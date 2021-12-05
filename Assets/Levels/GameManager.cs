@@ -29,8 +29,8 @@ public class GameManager : MonoBehaviour
 	int uniq;
 	//FileServer fileServ; //TODO uncomment when we care about online mode?
 
-	Mode current;
-	Mode child;
+	//Mode current;
+	//Mode child;
 
 	//MovieClip root; //TODO Obsolete
 	//MovieClip progressBar; //TODO Obsolete
@@ -51,17 +51,17 @@ public class GameManager : MonoBehaviour
 //	var fl_taMulti	: bool;
 //	var fl_bossRush	: bool;
 
-	Cookie cookie;
+	//Cookie cookie;
 
 	List<string> history;
 
-	Sound[] musics;
+	//Sound[] musics;
 
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	void New(Object initObj) { //MovieClip mc, 
+/* 	void New(Object initObj) { //MovieClip mc, 
 		root			= mc;
 		uniq			= 666;
 		SELF			= this; //TODO singleton
@@ -145,13 +145,13 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 		StartDefaultGame();
 
 	}
-
+ */
 
 
 	/*------------------------------------------------------------------------
 	REGISTER CLASSES //TODO this probably shouldn't exist, looks like we can assign all of those through unity's editor with prefabs
 	------------------------------------------------------------------------*/
-	void RegisterClasses() {
+/* 	void RegisterClasses() {
 		// *** Items
 		Std.registerClass("hammer_item_score", entity.item.ScoreItem);
 		Std.registerClass("hammer_item_special", entity.item.SpecialItem);
@@ -227,22 +227,22 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 		Std.registerClass("hammer_editor_label", gui.Label);
 		Std.registerClass("hammer_editor_field", gui.Field);
 	}
-
+ */
 
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI UN SET XML DE LEVEL EXISTE
 	------------------------------------------------------------------------*/
-	bool SetExists(string n) {
+/* 	bool SetExists(string n) {
 		data = ReadOnlyCollectionBase.GetSet(n); //TODO 100% sure this cause trouble
 		return (data!=null);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	AFFICHE UNE BARRE DE PROGRESSION //TODO manage that through another Unity object
 	------------------------------------------------------------------------*/
-	void progress(float ratio) {
+/* 	void progress(float ratio) {
 		// remove
 		if (ratio==null || ratio>=1) {
 			//progressBar.removeMovieClip();
@@ -258,25 +258,25 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 
 		Downcast(progressBar).bar._xscale = ratio*100;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	ERREUR CRITIQUE
 	------------------------------------------------------------------------*/
-	static void Fatal(string msg) {
+/* 	static void Fatal(string msg) {
 		Debug.Log("*** CRITICAL ERROR *** "+msg);
 		SELF.current.Destroy();
 		SELF.root.Stop();
 		SELF.root.RemoveMovieClip();
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	AVERTISSEMENT
 	------------------------------------------------------------------------*/
-	static void Warning(string msg) {
+/* 	static void Warning(string msg) {
 		Debug.Log("* WARNING * "+msg);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
@@ -292,19 +292,19 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 	/*------------------------------------------------------------------------
 	SIGNALE UNE OPéRATION ILLéGALE
 	------------------------------------------------------------------------*/
-	void LogIllegal(string str) {
+/* 	void LogIllegal(string str) {
 		LogAction("$!"+str);
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	LOG DE PARTIE
 	------------------------------------------------------------------------*/
-	void LogAction(string str) {
+/* 	void LogAction(string str) {
 		str = Tools.Replace(str,"$","");
 		str = Tools.Replace(str,":",".");
 		history.Add(str);
 	}
-
+ */
 
 
 
@@ -313,7 +313,7 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 	/*------------------------------------------------------------------------
 	LANCE UN MODE
 	------------------------------------------------------------------------*/
-	void Transition(GameMode prev, GameMode next) {
+/* 	void Transition(GameMode prev, GameMode next) {
 		next.init();
 
 		if (prev==null) {
@@ -328,12 +328,12 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 //			current = upcast(m);
 		}
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	LANCE UN MODE "ENFANT"
 	------------------------------------------------------------------------*/
-	void startChild(GameMode c) {
+/* 	void startChild(GameMode c) {
 		if (child!=null) {
 			Fatal("another child process is running!");
 		}
@@ -347,12 +347,12 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 		child.fl_runAsChild = true;
 		child.Init();
 		return child;
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	INTERROMPT LE PROCESS ENFANT (AVEC RETOUR OPTIONNEL)
 	------------------------------------------------------------------------*/
-	void StopChild(object data)  //'
+/* 	void StopChild(object data)  //'
 	{
 		string n = child._name;
 		child.Destroy();
@@ -360,28 +360,28 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 		current.Unlock();
 		current.Show();
 		current.OnWakeUp(n, data);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	LANCE UN MODE
 	------------------------------------------------------------------------*/
-	void StartMode(GameMode m) {
+/* 	void StartMode(GameMode m) {
 		Transition(current,m);
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	LANCE UN MODE DE JEU
 	------------------------------------------------------------------------*/
-	void StartGameMode(GameMode m) {
+/* 	void StartGameMode(GameMode m) {
 		Transition(current,m);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	MODES DE JEU
 	------------------------------------------------------------------------*/
-	string IsAdventure() {
+/* 	string IsAdventure() {
 		return IsMode("$solo");
 	}
 
@@ -422,13 +422,13 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 	bool IsMode(string modeName) {
 		return GetRoot().GetMode() == modeName.substring(1);
 	}
-
+ */
 
 
 	/*------------------------------------------------------------------------
 	LANCE LE MODE DE JEU PAR DéFAUT, SELON LES SETS DISPONIBLES
 	------------------------------------------------------------------------*/
-	void StartDefaultGame() {
+/* 	void StartDefaultGame() {
 		if (IsTutorial()) {
 			StartGameMode(new mode.Tutorial(this));
 			return;
@@ -470,7 +470,7 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 		}
 
 		Fatal("Invalid mode '"+GetRoot().GetMode()+"' found.");
-	}
+	} */
 
 
 
@@ -479,7 +479,7 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 	/*------------------------------------------------------------------------
 	MAIN // TODO move to update or remove completely?
 	------------------------------------------------------------------------*/
-	void Main() {
+/* 	void Main() {
 		// Timer // TODO obsolete, use unity Time
 		Timer.Update();
 		fps = Timer.fps();
@@ -496,5 +496,5 @@ h.set("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");h
 			child.main();
 		}
 
-	}
+	} */
 }

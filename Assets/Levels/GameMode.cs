@@ -49,9 +49,9 @@ public class GameMode : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	void New(GameManager m) {
+/* 	void New(GameManager m) {
 		manager = m ;
-		root = manager.root ;
+		//root = manager.root ;
 		// mc = Std.createEmptyMC(root,manager.uniq++);
 		// depthMan = new DepthManager(mc) ;
 		// soundMan = manager.soundMan;
@@ -62,7 +62,7 @@ public class GameMode : MonoBehaviour
 		fl_music		= false;
 		fl_mute			= false;
 		fl_runAsChild	= false;
-		currentTrack	= null;
+		currentTrack	= 0;
 		xOffset			= 0;
 		yOffset			= 0;
 		uniqId			= 1;
@@ -70,13 +70,13 @@ public class GameMode : MonoBehaviour
 
 		_name = "$abstractMode";
 		Show();
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	AFFICHE / MASQUE LE MC ROOT DU MODE
 	------------------------------------------------------------------------*/
-	void Show() {
+/* 	void Show() {
 		//mc._visible = true; //TODO
 		fl_hide = false;
 	}
@@ -85,58 +85,58 @@ public class GameMode : MonoBehaviour
 		//mc._visible = false; //TODO
 		fl_hide = true;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	void Init() {
+/* 	void Init() {
 		//mc._x = xOffset; //TODO
 		//mc._y = yOffset; //TODO
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE UN ID UNIQUE INCRéMENTAL
 	------------------------------------------------------------------------*/
-	int GetUniqId() {
+/* 	int GetUniqId() {
         uniqId++;
 		return uniqId;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	VERROUILLE / DéVERROUILLE LE MODE
 	------------------------------------------------------------------------*/
-	void Lock() {
+/* 	void Lock() {
 		fl_lock = true;
 	}
 	void Unlock() {
 		fl_lock = false;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE LE NOM DU MODE
 	------------------------------------------------------------------------*/
-	string Short() {
+/* 	string Short() {
 		return _name;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
-	void Destroy() {
+/* 	void Destroy() {
 		//depthMan.destroy() ; //TODO
 		Lock();
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	update des valeurs constantes diverses
 	------------------------------------------------------------------------*/
-	void UpdateConstants() { //TODO move to update and adapt the timer
+/* 	void UpdateConstants() { //TODO move to update and adapt the timer
 		if (fl_lock) {
 			return;
 		}
@@ -146,12 +146,12 @@ public class GameMode : MonoBehaviour
 		yFriction = Math.pow(Data.FRICTION_Y, Timer.tmod) ; // y
 		cycle += Timer.tmod;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	SAISIE DES CONTROLES DE DEBUG
 	------------------------------------------------------------------------*/
-	void GetDebugControls() {
+/* 	void GetDebugControls() {
 		// Clear debug
 		if (Key.isDown(Key.BACKSPACE)) {
 			Log.clear() ;
@@ -160,25 +160,25 @@ public class GameMode : MonoBehaviour
 
 	void GetControls() {
 		// do nothing yet
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	EVENT: LE MODE EST MIS EN ATTENTE PAR LE MANAGER (MODE ENFANT LANCé)
 	------------------------------------------------------------------------*/
-	void OnSleep() {
+/* 	void OnSleep() {
 		// do nothing
 	}
 
 	void OnWakeUp(string modeName, string data) //TODO delete this if unused
 	{
 		// do nothing
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	MUSICS MANAGEMENT //TODO update this to use unity tools
 	------------------------------------------------------------------------*/
-	void PlayMusic(int id) {
+	/* void PlayMusic(int id) {
 		if (!GameManager.CONFIG.HasMusic()) {
 			return;
 		}
@@ -218,21 +218,21 @@ public class GameMode : MonoBehaviour
 		}
 		n *= GameManager.CONFIG.musicVolume*100;
 		manager.musics[currentTrack].SetVolume(Math.round(n));
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	FIN DU MODE DE JEU
 	------------------------------------------------------------------------*/
-	void EndMode() {
+	/* void EndMode() {
 		StopMusic();
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	MAIN //TODO probably obsolete, remove and use the update function
 	------------------------------------------------------------------------*/
-	void Main() {
+/* 	void Main() {
 		// Debug
 		if (manager.fl_debug) {
 			GetDebugControls();
@@ -240,6 +240,6 @@ public class GameMode : MonoBehaviour
 		GetControls();
 
 		UpdateConstants();
-	}
+	} */
 
 }

@@ -21,7 +21,7 @@ public class SetManager : MonoBehaviour
 
     GameManager manager;
 
-	List<Levels> worldmap;
+	List<LevelData> worldmap;
 	string raw;
 
 	List<bool> fl_read;
@@ -42,7 +42,7 @@ public class SetManager : MonoBehaviour
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	void Initialize(string m, string s) { //TODO move to start or awake
-		manager			= m;
+		/* manager			= m;
 		fl_read			= new List();
 		fl_mirror		= false;
 		setName			= s;
@@ -54,7 +54,7 @@ public class SetManager : MonoBehaviour
 		raw = data.split(":");
 		if (manager.root.getName(setName+"_back_xml") == null ) { //TODO getter and setter for the setname in manager
 			manager.root.setName(setName+"_back_xml", raw.join(":"));
-		}
+		} */
 
 		/*
 		csum = 0;
@@ -69,63 +69,63 @@ public class SetManager : MonoBehaviour
 		if(GameManager.HH.get("$"+Md5.encode(setName))!="$"+Md5.encode(""+csum)) {GameManager.fatal(""); return;}
 		*/
 
-		ImportCookie();
+/* 		ImportCookie();
 		if ( raw == null ) {
 			GameManager.fatal("Error reading "+setName+" (null value)");
 			return;
 		}
 		levels = new List();
-		//levels[raw.length-1] = null; // fix for correct .length attribute
+		//levels[raw.length-1] = null; // fix for correct .length attribute */
 	}
 
 
 	/*------------------------------------------------------------------------
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
-	void Destroy() {
+/* 	void Destroy() {
 		suspend();
 		levels = new List<Level>();
 		fl_read = new List<bool>();
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	éCRASE LE CONTENU DU XML EN MéMOIRE
 	------------------------------------------------------------------------*/
-	void Overwrite(string sdata) {
+/* 	void Overwrite(string sdata) {
         if (manager.root.getName(setName+"_back") == null ) { //TODO getter and setter for the setname in manager
 			manager.root.setName(setName+"_back", raw.join(":"));
 		}
 		raw = sdata.split(":");
 		manager.root.setName(setName, sdata);
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	RELIS LA DERNIèRE VERSION SAUVEGARDéE
 	------------------------------------------------------------------------*/
-	void Rollback() {
+/* 	void Rollback() {
 		if (manager.root.getName(setName+"_back") != null ) {
 			string rawStr = manager.root.getName(setName+"_back");
             manager.root.setName(setName, rawStr);
 			raw = rawStr.split(":");
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	RELIS LA VERSION XML COMPILéE
 	------------------------------------------------------------------------*/
-	void Rollback_xml() {
+/* 	void Rollback_xml() {
 		string rawStr = manager.root.getName(setName+"_back_xml");
 		manager.root.setName(setName, rawStr);
 		raw = rawStr.split(":");
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	ALLUME / éTEINT UN FIELD DE TéLéPORTATION
 	------------------------------------------------------------------------*/
-	void ShowField(TeleporterData td) {
+/* 	void ShowField(TeleporterData td) {
 		if (td.fl_on) {
 			return;
 		}
@@ -133,9 +133,9 @@ public class SetManager : MonoBehaviour
 		td.mc.skin.sub.gotoAndStop("2");
 		td.podA.gotoAndStop("2");
 		td.podB.gotoAndStop("2");
-	}
+	} */
 
-	void HideField(TeleporterData td) {
+/* 	void HideField(TeleporterData td) {
 		if (!td.fl_on) {
 			return;
 		}
@@ -143,36 +143,36 @@ public class SetManager : MonoBehaviour
 		td.mc.skin.sub.gotoAndStop("1");
 		td.podA.gotoAndStop("1");
 		td.podB.gotoAndStop("1");
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	GESTION VERROU
 	------------------------------------------------------------------------*/
-	void Suspend() {
+/* 	void Suspend() {
 		// do nothing
 	}
 	void Restore(int lid) {
 		// do nothing
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	DéFINI LE NIVEAU COURANT
 	------------------------------------------------------------------------*/
-	void SetCurrent(int id) {
+/* 	void SetCurrent(int id) {
 		//if(GameManager.HH.get("$"+Md5.encode(setName))!="$"+Md5.encode(""+csum)) {GameManager.fatal(""); return;}
 		_previous = current;
 		_previousId = currentId;
 		current = levels[id];
 		currentId = id;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LES DONNéES SONT PRETES à ETRE UTILISéES
 	------------------------------------------------------------------------*/
-	void IsDataReady() {
+/* 	void IsDataReady() {
 		return fl_read[currentId];
 	}
 
@@ -180,49 +180,49 @@ public class SetManager : MonoBehaviour
 		if (IsDataReady()) {
 			OnDataReady();
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	ACTIVE UN NIVEAU DONNé
 	------------------------------------------------------------------------*/
-	void GoToLevel(int id) {
+/* 	void GoToLevel(int id) {
 		teleporterList = new List<TeleporterData>();
-		if (id>=levels.length) {
-			OnEndOfSet();
+		if (id>=worldmap.Count) {
+			//OnEndOfSet();
 			id = currentId;
 			return;
 		}
 		if (!fl_read[id]) {
-			levels[id] = Unserialize(id);
+			//worldmap[id] = JsonUtility.FromJson<LevelData>(fileName);
 		}
-		SetCurrent(id);
-		OnReadComplete();
+		//SetCurrent(id);
+		//OnReadComplete();
 	}
 
 	void Next() {
 		//if(GameManager.HH.get("$"+Md5.encode(setName))!="$"+Md5.encode(""+csum)) {GameManager.fatal(""); return;}
 		Goto(currentId+1);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	DéTRUIT UN NIVEAU DU SET
 	------------------------------------------------------------------------*/
-	void Delete(int id) {
+/* 	void Delete(int id) {
 		if (id>=levels.length) {
 			GameManager.fatal("delete after end");
 		}
 		raw.Remove(id);
 		levels.Remove(id);
 		fl_read.Remove(id);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	INSèRE UN NIVEAU DANS LE SET
 	------------------------------------------------------------------------*/
-	void Insert(int id, LevelData data) {
+/* 	void Insert(int id, LevelData data) {
 		raw.Insert(id, SerializeExternal(data));
 		levels.Insert(id, data);
 		fl_read.Insert(id, true);
@@ -233,13 +233,13 @@ public class SetManager : MonoBehaviour
 		levels.Add(data);
 		fl_read.Add(true);
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	INVERSION HORIZONTALE DéFINITIVE
 	------------------------------------------------------------------------*/
 	void flip(LevelData l) {
-		if (!fl_mirror) {
+		/* if (!fl_mirror) {
 			return l;
 		}
 
@@ -263,7 +263,7 @@ public class SetManager : MonoBehaviour
                 y++;
 			}
             x++;
-		}
+		} */
 
 
 
@@ -293,14 +293,14 @@ public class SetManager : MonoBehaviour
 		}
 		*/
 
-		return lf;
+		/* return lf; */
 	}
 
 
 	/*------------------------------------------------------------------------
 	INVERSION HORIZONTALE DES PORTALS
 	------------------------------------------------------------------------*/
-	void FlipPortals() { //might have fucked up this function
+/* 	void FlipPortals() { //might have fucked up this function
 		List<PortalData> list = new List<PortalData>();
 		foreach (PortalData portal in portalList) {
 			list.Add(portal);
@@ -308,13 +308,13 @@ public class SetManager : MonoBehaviour
 
 		portalList = list;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI L'ID DE LEVEL SPéCIFIé EST VIDE
 	------------------------------------------------------------------------*/
     // TODO add an isEmpty boolean to the levelData and set is to false in the constructor?
-	bool IsEmptyLevel(int id, GameMode g) {
+/* 	bool IsEmptyLevel(int id, GameMode g) {
 		if (id>=levels.count) {
 			return true;
 		}
@@ -340,7 +340,7 @@ public class SetManager : MonoBehaviour
 			ld.badList.length==0 &&
 			ld.specialSlots.length==0 &&
 			ld.scoreSlots.length==0;
-	}
+	} */
 
 
 	// *** ACCESSEURS *****
@@ -348,7 +348,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RETOURNE UNE CASE DE LA MAP
 	------------------------------------------------------------------------*/
-	int getCase(PortalData pt) {
+/* 	int getCase(PortalData pt) {
 		int cx = pt.x;
 		int cy = pt.y;
 		if (InBound(cx,cy)) {
@@ -377,25 +377,25 @@ public class SetManager : MonoBehaviour
 		else {
 			return Data.OUT_WALL ; // hors écran bas/gauche/droite
 		}
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	MODIFIE DYNAMIQUEMENT UNE CASE
 	------------------------------------------------------------------------*/
-	void ForceCase(int cx, int cy, int t) {
+/* 	void ForceCase(int cx, int cy, int t) {
 		if (InBound(cx,cy)) {
 			if (t<=0  &&  GetCase(cx, cy)>0  &&  GetCase(cx, cy+1)==Data.WALL) {
 				ForceCase(cx, cy+1, Data.GROUND);
 			}
 			current.map[cx][cy] = t;
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LES COORDONNéES DE CASE SONT DANS L'AIRE DE JEU
 	------------------------------------------------------------------------*/
-	bool InBound(int cx, int cy) {
+/* 	bool InBound(int cx, int cy) {
 		return (
             cx>=0 &&
             cx<Data.LEVEL_WIDTH &&
@@ -403,12 +403,12 @@ public class SetManager : MonoBehaviour
             cy<Data.LEVEL_HEIGHT
         );
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LA BOUNDING BOX EST DANS L'AIRE DE JEU
 	------------------------------------------------------------------------*/
-	bool ShapeInBound(Entity e) {
+/* 	bool ShapeInBound(Entity e) {
 		return (
 			e.x >= -e._width &&
 			e.x < Data.GAME_WIDTH &&
@@ -416,11 +416,11 @@ public class SetManager : MonoBehaviour
 			e.y < Data.GAME_HEIGHT
         );
 	}
-
+ */
 	/*------------------------------------------------------------------------
 	RENVOIE LE PREMIER SOL RENCONTRé A PARTIR D'UNE CASE DONNéE
 	------------------------------------------------------------------------*/
-	int[] GetGround(int cx, int cy) {
+/* 	int[] GetGround(int cx, int cy) {
 		int ty, n;
 		for (n=0, ty=cy ; n<=Data.LEVEL_HEIGHT ; n++,ty++) {
 			if (ty>0 && GetCase(cx, ty) == Data.GROUND ) {
@@ -432,7 +432,7 @@ public class SetManager : MonoBehaviour
 		}
 
 		return new int[2] {cx, cy};
-	}
+	} */
 
 
 	// *** CALLBACKS *****
@@ -440,30 +440,30 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EVENT: LECTURE DES NIVEAUX TERMINéE
 	------------------------------------------------------------------------*/
-	void OnReadComplete() {
+/* 	void OnReadComplete() {
 		CheckDataReady();
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	EVENT: DONNéES PRèTES
 	------------------------------------------------------------------------*/
-	void OnDataReady() {
+/* 	void OnDataReady() {
 		// do nothing
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	EVENT: FIN DU SET DE LEVELS
 	------------------------------------------------------------------------*/
-	void OnEndOfSet() {
+/* 	void OnEndOfSet() {
 		// do nothing
-	}
+	} */
 
 
-	void OnRestoreReady() {
+/* 	void OnRestoreReady() {
 		// do nothing
-	}
+	} */
 
 
 
@@ -472,7 +472,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	FONCTIONS DE SERIALIZATION
 	------------------------------------------------------------------------*/
-	LevelData Unserialize(int id) { // TODO adapt that to JSON format instead of the old serialized data
+/* 	LevelData Unserialize(int id) { // TODO adapt that to JSON format instead of the old serialized data
 		//if(GameManager.HH.get("$"+Md5.encode(setName))!="$"+Md5.encode(""+csum)) {GameManager.fatal(""); return null;}
 		LevelData l = Std.cast(  (new PersistCodec()).decode(raw[id])  );
 		if (fl_mirror) {
@@ -484,9 +484,9 @@ public class SetManager : MonoBehaviour
 		}
 		fl_read[id]=true;
 		return l;
-	}
+	} */
 
-	string Serialize(int id) {
+/* 	string Serialize(int id) {
 		ConvertWalls(levels[id]);
 		string l = (new PersistCodec()).encode(levels[id]);
 		return l;
@@ -507,7 +507,7 @@ public class SetManager : MonoBehaviour
 				}
 			}
 		}
-	}
+	} */
 
 
 
@@ -516,17 +516,17 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EXPORT
 	------------------------------------------------------------------------*/
-	void ExportCookie() {
+/* 	void ExportCookie() {
 		if (!manager.fl_cookie) {
 			return;
 		}
 		manager.cookie.saveSet(setName, raw.join(":"));
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	IMPORT
 	------------------------------------------------------------------------*/
-	void ImportCookie() {
+/* 	void ImportCookie() {
 		if (!manager.fl_cookie) {
 			return;
 		}
@@ -537,7 +537,7 @@ public class SetManager : MonoBehaviour
 		else {
 			ExportCookie();
 		}
-	}
+	} */
 
 
 
@@ -545,13 +545,13 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	DEBUG
 	------------------------------------------------------------------------*/
-	void Trace(int id) {
+/* 	void Trace(int id) {
 		Debug.Log("Total size: "+levels.length+" level(s)");
 		if(id!=null) {
 			Debug.Log("Level "+id+":");
 			Debug.Log("player: "+current.playerX+","+current.playerY);
 			Debug.Log(current.map);
 		}
-	}
+	} */
 
 }

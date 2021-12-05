@@ -73,7 +73,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	void New() {
+	/* void New() {
 		types = 0; //new Array() ;
 
 		x = 0 ;
@@ -102,84 +102,84 @@ public class Entity : MonoBehaviour
 		}
 	}
 
-
+ */
 
 	/*------------------------------------------------------------------------
 	INIT
 	------------------------------------------------------------------------*/
-	void Init(GameMode g) {
+/* 	void Init(GameMode g) {
 		game = g;
 		uniqId = game.GetUniqId();
 		Register(Data.ENTITY) ;
 		world = game.world;
 		scale(100);
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	ENREGISTRE UN NOUVEL éLéMENT
 	------------------------------------------------------------------------*/
-	void Register(int type) {
+/* 	void Register(int type) {
 		game.AddToList( ype, this);
 		types |= type; // TODO might want to track types through a dedicated function (too limited for new types)
 	}
-
+ */
 	/*------------------------------------------------------------------------
 	ENREGISTRE UN NOUVEL éLéMENT
 	------------------------------------------------------------------------*/
-	void Unregister(int type) {
+/* 	void Unregister(int type) {
 		game.RemoveFromList(type, this);
 		types ^= type; // TODO might want to track types through a dedicated function (too limited for new types)
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI L'ENTIT� EST DU TYPE SPéCIFIé
 	------------------------------------------------------------------------*/
-	bool IsType(int t) {
+/* 	bool IsType(int t) {
 		return (types&t) > 0; // TODO might want to track types through a dedicated function (too limited for new types)
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	DéFINI L'ENTITé PARENTE
 	------------------------------------------------------------------------*/
-	void SetParent(Entity e) {
+/* 	void SetParent(Entity e) {
 		parent = e;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	DéFINI LE TEMPS DE VIE
 	------------------------------------------------------------------------*/
-	void SetLifeTimer(float t) {
+/* 	void SetLifeTimer(float t) {
 		lifeTimer = t;
 		totalLife = t;
 	}
-
+ */
 	/*------------------------------------------------------------------------
 	MET à JOUR LE TEMPS DE VIE (SANS CHANGER LE TOTAL INITIAL)
 	------------------------------------------------------------------------*/
-	void UpdateLifeTimer(float t) {
+/* 	void UpdateLifeTimer(float t) {
 		if (totalLife==null) {
 			setLifeTimer(t);
 		}
 		else {
 			lifeTimer = t;
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	EVENT: FIN DE TIMER DE VIE // TODO manage that through an update function
 	------------------------------------------------------------------------*/
-	void OnLifeTimer() {
+/* 	void OnLifeTimer() {
 		destroy();
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	HIT TEST DE BOUNDING BOX // TODO use unity colliders instead
 	------------------------------------------------------------------------*/
-	bool HitBound(Entity e) {
+/* 	bool HitBound(Entity e) {
 		bool res = (
 			x+_width/2 > e.x-e._width/2 &&
 			y > e.y-e._height &&
@@ -187,21 +187,21 @@ public class Entity : MonoBehaviour
 			y-_height < e.y
 			);
 		return res;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	L'ENTITé EN RENCONTRE UNE AUTRE // TODO use unity colliders instead
 	------------------------------------------------------------------------*/
-	void Hit(Entity e) {
+/* 	void Hit(Entity e) {
 		// do nothing
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
-	void Destroy() {
+/* 	void Destroy() {
 		fl_kill = true;
 		fl_destroy = true;
 		Unstick();
@@ -211,13 +211,13 @@ public class Entity : MonoBehaviour
 			}
 		}
 		game.killList.Add(this);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	COLLE UN MC à L'ENTITé // TODO manage that through Unity editor
 	------------------------------------------------------------------------*/
-	void Stick(float ox, float oy) { //MovieClip mc, 
+/* 	void Stick(float ox, float oy) { //MovieClip mc, 
 		if (sticker._name!=null) {
 			Unstick();
 		}
@@ -228,13 +228,13 @@ public class Entity : MonoBehaviour
 		fl_stickRot = false;
 		fl_stickBound = false;
 		fl_elastick = false;
-	}
+	} */
     
 
 	/*------------------------------------------------------------------------
 	ACTIVE L'ELASTICITé DU STICKER (algo du cameraman bourré) // TODO probably obsolete
 	------------------------------------------------------------------------*/
-	void SetElaStick(bool f) {
+/* 	void SetElaStick(bool f) {
 		if ( fl_elastick ) {
 			return;
 		}
@@ -243,28 +243,28 @@ public class Entity : MonoBehaviour
 		stickerX		*= elaStickFactor;
 		stickerY		*= elaStickFactor;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	DéCOLLE LE STICKER
 	------------------------------------------------------------------------*/
-	void Unstick() {
+/* 	void Unstick() {
 		fl_stick = false;
 		sticker.RemoveMovieClip() ;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	ACTIVE LE SOFT-RECAL (coordonnées graphiques en retard sur les réelles) // TODO probably obsolete
 	------------------------------------------------------------------------*/
-	void ActivateSoftRecal() {
+/* 	void ActivateSoftRecal() {
 		fl_softRecal = true;
 		softRecalFactor = 0.1;
 	}
-
+ */
 
 	// *** DEBUG ***
-	void Release() {
+/* 	void Release() {
 		if (Key.isDown(Key.SHIFT)) {
 			if ( Key.isDown(Key.CONTROL) ) {
 				Debug.Log("Full serialization: "+Short());
@@ -277,7 +277,7 @@ public class Entity : MonoBehaviour
 				Debug.Log("dir=" + dir + " dx="+ dx + " dy=" + dy +" xscale="+ _xscale);
 			}
 		}
-	}
+	} */
 
     // TODO obsolete
     /*
@@ -305,7 +305,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MASQUE/AFFICHE L'ENTIT�
 	------------------------------------------------------------------------*/
-	void Hide() {
+/* 	void Hide() {
 		_visible = false;
 		if (sticker._name!=null) {
 			sticker._visible = _visible;
@@ -316,17 +316,17 @@ public class Entity : MonoBehaviour
 		if (sticker._name!=null) {
 			sticker._visible = _visible;
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	RE-SCALE DE L'ENTITé
 	------------------------------------------------------------------------*/
-	void scale(float n) {
+/* 	void scale(float n) {
 		scaleFactor = n/100 ;
 		_xscale = n ;
 		_yscale = _xscale ;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
@@ -382,12 +382,12 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MISE à JOUR DES COORDONNéES DE CASE
 	------------------------------------------------------------------------*/
-	void UpdateCoords() {
+/* 	void UpdateCoords() {
 		cx = Entity.x_rtc(x);
 		cy = Entity.y_rtc(y);
 		fcx = Entity.x_rtc(x);
 		fcy = Entity.y_rtc(y+Math.floor(Data.CASE_HEIGHT/2));
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
@@ -402,29 +402,29 @@ public class Entity : MonoBehaviour
 		};
         */
 	}
-	static int x_rtc(float n) {
+/* 	static int x_rtc(float n) {
 		return Math.floor(n/Data.CASE_WIDTH) ;
 	}
 	static int y_rtc(float n) {
 		return Math.floor((n-Data.CASE_HEIGHT/2)/Data.CASE_HEIGHT) ;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	CONVERSION CASE -> REAL
 	------------------------------------------------------------------------*/
-	static float x_ctr(int n) {
+/* 	static float x_ctr(int n) {
 		return n*Data.CASE_WIDTH + Data.CASE_WIDTH*0.5 ;
 	}
 	static float y_ctr(int n) {
 		return n*Data.CASE_HEIGHT + Data.CASE_HEIGHT;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	NORMALISE UN ANGLE (EN DEGRé) DANS L'INTERVAL 0-360 // TODO use unity objects (vector2, Quaternions)
 	------------------------------------------------------------------------*/
-	float AdjustAngle(float a) {
+/* 	float AdjustAngle(float a) {
 		while (a<0) {
 			a+=360;
 		}
@@ -432,10 +432,10 @@ public class Entity : MonoBehaviour
 			a-=360;
 		}
 		return a;
-	}
+	} */
 
 
-	int AdjustToLeft() {
+/* 	int AdjustToLeft() {
 		x = x_ctr(cx);
 		y = y_ctr(cy);
 		x-=Data.CASE_WIDTH*0.5+1;
@@ -448,27 +448,27 @@ public class Entity : MonoBehaviour
 	int CenterInCase() {
 		x = x_ctr(cx);
 		y = y_ctr(cy);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	RENVOIE LA DISTANCE DE L'ENTITé à UNE CASE // TODO use unity objects (vector2, Quaternions)
 	------------------------------------------------------------------------*/
-	float DistanceCase(int cx, int cy) {
+/* 	float DistanceCase(int cx, int cy) {
 		return Math.sqrt( Math.pow(cy-this.cy,2) + Math.pow(cx-this.cx,2) );
 	}
 
 	float Distance(float cx, float cy) {
 		return Math.sqrt( Math.pow(y-this.y,2) + Math.pow(x-this.x,2) );
 	}
-
+ */
 
 	// *** UPDATES
 
 	/*------------------------------------------------------------------------
 	MAIN // TODO move to update
 	------------------------------------------------------------------------*/
-	void MTUpdate() { //update
+/* 	void MTUpdate() { //update
 		// Durée de vie
 		if (lifeTimer>0) {
 			lifeTimer-=Timer.tmod;
@@ -484,22 +484,22 @@ public class Entity : MonoBehaviour
 			}
 		}
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE LE NOM COURT DU MOVIE
 	------------------------------------------------------------------------*/
-	string Short() {
+/* 	string Short() {
 		string str = ""+Std.cast(this) ; // TODO wtf
 		str = str.slice(str.lastIndexOf(".",9999)+1,9999);
 		str = str + "(@"+cx+","+cy+")";
 		return str;
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	Renvoie tous les types
 	------------------------------------------------------------------------*/
-	string PrintTypes() {
+/* 	string PrintTypes() {
 		List<bool> l = new List<bool>();
 		var b = 0;
 		for (int i=0 ; i<30 ; i++) {
@@ -509,13 +509,13 @@ public class Entity : MonoBehaviour
 			}
 		}
 		return string.Join(",", l); // TODO probably gonna fail, convert in array and join?
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	CLOTURE DES UPDATES // TODO move to update ?
 	------------------------------------------------------------------------*/
-	void EndUpdate() {
+	/* void EndUpdate() {
 		UpdateCoords() ;
 		if (fl_softRecal) {
 			var tx = x+_xOffset;
@@ -558,5 +558,5 @@ public class Entity : MonoBehaviour
 				sticker._x = Math.min( sticker._x, Data.GAME_WIDTH-sticker._width*0.5 );
 			}
 		}
-	}
+	} */
 }

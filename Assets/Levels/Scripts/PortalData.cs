@@ -33,8 +33,8 @@ public class PortalData : MonoBehaviour //TODO MonoBehavior probably not needed
 		this.cx = cx;
 		this.cy = cy;
 
-		x = mc._x;
-		y = mc._y;
+		//x = mc._x;
+		//y = mc._y;
 		cpt = 0;
 	}
 }

@@ -38,7 +38,7 @@ public class TeleporterData : MonoBehaviour //TODO MoboBehavior probably not nec
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	void New(int x, int y, int len, int dir) {
+/* 	void New(int x, int y, int len, int dir) {
 		cx = x;
 		cy = y;
 		direction = dir;
@@ -70,7 +70,7 @@ public class TeleporterData : MonoBehaviour //TODO MoboBehavior probably not nec
 		else {
 			endY += length*Data.CASE_HEIGHT;
 		}
-	}   
+	}    */
 }
 
 

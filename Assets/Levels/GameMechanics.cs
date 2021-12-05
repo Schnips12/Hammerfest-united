@@ -32,6 +32,8 @@ public class GameMechanics : ViewManager
 
 	ScriptEngine scriptEngine;
 
+    int currentId; // inherit
+
 	private struct _iteration {
         int cx;
         int cy;
@@ -41,8 +43,8 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	void New(GameManager m, ScriptEngine s) {
-		Super(m,s);
+/* 	void New(GameManager m, ScriptEngine s) {
+		//Super(m,s);
 
 		fl_parsing		= false;
 		fl_lock			= true;
@@ -51,67 +53,67 @@ public class GameMechanics : ViewManager
 
 		ResetIA();
 
-		triggers = Entity[LEVEL_WIDTH, LEVEL_HEIGHT, 1]; // TODO fix length
+		//triggers = Entity[LEVEL_WIDTH, LEVEL_HEIGHT, 1]; // TODO fix length
 
-	}
+	} */
 
-	void Destroy() {
-		super.Destroy();
-		scriptEngine.Destroy();
-	}
+/* 	void Destroy() {
+		//super.Destroy();
+		//scriptEngine.Destroy();
+	} */
 
 
 	/*------------------------------------------------------------------------
 	DéFINI LE GAME INTERNE
 	------------------------------------------------------------------------*/
-	void SetGame(GameMode g) {
+/* 	void SetGame(GameMode g) {
 		game = g;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	GESTION VERROU DE SCRIPT
 	------------------------------------------------------------------------*/
-	void Lock() {
+/* 	void Lock() {
 		fl_lock = true;
 	}
 	void Unlock() {
 		fl_lock = false;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	CHANGE LE NIVEAU COURANT
 	------------------------------------------------------------------------*/
-	void Goto(int id) {
+/* 	void Goto(int id) {
 		SetVisited();
 		ResetIA();
 //		scriptEngine.clearScript();
-		super.Goto(id);
+		//super.Goto(id);
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LES DONN�ES SONT PRETES
 	------------------------------------------------------------------------*/
-	bool IsDataReady() {
-		return super.IsDataReady() && flcurrentIA;
+/* 	bool IsDataReady() {
+		return falsesuper.IsDataReady() && flcurrentIA;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	ATTACHEMENT D'UNE VUE
 	------------------------------------------------------------------------*/
-	int CreateView(int id) {
+/* 	int CreateView(int id) {
 		scriptEngine.OnLevelAttach();
 		return super.CreateView(id);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	MISE EN ATTENTE
 	------------------------------------------------------------------------*/
-	void Suspend() {
+/* 	void Suspend() {
 		super.Suspend();
 		Lock();
 		var s = Data.CleanString(scriptEngine.script.ToString() );
@@ -123,7 +125,7 @@ public class GameMechanics : ViewManager
 
 	void Restore(int lid) {
 		super.Restore(lid);
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
@@ -137,7 +139,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LE NIVEAU A DéJà éTé PARCOURU
 	------------------------------------------------------------------------*/
-	void IsVisited() {
+	bool IsVisited() {
 		return fl_visited[currentId]==true;
 	}
 
@@ -148,9 +150,9 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RELANCE LE PROCESSUS DE PARSING IA
 	------------------------------------------------------------------------*/
-	void ResetIA() {
+/* 	void ResetIA() {
 		flcurrentIA = false;
-		_iteration = new _iteration();
+		//_iteration = new _iteration();
 		flagMap = List<bool>();
 		fallMap = List<bool>();
 
@@ -162,12 +164,12 @@ public class GameMechanics : ViewManager
 				//fallMap[i][j] = -1 ;
 			}
 		}
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	RETOURNE UNE CASE DE LA MAP IA
 	------------------------------------------------------------------------*/
-	bool CheckFlag(Coordinate pt, int flag) { //TODO use Vector2
+/* 	bool CheckFlag(Vector2 pt, int flag) { //TODO use Vector2
 		int x = pt.x;
 		int y = pt.y;
 		if (x>=0 && x<Data.LEVEL_WIDTH && y>=0 && y<Data.LEVEL_HEIGHT) {
@@ -176,26 +178,26 @@ public class GameMechanics : ViewManager
 		else {
 			return false ; // hors écran
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	FORCE UN FLAG DANS UNE CASE
 	------------------------------------------------------------------------*/
-	void ForceFlag(Coordinate pt, int flag, bool value) { // TODO why bit operations on bool? Might be wrong type for value.
+/* 	void ForceFlag(Vector2 pt, int flag, bool value) { // TODO why bit operations on bool? Might be wrong type for value.
 		if (value) {
 			flagMap[pt.x][pt.y] |= flag;
 		}
 		else {
 			flagMap[pt.x][pt.y] &= ~flag;
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	PARCOURS DE LA MAP DéCALé SUR PLUSIEURS FRAMES
 	------------------------------------------------------------------------*/
-	void ParseCurrentIA(Coordinate it) {
+/* 	void ParseCurrentIA(Vector2 it) {
 		var n=0 ;
 		var total = Data.LEVEL_WIDTH*Data.LEVEL_HEIGHT;
 		var cx = it.cx;
@@ -330,7 +332,7 @@ public class GameMechanics : ViewManager
 			// Sous-catégories de bords de dalle
 			if ((flags & Data.IA_FALL_SPOT)>0) {
 				// Saut à gauche
-				if (GetCase(cx+1,cy+1)==Data.GROUND && GetCase(cx-Data.IA_HJUMP,cy+1})==Data.GROUND) {
+				if (GetCase(cx+1,cy+1)==Data.GROUND && GetCase(cx-Data.IA_HJUMP,cy+1)==Data.GROUND) {
 					if (GetCase(cx-1,cy)<=0) {
 						flags |= Data.IA_JUMP_LEFT ;
 					}
@@ -362,14 +364,14 @@ public class GameMechanics : ViewManager
 
 		it.cx = cx;
 		it.cy = cy;
-	}
+	} */
 
 
 
 	/*------------------------------------------------------------------------
 	VERIFIE SI UN POINT EST SûR POUR TOMBER (RENVOIE LA HAUTEUR OU -1 SI VIDE)
 	------------------------------------------------------------------------*/
-	bool _checkSecureFall(int cx, int cy) {
+/* 	bool _checkSecureFall(int cx, int cy) {
 		bool secure,i,h ;
 
 		// Optimisations
@@ -397,12 +399,12 @@ public class GameMechanics : ViewManager
 			return -1; // TODO check this value
 		}
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE LA HAUTEUR D'UN MUR (AVEC UN MAX �VENTUEL, -1 SI MAX ATTEINT)
 	------------------------------------------------------------------------*/
-	int GetWallHeight(int cx, int cy, int max) {
+/* 	int GetWallHeight(int cx, int cy, int max) {
 		int h = 0;
 		while (GetCase(cx,cy-h)>0 && h<max) {
 			h++;
@@ -412,12 +414,12 @@ public class GameMechanics : ViewManager
 		}
 		return h;
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	RENVOIE LA HAUTEUR D'UNE MARCHE DANS LE VIDE
 	------------------------------------------------------------------------*/
-	int GetStepHeight(int cx, int cy, int max) {
+/* 	int GetStepHeight(int cx, int cy, int max) {
 		int h = 0;
 		while (GetCase(cx,cy-h)<=0  &&  h<max) {
 			h++;
@@ -428,48 +430,48 @@ public class GameMechanics : ViewManager
 		}
 		return h;
 	}
-
+ */
 	// *** EVENTS *****
 
 	/*------------------------------------------------------------------------
 	EVENT: DONNéES LUES, PRêT POUR LE SCROLLING
 	------------------------------------------------------------------------*/
-	void OnDataReady() {
+/* 	void OnDataReady() {
 		super.OnDataReady();
 		scriptEngine.Compile();
 	}
-
+ */
 	/*------------------------------------------------------------------------
 	EVENT: PARSE MAP IA TERMINé
 	------------------------------------------------------------------------*/
-	void OnParseIAComplete() {
+/* 	void OnParseIAComplete() {
 		fl_parsing = false;
 		flcurrentIA = true;
 		checkDataReady();
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	EVENT: DECRUNCH TERMIN�
 	------------------------------------------------------------------------*/
-	void OnReadComplete() {
+/* 	void OnReadComplete() {
 		super.OnReadComplete();
 		scriptEngine = new ScriptEngine(game, current);
 		fl_parsing = true;
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	EVENT: VUE PRèTE à èTRE JOUéE
 	------------------------------------------------------------------------*/
-	fvoid OnViewReady() {
+/* 	void OnViewReady() {
 		super.OnViewReady();
 		game.OnLevelReady();
 	}
-
+ */
 	/*------------------------------------------------------------------------
 	EVENT: FIN DE TRANSITION PORTAL
 	------------------------------------------------------------------------*/
-	void OnFadeDone() {
+/* 	void OnFadeDone() {
 		super.OnFadeDone();
 		game.OnRestore();
 		OnViewReady();
@@ -479,32 +481,32 @@ public class GameMechanics : ViewManager
 		game.OnRestore();
 		OnViewReady();
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	EVENT: FIN DU SET
 	------------------------------------------------------------------------*/
-	void OnEndOfSet() {
+/* 	void OnEndOfSet() {
 		super.OnEndOfSet();
 		game.OnEndOfSet();
 	}
-
+ */
 
 	/*------------------------------------------------------------------------
 	EVENT: RESTORE TERMINé
 	------------------------------------------------------------------------*/
-	void OnRestoreReady() {
+/* 	void OnRestoreReady() {
 		super.OnRestoreReady();
 		scrollDir = game.fl_rightPortal ? 1 : -1; // hack: game var doesn't exist in ViewManager
 	}
-
+ */
 
 	// *** DONNéES ***
 
 	/*------------------------------------------------------------------------
 	FORCE LE CONTENU D'UNE CASE (DYNAMIQUE SEULEMENT!)
 	------------------------------------------------------------------------*/
-	void ForceCase(int cx, int cy, int t) {
+/* 	void ForceCase(int cx, int cy, int t) {
 		super.ForceCase(cx,cy,t);
 		if (InBound(cx,cy)) {
 			if (t==Data.GROUND) {
@@ -514,12 +516,12 @@ public class GameMechanics : ViewManager
 				ForceFlag(cx,cy, Data.IA_TILE, false);
 			}
 		}
-	}
+	} */
 
 	/*------------------------------------------------------------------------
 	DéTECTION DES MURS (ID=2)
 	------------------------------------------------------------------------*/
-	void ParseWalls(LevelData l) {
+/* 	void ParseWalls(LevelData l) {
 		int[,] map = l.map;
 		int n=0;
 		for (var cy=0;cy<Data.LEVEL_HEIGHT;cy++) {
@@ -532,17 +534,17 @@ public class GameMechanics : ViewManager
 				}
 			}
 		}
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	LECTURE + DéTECTION DES MURS (ID=2)
 	------------------------------------------------------------------------*/
-	DataLevel Unserialize(int id) {
+/* 	LevelData Unserialize(int id) {
 		var l = super.Unserialize(id);
 		ParseWalls(l);
 		return l;
-	}
+	} */
 
 
 
@@ -551,7 +553,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RENVOIE LE TELEPORTER D'UNE CASE DONNéE
 	------------------------------------------------------------------------*/
-	TeleporterData GetTeleporter(entity.Physics e, int cx, int cy) {
+/* 	TeleporterData GetTeleporter(object e, int cx, int cy) {
 		TeleporterData outport = null;
 		if (GetCase(cx,cy) != Data.FIELD_TELEPORT) {
 			return null ;
@@ -581,20 +583,20 @@ public class GameMechanics : ViewManager
 			GameManager.fatal("teleporter not found in level "+currentId) ;
 		}
 		return outport ;
-	}
+	} */
 
 
 	/*------------------------------------------------------------------------
 	RENVOIE LE TéLéPORTEUR D'ARRIVéE POUR UN TéLéPORTEUR DONNé
 	------------------------------------------------------------------------*/
-	TeleporterData GetNextTeleporter(TeleporterData start) {
+/* 	TeleporterData GetNextTeleporter(TeleporterData start) {
 		TeleporterData outport = null ;
 		var fl_break = false;
 		var fl_rand = false;
 
-		// Recherche de correspondance face � face
-		for (var i=0;i<teleporterList.length && !fl_break;i++) {
-			var td = teleporterList[i] ;
+		// Recherche de correspondance face à face
+		for (int i=0;i<teleporterList.length && !fl_break;i++) {
+			TeleporterData td = teleporterList[i] ;
 			if (td.cx!=start.cx || td.cy!=start.cy) {
 				if (start.dir == Data.HORIZONTAL) {
 					if (start.dir==td.dir && start.cx==td.cx && start.length==td.length) {
@@ -616,9 +618,9 @@ public class GameMechanics : ViewManager
 
 			fl_rand = true;
 			if (teleporterList.length>1) {
-				var l = new Array() ;
-				for(var i=0 ; i<teleporterList.length ; i++) {
-					var td = teleporterList[i];
+				List<TeleporterData> l = new List<TeleporterData>();
+				for(int i=0 ; i<teleporterList.length ; i++) {
+					TeleporterData td = teleporterList[i];
 					if (td.cx!=start.cx || td.cy!=start.cy) {
 						if (td.dir == start.dir && td.length == start.length) {
 							l.push(teleporterList[i]) ;
@@ -635,13 +637,13 @@ public class GameMechanics : ViewManager
 		}
 
 		// Correspondance random
-		if ( outport==null ) {
+		if (outport==null) {
 
 			fl_rand = true;
-			if ( teleporterList.length>1 ) {
-				var l = new Array() ;
+			if (teleporterList.length>1) {
+				List<TeleporterData> l = new List<TeleporterData>();
 				for(var i=0;i<teleporterList.length;i++) {
-					if (  teleporterList[i].cx!=start.cx || teleporterList[i].cy!=start.cy  ) {
+					if (teleporterList[i].cx!=start.cx || teleporterList[i].cy!=start.cy) {
 						l.push(teleporterList[i]) ;
 					}
 				}
@@ -650,26 +652,26 @@ public class GameMechanics : ViewManager
 		}
 
 		// Aucune correspondance
-		if ( outport==null ) {
+		if (outport==null) {
 			GameManager.fatal("target teleporter not found in level "+currentId) ;
 		}
-		return { fl_rand:fl_rand, td:outport };
+		return outport; // TODO Need to return the fl_rand info too
 	}
 
-
+ */
 
 	/*------------------------------------------------------------------------
-	BOUCLE PRINCIPALE
+	BOUCLE PRINCIPALE // TODO move to update
 	------------------------------------------------------------------------*/
-	function update() {
+/* 	void MTupdate() {
 		super.update();
 
-		// Analyse (IA) niveau en cours si on a la main et que ca n'est pas d�j� fait
-		if ( fl_parsing ) {
+		// Analyse (IA) niveau en cours si on a la main et que ca n'est pas déjà fait
+		if (fl_parsing) {
 			parseCurrentIA(_iteration);
 		}
 
-		if ( !fl_lock ) {
+		if (!fl_lock) {
 			scriptEngine.update();
 		}
 
@@ -690,5 +692,5 @@ public class GameMechanics : ViewManager
 			}
 		}
 
-	}
+	} */
 }

@@ -5,7 +5,7 @@ from pathlib import Path
 
 currentPath = Path(abspath(getsourcefile(lambda:0)))
 targetPath = currentPath.parent.parent / "hammerfest" / "xml" / "levels" / "adventure.xml"
-SavingPath = currentPath.parent / "json" / "levels" / "adventure.json"
+SavingPath = currentPath.parent / "Assets" / "json" / "levels" / "adventure.json"
 
 adventure = targetPath.open()
 adventureThingy = adventure.read().split(":")
@@ -187,8 +187,8 @@ def decode_object_field(o):
         if(is_end):
             return False
         k = decode_string()
-        if(False and k[0] != "$" ): #obfu_mode
-            k = "$"+k
+        if(k[0] == "$"): #obfu_mode
+            k = k[1:]
         nfields += 1
         fieldtbl.insert(nfields, k)
         if( nfields >= next_field_bits ):
@@ -201,7 +201,7 @@ def decode_string():
     len = decode_int()
     is_b64 = (read(1) == 0)
     s = ""
-    if( is_b64 ):
+    if(is_b64):
         for i in range(len):
             s += c64(read(6))
     else:
@@ -342,35 +342,6 @@ class BadData:
 		self.x	= x
 		self.y	= y
 
-# unused for now but we need to cast the result to this class
-class Data:
-	map : list
-	badList : list
-	playerX : int
-	playerY : int
-	skinTiles : int
-	skinBg : int
-	specialSlots = []
-	scoreSlots = []
-	script = []
-
-	def __init__(self):
-		map = []
-		for x in range(Data.LEVEL_WIDTH):
-			map[x] = []
-			for y in range(Data.LEVEL_HEIGHT):
-			    map[x][y] = 0
-		self.playerX		= 0
-		self.playerY		= 0
-		self.skinBg		= 1
-		self.skinTiles	= 1
-		self.badList		= []
-		self.specialSlots	= []
-		self.scoreSlots		= []
-		self.script			= ""
-
-
-
 def unserialize(id):
     global fl_read
 
@@ -388,7 +359,6 @@ def JSONSerializer(obj):
     if hasattr(obj, '__dict__'):
         return obj.__dict__
     else:
-        print("fml")
         return obj
 
 
@@ -396,8 +366,16 @@ worldmap = []
 
 index = 0
 for level in adventureThingy:
-    worldmap.append(unserialize(0))
+    worldmap.append(unserialize(index))
     worldmap[index]["ID"] = index #just in case we want to adress levels through an ID instead of their position in the worlmap
+
+    nestedColumn = dict()
+    columnIndex = 0
+    for column in worldmap[index]["map"]:
+        nestedColumn["column"] = column
+        worldmap[index]["map"][columnIndex] = nestedColumn.copy()
+        columnIndex += 1
+
     index += 1
 
 
