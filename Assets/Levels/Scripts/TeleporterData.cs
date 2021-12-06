@@ -2,20 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TeleporterData : MonoBehaviour //TODO MoboBehavior probably not necessary
+public class TeleporterData
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
 
     //var mc		: {  >MovieClip, skin:{>MovieClip,sub:MovieClip}  } ; //TODO wtf
 	//MovieClip podA;
@@ -38,7 +26,7 @@ public class TeleporterData : MonoBehaviour //TODO MoboBehavior probably not nec
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-/* 	void New(int x, int y, int len, int dir) {
+	TeleporterData(int x, int y, int len, int dir) {
 		cx = x;
 		cy = y;
 		direction = dir;
@@ -47,7 +35,7 @@ public class TeleporterData : MonoBehaviour //TODO MoboBehavior probably not nec
 		fl_on = false;
 
 		// Calcul du point central
-		centerX	= cx * Data.CASE_WIDTH + Data.CASE_WIDTH/2;
+/* 		centerX	= cx * Data.CASE_WIDTH + Data.CASE_WIDTH/2;
 		centerY	= cy * Data.CASE_HEIGHT + Data.CASE_HEIGHT;
 		startX	= Entity.x_ctr(x);
 		startY	= Entity.y_ctr(y);
@@ -69,8 +57,8 @@ public class TeleporterData : MonoBehaviour //TODO MoboBehavior probably not nec
 		}
 		else {
 			endY += length*Data.CASE_HEIGHT;
-		}
-	}    */
+		} */
+	}   
 }
 
 

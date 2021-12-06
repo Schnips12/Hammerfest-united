@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-
-[Serializable]
+[Serializable] // Wrapper for deserializing JSON files to LevelData
 public class LevelsArray {
 	public LevelData[] thisArray;
 }
@@ -51,42 +50,15 @@ public class LevelData
 		return map[0].column.Length;
 	}
 
-	/*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-/* 	LevelData() {
-		//map = new int[Data.LEVEL_WIDTH, Data.LEVEL_HEIGHT]; // TODO might need to initialize it to zero
 
-		playerX		= 0;
-		playerY		= 0;
-		skinBg			= 1;
-		skinTiles		= 1;
-		badList		= new List<BadData>();
+	[Serializable] // Wrapper for deserializing JSON files to LevelData
+	public class _slot {
+		public int x;
+		public int y;
+	}
 
-		specialSlots	= new Vector2Int();
-		scoreSlots		= new Vector2Int();
-
-		script			= "";
-	} */
-
-}
-
-
-
-[Serializable]
-public class _slot {
-	public int x;
-	public int y;
-}
-
-[Serializable]
-public class _bad {
-	public int id;
-	public int x;
-	public int y;
-}
-
-[Serializable]
-public class _column {
-	public int[] column;
+	[Serializable] // Wrapper for deserializing JSON files to LevelData
+	public class _column {
+		public int[] column;
+	}
 }

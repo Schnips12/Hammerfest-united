@@ -8,10 +8,11 @@ using System.IO;
 public class View : MonoBehaviour
 {
 	// Testing area
-    [SerializeField] List<TileBase> groundTiles;
-	[SerializeField] List<SmarterTile> groundTilesRot;
+    [SerializeField] List<SmarterTile> groundTiles;
+	[SerializeField] List<SmarterTile> ground_endTiles;
 	[SerializeField] List<TileBase> backgroundTiles;
     [SerializeField] Tilemap groundMap;
+	[SerializeField] Tilemap ground_endMap;
 	[SerializeField] Tilemap backgroundMap;
     [SerializeField] GameObject gameArea;
 	[SerializeField] private LevelData[] levels;
@@ -27,13 +28,10 @@ public class View : MonoBehaviour
 	LevelData data;
 	Camera cam;
 
-	float xOffset;
 	bool fl_attach;
 	bool fl_shadow;
 	bool fl_hideTiles;
 	bool fl_hideBorders;
-	int levelId;
-
 	bool[,] _fieldMap;
 
 	int currentId;
@@ -41,38 +39,19 @@ public class View : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-		// Testing area
 		cam = Camera.main;
         string json = File.ReadAllText(Application.dataPath+"/json/levels/adventure.json");
-        levels = JsonUtility.FromJson<LevelsArray>("{\"thisArray\":"+json+"}").thisArray;
-		//Debug.Log(levels[1].scoreSlots[0]);
-
-
-		//this.world = world;
-
-		//depthMan	= dm;
-		xOffset		= 10;
-
+        levels = JsonUtility.FromJson<LevelsArray>("{\"thisArray\":"+json+"}").thisArray; // TODO load a single level
+	
 		fl_attach		= false;
 		fl_shadow		= true;
 		fl_hideTiles	= false;
 		fl_hideBorders	= false;
 
-/* 		tileList	= new List<TileMC>();
-		gridList	= new List<MovieClip>();
-		mcList		= new List<MovieClip>(); */
+		fl_fast		= false;
+		currentId = 0;
 
-/* 		_sprite_top		= depthMan.empty(Data.DP_SPRITE_TOP_LAYER);
-		_sprite_top._x	-= xOffset;
-		_sprite_back	= depthMan.empty(Data.DP_SPRITE_BACK_LAYER);
-		_sprite_back._x	-= xOffset;
-		_sprite_top_dm	= new DepthManager(_sprite_top);
-		_sprite_back_dm	= new DepthManager(_sprite_back); */
-
-/* 		fl_cache	= world.manager.fl_flash8; */
-		fl_fast		= false;	
-
-		currentId = 0;        
+		Debug.Log(String.Join("\n", levels[3].script.Split('\r')));
     }
 
     // Update is called once per frame
@@ -80,59 +59,101 @@ public class View : MonoBehaviour
     {
 		if(Input.GetMouseButtonDown(0)) {
 			groundMap.ClearAllTiles();
+			ground_endMap.ClearAllTiles();
+			backgroundMap.ClearAllTiles();
 			DrawBackground();
             DrawGround();
 			currentId++;
         }
     }
 
+	/// <summary>Replace the positive values of the map with codes for floors and columns.</summary>
 	void TraceLines(int index) {
 		bool tracing = false;
 		int startX = 0;
 		int startY = 0;
 
-		for (int y=0 ; y < levels[index].mapHeight() ; y++) {
-			for (int x=0 ; x < levels[index].mapWidth() ; x++) {
+		// Reading the map line by line and detecting consecutive positive values.
+		for (int y=0 ; y <= levels[index].mapHeight() ; y++) {
+			for (int x=0 ; x <= levels[index].mapWidth() ; x++) {
 				if (!tracing) {
-					if (levels[index].GetCase(x, y) > 0) {
+					// Ignoring values greater than 100 as they result from vertical tracing.
+					if (levels[index].GetCase(x, y) > 0 & levels[index].GetCase(x, y) < 100) {
 						startX = x;
 						startY = y;
 						tracing = true;
 					}
 				}
-
 				
 				if (tracing) {
 					// End tracing when reaching an empty case or the end of the map
-					if (levels[index].GetCase(x, y) <= 0 | x==levels[index].mapWidth()-1) {
+					if (levels[index].GetCase(x, y) <= 0) {
 						int wid = x-startX;
-						if(x==levels[index].mapWidth()-1) {
-							wid++;
-						}
 
-						if (wid==1) { // This would be a column if the upper case is full
-							int drawY = 0;
-							if (levels[index].GetCase(startX, startY+1) > 0) { // Column detected
-								while (levels[index].GetCase(startX, startY+drawY) > 0 & levels[index].GetCase(startX, startY+drawY) < 100) {
-									levels[index].SetCase(startX, startY+drawY, 101 + drawY);
-									drawY++;
+						if (wid==1 & IsWall(startX, startY)) {
+							int hei = 0;
+							// Vertical tracing because horizontal tracing ended after one step
+							if (!IsWall(startX, startY-1)) {
+								while (IsWall(startX, startY+hei)) {
+									hei++;
 								}
-							} else { // One by one element detected
-								levels[index].SetCase(startX, startY, 1);
 							}
-						} else { // Horizontal bar detected
-							for(int drawX=0 ; drawX<wid ; drawX++) {
-								levels[index].SetCase(startX+drawX, y, 1+drawX);
-							}							
+
+							if (hei==1) { // The column is one unit tall so we treat it as a floor
+								AttachTile(startX, startY, 1);
+							} else {  // Otherwise we write the whole column
+								AttachColumn(startX, startY, hei);
+							}
+						}
+						else { // Writing the detected floor element
+							AttachTile(startX, startY, wid);
 						}
 						tracing = false;
 					}
 				}
 			}
 		}
+		
+/* 		// Fields
+		for ( var y=0 ; y<Data.LEVEL_HEIGHT ; y++ ) {
+			for ( var x=0 ; x<Data.LEVEL_WIDTH ; x++ ) {
+				if ( data.$map[x][y] < 0 && _fieldMap[x][y]==null ) {
+					attachField(x,y);
+				}
+			}
+		}
+
+
+		// Colonnes de pierre
+		if ( !fl_fast ) {
+			_leftBorder = _top_dm.attach("hammer_sides", 2);
+			_leftBorder._x = 5;
+			_rightBorder = _top_dm.attach("hammer_sides", 2);
+			_rightBorder._x = Data.GAME_WIDTH+15;
+
+			_leftBorder._visible = !fl_hideBorders;
+			_rightBorder._visible = !fl_hideBorders;
+		} */
 	}
 
-	void DrawGround() {
+	/// <sumary>Write values in the map coresponding to consecutive floor tiles</sumary>
+	void AttachTile(int startX, int startY, int width) {
+		for (int i=0 ; i < width ; i++) {
+			levels[currentId].SetCase(startX+i, startY, i+1);
+		}
+		levels[currentId].SetCase(startX+width-1, startY, width-1+1001);
+	}
+
+	/// <sumary>Write values in the map coresponding to consecutive column tiles</sumary>
+	// TODO This will have to be edited when attempting to flip the column sprites.
+	void AttachColumn(int startX, int startY, int height) {
+		for (int i=0 ; i < height ; i++) {
+			levels[currentId].SetCase(startX, startY+i, i+101);
+		}
+		levels[currentId].SetCase(startX, startY+height-1, height-1+1101);
+	}
+
+	void DrawGround() { // TODO instead of iteration over the background, should be using level dimensions
 		TraceLines(currentId);
 		float xSize = groundMap.transform.localScale.x;
 		float ySize = groundMap.transform.localScale.y;
@@ -144,21 +165,29 @@ public class View : MonoBehaviour
 			for (float y=bounds.min.y ; y<bounds.max.y ; y+=ySize) {
 				Vector3Int cellPos = groundMap.WorldToCell(new Vector3(x, y, 0));
 				int cellValue = levels[currentId].GetCase(cellPos.x, cellPos.y) % 100;
-				bool isColumn = levels[currentId].GetCase(cellPos.x, cellPos.y) > 100;
-				if(cellValue > 0) {
-					SmarterTile ground = groundTilesRot.Find(item => item.name.Substring(5, 2) == skinTiles & Int16.Parse(item.name.Substring(8))+1 == cellValue);
+				bool isColumn = levels[currentId].GetCase(cellPos.x, cellPos.y) % 1000 > 100;
+				bool isEnd 	  = levels[currentId].GetCase(cellPos.x, cellPos.y) > 1000;
+				if(cellValue > 0) { // TODO modify the SmartTile class to allow inverting tiles then flip columns upside down
+					Quaternion rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
 					if (isColumn) {
-						ground.rotation = Quaternion.Euler(0.0f, 0.0f, 90.0f);
-					} else {
-						ground.rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+						rotation = Quaternion.Euler(0.0f, 0.0f, 90.0f);
 					}
+
+					SmarterTile ground = groundTiles.Find(item => item.name.Substring(5, 2) == skinTiles & Int16.Parse(item.name.Substring(8))+1 == cellValue);
+					ground.rotation = rotation;
 					groundMap.SetTile(cellPos, ground);
+
+					if(isEnd) {
+						SmarterTile ground_end = ground_endTiles.Find(item => item.name.Substring(4, 2) == skinTiles);
+						ground_end.rotation = rotation;
+						ground_endMap.SetTile(cellPos, ground_end);
+					}
 				}
 			}
 		}
 	}
 
-	void DrawBackground() {
+	void DrawBackground() { // TODO instead of iteration over the background, should be using level dimensions
 		float xSize = backgroundMap.transform.localScale.x;
 		float ySize = backgroundMap.transform.localScale.y;
 		Bounds bounds = gameArea.GetComponent<Renderer>().bounds;
@@ -172,9 +201,27 @@ public class View : MonoBehaviour
 		}
 	}
 
+	/*------------------------------------------------------------------------
+	RETOURNE SI UNE CASE EST UN MUR
+	------------------------------------------------------------------------*/
+	bool IsWall(int cx, int cy) {
+		bool isWall = levels[currentId].GetCase(cx, cy) > 0;
+		
+		if (levels[currentId].GetCase(cx-1, cy) > 0) {
+			isWall = false;
+		}
+
+		if (levels[currentId].GetCase(cx+1, cy) > 0) {
+			isWall = false;
+		}
+
+		return isWall;
+	}
+
+
 
 	/*------------------------------------------------------------------------
-	EFFACE LES OMBRES SOUS LES DALLES
+	EFFACE LES OMBRES SOUS LES DALLES // TODO Add shadow management
 	------------------------------------------------------------------------*/
 	void RemoveShadows() {
 		fl_shadow = false;
@@ -182,18 +229,7 @@ public class View : MonoBehaviour
 
 
 	/*------------------------------------------------------------------------
-	RETOURNE SI UNE CASE EST UN MUR
-	------------------------------------------------------------------------*/
-/* 	bool IsWall(int cx, int cy) {
-		return
-			data.map[cx, cy]>0 &&
-			(data.map[cx-1, cy]<=0 || data.map[cx-1, cy]==null) && // TODO expect out of index error here
-			(data.map[cx+1, cy]<=0 || data.map[cx+1, cy]==null);
-	} */
-
-
-	/*------------------------------------------------------------------------
-	CALCUL DES ID DE SKIN TILES / COLUMN
+	CALCUL DES ID DE SKIN TILES / COLUMN // TODO check is still unused upon View completion and get rid of it
 	------------------------------------------------------------------------*/
 	int GetTileSkinId(int id) {
 		if (id>=100) {
@@ -221,42 +257,6 @@ public class View : MonoBehaviour
 		}
 	}
 
-	/*------------------------------------------------------------------------
-	ATTACHE UN PLATEAU
-	------------------------------------------------------------------------*/
-    void AttachTile(int sx, int sy, int wid, int skin) {
-		skin = GetTileSkinId(skin);
-		if (fl_fast) {
-			skin = 30;
-		}
-		TileBase tile = groundTiles.Find(item => Int16.Parse(item.name.Substring(2, 2)) == skin);
-
-		for (int x=sx ; x<sx+wid ; x++) {
-			Vector3Int cellPos = new Vector3Int(x, sy, 0);
-			groundMap.SetTile(cellPos, tile);
-		}
-
-		// TODO Add shadows under tiles.
-/* 		if (!fl_shadow || fl_fast) {
-			tile.ombre._visible = false;
-			tile.endTile.ombre._visible = false;
-		} */
-	}
-
-	void attachBg(int skinBg) {
-		float xSize = backgroundMap.transform.localScale.x;
-		float ySize = backgroundMap.transform.localScale.y;
-		Bounds bounds = gameArea.GetComponent<Renderer>().bounds;
-		TileBase background = backgroundTiles.Find(item => Int16.Parse(item.name.Substring(2, 2)) == skinBg);
-
-		for (float x=bounds.min.x ; x<=bounds.max.x ; x+=xSize) {
-			for (float y=bounds.min.y ; y<=bounds.max.y ; y+=ySize) {
-				Vector3Int cellPos = backgroundMap.WorldToCell(new Vector3(x, y, 0));
-				backgroundMap.SetTile(cellPos, background);
-			}
-		}
-	}
-
 	void FlipBackground() {
 		Vector3 flippedPos = new Vector3(-backgroundMap.transform.position.x, backgroundMap.transform.position.y, backgroundMap.transform.position.z);
 		Vector3 flippedSca = new Vector3(-backgroundMap.transform.localScale.x, backgroundMap.transform.localScale.y, backgroundMap.transform.localScale.z);
@@ -265,35 +265,9 @@ public class View : MonoBehaviour
 		backgroundMap.transform.localScale = flippedSca;
 	}
 
-	/*------------------------------------------------------------------------
-	ATTACHE UNE COLONNE
-	------------------------------------------------------------------------*/
-	void AttachColumn(int sx, int sy, int hei, int skin) {
-		skin = GetColumnSkinId(skin);
-		if (fl_fast) {
-			skin = 30;
-		}
-		TileBase tile = groundTiles.Find(item => Int16.Parse(item.name.Substring(2, 2)) == skin);
-		Matrix4x4 matrix = Matrix4x4.TRS(Vector3.zero, Quaternion.Euler(0f, 0f, 90f), Vector3.one);
-
-		for (int y=sy ; y<sy+hei ; y++) {
-			Vector3Int cellPos = new Vector3Int(sx, y, 0);
-			groundMap.SetTile(cellPos, tile);
-			groundMap.SetTransformMatrix(cellPos, matrix);
-		}
-
-
-        // TODO Add shadows under tiles.
-/* 		if ( !fl_shadow || fl_fast ) {
-			tile.ombre._visible = false;
-			tile.endTile.ombre._visible = false;
-		} */
-	}
-
-
 	
 	/*------------------------------------------------------------------------
-	ATTACHE UN CHAMP D'�NERGIE
+	ATTACHE UN CHAMP D'�NERGIE // TODO Nightmare here, need to find the field graphic assets
 	------------------------------------------------------------------------*/
 /* 	void AttachField(int sx, int sy) {
 		if (fl_fast) {
@@ -396,6 +370,22 @@ public class View : MonoBehaviour
 		// TODO create a matrix to reverse the sprite on X axis
 		// TODO Create a new grid for managing extra background sprites
 	}
+
+
+	/*------------------------------------------------------------------------
+	AFFICHE LES SPOTS DES BADS // TODO Instantiate the bad prefabs
+	------------------------------------------------------------------------*/
+/* 	function attachBadSpots() {
+		for (var i=0;i<data.$badList.length;i++) {
+			var sp = data.$badList[i];
+			var mc = _sprite_top_dm.attach("hammer_editor_bad", Data.DP_BADS);
+			mc._x = Entity.x_ctr(sp.$x) + Data.CASE_WIDTH*0.5;
+			mc._y = Entity.y_ctr(sp.$y);
+			mc.gotoAndStop(  ""+(sp.$id+1)  )
+//			Log.trace(sp.$x+","+sp.$y+" id="+sp.$id+" --> "+mc._name);
+		}
+	} */
+
 }
 
 
