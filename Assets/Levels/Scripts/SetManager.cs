@@ -4,6 +4,25 @@ using UnityEngine;
 
 public class SetManager : MonoBehaviour
 {
+    protected GameManager manager;
+
+	public List<LevelData> worldmap;
+	protected string raw;
+
+	protected List<bool> fl_read;
+	protected bool fl_mirror;
+    protected int csum;
+	protected string setName;
+
+    public List<TeleporterData> teleporterList;
+    public List<PortalData> portalList;
+
+    protected LevelData current;
+    protected int currentId;
+    protected LevelData _previous;
+    protected int _previousId;
+
+
     // Start is called before the first frame update
     void Start()
     {
@@ -18,25 +37,6 @@ public class SetManager : MonoBehaviour
     {
         // do nothing
     }
-
-    GameManager manager;
-
-	List<LevelData> worldmap;
-	string raw;
-
-	List<bool> fl_read;
-	bool fl_mirror;
-    int csum;
-	string setName;
-
-    List<TeleporterData> teleporterList;
-    List<PortalData> portalList;
-
-    LevelData current;
-    int currentId;
-    LevelData _previous;
-    int _previousId;
-
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR

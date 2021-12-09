@@ -1425,6 +1425,14 @@ MonoBehaviour:
   backgroundMap: {fileID: 815311040}
   gameArea: {fileID: 672456635}
   levels: []
+  bombField: {fileID: 6940581895600637715, guid: 3c6e78c420df5b24a92c1cad52808179, type: 3}
+  tpField: {fileID: 195564474101005117, guid: b20502eda6af84346bdfcde35a75cdac, type: 3}
+  portalField: {fileID: 2741018978627722208, guid: 2981ce4fec772b64a8c62c6c767d8b02, type: 3}
+  pod: {fileID: 7487663541513957639, guid: 06bc52efe163ff5428e7340afe5929c3, type: 3}
+  fl_attach: 0
+  fl_shadow: 0
+  fl_hideTiles: 0
+  fl_hideBorders: 0
 --- !u!4 &264350092
 Transform:
   m_ObjectHideFlags: 0
@@ -1532,6 +1540,7 @@ GameObject:
   m_Component:
   - component: {fileID: 672456636}
   - component: {fileID: 672456637}
+  - component: {fileID: 672456638}
   m_Layer: 0
   m_Name: Game Area
   m_TagString: Untagged
@@ -1604,6 +1613,25 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!95 &672456638
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 672456635}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: a3236ed4eeae3f541b793c866ff6ed25, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &700345957
 GameObject:
   m_ObjectHideFlags: 0

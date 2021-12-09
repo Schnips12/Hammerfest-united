@@ -8,25 +8,27 @@ public class TeleporterData
     //var mc		: {  >MovieClip, skin:{>MovieClip,sub:MovieClip}  } ; //TODO wtf
 	//MovieClip podA;
 	//MovieClip podB;
-	int cx;
-	int cy;
+	public int cx;
+	public int cy;
+	public int ecx;
+	public int ecy;
 
-	float centerX;
-	float centerY;
-	float startX;
-	float startY;
-	float endX;
-	float endY;
+	public float centerX;
+	public float centerY;
+	public float startX;
+	public float startY;
+	public float endX;
+	public float endY;
 
-	int direction;
-	int length;
+	public int direction;
+	public int length;
 
-	bool fl_on;
+	public bool fl_on;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	TeleporterData(int x, int y, int len, int dir) {
+	public TeleporterData(int x, int y, int len, int dir, float scaleX, float scaleY) {
 		cx = x;
 		cy = y;
 		direction = dir;
@@ -35,29 +37,33 @@ public class TeleporterData
 		fl_on = false;
 
 		// Calcul du point central
-/* 		centerX	= cx * Data.CASE_WIDTH + Data.CASE_WIDTH/2;
-		centerY	= cy * Data.CASE_HEIGHT + Data.CASE_HEIGHT;
-		startX	= Entity.x_ctr(x);
-		startY	= Entity.y_ctr(y);
+		centerX	= cx * scaleX + scaleX/2;
+		centerY	= cy * scaleY + scaleY;
+		startX	= Entity.x_ctr(x, scaleX);
+		startY	= Entity.y_ctr(y, scaleY);
 
-		if (direction==Data.HORIZONTAL) {
-			centerX += length/2*Data.CASE_WIDTH;
-			startX -= Data.CASE_WIDTH*0.5;
+		if (direction == 2) { // TODO Use Data.HORIZONTAL
+			centerX += length/2*scaleX;
+			startX -= scaleX*0.5f;
 		}
-		if (direction==Data.VERTICAL) {
-			centerY += length/2*Data.CASE_HEIGHT ;
-			startY -= Data.CASE_HEIGHT;
+		if (direction == 1) { // TODO Use Data.VERTICAL
+			centerY += length/2*scaleY ;
+			startY -= scaleY;
 		}
 
 		endX = startX;
 		endY = startY;
+		ecx = cx;
+		ecy = cy;
 
-		if (direction==Data.HORIZONTAL) {
-			endX += length*Data.CASE_WIDTH;
+		if (direction == 2) { // TODO Use Data.HORIZONTAL
+			ecx += length;
+			endX += length*scaleY;
 		}
 		else {
-			endY += length*Data.CASE_HEIGHT;
-		} */
+			ecy += length;
+			endY += length*scaleY;
+		}
 	}   
 }
 

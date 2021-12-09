@@ -16,6 +16,12 @@ public class View : MonoBehaviour
 	[SerializeField] Tilemap backgroundMap;
     [SerializeField] GameObject gameArea;
 	[SerializeField] private LevelData[] levels;
+	[SerializeField] GameObject bombField;
+	[SerializeField] GameObject tpField;
+	[SerializeField] GameObject portalField;
+	[SerializeField] GameObject pod;
+
+	private List<GameObject> mapThings;
 
 
 /* 	bool fl_cache; */
@@ -28,17 +34,20 @@ public class View : MonoBehaviour
 	LevelData data;
 	Camera cam;
 
-	bool fl_attach;
-	bool fl_shadow;
-	bool fl_hideTiles;
-	bool fl_hideBorders;
-	bool[,] _fieldMap;
-
+	public bool fl_attach;
+	public bool fl_shadow;
+	public bool fl_hideTiles;
+	public bool fl_hideBorders;
+	public bool[,] _fieldMap;
 	int currentId;
 
-    // Start is called before the first frame update
-    void Start()
-    {
+	bool flashing;
+
+    public View(int levelId) {
+
+    }
+
+	private void Start() {
 		cam = Camera.main;
         string json = File.ReadAllText(Application.dataPath+"/json/levels/adventure.json");
         levels = JsonUtility.FromJson<LevelsArray>("{\"thisArray\":"+json+"}").thisArray; // TODO load a single level
@@ -48,30 +57,47 @@ public class View : MonoBehaviour
 		fl_hideTiles	= false;
 		fl_hideBorders	= false;
 
-		fl_fast		= false;
-		currentId = 0;
+		fl_fast	  = false;
+
+		currentId = -1;
+
+		mapThings = new List<GameObject>();
+		flashing = false;
 
 		Debug.Log(String.Join("\n", levels[3].script.Split('\r')));
+	}
+
+	private void Update() {
+		if(Input.GetMouseButtonDown(0)) {
+			Detach();
+			currentId++;
+			Attach();		
+        }
+		if(Input.GetMouseButtonDown(1)) {
+			flashing = !flashing;
+			foreach (GameObject thing in mapThings) {
+				if (thing.name == tpField.name+"(Clone)") {
+					thing.GetComponentInChildren<Animator>().SetBool("flashing", flashing);
+				} else if(thing.name == pod.name+"(Clone)") {
+					thing.GetComponent<Animator>().SetBool("flashing", flashing);
+				}
+			}
+		}
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-		if(Input.GetMouseButtonDown(0)) {
-			groundMap.ClearAllTiles();
-			ground_endMap.ClearAllTiles();
-			backgroundMap.ClearAllTiles();
-			DrawBackground();
-            DrawGround();
-			currentId++;
-        }
-    }
+	void Attach() {
+		DrawBackground();
+        DrawGround();
+	}
+
 
 	/// <summary>Replace the positive values of the map with codes for floors and columns.</summary>
 	void TraceLines(int index) {
 		bool tracing = false;
 		int startX = 0;
 		int startY = 0;
+		
+		_fieldMap = new bool[levels[currentId].mapWidth(), levels[currentId].mapHeight()];
 
 		// Reading the map line by line and detecting consecutive positive values.
 		for (int y=0 ; y <= levels[index].mapHeight() ; y++) {
@@ -114,18 +140,18 @@ public class View : MonoBehaviour
 			}
 		}
 		
-/* 		// Fields
-		for ( var y=0 ; y<Data.LEVEL_HEIGHT ; y++ ) {
-			for ( var x=0 ; x<Data.LEVEL_WIDTH ; x++ ) {
-				if ( data.$map[x][y] < 0 && _fieldMap[x][y]==null ) {
-					attachField(x,y);
+		// Fields
+		for (int y=0 ; y<levels[currentId].mapHeight() ; y++) {
+			for (int x=0 ; x<levels[currentId].mapWidth() ; x++) {
+				if (levels[currentId].GetCase(x, y) < 0 & _fieldMap[x, y]==false) {
+					AttachField(x, y);
 				}
 			}
 		}
 
 
 		// Colonnes de pierre
-		if ( !fl_fast ) {
+/* 		if ( !fl_fast ) {
 			_leftBorder = _top_dm.attach("hammer_sides", 2);
 			_leftBorder._x = 5;
 			_rightBorder = _top_dm.attach("hammer_sides", 2);
@@ -223,7 +249,7 @@ public class View : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EFFACE LES OMBRES SOUS LES DALLES // TODO Add shadow management
 	------------------------------------------------------------------------*/
-	void RemoveShadows() {
+	public void RemoveShadows() {
 		fl_shadow = false;
 	}
 
@@ -267,101 +293,113 @@ public class View : MonoBehaviour
 
 	
 	/*------------------------------------------------------------------------
-	ATTACHE UN CHAMP D'�NERGIE // TODO Nightmare here, need to find the field graphic assets
+	ATTACHE UN CHAMP D'�NERGIE
 	------------------------------------------------------------------------*/
-/* 	void AttachField(int sx, int sy) {
+	void AttachField(int sx, int sy) {
 		if (fl_fast) {
 			return;
 		}
 		bool fl_flip = false;
-		int id = data.map[sx, sy];
-		TeleporterData td;
+		int id = levels[currentId].GetCase(sx, sy);
+		TeleporterData td = null;
 
 		// attachement
-		mc = _field_dm.attach("field",1);
-//		mc = Std.attachMC( _field_dm, "field", sy*Data.LEVEL_WIDTH+sx );
-		mc._x = sx*Data.CASE_WIDTH;
-		mc._y = sy*Data.CASE_HEIGHT;
+		float depth = groundMap.transform.position.z - 1;
+		float scaleX = groundMap.transform.localScale.x;
+		float scaleY = groundMap.transform.localScale.y;
+		Vector3 pos = groundMap.CellToWorld(new Vector3Int(sx, sy, 0)) + new Vector3(scaleX/2, scaleY/2, depth);
 
+		GameObject f = null;
+		if (-5 <= id & id <= -1) {
+			f = Instantiate(bombField, pos, Quaternion.identity);
+			f.GetComponentInChildren<Field>().SetSkin(id);
+		} else if (id == -6) {
+			f = Instantiate(tpField, pos, Quaternion.identity);
+		} else if (id == -7) {
+			f = Instantiate(portalField, pos, Quaternion.identity);
+		}
 
+		if (f != null) {
+			mapThings.Add(f);
+		}
+		
 
-		if (data.map[sx+1, sy] == id) {
+		if (levels[currentId].GetCase(sx+1, sy) == id) {
 			// horizontal
-			// TODO find where the visual is stored... then apply it
 			int i = sx;
-			while (data.map[i, sy] == id) {
+			while (levels[currentId].GetCase(i, sy) == id) {
 				_fieldMap[i, sy]=true;
 				i++;
 			}
-
-			if (id == Data.FIELD_TELEPORT) {
-				td = new TeleporterData(sx, sy, i-sx, Data.HORIZONTAL);
+			if (id == -6) { // TODO Use Data.FIELD_TELEPORT
+				td = new TeleporterData(sx, sy, i-sx, 2, scaleX, scaleY); // TODO Use Data.HORIZONTAL
 			}
+			f.transform.localScale = new Vector3(scaleX, (i-sx)*scaleY, 1);
+			f.transform.position += new Vector3(i-sx-1, 0, 0);
+			f.transform.rotation = Quaternion.Euler(0, 0, 90);
 		}
 		else {
-			if (data.map[sx, sy+1] == id) {
+			if (levels[currentId].GetCase(sx, sy+1) == id) {
 				// vertical
-				var i = sy;
-				while (data.map[sx, i] == id) {
+				int i = sy;
+				while (levels[currentId].GetCase(sx, i) == id) {
 					_fieldMap[sx, i]=true;
 					i++;
 				}
 
-				if (id==Data.FIELD_TELEPORT) {
-					td = new TeleporterData(sx, sy, i-sy, Data.VERTICAL);
+				if (id == -6) { // TODO Use Data.FIELD_TELEPORT
+					td = new TeleporterData(sx, sy, i-sy, 1, scaleX, scaleY); // TODO Use Data.HORIZONTAL
 				}
-				if (id==Data.FIELD_PORTAL) {
-					if (data.map[sx+1, sy]>0) {
+				if (id == -7) { // TODO Use Data.FIELD_PORTAL
+					if (levels[currentId].GetCase(sx+1, sy) > 0) {
 						fl_flip = true;
 					}
 				}
-				//mc._height = Data.CASE_HEIGHT * (i-sy);
+				f.transform.localScale = new Vector3(scaleX, (i-sy)*scaleY, 1);
+				f.transform.position += new Vector3(0, i-sy-1, 0);
 			}
 			else {
-				//mc.gotoAndStop("2");
-				//mc._width = Data.CASE_WIDTH;
+				f.transform.localScale = new Vector3(scaleX, scaleY, 1);
+				f.transform.rotation = Quaternion.Euler(0, 0, 90);
 			}
 		}
 
 		// skin
 		if (fl_flip) {
-			//downcast(mc).skin.sub._xscale *= -1;
+			f.GetComponentInChildren<SpriteRenderer>().flipX = true;
 		}
 
 		// téléporteur
-		if (id == Data.FIELD_TELEPORT) {
-			td.podA		= _field_dm.attach("hammer_pod", Data.DP_INTERF);
-			td.podA._x	= td.startX;
-			td.podA._y	= td.startY;
-			td.podA.stop();
+		if (id == -6) { // TODO Use Data.FIELD_TELEPORT
+			pos = groundMap.CellToWorld(new Vector3Int(td.cx, td.cy, 0)) + new Vector3(scaleX/2, 0, depth-1);
+			GameObject fa = Instantiate(pod, pos, Quaternion.identity);
+			fa.transform.localScale = new Vector3(scaleX, scaleY, 1);
+			mapThings.Add(fa);
 
-			td.podB		= _field_dm.attach("hammer_pod", Data.DP_INTERF);
-			td.podB._x	= td.endX;
-			td.podB._y	= td.endY;
-			td.podB._rotation = 180;
-			td.podB.stop();
+			pos = groundMap.CellToWorld(new Vector3Int(td.ecx, td.ecy, 0)) + new Vector3(scaleX/2, 0, depth-1);
+			GameObject fb = Instantiate(pod, pos, Quaternion.identity);
+			fb.transform.localScale = new Vector3(scaleX, scaleY, 1);
+			fb.transform.rotation = Quaternion.Euler(0, 0, 180);
+			mapThings.Add(fb);
 
-			td.mc.stop();
-
-			if ( td.dir==Data.HORIZONTAL ) {
-				td.podA._y -= Data.CASE_HEIGHT*0.5;
-				td.podB._y -= Data.CASE_HEIGHT*0.5;
+			if (td.direction == 2) {  // TODO Use Data.HORIZONTAL
+				fa.transform.Translate(new Vector3(-scaleX/2, scaleY/2, 0), Space.World);
+				fb.transform.Translate(new Vector3(-scaleX/2, scaleY/2, 0), Space.World);
 			}
 			else {
-				td.podA._rotation += 90;
-				td.podB._rotation += 90;
+				fa.transform.Rotate(new Vector3(0, 0, 90));
+				fb.transform.Rotate(new Vector3(0, 0, 90));
 			}
 //			td.podB = world.game.fxMan.attachFx( td.endX,td.endY, "hammer_fx_shine" );
 //			td.podB.gotoAndStop("2");
-			world.teleporterList.push(td);
+			//world.teleporterList.Add(td);
 		}
 
 		// portal
-		if (id == Data.FIELD_PORTAL) {
-			world.portalList.push(new PortalData(mc, sx, sy));
+		if (id == -7) { // Use Data.FIELD_PORTAL
+			//world.portalList.Add(new PortalData(sx, sy));
 		}
-
-	} */
+	}
 
 	/*------------------------------------------------------------------------
 	AFFICHE UN SPRITE STATIQUE DE D�COR
@@ -385,6 +423,35 @@ public class View : MonoBehaviour
 //			Log.trace(sp.$x+","+sp.$y+" id="+sp.$id+" --> "+mc._name);
 		}
 	} */
+
+	public void Detach() {
+		groundMap.ClearAllTiles();
+		ground_endMap.ClearAllTiles();
+		backgroundMap.ClearAllTiles();
+		foreach (GameObject thing in mapThings) {
+			Destroy(thing);
+		}
+		mapThings = new List<GameObject>();
+	}
+
+	/*------------------------------------------------------------------------
+	VUE D'UN NIVEAU DU SET INTERNE
+	------------------------------------------------------------------------*/
+	public void Display(int id) {
+		this.data = world.worldmap[id];
+		currentId = id;
+		if (this.data==null) {
+			//GameManager.Warning("null view");
+		}
+		Attach();
+	}
+
+	/*------------------------------------------------------------------------
+	VUE DU NIVEAU EN COURS DANS LE SET
+	------------------------------------------------------------------------*/
+	public void displayCurrent() {
+		Display(currentId);
+	}
 
 }
 

@@ -413,12 +413,12 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONVERSION CASE -> REAL
 	------------------------------------------------------------------------*/
-/* 	static float x_ctr(int n) {
-		return n*Data.CASE_WIDTH + Data.CASE_WIDTH*0.5 ;
+	public static float x_ctr(int n, float scaleX) {
+		return n*scaleX + scaleX*0.5f ;
 	}
-	static float y_ctr(int n) {
-		return n*Data.CASE_HEIGHT + Data.CASE_HEIGHT;
-	} */
+	public static float y_ctr(int n, float scaleY) {
+		return n*scaleY + scaleY;
+	}
 
 
 	/*------------------------------------------------------------------------

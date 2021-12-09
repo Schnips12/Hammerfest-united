@@ -14,7 +14,7 @@ public class PortalData
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	PortalData(int cx, int cy) {
+	public PortalData(int cx, int cy) {
 		this.cx = cx;
 		this.cy = cy;
 		cpt = 0;
