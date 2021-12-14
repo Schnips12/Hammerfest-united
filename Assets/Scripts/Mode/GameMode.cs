@@ -1,13 +1,25 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using TMPro;
 
-namespace Mode;
+namespace Modes;
 
 public class GameMode : Mode
 {
     static int WATER_COLOR		= 0x0000ff;
 
+    [SerializeField] GameObject popupPrefab;
+    private GameObject popup;
+    [SerializeField] GameObject pointerPrefab;
+    private GameObject pointer;
+    [SerializeField] GameObject itemNamePrefab;
+    private GameObject itemName;
+    [SerializeField] GameObject radiusPrefab;
+    private GameObject radius;
+    [SerializeField] GameObject darknessPrefab;
+    private GameObject darkness;
 
     FxManager fxMan;
     StatsManager statsMan;
@@ -21,17 +33,13 @@ public class GameMode : Mode
     bool fl_bombControl;
     bool fl_ninja;
     bool fl_bombExpert;
-
     bool fl_ice;
     bool fl_aqua;
-
     bool fl_badsCallback;
 
     float duration;
-
     float gFriction;
     float sFriction;
-
     float speedFactor;
     float diffFactor;
 
@@ -47,14 +55,11 @@ public class GameMode : Mode
     bool fl_clear;
     bool fl_gameOver;
     bool fl_pause;
-
     bool fl_rightPortal;
 
     float huTimer;
     int huState;
-
     float endModeTimer;
-
     float shakeTotal;
     float shakeTimer;
     float shakePower;
@@ -65,42 +70,15 @@ public class GameMode : Mode
     bool fl_flipY;
     float aquaTimer;
 
-    int keyLock;
-
     List<bool> globalActives;
-    /* var endLevelStack	: Array<void->void>; */
 
-/*         var popMC			: { > MovieClip, sub: { > MovieClip, field:TextField, header:TextField } };
-    var pointerMC		: MovieClip;
-    var radiusMC		: MovieClip;
-    var darknessMC		: { > MovieClip, holes:Array<MovieClip> };
-    var itemNameMC		: { > MovieClip, field:TextField };
-    var pauseMC			: {
-        > MovieClip,
-        click	: TextField,
-        move	: TextField,
-        attack	: TextField,
-        pause	: TextField,
-        space	: TextField,
-        title	: TextField,
-        tip		: TextField,
-        sector	: TextField,
-    };
-    var mapMC			: {
-        > MovieClip,
-        field	: TextField,
-        ptr		: MovieClip,
-        pit		: MovieClip,
-    }; */
     /* var mapIcons		: Array<MovieClip>; */
     float dfactor;
     float targetDark;
     /* var extraHoles		: Array< {x:float, y:float, d:float, mc:MovieClip} >; */
 
     float lagCpt;
-
     int tipId;
-
     float bulletTimer;
 
     List<int> specialPicks;
@@ -121,24 +99,16 @@ public class GameMode : Mode
         public int eid;
         public string misc;
     }
-
     List<eventAndTravel> mapEvents;
     List<eventAndTravel> mapTravels;
 
-
     Hashtable dvars;
-
     Color color;
     int colorHex;
-
     List<bool> worldKeys;
-
     int forcedDarkness;
-
     Level.PortalLink nextLink;
     int fakeLevelId;
-
-
     int perfectItemCpt;
 
 
@@ -152,38 +122,37 @@ public class GameMode : Mode
         fl_bullet		= true;
         fl_disguise		= true;
         fl_map			= false;
-        fl_mirror		= GameManager.CONFIG.hasOption(Data.OPT_MIRROR);
-        fl_nightmare	= GameManager.CONFIG.hasOption(Data.OPT_NIGHTMARE);
-        fl_ninja		= GameManager.CONFIG.hasOption(Data.OPT_NINJA);
-        fl_bombExpert	= GameManager.CONFIG.hasOption(Data.OPT_BOMB_EXPERT);
+        fl_mirror		= GameManager.CONFIG.HasOption(Data.OPT_MIRROR);
+        fl_nightmare	= GameManager.CONFIG.HasOption(Data.OPT_NIGHTMARE);
+        fl_ninja		= GameManager.CONFIG.HasOption(Data.OPT_NINJA);
+        fl_bombExpert	= GameManager.CONFIG.HasOption(Data.OPT_BOMB_EXPERT);
         fl_bombControl	= false;
-        savedScores		= new Array();
+        savedScores		= new List<int>();
 
         xOffset			= 10;
 
         fxMan = new FxManager(this);
         statsMan = new StatsManager(this);
         randMan = new RandomManager();
-        var old = Std.getTimer();
-        randMan.register(Data.RAND_EXTENDS_ID,	Data.RAND_EXTENDS);
-        randMan.register(
+
+        randMan.Register(Data.RAND_EXTENDS_ID,	Data.RAND_EXTENDS);
+        randMan.Register(
             Data.RAND_ITEMS_ID,
-            Data.getRandFromFamilies(Data.SPECIAL_ITEM_FAMILIES, GameManager.CONFIG.specialItemFamilies)
+            Data.GetRandFromFamilies(Data.SPECIAL_ITEM_FAMILIES, GameManager.CONFIG.specialItemFamilies)
         );
-        randMan.register(
+        randMan.Register(
             Data.RAND_SCORES_ID,
-            Data.getRandFromFamilies(Data.SCORE_ITEM_FAMILIES, GameManager.CONFIG.scoreItemFamilies)
+            Data.GetRandFromFamilies(Data.SCORE_ITEM_FAMILIES, GameManager.CONFIG.scoreItemFamilies)
         );
 
-        speedFactor = 1.0; // facteur de vitesse des bads
-        diffFactor	= 1.0;
+        speedFactor = 1.0f; // facteur de vitesse des bads
+        diffFactor	= 1.0f;
 
         endModeTimer = 0;
 
         comboList = new List<int>();
-
         killList = new List<Entity>();
-        unregList = new Dictionnary<int, Entity>();
+        unregList = new Dictionary<int, Entity>();
         lists = new List<List<Entity>>();
         for(int i=0 ; i < 200 ; i++) {
             lists[i] = new List<Entity>();
@@ -195,8 +164,8 @@ public class GameMode : Mode
         /* extraHoles		= new Array(); */
         dfactor			= 0;
 
-        shake(null,null);
-        wind(null,null);
+        Shake(0, 0);
+        Wind(0, 0);
         aquaTimer = 0;
 
         bulletTimer = 0;
@@ -209,27 +178,27 @@ public class GameMode : Mode
         huState		= 0;
         tipId		= 0;
 
-        _name		= "$abstractGameMode";
+        _name		= "abstractGameMode";
 
         specialPicks	= new List<int>();
         scorePicks		= new List<int>();
 
         currentDim	= 0;
         dimensions	= new List<Level.GameMechanics>();
-        latePlayers	= new List<Entity.player>();
+        latePlayers	= new List<Entity.Player>();
         /* mapIcons	= new Array(); */
         mapEvents	= new List<eventAndTravel>();
         mapTravels	= new List<eventAndTravel>();
 
         gameChrono	= new Chrono();
 
-        clearDynamicVars();
+        ClearDynamicVars();
 
 
         worldKeys = new List<bool>();
         for (int i=5000 ; i < 5100 ; i++) {
-            if (GameManager.CONFIG.hasFamily(i)) {
-                giveKey(i-5000);
+            if (GameManager.CONFIG.HasFamily(i)) {
+                GiveKey(i-5000);
             }
         }
 
@@ -255,8 +224,8 @@ public class GameMode : Mode
     INITIALISE L'INTERFACE DE JEU (non appelé dans la classe gamemode)
     ------------------------------------------------------------------------*/
     void InitInterface() {
-        gi.Destroy();
-        gi = new gui.GameInterface(this);
+        gui.Destroy();
+        gui = new gui.GameInterface(this);
     }
 
 
@@ -268,7 +237,7 @@ public class GameMode : Mode
             ResetHurry();
         }
         badCount		= 0;
-        forcedDarkness	= null;
+        forcedDarkness	= 0;
         fl_clear		= false;
         var l = GetPlayerList();
         foreach (Entity.Player player in l) {
@@ -383,13 +352,13 @@ public class GameMode : Mode
         DestroyList(Data.HU_BAD);
 
         var l = GetBadList();
-        for (var i=0;i<l.length;i++) {
-            l[i].CalmDown();
+        foreach (Entity.Bad bad in l) {
+            bad.CalmDown();
         }
 
         // Boss
         var b = GetOne(Data.BOSS);
-        if (b!=null) {
+        if (b != null) {
             OnPlayerDeath();
         }
     }
@@ -421,54 +390,46 @@ public class GameMode : Mode
 
 
     /*------------------------------------------------------------------------
-    CONTROLES DE BASE // TODO Use Input
+    CONTROLES DE BASE
     ------------------------------------------------------------------------*/
     void GetControls() {
-        base.GetControls();
-
         // Pause
-        if (keyLock!=null & !Key.isDown(keyLock)) {
-            keyLock = null;
-        }
-        if (Key.isDown(80) && keyLock!=80) {
+        if (Input.GetKeyDown(KeyCode.P)) {
             if (fl_lock) {
-                onUnpause();
+                OnUnpause();
             }
             else {
-                onPause();
+                OnPause();
             }
-            keyLock = 80;
         }
 
 
         // Carte
-        if (fl_map && Key.isDown(67) && keyLock!=67) {
+        if (fl_map & Input.GetKeyDown(KeyCode.C)) {
             if (fl_lock) {
-                onUnpause();
+                OnUnpause();
             }
             else {
-                onMap();
+                OnMap();
             }
-            keyLock = 67;
         }
 
 
         // Musique
-        if (!fl_lock && fl_music && Key.isDown(77) && keyLock!=77) {
+        if (!fl_lock & fl_music & Input.GetKeyDown(KeyCode.M)) {
             fl_mute = !fl_mute;
             if (fl_mute) {
-                setMusicVolume(0);
+                SetMusicVolume(0);
             }
             else {
-                setMusicVolume(1);
+                SetMusicVolume(1);
             }
-            keyLock = 77;
         }
 
 
         // Suicide
-        if ( Key.isDown(Key.SHIFT) && Key.isDown(Key.CONTROL) && Key.IsDown(75) ) {
-            if ( !fl_switch && !fl_lock && CountList(Data.PLAYER)>0 ) {
+        if (Input.GetKey(KeyCode.LeftShift) & Input.GetKey(KeyCode.LeftControl) & Input.GetKeyDown(KeyCode.K)) {
+            if (!fl_switch && !fl_lock && CountList(Data.PLAYER)>0 ) {
                 DestroyList(Data.PLAYER);
                 OnGameOver();
             }
@@ -476,160 +437,51 @@ public class GameMode : Mode
 
 
         // Pause / quitter
-        if (!fl_switch && Key.isDown(Key.ESCAPE) && !fl_gameOver && keyLock!=Key.ESCAPE ) {
-            if ( manager.fl_local && !fl_lock ) {
-                endMode();
+        if (!fl_switch & Input.GetKeyDown(KeyCode.Escape) & !fl_gameOver) {
+            if (manager.fl_local & !fl_lock) {
+                EndMode();
             }
             else {
                 if ( manager.fl_debug ) {
-                    if ( !fl_lock ) {
-                        destroyList(Data.PLAYER);
-                        onGameOver();
+                    if (!fl_lock) {
+                        DestroyList(Data.PLAYER);
+                        OnGameOver();
                     }
                 }
                 else {
                     if (fl_lock) {
-                        onUnpause();
+                        OnUnpause();
                     }
                     else {
-                        onPause();
+                        OnPause();
                     }
                 }
             }
-            keyLock = Key.ESCAPE;
         }
 
         // Déguisements
-        if ( fl_disguise && Key.isDown(68) && keyLock!=68 ) {
-            var p = getPlayerList()[0];
-            var old = p.head;
+        if (fl_disguise & Input.GetKeyDown(KeyCode.D)) {
+            Entity.Player p = GetPlayerList()[0];
+            int old = p.head;
             p.head++;
-            if ( p.head==Data.HEAD_AFRO && !GameManager.CONFIG.hasFamily(109) ) p.head++; // touffe
-            if ( p.head==Data.HEAD_CERBERE && !GameManager.CONFIG.hasFamily(110) ) p.head++; // cerbère
-            if ( p.head==Data.HEAD_PIOU && !GameManager.CONFIG.hasFamily(111) ) p.head++; // piou
-            if ( p.head==Data.HEAD_MARIO && !GameManager.CONFIG.hasFamily(112) ) p.head++; // mario
-            if ( p.head==Data.HEAD_TUB && !GameManager.CONFIG.hasFamily(113) ) p.head++; // cape
+            if ( p.head==Data.HEAD_AFRO & !GameManager.CONFIG.HasFamily(109) ) p.head++; // touffe
+            if ( p.head==Data.HEAD_CERBERE & !GameManager.CONFIG.HasFamily(110) ) p.head++; // cerbère
+            if ( p.head==Data.HEAD_PIOU & !GameManager.CONFIG.HasFamily(111) ) p.head++; // piou
+            if ( p.head==Data.HEAD_MARIO & !GameManager.CONFIG.HasFamily(112) ) p.head++; // mario
+            if ( p.head==Data.HEAD_TUB & !GameManager.CONFIG.HasFamily(113) ) p.head++; // cape
             if ( p.head>6 ) {
                 p.head = p.defaultHead;
             }
             if ( old!=p.head ) {
-                p.replayAnim();
+                p.ReplayAnim();
             }
-            keyLock = 68;
         }
 
         // FPS
-        if ( Key.isDown(70) ) {
-            Log.print( Math.round(Timer.fps())+" FPS" );
-            Log.print("Performances: "+Math.min(100,Math.round(100*Timer.fps()/30))+"%");
+        if (Input.GetKeyDown(KeyCode.F)) {
+            Debug.Log( Mathf.Round(1/Time.deltaTime)+" FPS" );
+            Debug.Log("Performances: "+Mathf.Min(100, Mathf.Round(100/Time.deltaTime/30))+"%");
         }
-
-        // Build time
-        if ( Key.isDown(66) ) {
-            Log.print("Dernière mise à jour:");
-            Log.print( __TIME__ );
-            Log.print("Version de Flash: "+manager.fVersion);
-        }
-    }
-
-
-    /*------------------------------------------------------------------------
-    CONTROLES DE DEBUG
-    ------------------------------------------------------------------------*/
-    void GetDebugControls() {
-        super.getDebugControls();
-
-        if (Key.isDown(Key.SHIFT)) {
-            Timer.tmod = 0.3;
-        }
-
-        if (Key.isDown(Key.HOME)) {
-            Timer.tmod = 1.0;
-        }
-
-    }
-
-
-    /*------------------------------------------------------------------------
-    AFFICHE DES INFOS DE DEBUG
-    ------------------------------------------------------------------------*/
-    void PrintDebugInfos() {
-//		printBetaInfos();return;
-        Log.print("build:"+__TIME__);
-        Log.print("lang="+Lang.lang+" debug="+Lang.fl_debug);
-        Log.print("debug="+manager.fl_debug+" local="+manager.fl_local);
-        Log.print("cookie="+manager.fl_cookie);
-        Log.print("--- DATA ---");
-        Log.print(GameManager.CONFIG.toString());
-        Log.print("fl8 = "+manager.fl_flash8);
-        Log.print("ent = "+countList(Data.ENTITY));
-        Log.print("bad = "+countList(Data.BAD));
-
-        var k = new Array();
-        for (var i=0;i<worldKeys.length;i++) {
-            if ( worldKeys[i] ) {
-                k.push(i);
-            }
-        }
-        Log.print("keys= "+k.join(", "));
-        /***
-        Log.print("details = "+GameManager.CONFIG.fl_detail);
-        Log.print("--- PARAMS ---");
-        Log.print(GameManager.CONFIG.families.join("\n~ "));
-        Log.print("snd="+GameManager.CONFIG.soundVolume+" mus="+GameManager.CONFIG.musicVolume);
-        if ( manager.fl_cookie ) {
-            Log.print("--- COOKIE ---");
-            var d = new Date();
-            d.setTime( manager.cookie.data.lastModified );
-            Log.print("ver = "+Cookie.VERSION);
-            Log.print("date = "+d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear() );
-            Log.print("time = "+d.getHours()+":"+d.getMinutes()+":"+d.getSeconds() );
-        }
-        /***
-        Log.print("--- SCRIPT ---");
-        Log.print("fl_clear="+fl_clear);
-        var node = world.scriptEngine.script.firstChild;
-        while ( node!=null ) {
-            if ( node.nodeName!=null ) {
-                Log.print(node.nodeName);
-            }
-            node = node.nextSibling;
-        }
-        Log.print("--- HIST ---");
-        Log.print(world.scriptEngine.history.join("\n"));
-        /***/
-    }
-
-
-    /*------------------------------------------------------------------------
-    AFFICHE DES INFOS DE BETA TEST
-    ------------------------------------------------------------------------*/
-    void PrintBetaInfos() {
-//		Log.print(manager.history.join("\n"));
-//		return;
-        Log.print("appuyez sur 'C' pour\ncopier ce texte dans le\npresse-papier");
-        Log.print("--- VERSION ---");
-        Log.print("beta 6.1+");
-        Log.print("build:"+__TIME__);
-        Log.print("f:"+GameManager.CONFIG.families.join("."));
-        Log.print("--- DATA ---");
-        Log.print("lvl= "+world.currentId);
-        Log.print("bads= "+countList(Data.BAD));
-        Log.print("bads_c= "+countList(Data.BAD_CLEAR));
-        Log.print("clear= "+fl_clear);
-        Log.print("cycle= "+Math.round(world.scriptEngine.cycle));
-        Log.print("compile= "+world.scriptEngine.fl_compile);
-        Log.print("--- SCRIPT ---");
-        var node = world.scriptEngine.script.firstChild;
-        while ( node!=null ) {
-            if ( node.nodeName!=null ) {
-                Log.print(node.nodeName);
-            }
-            node = node.nextSibling;
-        }
-        Log.print("--- HIST ---");
-        Log.print("\n"+world.scriptEngine.history.join("\n*"));
-        Log.print("------");
     }
 
 
@@ -647,14 +499,14 @@ public class GameMode : Mode
     void StartLevel() {
         var n=0;
         n = world.scriptEngine.InsertBads();
-        if ( n==0 ) {
+        if (n==0) {
             fxMan.AttachExit();
             fl_clear = true;
         }
 
         UpdateDarkness();
 
-        if ( !world.IsVisited() ) {
+        if (!world.IsVisited()) {
             AddLevelItems();
         }
 
@@ -729,10 +581,8 @@ public class GameMode : Mode
             return;
         }
 
-
-
         if (id>=world.levels.Count) {
-            world.onEndOfSet();
+            world.OnEndOfSet();
             return;
         }
 
@@ -761,16 +611,16 @@ public class GameMode : Mode
                 best = p;
             }
         }
-        for (var i=0;i<lp.length;i++) {
-            lp[i].moveTo( best.x, -600 );
-            lp[i].hide();
-            lp[i].onNextLevel();
+        foreach (Entity.player p in lp) {
+            p.MoveTo(best.x, -600);
+            p.Hide();
+            p.OnNextLevel();
         }
-        best.MoveTo(best.x,-200);
+        best.MoveTo(best.x, -200);
 
         fxMan.OnNextLevel();
 
-        soundMan.PlaySound("sound_level_clear", Data.CHAN_INTERF);
+        /* soundMan.PlaySound("sound_level_clear", Data.CHAN_INTERF); */ // TOTO Use AudioSource
     }
 
 
@@ -781,7 +631,7 @@ public class GameMode : Mode
 
     protected override void Unlock() {
         base.Unlock();
-        gameChrono.Start();
+        gameChrono.Begin();
     }
 
 
@@ -789,9 +639,6 @@ public class GameMode : Mode
     COMPTEUR DE COMBO POUR UN ID UNIQUE
     ------------------------------------------------------------------------*/
     int CountCombo(int id) {
-        if (comboList[id]==null) {
-            comboList[id] = 0;
-        }
         return ++comboList[id];
     }
 
@@ -819,62 +666,62 @@ public class GameMode : Mode
     MISE À JOUR DES VARIABLES DE FRICTIONS AU SOL
     ------------------------------------------------------------------------*/
     void UpdateGroundFrictions() {
-        gFriction = Mathf.Pow(Data.FRICTION_GROUND, Timer.tmod) ; // x au sol
-        sFriction = Mathf.Pow(Data.FRICTION_SLIDE, Timer.tmod) ; // x sur sol glissant
+        gFriction = Mathf.Pow(Data.FRICTION_GROUND, Time.fixedDeltaTime) ; // x au sol
+        sFriction = Mathf.Pow(Data.FRICTION_SLIDE, Time.fixedDeltaTime) ; // x sur sol glissant
     }
 
 
     /*------------------------------------------------------------------------
     COMPTAGE D'ITEMS
     ------------------------------------------------------------------------*/
-    void PickUpSpecial(int id) {
-        if ( specialPicks[id]==null ) {
-            specialPicks[id]=0;
-        }
+    int PickUpSpecial(int id) {
         return ++specialPicks[id];
     }
 
-    void PickUpScore(int id, int subId) {
-        if (scorePicks[id]==null) {
-            scorePicks[id]=0;
-        }
+    int PickUpScore(int id, int subId) {
         return ++scorePicks[id];
     }
 
     string GetPicks() {
         var s = "";
-        foreach (int? pick in specialPicks) {
-            if (pick != null) { // TODO Use nullable int on that list
-                s+=i+"="+pick+"|";
+
+        int i=0;
+        foreach (int pick in specialPicks) {
+            if (pick != 0) {
+                s += i+"="+pick+"|";
             }
+            i++;
         }
+
+        i=0;
         foreach (int? pick in scorePicks) {
             if (pick != null) {
-                s+=(i+1000)+"="+pick+"|";
+                s += (i+1000)+"="+pick+"|";
             }
+            i++;
         }
+
         if (s.Length > 0) {
             s = s.Substring(0, s.Length-1);
         }
-
         return s;
     }
 
 
-    string GgetPicks2() {
-        List<int> s = new List<int>();
+    int[] GetPicks2() {
+        int[] s = new int[1000+specialPicks.Count];
 
         int i=0;
-        foreach (int? pick in specialPicks) {
-            if (pick != null) {
+        foreach (int pick in specialPicks) {
+            if (pick != 0) {
                 s[i] = pick;
                 i++;
             }
         }
 
         i=0;
-        foreach (int? pick in specialPicks) {
-            if (pick != null) {
+        foreach (int pick in specialPicks) {
+            if (pick != 0) {
                 s[i+1000] = pick;
                 i++;
             }
@@ -925,21 +772,21 @@ public class GameMode : Mode
         }
 
         // Filtre infos inutiles
-        foreach (eventAndTravel e in mapEvents) {
+        foreach (eventAndTravel ev in mapEvents) {
 
             // aller-retour au meme level
-            if (e.lid==lid & e.eid==Data.EVENT_EXIT_RIGHT & eid==Data.EVENT_BACK_RIGHT) {
+            if (ev.lid==lid & ev.eid==Data.EVENT_EXIT_RIGHT & eid==Data.EVENT_BACK_RIGHT) {
                 return;
             }
-            if (e.lid==lid & e.eid==Data.EVENT_EXIT_LEFT & eid==Data.EVENT_BACK_LEFT) {
+            if (ev.lid==lid & ev.eid==Data.EVENT_EXIT_LEFT & eid==Data.EVENT_BACK_LEFT) {
                 return;
             }
 
             // sorti plusieurs fois au meme level
-            if (e.lid==lid & e.eid==Data.EVENT_EXIT_RIGHT & eid==Data.EVENT_EXIT_RIGHT) {
+            if (ev.lid==lid & ev.eid==Data.EVENT_EXIT_RIGHT & eid==Data.EVENT_EXIT_RIGHT) {
                 return;
             }
-            if (e.lid==lid & e.eid==Data.EVENT_EXIT_LEFT & eid==Data.EVENT_EXIT_LEFT) {
+            if (ev.lid==lid & ev.eid==Data.EVENT_EXIT_LEFT & eid==Data.EVENT_EXIT_LEFT) {
                 return;
             }
         }
@@ -965,8 +812,6 @@ public class GameMode : Mode
         return 84 + Mathf.Min(350, lid*3.5f);
     }
 
-
-
     /*------------------------------------------------------------------------
     DÉFINI UNE VARIABLE DYNAMIQUE
     ------------------------------------------------------------------------*/
@@ -977,8 +822,8 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     LIT UNE VARIABLE DYNAMIQUE
     ------------------------------------------------------------------------*/
-    int GetDynamicVar(string name) {
-        return dvars[name.Substring(1).ToLower()]; // le $ est retiré en interne
+    string GetDynamicVar(string name) {
+        return dvars[name.ToLower()].ToString();
     }
 
     int GetDynamicInt(string name) {
@@ -1043,7 +888,7 @@ public class GameMode : Mode
     void ResetCol() {
         if (color != null) {
             colorHex = null;
-            color.reset();
+            color.Reset();
             color = null;
         }
     }
@@ -1078,7 +923,7 @@ public class GameMode : Mode
 
         ResetHurry();
 
-        latePlayers = new List<Entity.player>();
+        latePlayers = new List<Entity.Player>();
         var l = GetPlayerList();
         foreach (Entity.player p in l) {
             p.specialMan.ClearTemp();
@@ -1094,7 +939,7 @@ public class GameMode : Mode
                 p.fl_hitGround = true;
             }
             p.ChangeWeapon(Data.WEAPON_B_CLASSIC);
-            if (world.getCase(p.cx, p.cy) != Data.FIELD_PORTAL) {
+            if (world.GetCase(p.cx, p.cy) != Data.FIELD_PORTAL) {
                 latePlayers.Add(p);
             }
             p.Hide();
@@ -1135,20 +980,19 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISE ET AJOUTE UNE DIMENSION
     ------------------------------------------------------------------------*/
-    Levels.GameMechanics AddWorld(string name) {
-        Levels.GameMechanics dim;
-        dim = new Levels.GameMechanics(manager, name);
+    Level.GameMechanics AddWorld(string name) {
+        Level.GameMechanics dim;
+        dim = new Level.GameMechanics(manager, name);
         dim.fl_mirror = fl_mirror;
-        dim.setDepthMan(depthMan);
-        dim.setGame(this);
-        if (dimensions.length>0) {
-            dim.suspend();
+        dim.SetGame(this);
+        if (dimensions.Count>0) {
+            dim.Suspend();
             dim.fl_mainWorld = false;
         }
         else {
             world = dim;
         }
-        dimensions.push(dim);
+        dimensions.Add(dim);
         return dim;
     }
 
@@ -1214,7 +1058,7 @@ public class GameMode : Mode
         if (nextLink!=null) {
             return false;
         }
-        PortalLink link = Data.GetLink(currentDim, world.currentId, pid);
+        Level.PortalLink link = Data.GetLink(currentDim, world.currentId, pid);
         if (link==null) {
             return false;
         }
@@ -1323,7 +1167,7 @@ public class GameMode : Mode
 
 
     /*------------------------------------------------------------------------
-    RENVOIE DES LISTES SPÉCIFIQUES TYPÉES
+    RENVOIE DES LISTES SPÉCIFIQUES TYPÉES // TODO Define IEntity ?
     ------------------------------------------------------------------------*/
     List<Entity.Bad> GetBadList() {
         return GetList(Data.BAD);
@@ -1379,7 +1223,7 @@ public class GameMode : Mode
     ------------------------------------------------------------------------*/
     Entity GetOne(int type) {
         List<Entity> l = GetList(type);
-        return l[Random.Range(0, l.Count)];
+        return l[UnityEngine.Random.Range(0, l.Count)];
     }
 
 
@@ -1394,7 +1238,7 @@ public class GameMode : Mode
 
         int i;
         do {
-            i=Random.Range(0, l.Count);
+            i=UnityEngine.Random.Range(0, l.Count);
         }
         while (l[i]==e);
 
@@ -1414,7 +1258,7 @@ public class GameMode : Mode
     RETIRE D'UNE LISTE D'UPDATE
     ------------------------------------------------------------------------*/
     void RemoveFromList(int type, Entity e) {
-        lists[getListId(type)].Remove(e);
+        lists[GetListId(type)].Remove(e);
     }
 
 
@@ -1435,7 +1279,7 @@ public class GameMode : Mode
     void DestroySome(int type, int n) {
         List<Entity> l = GetListCopy(type);
         while (l.Count>0 & n>0) {
-            int i = Random.Range(0, l.Count);
+            int i = UnityEngine.Random.Range(0, l.Count);
             l[i].Destroy();
             l.RemoveAt(i);
             n--;
@@ -1446,22 +1290,22 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     NETTOIE LES LISTES DE DESTRUCTION
     ------------------------------------------------------------------------*/
-    function cleanKills() {
+    void CleanKills() {
         // Dés-enregistrement d'entités détruites dans ce tour
-        for (var i=0; i<unregList.length; i++) {
-            removeFromList( unregList[i].type, unregList[i].ent );
+        for (var i=0; i<unregList.Count; i++) {
+            RemoveFromList( unregList[i].type, unregList[i].ent );
         }
-        unregList = new Array();
+        unregList = new Dictionary<int, Entity>();
 
         // Suppression d'entités en fin de tour
-        for (var i=0; i<killList.length; i++) {
+        for (var i=0; i<killList.Count; i++) {
             var e = killList[i];
 //			if ( (e.types&Data.BAD_CLEAR) > 0 && !fl_lock) {
 //				checkLevelClear();
 //			}
             e.removeMovieClip();
         }
-        killList = new Array();
+        killList = new List<Entity>();
     }
 
 
@@ -1479,10 +1323,10 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DESTRUCTION
     ------------------------------------------------------------------------*/
-    void Destroy() {
+    void DestroyThis() {
         ResetCol();
         KillPortals();
-        base.Destroy();
+        base.DestroyThis();
     }
 
 
@@ -1514,26 +1358,26 @@ public class GameMode : Mode
     Entity.Bad AttachBad(int id, float x,float y) {
         Entity.Bad bad;
         switch (id) {
-            case Data.BAD_POMME			 = Entity.Bad.Walker.Pomme.Attach(this,x,y) ; break;
-            case Data.BAD_CERISE		 = Entity.Bad.Walker.Cerise.Attach(this,x,y) ; break;
-            case Data.BAD_BANANE		 = Entity.Bad.Walker.Banane.Attach(this,x,y) ; break;
-            case Data.BAD_ANANAS		 = Entity.Bad.Walker.Ananas.Attach(this,x,y) ; break;
-            case Data.BAD_ABRICOT		 = Entity.Bad.Walker.Abricot.Attach(this,x,y,true) ; break;
-            case Data.BAD_ABRICOT2		 = Entity.Bad.Walker.Abricot.Attach(this,x,y,false) ; break;
-            case Data.BAD_POIRE			 = Entity.Bad.Walker.Poire.Attach(this,x,y) ; break;
-            case Data.BAD_BOMBE			 = Entity.Bad.Walker.Bombe.Attach(this,x,y) ; break;
-            case Data.BAD_ORANGE		 = Entity.Bad.Walker.Orange.Attach(this,x,y) ; break;
-            case Data.BAD_FRAISE		 = Entity.Bad.Walker.Fraise.Attach(this,x,y) ; break;
-            case Data.BAD_CITRON		 = Entity.Bad.Walker.Citron.Attach(this,x,y) ; break;
-            case Data.BAD_BALEINE		 = Entity.Bad.flyer.Baleine.Attach(this,x,y) ; break;
-            case Data.BAD_SPEAR			 = Entity.Bad.Spear.Attach(this,x,y) ; break;
-            case Data.BAD_CRAWLER		 = Entity.Bad.Ww.Crawler.Attach(this,x,y) ; break;
-            case Data.BAD_TZONGRE		 = Entity.Bad.Flyer.Tzongre.Attach(this,x,y) ; break;
-            case Data.BAD_SAW			 = Entity.Bad.Ww.Saw.Attach(this,x,y) ; break;
-            case Data.BAD_LITCHI		 = Entity.Bad.Walker.Litchi.Attach(this,x,y) ; break;
-            case Data.BAD_KIWI			 = Entity.Bad.Walker.Kiwi.Attach(this,x,y) ; break;
-            case Data.BAD_LITCHI_WEAK	 = Entity.Bad.Walker.LitchiWeak.Attach(this,x,y) ; break;
-            case Data.BAD_FRAMBOISE		 = Entity.Bad.Walker.Framboise.Attach(this,x,y) ; break;
+            case Data.BAD_POMME			 : Entity.Bad.Walker.Pomme.Attach(this,x,y) ; break;
+            case Data.BAD_CERISE		 : Entity.Bad.Walker.Cerise.Attach(this,x,y) ; break;
+            case Data.BAD_BANANE		 : Entity.Bad.Walker.Banane.Attach(this,x,y) ; break;
+            case Data.BAD_ANANAS		 : Entity.Bad.Walker.Ananas.Attach(this,x,y) ; break;
+            case Data.BAD_ABRICOT		 : Entity.Bad.Walker.Abricot.Attach(this,x,y,true) ; break;
+            case Data.BAD_ABRICOT2		 : Entity.Bad.Walker.Abricot.Attach(this,x,y,false) ; break;
+            case Data.BAD_POIRE			 : Entity.Bad.Walker.Poire.Attach(this,x,y) ; break;
+            case Data.BAD_BOMBE			 : Entity.Bad.Walker.Bombe.Attach(this,x,y) ; break;
+            case Data.BAD_ORANGE		 : Entity.Bad.Walker.Orange.Attach(this,x,y) ; break;
+            case Data.BAD_FRAISE		 : Entity.Bad.Walker.Fraise.Attach(this,x,y) ; break;
+            case Data.BAD_CITRON		 : Entity.Bad.Walker.Citron.Attach(this,x,y) ; break;
+            case Data.BAD_BALEINE		 : Entity.Bad.flyer.Baleine.Attach(this,x,y) ; break;
+            case Data.BAD_SPEAR			 : Entity.Bad.Spear.Attach(this,x,y) ; break;
+            case Data.BAD_CRAWLER		 : Entity.Bad.Ww.Crawler.Attach(this,x,y) ; break;
+            case Data.BAD_TZONGRE		 : Entity.Bad.Flyer.Tzongre.Attach(this,x,y) ; break;
+            case Data.BAD_SAW			 : Entity.Bad.Ww.Saw.Attach(this,x,y) ; break;
+            case Data.BAD_LITCHI		 : Entity.Bad.Walker.Litchi.Attach(this,x,y) ; break;
+            case Data.BAD_KIWI			 : Entity.Bad.Walker.Kiwi.Attach(this,x,y) ; break;
+            case Data.BAD_LITCHI_WEAK	 : Entity.Bad.Walker.LitchiWeak.Attach(this,x,y) ; break;
+            case Data.BAD_FRAMBOISE		 : Entity.Bad.Walker.Framboise.Attach(this,x,y) ; break;
 
             default :
                 GameManager.Fatal("(attachBad) unknown bad "+id);
@@ -1554,76 +1398,57 @@ public class GameMode : Mode
     ------------------------------------------------------------------------*/
     void AttachPop(string msg, bool fl_tuto) {
         KillPop();
-        popMC = downcast( depthMan.attach("hammer_interf_pop", Data.DP_INTERF) );
-        popMC._x = Data.GAME_WIDTH*0.5;
+        popup = GameObject.Instantiate(popupPrefab, Vector3.zero, Quaternion.identity);
+        popup.GetComponent<TMP_Text>().text = msg;
 
-        if ( fl_tuto ) {
-            popMC.sub.gotoAndStop("2");
-            popMC.sub.header.text = Lang.get(2);
+        if (fl_tuto) {
+
         }
         else {
-            popMC.sub.gotoAndStop("1");
+
         }
-
-        // Trims leading endLines
-        while ( msg.charCodeAt(0)==10 || msg.charCodeAt(0)==13 ) {
-            msg = msg.substring(1);
-        }
-
-        popMC.sub.field.html = true;
-        popMC.sub.field.htmlText = Data.replaceTag(msg, "*","<font color=\"#f7e8d5\">","</font>");
-
-        // Vertical centering
-        var h = popMC.sub.field.textHeight;
-        popMC.sub.field._y = -h*0.5 - 2;
     }
 
 
     /*------------------------------------------------------------------------
     ATTACH: POINTEUR DE CIBLAGE
     ------------------------------------------------------------------------*/
-    function attachPointer(cx,cy, ocx,ocy) {
-        killPointer();
+    void AttachPointer(int cx, int cy, int ocx, int ocy) {
+        KillPointer();
         var x = Entity.x_ctr(cx);
         var y = Entity.y_ctr(cy);
         var ox = Entity.x_ctr(ocx);
         var oy = Entity.y_ctr(ocy);
-        pointerMC = depthMan.attach("hammer_fx_pointer", Data.DP_INTERF);
-        pointerMC._x = x;
-        pointerMC._y = y;
-        var ang = Math.atan2(oy-y, ox-x) * 180 / Math.PI;
-        pointerMC._rotation = ang-90;
+        Vector3 pos = new Vector3(x, y, 0);
+        Quaternion rot = Quaternion.Euler(0, 0, Mathf.Rad2Deg*Mathf.Atan2(oy-y, ox-x)-90);
+        pointer = GameObject.Instantiate(pointerPrefab, pos, rot);
     }
 
 
     /*------------------------------------------------------------------------
     ATTACH: CERCLE DE DEBUG
     ------------------------------------------------------------------------*/
-    function attachRadius(x,y,r) {
-        killRadius();
+    void AttachRadius(float x, float y, float r) {
+/*         KillRadius();
         radiusMC = depthMan.attach("debug_radius", Data.DP_INTERF);
         radiusMC._x = x;
         radiusMC._y = y;
         radiusMC._width = r*2;
-        radiusMC._height = radiusMC._width;
+        radiusMC._height = radiusMC._width; */
     }
 
 
     /*------------------------------------------------------------------------
     AFFICHE UN NOM D'ITEM SPÉCIAL RAMASSÉ
     ------------------------------------------------------------------------*/
-    function attachItemName(family:Array<Array<ItemFamilySet>>,id) {
-        if ( id==null ) {// || popMC._name!=null ) {
-            return;
-        }
-
+    void AttachItemName(List<List<ItemFamilySet>> family, int id) {
         // Recherche du nom
-        var s	= null;
-        var i	= 0;
-        while (s==null && i<family.length) {
-            var j=0;
-            while (s==null && j<family[i].length) {
-                if ( family[i][j].id == id ) {
+        string s = "";
+        int i = 0;
+        while (s=="" & i<family.Count) {
+            int j=0;
+            while (s==null & j<family[i].Count) {
+                if (family[i][j].id == id) {
                     s = family[i][j].name;
                 }
                 j++;
@@ -1631,9 +1456,9 @@ public class GameMode : Mode
             i++;
         }
 
-        if ( s!="" && s!=null ) {
+        if (s!="" && s!=null) {
             // Affichage
-            killItemName();
+            KillItemName();
             itemNameMC = downcast( depthMan.attach("hammer_interf_item_name", Data.DP_TOP) );
             itemNameMC._x = Data.GAME_WIDTH*0.5 + 20; // icon width
             itemNameMC._y = 15;//Data.GAME_HEIGHT-20; // 15;
@@ -1653,7 +1478,7 @@ public class GameMode : Mode
             icon._y = 10;
             icon._xscale = 75;
             icon._yscale = icon._xscale;
-            downcast(icon).sub.stop();
+            Downcast(icon).sub.stop();
         }
     }
 
@@ -1661,37 +1486,37 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DETACHEMENTS
     ------------------------------------------------------------------------*/
-    function killPop() {
-        popMC.removeMovieClip();
+    void KillPop() {
+        GameObject.Destroy(popup);
     }
 
-    function killPointer() {
-        pointerMC.removeMovieClip();
+    void KillPointer() {
+        GameObject.Destroy(pointer);
     }
 
-    function killRadius() {
-        radiusMC.removeMovieClip();
+    void KillRadius() {
+        GameObject.Destroy(radius);
     }
 
-    function killItemName() {
-        itemNameMC.removeMovieClip();
+    void KillItemName() {
+        GameObject.Destroy(itemName);
     }
 
 
-    function killPortals() {
-        for (var i=0;i<portalMcList.length;i++) {
-            portalMcList[i].mc.removeMovieClip();
+    void KillPortals() { // TODO Change portalMCList type to List of GameObject?
+        foreach (Level.PortalLink ptl in portalMcList) {
+            GameObject.Destroy(ptl.mc);
         }
-        portalMcList = new Array();
+        portalMcList = new List<Level.PortalLink>();
     }
 
 
     /*------------------------------------------------------------------------
     ATTACH: ICON SUR LA CARTE
     ------------------------------------------------------------------------*/
-    function attachMapIcon(eid:int,lid, txt, offset:int, offsetTotal:int) {
+    void AttachMapIcon(int eid, int lid, string txt, int offset, int offsetTotal) {
         var x = Data.GAME_WIDTH*0.5;
-        var y = getMapY(lid);
+        var y = GetMapY(lid);
         if ( offset!=null ) {
             var wid = 8;
             x += offset*wid - 0.5*(offsetTotal-1)*wid;
@@ -1706,8 +1531,8 @@ public class GameMode : Mode
 
         var mc = depthMan.attach("hammer_interf_mapIcon", Data.DP_INTERF);
         mc.gotoAndStop(""+eid);
-        mc._x = Math.floor(x);
-        mc._y = Math.floor(y);
+        mc._x = Mathf.Floor(x);
+        mc._y = Mathf.Floor(y);
 
         if ( txt==null ) {
             txt = "?";
@@ -1720,11 +1545,11 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     BOULE DE FEU DE HURRY UP
     ------------------------------------------------------------------------*/
-    function callEvilOne(baseAnger:int) {
-        var lp = getPlayerList();
-        for (var i=0;i<lp.length;i++) {
+    void CallEvilOne(int baseAnger) {
+        var lp = GetPlayerList();
+        for (var i=0;i<lp.Count;i++) {
             if ( !lp[i].fl_kill ) {
-                var mc = entity.bad.FireBall.attach(this, lp[i]);
+                var mc = Entity.Bad.FireBall.Attach(this, lp[i]);
                 mc.anger = baseAnger-1;
                 if ( baseAnger>0 ) {
                     mc.fl_summon = false;
@@ -1741,41 +1566,41 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: LEVEL PRÊT À ÊTRE JOUÉ (APRÈS SCROLLING)
     ------------------------------------------------------------------------*/
-    function onLevelReady() {
+    void OnLevelReady() {
 //		if ( world.currentId==0 ) {
 //			gameChrono.reset();
 //		}
-        unlock();
-        initLevel();
-        startLevel();
+        Unlock();
+        InitLevel();
+        StartLevel();
 
-        updateEntitiesWorld();
+        UpdateEntitiesWorld();
 
-        var l = getList(Data.PLAYER);
-        for (var i=0;i<l.length;i++) {
+        var l = GetList(Data.PLAYER);
+        for (var i=0;i<l.Count;i++) {
             l[i].show();
         }
     }
 
-    function onBadsReady() {
-        if ( fl_ninja && getBadClearList().length>1 ) {
-            var foe : entity.Bad = downcast( getOne(Data.BAD_CLEAR) );
+    void OnBadsReady() {
+        if (fl_ninja & GetBadClearList().Count>1) {
+            Entity.bad foe = GetOne(Data.BAD_CLEAR);
             foe.fl_ninFoe = true;
 
-            if ( fl_nightmare || !world.fl_mainWorld || world.fl_mainWorld && world.currentId>=20 ) {
-                var lid = dimensions[0].currentId;
-                friendsLimit = Math.floor( Math.max( 2, Math.floor( (lid-20)/10 ) ) );
+            if (fl_nightmare | !world.fl_mainWorld | world.fl_mainWorld & world.currentId>=20) {
+                int lid = dimensions[0].currentId;
+                friendsLimit = Math.Max(2, Mathf.FloorToInt((lid-20)/10));
             }
             else {
                 friendsLimit = 1;
             }
-            if ( fl_nightmare ) {
+            if (fl_nightmare) {
                 friendsLimit++;
             }
-            friendsLimit = Math.round( Math.min( getBadClearList().length-1, friendsLimit ) );
-            while( friendsLimit>0 ) {
-                var b : entity.Bad = downcast( getAnotherOne( Data.BAD_CLEAR, foe ) );
-                if ( !b.fl_ninFriend ) {
+            friendsLimit = Mathf.Min(GetBadClearList().Count-1, friendsLimit);
+            while(friendsLimit>0) {
+                Entity.Bad b = GetAnotherOne(Data.BAD_CLEAR, foe);
+                if (!b.fl_ninFriend) {
                     b.fl_ninFriend = true;
                     friendsLimit--;
                 }
@@ -1787,36 +1612,36 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: LEVEL RESTAURÉ, PRÊT À ÊTRE JOUÉ
     ------------------------------------------------------------------------*/
-    function onRestore() {
-        unlock();
+    void OnRestore() {
+        Unlock();
 
 
-        var pt = getPortalEntrance(portalId); // coordonnées case
-        var l = getPlayerList();
-        for (var i=0;i<l.length;i++) {
+        var pt = GetPortalEntrance(portalId); // coordonnées case
+        var l = GetPlayerList();
+        for (var i=0;i<l.Count;i++) {
             var p = l[i];
-            p.moveToCase( pt.x,pt.y );
-            p.show();
-            p.unshield();
-            if ( pt.fl_unstable ) {
+            p.MoveToCase( pt.x,pt.y );
+            p.Show();
+            p.Unshield();
+            if (pt.fl_unstable) {
                 p.knock(Data.SECOND*0.6);
 //				fxMan.attachExplosion( p.x,p.y-Data.CASE_HEIGHT, 45 );
             }
         }
 
-        for (var i=0;i<latePlayers.length;i++) {
+        for (var i=0;i<latePlayers.Count;i++) {
             var p = latePlayers[i];
-            p.knock(Data.SECOND*1.3);
+            p.Knock(Data.SECOND*1.3);
             p.dx = 0;
         }
 
 
-        if ( world.fl_mainWorld ) {
+        if (world.fl_mainWorld) {
             if ( pt.x>=Data.LEVEL_WIDTH*0.5 ) {
-                registerMapEvent( Data.EVENT_BACK_RIGHT, null);
+                RegisterMapEvent(Data.EVENT_BACK_RIGHT, null);
             }
             else {
-                registerMapEvent( Data.EVENT_BACK_LEFT, null);
+                RegisterMapEvent(Data.EVENT_BACK_LEFT, null);
             }
         }
     }
@@ -1825,10 +1650,9 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     MISE À JOUR VARIABLE WORLD DES ENTITÉS
     ------------------------------------------------------------------------*/
-    function updateEntitiesWorld() {
-        var l;
-        l = getList(Data.ENTITY);
-        for (var i=0;i<l.length;i++) {
+    void UpdateEntitiesWorld() {
+        List <Entity> l = GetList(Data.ENTITY);
+        for (var i=0;i<l.Count;i++) {
             l[i].world = world;
         }
     }
@@ -1837,27 +1661,27 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: NIVEAU TERMINÉ
     ------------------------------------------------------------------------*/
-    function onLevelClear() {
-        if ( fl_clear ) {
+    void OnLevelClear() {
+        if (fl_clear) {
             return;
         }
 
-        world.scriptEngine.clearEndTriggers();
+        world.scriptEngine.ClearEndTriggers();
 
 //		destroyList( Data.SUPA );
 //		destroyList( Data.BAD_BOMB );
 //		destroyList( Data.SPECIAL_ITEM );
 
-        var l = getList(Data.SPECIAL_ITEM);
-        for (var i=0;i<l.length;i++) {
-            var it : entity.Item = downcast(l[i]);
-            if ( it.id==0 ) {
-                it.destroy();
+        var l = GetList(Data.SPECIAL_ITEM);
+        for (var i=0;i<l.Count;i++) {
+            Entity.Item it = l[i];
+            if (it.id==0) {
+                it.Destroy();
             }
         }
 
         fl_clear = true;
-        fxMan.attachExit();
+        fxMan.AttachExit();
 
         // Pile d'appel post-clear
         for (var i=0;i<endLevelStack.length;i++) {
@@ -1870,24 +1694,24 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: HURRY UP!
     ------------------------------------------------------------------------*/
-    function onHurryUp() {
+    void OnHurryUp() {
         huState++;
         huTimer = 0;
 
         // Énervement de tous les bads
-        var lb = getBadList();
-        for (var i=0;i<lb.length;i++) {
+        var lb = GetBadList();
+        for (var i=0;i<lb.Count;i++) {
             lb[i].onHurryUp();
         }
 
         // Annonce
-        var mc = fxMan.attachHurryUp();
+        var mc = fxMan.AttachHurryUp();
 
         if ( huState==1 ) {
             soundMan.playSound("sound_hurry", Data.CHAN_INTERF);
         }
         if ( huState==2 ) {
-            callEvilOne(0);
+            CallEvilOne(0);
         }
         return mc;
     }
@@ -1896,7 +1720,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: FIN DE PARTIE
     ------------------------------------------------------------------------*/
-    function onGameOver() {
+    void OnGameOver() {
         fl_gameOver = true;
     }
 
@@ -1904,7 +1728,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: MORT D'UN BAD
     ------------------------------------------------------------------------*/
-    function onKillBad(b:entity.Bad) {
+    void OnKillBad(Entity.Bad b) {
         // do nothing
     }
 
@@ -1912,13 +1736,13 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: PAUSE
     ------------------------------------------------------------------------*/
-    function onPause() {
-        if ( fl_lock ) {
+    void OnPause() {
+        if (fl_lock) {
             return;
         }
         fl_pause = true;
-        lock();
-        world.lock();
+        Lock();
+        world.Lock();
 
         pauseMC.removeMovieClip();
         pauseMC = downcast(  depthMan.attach("hammer_interf_instructions", Data.DP_INTERF)  );
@@ -1926,26 +1750,26 @@ public class GameMode : Mode
         pauseMC._x = Data.GAME_WIDTH*0.5;
         pauseMC._y = Data.GAME_HEIGHT*0.5;
         pauseMC.click.text	= "";
-        pauseMC.title.text	= Lang.get(5);
-        pauseMC.move.text	= Lang.get(7);
-        pauseMC.attack.text	= Lang.get(8);
-        pauseMC.pause.text	= Lang.get(9);
-        pauseMC.space.text	= Lang.get(10);
-        pauseMC.sector.text	= Lang.get(14)+"«"+Lang.getSectorName(currentDim, world.currentId)+"»";
+        pauseMC.title.text	= Lang.Get(5);
+        pauseMC.move.text	= Lang.Get(7);
+        pauseMC.attack.text	= Lang.Get(8);
+        pauseMC.pause.text	= Lang.Get(9);
+        pauseMC.space.text	= Lang.Get(10);
+        pauseMC.sector.text	= Lang.Get(14)+"«"+Lang.GetSectorName(currentDim, world.currentId)+"»";
 
         if ( !fl_mute ) {
-            setMusicVolume(0.5);
+            SetMusicVolume(0.5);
         }
 
         // Tool tip
-        var tip	= Lang.get(301 + tipId++);
+        var tip	= Lang.Get(301 + tipId++);
         if ( tip==null ) {
             tipId = 0;
-            tip	= Lang.get(301 + tipId++);
+            tip	= Lang.Get(301 + tipId++);
         }
 
         pauseMC.tip.html = true;
-        pauseMC.tip.htmlText = "<b>" + Lang.get(300) +"</b>"+ tip;
+        pauseMC.tip.htmlText = "<b>" + Lang.Get(300) +"</b>"+ tip;
 
     }
 
@@ -1953,17 +1777,17 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: WORLD MAP
     ------------------------------------------------------------------------*/
-    function onMap() {
+    void OnMap() {
         fl_pause = true;
-        lock();
-        world.lock();
+        Lock();
+        world.Lock();
         if ( !fl_mute ) {
-            setMusicVolume(0.5);
+            SetMusicVolume(0.5);
         }
 
         mapMC.removeMovieClip();
         mapMC = downcast( depthMan.attach("hammer_map", Data.DP_INTERF) );
-        mapMC.field.text = Lang.getSectorName(currentDim, world.currentId);
+        mapMC.field.text = Lang.GetSectorName(currentDim, world.currentId);
         mapMC._x = -xOffset;
 
         var lid = dimensions[0].currentId;
@@ -1972,38 +1796,38 @@ public class GameMode : Mode
             mapMC.pit._visible = false;
         }
         else {
-            mapMC.ptr._y = getMapY(lid);
+            mapMC.ptr._y = GetMapY(lid);
             mapMC.pit.blendMode	= BlendMode.OVERLAY;
             mapMC.pit._alpha	= 75;
-            mapMC.pit._yscale	= Math.min(100, 100 * (lid/100) );
+            mapMC.pit._yscale	= Mathf.Min(100, 100 * (lid/100) );
         }
 
 
         // Traversées de portails
-        for (var i=0;i<mapTravels.length;i++) {
+        for (var i=0;i<mapTravels.Count;i++) {
             var e = mapTravels[i];
-            attachMapIcon( e.eid, e.lid, e.misc, null,null );
+            AttachMapIcon(e.eid, e.lid, e.misc, 0, 0);
         }
 
         // Icones
-        for (var i=0;i<mapEvents.length;i++) {
+        for (var i=0;i<mapEvents.Count;i++) {
             var e = mapEvents[i];
-            var list = new Array();
+            var list = new List<eventAndTravel>();
 
             // Sélection sur le level courant
-            for (var j=0;j<mapEvents.length;j++) {
+            for (var j=0;j<mapEvents.Count;j++) {
                 if ( mapEvents[j].lid == e.lid ) {
-                    list.push(mapEvents[j]);
+                    list.Add(mapEvents[j]);
                 }
             }
 
-            for (var j=0;j<list.length;j++) {
-                attachMapIcon(
+            for (var j=0;j<list.Count;j++) {
+                AttachMapIcon(
                     list[j].eid,
                     list[j].lid,
                     list[j].misc,
                     j,
-                    list.length
+                    list.Count
                 );
             }
         }
@@ -2014,19 +1838,19 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: FIN DE PAUSE
     ------------------------------------------------------------------------*/
-    function onUnpause() {
-        if ( !fl_pause ) {
+    void OnUnpause() {
+        if (!fl_pause) {
             return;
         }
         fl_pause = false;
-        unlock();
-        world.unlock();
+        Unlock();
+        world.Unlock();
         pauseMC.removeMovieClip();
         mapMC.removeMovieClip();
-        if ( !fl_mute ) {
-            setMusicVolume(1);
+        if (!fl_mute) {
+            SetMusicVolume(1);
         }
-        for (var i=0;i<mapIcons.length;i++) {
+        for (var i=0;i<mapIcons.Count;i++) {
             mapIcons[i].removeMovieClip();
         }
         mapIcons = new Array();
@@ -2036,28 +1860,28 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: RÉSURRECTION
     ------------------------------------------------------------------------*/
-    function onResurrect() {
-        registerMapEvent( Data.EVENT_DEATH, null );
-        destroyList(Data.SUPA);
-        resetHurry() ;
-        updateDarkness();
-        world.scriptEngine.onPlayerBirth();
-        world.scriptEngine.onPlayerDeath();
+    void OnResurrect() {
+        RegisterMapEvent( Data.EVENT_DEATH, null );
+        DestroyList(Data.SUPA);
+        ResetHurry() ;
+        UpdateDarkness();
+        world.scriptEngine.OnPlayerBirth();
+        world.scriptEngine.OnPlayerDeath();
     }
 
 
     /*------------------------------------------------------------------------
     EVENT: EXPLOSION D'UNE BOMBE (event pour les scripts)
     ------------------------------------------------------------------------*/
-    function onExplode(x,y,radius) {
-        world.scriptEngine.onExplode(x,y,radius);
+    void OnExplode(float x, float y, float radius) {
+        world.scriptEngine.OnExplode(x, y, radius);
     }
 
 
     /*------------------------------------------------------------------------
     EVENT: FIN DU SET DE LEVELS
     ------------------------------------------------------------------------*/
-    function onEndOfSet() {
+    void OnEndOfSet() {
         // do nothing
     }
 
@@ -2065,7 +1889,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     GÈRE L'OBSCURITÉ
     ------------------------------------------------------------------------*/
-    function updateDarkness() {
+    void UpdateDarkness() {
 
 
 //		if ( forcedDarkness==null ) {
@@ -2131,7 +1955,7 @@ public class GameMode : Mode
         }
 
         // Spots de lumière supplémentaires
-        detachExtraHoles();
+        DetachExtraHoles();
         for (var i=0;i<extraHoles.length;i++) {
             var hole = Std.attachMC(darknessMC, "hammer_fx_darknessHole", manager.uniq++);
             hole._x = extraHoles[i].x;
@@ -2144,7 +1968,7 @@ public class GameMode : Mode
         }
 
         // Effets des évolutions des joueurs
-        var l = getPlayerList();
+        var l = GetPlayerList();
         for (var i=0;i<l.length;i++) {
             if ( l[i].fl_candle || l[i].specialMan.actives[68] ) { // bougie
                 darknessMC.holes[i]._xscale = 150;
@@ -2160,19 +1984,19 @@ public class GameMode : Mode
             }
         }
 
-        holeUpdate();
+        HoleUpdate();
     }
 
 
     /*------------------------------------------------------------------------
     AJOUTE UN SPOT DE LUMIÈRE
     ------------------------------------------------------------------------*/
-    function addHole(x,y,diameter) {
-        extraHoles.push( {x:x, y:y, d:diameter, mc:null} );
+    void AddHole(float x, float y, float diameter) {
+        extraHoles.Add(x, y, diameter);
     }
 
 
-    function detachExtraHoles() {
+    void DetachExtraHoles() {
         for(var i=0;i<extraHoles.length;i++) {
             extraHoles[i].mc.removeMovieClip();
         }
@@ -2180,8 +2004,8 @@ public class GameMode : Mode
     }
 
 
-    function clearExtraHoles() {
-        detachExtraHoles();
+    void ClearExtraHoles() {
+        DetachExtraHoles();
         extraHoles = new Array();
     }
 
@@ -2189,14 +2013,14 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     MAIN: DARKNESS HALO
     ------------------------------------------------------------------------*/
-    function holeUpdate() {
-        if ( darknessMC._name == null ) {
+    void HoleUpdate() {
+        if (darknessMC == null) {
             return;
         }
 
         // Placements trous
-        var l = getPlayerList();
-        for (var i=0;i<l.length;i++) {
+        var l = GetPlayerList();
+        for (var i=0;i<l.Count;i++) {
             var p = l[i];
             var tx = p.x + Data.CASE_WIDTH*0.5;
             var ty = p.y - Data.CASE_HEIGHT;
@@ -2214,20 +2038,17 @@ public class GameMode : Mode
         }
 
         // Tweening luminosité
-        dfactor = Math.round(dfactor);
-        targetDark = Math.round(targetDark);
-        if ( dfactor==null ) {
-            dfactor = 0;
-        }
-        if ( dfactor<targetDark ) {
+        dfactor = Mathf.RoundToInt(dfactor);
+        targetDark = Mathf.RoundToInt(targetDark);
+        if (dfactor<targetDark) {
             dfactor+=2;
             if ( dfactor>targetDark ) {
                 dfactor = targetDark;
             }
         }
-        if ( dfactor>targetDark ) {
+        if (dfactor>targetDark) {
             dfactor-=2;
-            if ( dfactor<targetDark ) {
+            if (dfactor<targetDark) {
                 dfactor = targetDark;
             }
         }
@@ -2240,13 +2061,13 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     MAIN
     ------------------------------------------------------------------------*/
-    function main() {
+    void Main() {
         // FPS
-        if ( GameManager.CONFIG.fl_detail ) {
-            if ( Timer.fps()<=16 ) { // lag manager
-                lagCpt+=Timer.tmod;
-                if ( lagCpt>=Data.SECOND*30 ) {
-                    GameManager.CONFIG.setLowDetails();
+        if (GameManager.CONFIG.fl_detail) {
+            if (1/Time.deltaTime <= 16) { // lag manager
+                lagCpt+=Time.fixedDeltaTime;
+                if (lagCpt>=Data.SECOND*30) {
+                    GameManager.CONFIG.SetLowDetails();
                     GameManager.CONFIG.fl_shaky = false;
                 }
             }
@@ -2256,35 +2077,35 @@ public class GameMode : Mode
         }
 
         // Chrono
-        gameChrono.update();
+        gameChrono.Update();
 
         // Pause
-        if ( fl_pause ) {
-            if ( manager.fl_debug ) {
-                printDebugInfos();
+        if (fl_pause) {
+            if (manager.fl_debug) {
+                PrintDebugInfos();
             }
         }
 
         // Bullet time
-        if ( fl_bullet && bulletTimer>0 ) {
-            bulletTimer-=Timer.tmod;
-            if ( bulletTimer>0 ) {
-                Timer.tmod = 0.3;
+        if (fl_bullet & bulletTimer>0) {
+            bulletTimer-=Time.fixedDeltaTime;
+            if (bulletTimer>0) {
+                Time.fixedDeltaTime = 0.3f;
             }
         }
 
         // Item name
-        if ( itemNameMC._name!=null ) {
+        if (itemName != null) {
             itemNameMC._alpha -= (105 - itemNameMC._alpha)*0.01;
-            if ( itemNameMC._alpha<=5 ) {
-                itemNameMC.removeMovieClip();
+            if (itemNameMC._alpha<=5) {
+                GameObject.Destroy(itemName);
             }
         }
 
         // Variables
-        updateGroundFrictions();
-        fl_ice = ( getDynamicVar("$ICE")!=null );
-        fl_aqua = ( getDynamicVar("$AQUA")!=null );
+        UpdateGroundFrictions();
+        fl_ice = (GetDynamicVar("$ICE")!="");
+        fl_aqua = (GetDynamicVar("$AQUA")!="");
 //		if ( fl_aqua ) {
 //			if ( GameManager.CONFIG.fl_detail && colorHex!=WATER_COLOR ) {
 //				setColorHex(20, WATER_COLOR);
@@ -2294,99 +2115,95 @@ public class GameMode : Mode
 //			resetCol();
 //		}
 
-        // Super
-        super.main();
-
-
         // Level
-        world.update();
+        world.Update();
 
         // Interface
-        gi.update();
+        gi.Update();
 
         // Lock
         if (fl_lock) {
             return;
         }
 
-        if( getBadList().length>0 && fl_badsCallback==false) {
-            onBadsReady();
+        if( GetBadList().Count>0 & fl_badsCallback==false) {
+            OnBadsReady();
             fl_badsCallback = true;
         }
 
         // Flottement des portails
-        for (var i=0;i<portalMcList.length;i++) {
+        for (var i=0;i<portalMcList.Count;i++) {
             var p = portalMcList[i];
-            if ( p!=null ) {
-                p.mc._y = p.y + 2 * Math.sin(p.cpt);
-                p.cpt+=Timer.tmod*0.1;
-                if ( Std.random(5)==0 ) {
-                    var a = fxMan.attachFx(
-                        p.x + Std.random(25)*(Std.random(2)*2-1),
-                        p.y + Std.random(25)*(Std.random(2)*2-1),
+            if (p!=null) {
+                p.mc._y = p.y + 2 * Mathf.Sin(p.cpt);
+                p.cpt+=Time.fixedDeltaTime*0.1f;
+                if (UnityEngine.Random.Range(0, 5)==0) {
+                    var a = fxMan.AttachFx(
+                        p.x + UnityEngine.Random.Range(0, 25)*(UnityEngine.Random.Range(0, 2)*2-1),
+                        p.y + UnityEngine.Random.Range(0, 25)*(UnityEngine.Random.Range(0, 2)*2-1),
                         "hammer_fx_star"
                     );
-                    a.mc._xscale	= Std.random(70)+30;
+                    a.mc._xscale	= UnityEngine.Random.Range(0, 70)+30;
                     a.mc._yscale	= a.mc._xscale;
                 }
             }
         }
 
 
-        duration += Timer.tmod;
+        duration += Time.fixedDeltaTime;
 
         // Timer de fin de mode auto
-        if ( endModeTimer>0 ) {
-            endModeTimer-=Timer.tmod;
+        if (endModeTimer>0) {
+            endModeTimer-=Time.fixedDeltaTime;
             if ( endModeTimer<=0 ) {
-                var pl = getPlayerList();
-                for (var i=0;i<pl.length;i++) {
-                    registerScore(pl[i].pid,pl[i].score);
+                var pl = GetPlayerList();
+                for (var i=0;i<pl.Count;i++) {
+                    RegisterScore(pl[i].pid,pl[i].score);
                 }
-                onGameOver();
+                OnGameOver();
             }
         }
 
         // FX manager
-        fxMan.main();
+        fxMan.Main();
 
         // Hurry up!
-        huTimer += Timer.tmod;
-        if ( Key.isDown(72) && manager.fl_debug ) { // H
-            huTimer += Timer.tmod*20;
+        huTimer += Time.fixedDeltaTime;
+        if (Input.GetKeyDown(KeyCode.H) & manager.fl_debug) { // H
+            huTimer += Time.fixedDeltaTime*20;
         }
-        if ( huState<Data.HU_STEPS.length && huTimer>=Data.HU_STEPS[huState]/diffFactor ) {
-            onHurryUp();
+        if (huState<Data.HU_STEPS.Length & huTimer>=Data.HU_STEPS[huState]/diffFactor) {
+            OnHurryUp();
         }
         // RAZ status hurry up si la fireball a été détruite
-        if ( huState>=Data.HU_STEPS.length ) {
-            if ( countList(Data.HU_BAD)==0 ) {
-                callEvilOne( Math.round(huTimer/Data.AUTO_ANGER) );
+        if (huState>=Data.HU_STEPS.Length) {
+            if (CountList(Data.HU_BAD)==0) {
+                CallEvilOne(Mathf.RoundToInt(huTimer/Data.AUTO_ANGER));
             }
         }
 
         // Mouvement des entités
-        var l = getList(Data.ENTITY);
-        for (var i=0; i<l.length; i++) {
-            l[i].update();
-            l[i].endUpdate();
+        var l = GetList(Data.ENTITY);
+        for (var i=0; i<l.Count; i++) {
+            l[i].Update();
+            l[i].EndUpdate();
         }
-        holeUpdate();
+        HoleUpdate();
 
-        cleanKills();
-        if ( !world.fl_lock ) {
-            checkLevelClear();
+        CleanKills();
+        if (!world.fl_lock) {
+            CheckLevelClear();
         }
 
         // Joueurs en téléportation portail
-        if ( nextLink!=null ) {
-            var pl = getPlayerList();
-            for (var i=0;i<pl.length;i++) {
+        if (nextLink!=null) {
+            var pl = GetPlayerList();
+            for (var i=0;i<pl.Count;i++) {
                 var p = pl[i];
                 p._xscale*=0.85;
-                p._yscale=Math.abs(p._xscale);
-                if ( Math.abs(p._xscale)<=2 ) {
-                    switchDimensionById( nextLink.to_did, nextLink.to_lid, nextLink.to_pid );
+                p._yscale=Mathf.Abs(p._xscale);
+                if (Mathf.Abs(p._xscale)<=2) {
+                    SwitchDimensionById( nextLink.to_did, nextLink.to_lid, nextLink.to_pid );
                     i = 9999;
                     nextLink = null;
                 }
@@ -2394,71 +2211,70 @@ public class GameMode : Mode
         }
 
         // Tremblement
-        if ( shakeTimer>0 ) {
-            shakeTimer-=Timer.tmod;
-            if ( shakeTimer<=0 ) {
+        if (shakeTimer>0) {
+            shakeTimer-=Time.fixedDeltaTime;
+            if (shakeTimer <= 0) {
                 shakeTimer = 0;
                 shakePower = 0;
             }
-            if ( fl_flipX ) {
+/*             if (fl_flipX) {
                 mc._x = Data.GAME_WIDTH+xOffset - Math.round( (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
             }
             else {
                 mc._x = Math.round( xOffset + (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
             }
-            if ( fl_flipY ) {
+            if (fl_flipY) {
                 mc._y = Data.GAME_HEIGHT + 20 + Math.round( yOffset + (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
             }
             else {
                 mc._y = Math.round( yOffset + (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
-            }
+            } */ // TODO Move the camera ?
         }
 
-        if ( fl_aqua ) {
-            aquaTimer += 0.03*Timer.tmod;
-            if ( !fl_flipY ) {
-                mc._y = -7 + 7*Math.cos(aquaTimer);
-                mc._yscale = 102 - 2*Math.cos(aquaTimer);
+        if (fl_aqua) {
+            aquaTimer += 0.03f*Time.fixedDeltaTime;
+            if (!fl_flipY) {
+/*                 mc._y = -7 + 7*Mathf.Cos(aquaTimer);
+                mc._yscale = 102 - 2*Mathf.Cos(aquaTimer); */ // TODO Move the camera ?
             }
         }
         else {
-            if ( aquaTimer!=0 ) {
+            if (aquaTimer!=0) {
                 aquaTimer = 0;
-                flipY(fl_flipY);
+                FlipY(fl_flipY);
             }
         }
 
 
         // Vent
-        if ( windTimer>0 ) {
-            windTimer-=Timer.tmod;
-            if ( windTimer<=0 ) {
-                wind(null,null);
+        if (windTimer>0) {
+            windTimer -= Time.fixedDeltaTime;
+            if (windTimer<=0) {
+                Wind(0, 0);
             }
         }
 
         // Indication de sortie fausse
-        if ( countList(Data.BAD_CLEAR)>0 ) {
-            if ( fxMan.mc_exitArrow._name!=null ) {
-                fxMan.detachExit();
+        if (CountList(Data.BAD_CLEAR)>0) {
+            if (fxMan.mc_exitArrow._name!=null) {
+                fxMan.DetachExit();
             }
         }
 
         // Pas d'indicateur de sortie en tuto
-        if ( fxMan.mc_exitArrow._name!=null ) {
-            if ( manager.isTutorial() ) {
-                fxMan.detachExit();
+        if (fxMan.mc_exitArrow._name!=null) {
+            if (manager.IsTutorial()) {
+                fxMan.DetachExit();
             }
         }
 
 
         // Enervement minimum
-        if ( fl_nightmare ) {
-            var bl = getBadList();
-            for (var i=0;i<bl.length;i++) {
-                var b = bl[i];
-                if ( b.isType(Data.BAD_CLEAR) && b.anger==0 ) {
-                    b.angerMore();
+        if (fl_nightmare) {
+            var bl = GetBadList();
+            foreach (Entity.Bad b in bl) {
+                if (b.IsType(Data.BAD_CLEAR) & b.anger) {
+                    b.Angermore();
                 }
             }
         }

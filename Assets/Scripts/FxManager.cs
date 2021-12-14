@@ -113,7 +113,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: INDICATEUR DE LEVEL
 	------------------------------------------------------------------------*/
-	void AttachExit() {
+	public void AttachExit() {
 		DetachExit();
 /* 		var mc = downcast( game.depthMan.attach("hammer_fx_exit",Data.DP_INTERF) );
 		mc._x = Data.GAME_WIDTH/2;
@@ -123,7 +123,7 @@ public class FxManager
 	}
 
 
-	void DetachExit() {
+	public void DetachExit() {
 		/* mc_exitArrow.removeMovieClip(); */
 	}
 
@@ -131,7 +131,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: INDICATEUR DE LEVEL
 	------------------------------------------------------------------------*/
-	void AttachEnter(var x, int pid) {
+	public void AttachEnter(GameObject x, int pid) {
 /* 		var mc = game.depthMan.attach("hammer_fx_enter",Data.DP_INTERF);
 		mc._x = x;
 		mc._y = 0;

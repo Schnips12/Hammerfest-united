@@ -7,17 +7,17 @@ public class GameParameters
 {
 	GameManager manager;
 
-	List<int> specialItemFamilies;
-	List<int> scoreItemFamilies;
-	float soundVolume;
-	float musicVolume;
-	float generalVolume;
-	bool fl_detail;
-	bool fl_shaky;
+	public List<int> specialItemFamilies;
+	public List<int> scoreItemFamilies;
+	public float soundVolume;
+	public float musicVolume;
+	public float generalVolume;
+	public bool fl_detail;
+	public bool fl_shaky;
 
 	Cookie root;
 	List<string> families;
-	Hashtable options;
+	Dictionary<string, bool> options;
 	List<string> optionList; // for toString() output only
 
 
@@ -38,17 +38,17 @@ public class GameParameters
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR (default values)
 	------------------------------------------------------------------------*/
-	public GameParameters(Cookie mc, GameManager man, List<string> f, Hashtable opt) {
+	public GameParameters(Cookie mc, GameManager man, List<string> f, List<string> opt) {
 		root = mc;
 		manager = man;
 
 		// Options de jeu (mirror, nightmare...)
-		options = new Hashtable();
+		options = new Dictionary<string, bool>();
 		optionList = new List<string>();
 		if (opt.Count > 0) {
-			foreach (DictionaryEntry item in opt) {
-                optionList.Add(item.Key.ToString());
-				options.Add(item.Value, true);
+			foreach (string s in opt) {
+                optionList.Add(s);
+				options.Add(s, true);
 			}
 		}
 
@@ -67,11 +67,11 @@ public class GameParameters
 		}
 
 		// Misc data
-		generalVolume		= GetInt("$volume") * 0.5f / 100 ;
-		soundVolume			= GetInt("$sound") * generalVolume;
-		musicVolume			= GetInt("$music") * generalVolume * 0.65f;
-		fl_detail			= GetBool("$detail");
-		fl_shaky			= GetBool("$shake");
+		generalVolume		= GetInt("volume") * 0.5f / 100 ;
+		soundVolume			= GetInt("sound") * generalVolume;
+		musicVolume			= GetInt("music") * generalVolume * 0.65f;
+		fl_detail			= GetBool("detail");
+		fl_shaky			= GetBool("shake");
 
 		if (!fl_detail) {
 			SetLowDetails();
@@ -81,20 +81,20 @@ public class GameParameters
 
 
 	/*------------------------------------------------------------------------
-	MODE BASSE QUALIT�
+	MODE BASSE QUALITé
 	------------------------------------------------------------------------*/
-	void SetLowDetails() {
+	public void SetLowDetails() {
 		fl_detail = false;
-		root.SetVar("_quality", "$medium".Substring(1));
+		root.SetVar("_quality", "medium");
 		Data.MAX_FX = Mathf.CeilToInt(Data.MAX_FX * 0.5f);
 	}
 
 
 
 	/*------------------------------------------------------------------------
-	RENVOIE TRUE SI LA FAMILLE ID EST D�BLOQU�E
+	RENVOIE TRUE SI LA FAMILLE ID EST DéBLOQUéE
 	------------------------------------------------------------------------*/
-	bool HasFamily(int id) {
+	public bool HasFamily(int id) {
 		bool fl_found = false;
 		foreach (int item in specialItemFamilies) {
 			if (item==id) {
@@ -111,15 +111,15 @@ public class GameParameters
 
 
 	/*------------------------------------------------------------------------
-	RENVOIE TRUE SI L'OPTION DEMAND�E EST ACTIV�E
+	RENVOIE TRUE SI L'OPTION DEMANDéE EST ACTIVéE
 	------------------------------------------------------------------------*/
-	bool HasOption(string oid) {
-		return options[oid].Equals(true);
+	public bool HasOption(string oid) {
+		return options[oid] == true;
 	}
 
 
 	/*------------------------------------------------------------------------
-	RENVOIE UN R�SUM� DE LA CONFIG
+	RENVOIE UN RéSUMé DE LA CONFIG
 	------------------------------------------------------------------------*/
 	public override string ToString() {
 		var str = "";
@@ -133,7 +133,7 @@ public class GameParameters
 	}
 
 
-	bool HasMusic() {
-		return manager.musics[0]!=null;
+	public bool HasMusic() {
+		return manager.musics.Count > 0;
 	}
 }

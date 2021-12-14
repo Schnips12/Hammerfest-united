@@ -22,11 +22,11 @@ public class RandomManager
 	/*------------------------------------------------------------------------
 	AJOUTE UN TABLEAU
 	------------------------------------------------------------------------*/
-	public void Register(int id, List<int> bulk) {
+	public void Register(int id, int[] bulk) {
         while(bulks.Count < id) {
             bulks.Add(null);
         }
-		bulks[id] = bulk;
+		bulks[id] = new List<int>(bulk);
 		ComputeSum(id);
 //		expand(id);
 	}

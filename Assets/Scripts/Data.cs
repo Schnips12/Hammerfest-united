@@ -618,9 +618,9 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	BUILD A RAND ITEM TABLE CONTAINING SPECIFIED FAMILIES
 	------------------------------------------------------------------------*/
-	static int[] GetRandFromFamilies(List<List<ItemFamilySet>> familySet, int[] familiesId) {
+	public static int[] GetRandFromFamilies(List<List<ItemFamilySet>> familySet, List<int> familiesId) {
 		List<int> tab = new List<int>();
-		for (int i=0 ; i < familiesId.Length ; i++) {
+		for (int i=0 ; i < familiesId.Count ; i++) {
 			List<ItemFamilySet> family = familySet[familiesId[i]];
 			for (int n=0 ; n < family.Count ; n++) {
                 while(tab.Count < family[n].id) {
@@ -636,7 +636,7 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EXTRACTS SCORE VALUES FROM FAMILIES
 	------------------------------------------------------------------------*/
-	static List<int> GetScoreItemValues() {
+	public static List<int> GetScoreItemValues() {
 		List<int> tab = new List<int>();
 		for (int i=0 ; i < Data.SCORE_ITEM_FAMILIES.Count ; i++) {
 			List<ItemFamilySet> family = Data.SCORE_ITEM_FAMILIES[i];

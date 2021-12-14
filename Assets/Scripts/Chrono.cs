@@ -1,21 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Chrono : MonoBehaviour
+public class Chrono
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-    
 	float suspendTimer;
 	float haltedTimer;
     float gameTimer;
@@ -26,7 +12,7 @@ public class Chrono : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Chrono() {
+	public Chrono() {
 		suspendTimer	= 0;
 		haltedTimer		= Get();
         gameTimer       = Time.time;
@@ -52,14 +38,14 @@ public class Chrono : MonoBehaviour
 	/*------------------------------------------------------------------------
 	GESTION DU CHRONO
 	------------------------------------------------------------------------*/
-	void Reset() {
+	public void Reset() {
 		fl_init			= true;
 		fl_stop			= false;
 		suspendTimer	= 0;
 		gameTimer		= Time.time;
 	}
 
-	void Begin() {
+	public void Begin() {
 		if (suspendTimer != 0) {
 			var d = Time.time - suspendTimer;
 			gameTimer += d;
@@ -69,7 +55,7 @@ public class Chrono : MonoBehaviour
 		suspendTimer = 0;
 	}
 
-	void Stop() {
+	public void Stop() {
 		if (fl_stop) {
 			return;
 		}

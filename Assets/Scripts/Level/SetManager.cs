@@ -302,7 +302,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RETOURNE UNE CASE DE LA MAP
 	------------------------------------------------------------------------*/
-	int GetCase(int x, int y) {
+	public int GetCase(int x, int y) {
 		int cx = x;
 		int cy = y;
 		if (InBound(cx,cy)) {
@@ -410,7 +410,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EVENT: FIN DU SET DE LEVELS
 	------------------------------------------------------------------------*/
-	void OnEndOfSet() {
+	public void OnEndOfSet() {
 		// do nothing
 	}
 

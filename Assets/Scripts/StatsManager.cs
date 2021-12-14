@@ -12,7 +12,7 @@ public class StatsManager
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public StatsManager(Mode.GameMode g) {
+	public StatsManager(Modes.GameMode g) {
 		game = g;
 		stats = new List<Stat>();
 		for (int i=0 ; i < 50 ; i++) {

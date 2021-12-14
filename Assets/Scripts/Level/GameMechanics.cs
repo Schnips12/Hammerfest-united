@@ -6,35 +6,22 @@ namespace Level;
 
 public class GameMechanics : ViewManager
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-    Mode.GameMode game;
+    Modes.GameMode game;
 
 	bool fl_parsing;
 	bool flcurrentIA;
 	bool fl_compile;
-	bool fl_lock;
+	public bool fl_lock;
 	List<bool> fl_visited;
-	bool fl_mainWorld;
+	public bool fl_mainWorld;
 
-	int[,] flagMap; // flags IA
-	int[,] fallMap; // hauteur de chute par case
-	Entity[,,] triggers;
+	List<List<int>> flagMap; // flags IA
+	List<List<int>> fallMap; // hauteur de chute par case
+	List<List<List<Entity>>> triggers;
 
-	ScriptEngine scriptEngine;
+	public ScriptEngine scriptEngine;
 
-    int currentId; // inherit
+    public int currentId; // inherit
 
 	private struct _iteration {
         int cx;
@@ -141,7 +128,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LE NIVEAU A DéJà éTé PARCOURU
 	------------------------------------------------------------------------*/
-	bool IsVisited() {
+	public bool IsVisited() {
 		return fl_visited[currentId]==true;
 	}
 

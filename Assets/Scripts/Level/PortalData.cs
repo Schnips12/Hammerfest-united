@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+namespace Level;
+
 public class PortalData
 {
  	public int cx;

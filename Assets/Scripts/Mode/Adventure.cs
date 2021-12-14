@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Modes;
 
-namespace Mode;
+namespace GameModes;
 
-public class Adventure : MonoBehaviour
+public class Adventure : GameMode
 {
 
 	var perfectOrder	: Array<int>;
@@ -23,8 +24,7 @@ public class Adventure : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	function new(m,id) {
-		super(m);
+	public Adventure(GameManager m, int id) : base(m) {
 		firstLevel	= id;
 
 		fl_warpStart	= false;

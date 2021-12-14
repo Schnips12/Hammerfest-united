@@ -8,8 +8,8 @@ public class ViewManager : SetManager
 {
     View view;
 
-	bool fl_hideTiles;
-	bool fl_hideBorders;
+	public bool fl_hideTiles;
+	public bool fl_hideBorders;
 	bool fl_shadow;
 	int scrollDir;
 
@@ -179,7 +179,7 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	GESTION MISE EN ATTENTE
 	------------------------------------------------------------------------*/
-	void Suspend() {
+	public void Suspend() {
 		//super.suspend();
 		view.Detach();
 		//fake.removeMovieClip();
@@ -206,7 +206,7 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE (SCROLLING)
 	------------------------------------------------------------------------*/
-	void Update() {
+	public void Update() {
 		//super.update();
 
 		if (fl_scrolling) {
