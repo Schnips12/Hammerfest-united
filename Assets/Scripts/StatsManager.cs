@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StatsManager
 {
-	Mode.GameMode game;
+	Modes.GameMode game;
 	List<Stat> stats;
 	List<int> extendList;
 
@@ -70,7 +70,7 @@ public class StatsManager
 	/*------------------------------------------------------------------------
 	CALCULE LES EXTENDS POUR LE NIVEAU EN COURS
 	------------------------------------------------------------------------*/
-	void SpreadExtend() {
+	public void SpreadExtend() {
 		float nb = CountExtend();
 
 		if (nb>0) {
@@ -104,8 +104,8 @@ public class StatsManager
 			return null;
 		}
 		var pt = game.world.GetGround(Random.Range(0, Data.LEVEL_WIDTH), Random.Range(0, Data.LEVEL_HEIGHT));
-		float x = Entity.x_ctr(pt.x);
-		float y = Entity.y_ctr(pt.y);
+		float x = Entity.x_ctr(pt[0]);
+		float y = Entity.y_ctr(pt[1]);
 		int id = extendList[Random.Range(0, extendList.Count)];
 		var mc = Entity.Item.SpecialItem.Attach(game, x,y, 0, id);
 		return mc;

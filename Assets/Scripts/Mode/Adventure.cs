@@ -8,17 +8,15 @@ namespace GameModes;
 public class Adventure : GameMode
 {
 
-	var perfectOrder	: Array<int>;
-	var perfectCount	: int;
+	List<int> perfectOrder;
+	int perfectCount;
 
-	var firstLevel		: int;
+	int firstLevel;
+	bool fl_warpStart;
+	float trackPos;
 
-	var fl_warpStart	: bool;
-
-	var trackPos		: float;
-
-	static var BUCKET_X			= 11;
-	static var BUCKET_Y			= 19;
+	static int BUCKET_X			= 11;
+	static int BUCKET_Y			= 19;
 
 
 	/*------------------------------------------------------------------------
@@ -29,70 +27,49 @@ public class Adventure : GameMode
 
 		fl_warpStart	= false;
 		fl_map			= true;
-		_name 			= "$adventure";
+		_name 			= "adventure";
 	}
 
 
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	function init() {
-		super.init();
+	public override void Init() {
+		base.Init();
 
-		initGame();
+		InitGame();
 
-		var pl = getPlayerList();
-		for (var i=0;i<pl.length;i++) {
-			initPlayer(pl[i]);
+		var pl = GetPlayerList();
+		foreach (Entity.Player p in pl) {
+			InitPlayer(p);
 		}
 
-		initInterface();
-
-
-
-	}
-
-
-	/*------------------------------------------------------------------------
-	FIN DE MODE
-	------------------------------------------------------------------------*/
-	function destroy() {
-		super.destroy();
-	}
-
-
-	/*------------------------------------------------------------------------
-	CONTR�LES DE JEU
-	------------------------------------------------------------------------*/
-	function getDebugControls() {
-		super.getDebugControls();
-		if ( Key.isDown(Key.SHIFT) && Key.isDown(Key.CONTROL) && Key.isDown(77) ) { //  Ctrl+Shift+M
-			manager.startGameMode( new mode.MultiCoop(manager,0) );
-		}
+		InitInterface();
 	}
 
 
 	/*------------------------------------------------------------------------
 	PLACE LES ITEMS STANDARDS DU NIVEAU
 	------------------------------------------------------------------------*/
-	function addLevelItems() {
-		super.addLevelItems();
-		var n,pt;
+	public override void AddLevelItems() {
+		base.AddLevelItems();
+		int n;
+		Level._slot pt;
 
 		// Extends
-		if ( world.current.$specialSlots.length>0 ) {
-			statsMan.spreadExtend();
+		if ( world.current.specialSlots.Length>0 ) {
+			statsMan.SpreadExtend();
 		}
 
 		// Special
-		if ( world.current.$specialSlots.length>0 ) {
-			n = Std.random(world.current.$specialSlots.length);
-			pt = world.current.$specialSlots[n];
-			world.scriptEngine.insertSpecialItem(
-				randMan.draw(Data.RAND_ITEMS_ID),
+		if ( world.current.specialSlots.Length>0 ) {
+			n = Random.Range(0, world.current.specialSlots.Length);
+			pt = world.current.specialSlots[n];
+			world.scriptEngine.InsertSpecialItem(
+				randMan.Draw(Data.RAND_ITEMS_ID),
 				null,
-				pt.$x,
-				pt.$y,
+				pt.x,
+				pt.y,
 				Data.SPECIAL_ITEM_TIMER,
 				null,
 				false,
@@ -101,14 +78,14 @@ public class Adventure : GameMode
 		}
 
 		// Score
-		if ( world.current.$scoreSlots.length>0 ) {
-			n = Std.random(world.current.$scoreSlots.length);
-			pt = world.current.$scoreSlots[n];
-			world.scriptEngine.insertScoreItem(
-				randMan.draw(Data.RAND_SCORES_ID),
+		if ( world.current.scoreSlots.Length>0 ) {
+			n = Random.Range(0, world.current.scoreSlots.Length);
+			pt = world.current.scoreSlots[n];
+			world.scriptEngine.InsertScoreItem(
+				Random.Range(0, Data.RAND_SCORES_ID),
 				null,
-				pt.$x,
-				pt.$y,
+				pt.x,
+				pt.y,
 				Data.SCORE_ITEM_TIMER,
 				null,
 				false,
@@ -116,14 +93,14 @@ public class Adventure : GameMode
 			);
 
 			if ( globalActives[94] ) {
-				var cx = Std.random(Data.LEVEL_WIDTH);
-				var cy = Std.random(Data.LEVEL_HEIGHT-5);
-				var ptC = world.getGround(cx,cy);
-				world.scriptEngine.insertScoreItem(
-					randMan.draw(Data.RAND_SCORES_ID),
+				var cx = Random.Range(0, Data.LEVEL_WIDTH);
+				var cy = Random.Range(0, Data.LEVEL_HEIGHT-5);
+				var ptC = world.GetGround(cx, cy);
+				world.scriptEngine.InsertScoreItem(
+					Random.Range(0, Data.RAND_SCORES_ID),
 					null,
-					ptC.x,
-					ptC.y,
+					ptC[0],
+					ptC[1],
 					Data.SCORE_ITEM_TIMER,
 					null,
 					false,
@@ -137,10 +114,10 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	ATTACHEMENT BAD: GESTION DU PERFECT ORDER POUR LE SUPA ITEM
 	------------------------------------------------------------------------*/
-	function attachBad(id,x,y) {
-		var b = super.attachBad(id,x,y);
-		if ( (b.types&Data.BAD_CLEAR)>0 ) {
-			perfectOrder.push(b.uniqId);
+	Entity.Bad AttachBad(int id, int x, int y) {
+		Entity.Bad b = base.AttachBad(id, x, y);
+		if ( (b.types & Data.BAD_CLEAR) > 0 ) {
+			perfectOrder.Add(b.uniqId);
 			perfectCount++;
 		}
 		return b;
@@ -150,16 +127,16 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	INITIALISATION DU MONDE
 	------------------------------------------------------------------------*/
-	function initWorld() {
-		super.initWorld();
+	protected override void InitWorld() {
+		base.InitWorld();
 
-		addWorld("xml_adventure");
-		addWorld("xml_deepnight");
-		addWorld("xml_hiko");
-		addWorld("xml_ayame");
-		addWorld("xml_hk");
-		if ( manager.isDev() ) {
-			addWorld("xml_dev");
+		AddWorld("xml_adventure");
+		AddWorld("xml_deepnight");
+		AddWorld("xml_hiko");
+		AddWorld("xml_ayame");
+		AddWorld("xml_hk");
+		if ( manager.IsDev() ) {
+			AddWorld("xml_dev");
 		}
 	}
 
@@ -167,67 +144,67 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	INITIALISATION PARTIE
 	------------------------------------------------------------------------*/
-	function initGame() {
-		super.initGame();
-		playMusic(0);
-		world.goto(firstLevel);
-		insertPlayer(world.current.$playerX, world.current.$playerY);
+	protected override void InitGame() {
+		base.InitGame();
+		PlayMusic(0);
+		world.Goto(firstLevel);
+		InsertPlayer(world.current.playerX, world.current.playerY);
 	}
 
 
 	/*------------------------------------------------------------------------
 	CHANGEMENT DE LEVEL
 	------------------------------------------------------------------------*/
-	function goto(id) {
-		perfectOrder = new Array();
+	protected override void Goto(int id) {
+		perfectOrder = new List<int>();
 		perfectCount = 0;
 
-		super.goto(id);
+		base.Goto(id);
 	}
 
 
 	/*------------------------------------------------------------------------
 	D�MARRE LE NIVEAU
 	------------------------------------------------------------------------*/
-	function startLevel() {
-		var pl = getPlayerList();
-		for (var i=0;i<pl.length;i++) {
-			pl[i].setBaseAnims(Data.ANIM_PLAYER_WALK, Data.ANIM_PLAYER_STOP);
+	protected override void StartLevel() {
+		var pl = GetPlayerList();
+		for (var i=0;i<pl.Count;i++) {
+			/* pl[i].setBaseAnims(Data.ANIM_PLAYER_WALK, Data.ANIM_PLAYER_STOP); */ // TODO Use animation flags
 		}
-		perfectOrder = new Array();
+		perfectOrder = new List<int>();
 		perfectCount = 0;
-		super.startLevel();
+		base.StartLevel();
 
 		// Boss 1
-		if ( world.fl_mainWorld && world.currentId == Data.BAT_LEVEL ) {
-			entity.boss.Bat.attach(this);
+		if ( world.fl_mainWorld & world.currentId == Data.BAT_LEVEL ) {
+			Entity.Boss.Bat.Attach(this);
 			fl_clear = false;
 		}
 
 		// Boss 2
-		if ( world.fl_mainWorld && world.currentId == Data.TUBERCULOZ_LEVEL ) {
-			entity.boss.Tuberculoz.attach(this);
+		if ( world.fl_mainWorld & world.currentId == Data.TUBERCULOZ_LEVEL ) {
+			Entity.Boss.Tuberculoz.Attach(this);
 			fl_clear = false;
 		}
 
 		// Pas de fleche au level 0
-		if ( world.fl_mainWorld && world.currentId==0 ) {
-			fxMan.detachExit();
+		if ( world.fl_mainWorld & world.currentId==0 ) {
+			fxMan.DetachExit();
 		}
 	}
 
 	/*------------------------------------------------------------------------
 	LANCE LE NIVEAU SUIVANT
 	------------------------------------------------------------------------*/
-	function nextLevel() {
+	protected override void NextLevel() {
 
-		super.nextLevel();
+		base.NextLevel();
 
 		if ( fl_warpStart ) {
 			world.currentId = 0;
-			unlock();
-			world.view.detach();
-			forcedGoto(10);
+			Unlock();
+			world.view.Detach();
+			ForcedGoto(10);
 		}
 
 	}
@@ -236,10 +213,12 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	ENVOI DU R�SULTAT DE LA PARTIE
 	------------------------------------------------------------------------*/
-	function saveScore() {
-		if(GameManager.HH.get("$"+Md5.encode(world.setName))!="$"+Md5.encode(""+world.csum)) {GameManager.fatal("argh"); return;}
-		if(world.setName!="xml_adventure") { GameManager.fatal("");return; }
-		Std.getGlobal("gameOver") (
+	void SaveScore() {
+		if(world.setName!="xml_adventure") {
+			GameManager.Fatal("");
+			return;
+		}
+/* 		Std.getGlobal("gameOver") ( // TODO Create a save system
 			savedScores[0],
 			null,
 			{
@@ -247,19 +226,19 @@ public class Adventure : GameMode
 				$item2			: getPicks2(),
 				$data			: manager.history,
 			}
-		);
+		); */
 	}
 
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE POUR LES LEVELS DE BOSS
 	------------------------------------------------------------------------*/
-	function isBossLevel(id) {
+	protected override bool IsBossLevel(int id) {
 		return
-			super.isBossLevel(id) ||
-			world.fl_mainWorld && (
-				( id>=30 && (id % 10)==0 ) ||
-				id==Data.BAT_LEVEL ||
+			base.IsBossLevel(id) |
+			world.fl_mainWorld & (
+				( id>=30 & (id % 10)==0 ) |
+				id==Data.BAT_LEVEL |
 				id==Data.TUBERCULOZ_LEVEL
 			);
 	}
@@ -269,22 +248,22 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: LEVEL PR�T � �TRE JOU� (APRES SCROLL)
 	------------------------------------------------------------------------*/
-	function onLevelReady() {
-		super.onLevelReady();
+	protected override void OnLevelReady() {
+		base.OnLevelReady();
 		if ( fl_warpStart ) {
 			if ( world.fl_mainWorld ) {
-				var p = getOne(Data.PLAYER);
-				world.view.attachSprite(
-					"$door_secret",
-					Entity.x_ctr( world.current.$playerX ),
-					Entity.x_ctr( world.current.$playerY ) + Data.CASE_HEIGHT*0.5,
+				var p = GetOne(Data.PLAYER);
+				world.view.AttachSprite(
+					"door_secret",
+					Entity.x_ctr( world.current.playerX ),
+					Entity.x_ctr( world.current.playerY ) + Data.CASE_HEIGHT*0.5,
 					true
 				);
 			}
 			fl_warpStart = false;
 		}
-		if ( !world.isVisited() ) {
-			fxMan.attachLevelPop( Lang.getLevelName(currentDim,world.currentId), world.currentId>0 );
+		if ( !world.IsVisited() ) {
+			fxMan.AttachLevelPop( Lang.GetLevelName(currentDim,world.currentId), world.currentId>0 );
 		}
 	}
 
@@ -292,15 +271,15 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: LEVEL TERMIN�
 	------------------------------------------------------------------------*/
-	function onLevelClear() {
-		super.onLevelClear();
-		if ( !world.isVisited() && perfectOrder.length==0 && world.scriptEngine.cycle>=10 ) {
-			var pl = getPlayerList();
-			for (var i=0;i<pl.length;i++) {
-				pl[i].setBaseAnims(Data.ANIM_PLAYER_WALK_V, Data.ANIM_PLAYER_STOP_V);
+	protected override void OnLevelClear() {
+		base.OnLevelClear();
+		if ( !world.IsVisited() & perfectOrder.Count==0 & world.scriptEngine.cycle>=10 ) {
+			var pl = GetPlayerList();
+			for (var i=0;i<pl.Count;i++) {
+				/* pl[i].setBaseAnims(Data.ANIM_PLAYER_WALK_V, Data.ANIM_PLAYER_STOP_V); */ // TODO Use animation flags
 			}
-			entity.supa.SupaItem.attach(this, perfectCount-1);
-			statsMan.inc(Data.STAT_SUPAITEM,1);
+			Entity.Supa.SupaItem.attach(this, perfectCount-1);
+			statsMan.Inc(Data.STAT_SUPAITEM,1);
 		}
 	}
 
@@ -309,17 +288,17 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: MORT D'UN BAD
 	------------------------------------------------------------------------*/
-	function onKillBad(b) {
-		super.onKillBad(b);
+	protected override void OnKillBad(Entity.Bad b) {
+		base.OnKillBad(b);
 
 		// Boss Tuberculoz
-		if ( world.fl_mainWorld && world.currentId==Data.TUBERCULOZ_LEVEL ) {
-			downcast( getOne(Data.BOSS) ).onKillBad();
+		if ( world.fl_mainWorld & world.currentId==Data.TUBERCULOZ_LEVEL ) {
+			GetOne(Data.BOSS).OnKillBad();
 		}
 
 		// Perfect order
-		if ( badCount>1 && b.uniqId==perfectOrder[0] ) {
-			perfectOrder.splice(0,1);
+		if ( badCount>1 & b.uniqId==perfectOrder[0] ) {
+			perfectOrder.RemoveAt(0);
 		}
 	}
 
@@ -336,11 +315,11 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION D'UNE BOMBE DE JOUEUR
 	------------------------------------------------------------------------*/
-	function onExplode(x,y,radius) {
-		super.onExplode(x,y,radius);
+	protected override void OnExplode(float x, float y, float radius) {
+		base.OnExplode(x,y,radius);
 
-		if ( world.fl_mainWorld && world.currentId==Data.TUBERCULOZ_LEVEL ) {
-			downcast(getOne(Data.BOSS)).onExplode(x,y,radius);
+		if ( world.fl_mainWorld & world.currentId==Data.TUBERCULOZ_LEVEL ) {
+			GetOne(Data.BOSS).OnExplode(x,y,radius);
 		}
 
 	}
@@ -349,45 +328,45 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: FIN DU SET DE LEVELS
 	------------------------------------------------------------------------*/
-	function onEndOfSet() {
-		super.onEndOfSet();
-		exitGame();
+	protected override void OnEndOfSet() {
+		base.OnEndOfSet();
+		ExitGame();
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: GAME OVER
 	------------------------------------------------------------------------*/
-	function onGameOver() {
-		super.onGameOver();
-		manager.logAction(
-			"$t="+Math.round(duration/Data.SECOND);
+	protected override void OnGameOver() {
+		base.OnGameOver();
+		manager.LogAction(
+			"t="+Mathf.Round(duration/Data.SECOND)
 		);
 
-		var fl_illegal = ( manager.history.join("|").indexOf("!",0)>=0 );
+		var fl_illegal = string.Join("|", manager.history.ToArray()).IndexOf("!", 0) >= 0;
 
-		manager.history = [
-			"F="+downcast(Std.getRoot()).$version,
-			"T="+gameChrono.get()
-		];
+		manager.history = new List<string>();
+		manager.history.Add("F="+root.version);
+		manager.history.Add("T="+gameChrono.Get());
+
 		if ( fl_illegal ) {
-			manager.history.push("$illegal".substring(1));
+			manager.history.Add("illegal");
 		}
 
 
-		stopMusic();
+		StopMusic();
 
-		saveScore();
+		SaveScore();
 	}
 
 	/*------------------------------------------------------------------------
 	EVENT: HURRY UP !
 	------------------------------------------------------------------------*/
-	function onHurryUp() {
-		var mc = super.onHurryUp();
-		if ( GameManager.CONFIG.hasMusic() && currentTrack==0 ) {
-			trackPos = manager.musics[currentTrack].position;
-			playMusic(2);
+	protected override GameObject OnHurryUp() {
+		GameObject mc = base.OnHurryUp();
+		if ( GameManager.CONFIG.HasMusic() & currentTrack==0 ) {
+			trackPos = audio.time;
+			PlayMusic(2);
 		}
 		return mc;
 	}
@@ -396,10 +375,10 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	FIN DE HURRY UP
 	------------------------------------------------------------------------*/
-	function resetHurry() {
-		super.resetHurry();
+	protected override void ResetHurry() {
+		base.ResetHurry();
 		if ( currentTrack==2 ) {
-			playMusic(0);
+			PlayMusic(0);
 //			playMusicAt(0,trackPos);
 		}
 	}
@@ -408,8 +387,10 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	FIN DE MODE
 	------------------------------------------------------------------------*/
-	function endMode() {
-		stopMusic();
-		manager.startMode( new mode.Editor(manager,world.setName,world.currentId) );
+	protected override void EndMode() {
+		StopMusic();
+		/* manager.StartMode(new Mode.Editor(manager,world.setName,world.currentId)); */
 	}
+
+}
 

@@ -12,14 +12,14 @@ public class SetManager : MonoBehaviour
 	protected List<string> json;
 
 	protected List<bool> fl_read;
-	protected bool fl_mirror;
+	public bool fl_mirror;
     protected int csum;
-	protected string setName;
+	public string setName;
 
     public List<TeleporterData> teleporterList;
     public List<PortalData> portalList;
 
-    protected LevelData current;
+    public LevelData current;
     protected int currentId;
     protected LevelData _previous;
     protected int _previousId;
@@ -43,7 +43,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	void Initialize(GameManager m, string s) { //TODO move to start or awake
+	protected SetManager(GameManager m, string s) {
 		manager			= m;
 		fl_read			= new List<bool>();
 		fl_mirror		= false;
@@ -84,7 +84,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
-	void Destroy() {
+	public virtual void DestroyThis() {
 		//Suspend();
 		worldmap = new List<LevelData>();
 		fl_read = new List<bool>();
@@ -138,11 +138,11 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LES DONNéES SONT PRETES à ETRE UTILISéES
 	------------------------------------------------------------------------*/
-	public bool IsDataReady() {
+	public virtual bool IsDataReady() {
 		return fl_read[currentId];
 	}
 
-	void CheckDataReady() {
+	protected void CheckDataReady() {
 		if (IsDataReady()) {
 			OnDataReady();
 		}
@@ -152,7 +152,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	ACTIVE UN NIVEAU DONNé
 	------------------------------------------------------------------------*/
-	void GoToLevel(int id) {
+	public virtual void Goto(int id) {
 		teleporterList = new List<TeleporterData>();
 		if (id>=worldmap.Count) {
 			OnEndOfSet();
@@ -167,7 +167,7 @@ public class SetManager : MonoBehaviour
 	}
 
 	void Next() {
-		GoToLevel(currentId+1);
+		Goto(currentId+1);
 	}
 
 
@@ -336,7 +336,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MODIFIE DYNAMIQUEMENT UNE CASE
 	------------------------------------------------------------------------*/
-	void ForceCase(int cx, int cy, int t) {
+	public virtual void ForceCase(int cx, int cy, int t) {
 		if (InBound(cx, cy)) {
 			if (t <= 0  &  GetCase(cx, cy) > 0  &  GetCase(cx, cy+1) == Data.WALL) {
 				ForceCase(cx, cy+1, Data.GROUND);
@@ -349,7 +349,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LES COORDONNéES DE CASE SONT DANS L'AIRE DE JEU
 	------------------------------------------------------------------------*/
-	bool InBound(int cx, int cy) {
+	protected bool InBound(int cx, int cy) {
 		return (
             cx >= 0 					&
             cx < current.mapWidth() 	&
@@ -374,7 +374,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE LE PREMIER SOL RENCONTRé A PARTIR D'UNE CASE DONNéE
 	------------------------------------------------------------------------*/
-	int[] GetGround(int cx, int cy) {
+	public int[] GetGround(int cx, int cy) {
 		int ty, n;
 		for (n=0, ty=cy ; n <= current.mapHeight() ; n++, ty--) {
 			if (ty > 0 & GetCase(cx, ty) == Data.GROUND) {
@@ -394,7 +394,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EVENT: LECTURE DES NIVEAUX TERMINéE
 	------------------------------------------------------------------------*/
-	void OnReadComplete() {
+	protected virtual void OnReadComplete() {
 		CheckDataReady();
 	}
 
@@ -402,7 +402,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EVENT: DONNéES PRèTES
 	------------------------------------------------------------------------*/
-	void OnDataReady() {
+	protected virtual void OnDataReady() {
 		// do nothing
 	}
 
@@ -410,7 +410,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EVENT: FIN DU SET DE LEVELS
 	------------------------------------------------------------------------*/
-	public void OnEndOfSet() {
+	public virtual void OnEndOfSet() {
 		// do nothing
 	}
 
@@ -426,7 +426,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	FONCTIONS DE SERIALIZATION
 	------------------------------------------------------------------------*/
-	LevelData Unserialize(int id) { // TODO adapt that to JSON format instead of the old serialized data
+	protected virtual LevelData Unserialize(int id) { // TODO adapt that to JSON format instead of the old serialized data
 		//if(GameManager.HH.get("$"+Md5.encode(setName))!="$"+Md5.encode(""+csum)) {GameManager.fatal(""); return null;}
 		LevelData l = JsonUtility.FromJson<LevelData>(json[id]);
 		if (fl_mirror) {

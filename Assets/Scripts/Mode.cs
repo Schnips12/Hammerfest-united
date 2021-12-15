@@ -8,13 +8,13 @@ public class Mode
 	float yFriction;
 
 	protected GameManager manager;
-	Cookie root;
-	AudioSource audio;
+	protected Cookie root;
+	protected AudioSource audio;
 	//DepthManager depthMan; //TODO replace with unity object
 	//SoundManager soundMan; //TODO replace with unity object
 
 	protected bool fl_music;
-	int currentTrack;
+	protected int currentTrack;
 	protected bool fl_mute;
 
 	public bool fl_lock;
@@ -88,10 +88,10 @@ public class Mode
 	/*------------------------------------------------------------------------
 	VERROUILLE / DéVERROUILLE LE MODE
 	------------------------------------------------------------------------*/
-	public void Lock() {
+	public virtual void Lock() {
 		fl_lock = true;
 	}
-	public void Unlock() {
+	public virtual void Unlock() {
 		fl_lock = false;
 	}
 
@@ -143,7 +143,7 @@ public class Mode
 	/*------------------------------------------------------------------------
 	MUSICS MANAGEMENT //TODO update this to use unity tools
 	------------------------------------------------------------------------*/
-	void PlayMusic(int id) {
+	public void PlayMusic(int id) {
 		if (!GameManager.CONFIG.HasMusic()) {
 			return;
 		}
@@ -171,7 +171,7 @@ public class Mode
 		}
 	}
 
-	void StopMusic() {
+	protected void StopMusic() {
 		if (!GameManager.CONFIG.HasMusic()) {
 			return;
 		}
@@ -192,7 +192,7 @@ public class Mode
 	/*------------------------------------------------------------------------
 	FIN DU MODE DE JEU
 	------------------------------------------------------------------------*/
-	public void EndMode() {
+	protected virtual void EndMode() {
 		StopMusic();
 	}
 

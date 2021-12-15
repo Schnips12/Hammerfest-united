@@ -1,107 +1,92 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Xml.Linq;
+using System;
 
 namespace Level;
 
-public class ScriptEngine : MonoBehaviour
+public class ScriptEngine
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    const string T_TIMER		= "t_timer";
+	const string T_POS			= "t_pos";
+	const string T_ATTACH		= "attach";
+	const string T_DO			= "do";
+	const string T_END			= "end";
+	const string T_BIRTH		= "birth";
+	const string T_DEATH		= "death";
+	const string T_EXPLODE		= "exp";
+	const string T_ENTER		= "enter";
+	const string T_NIGHTMARE	= "night";
+	const string T_MIRROR		= "mirror";
+	const string T_MULTI		= "multi";
+	const string T_NINJA		= "ninja";
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	const string E_SCORE		= "e_score";
+	const string E_SPECIAL		= "e_spec";
+	const string E_EXTEND		= "e_ext";
+	const string E_BAD			= "e_bad";
+	const string E_KILL			= "e_kill";
+	const string E_TUTORIAL		= "e_tuto";
+	const string E_MESSAGE		= "e_msg";
+	const string E_KILLMSG		= "e_killMsg";
+	const string E_POINTER		= "e_pointer";
+	const string E_KILLPTR		= "e_killPt";
+	const string E_MC			= "e_mc";
+	const string E_PLAYMC		= "e_pmc";
+	const string E_MUSIC		= "e_music";
+	const string E_ADDTILE		= "e_add";
+	const string E_REMTILE		= "e_rem";
+	const string E_ITEMLINE		= "e_itemLine";
+	const string E_GOTO			= "e_goto";
+	const string E_HIDE			= "e_hide";
+	const string E_HIDEBORDERS	= "e_hideBorders";
+	const string E_CODETRIGGER	= "e_ctrigger";
+	const string E_PORTAL		= "e_portal";
+	const string E_SETVAR		= "e_setVar";
+	const string E_OPENPORTAL	= "e_openPortal";
+	const string E_DARKNESS		= "e_darkness";
+	const string E_FAKELID		= "e_fakelid";
 
-/*     static var T_TIMER			= "$t_timer";
-	static var T_POS			= "$t_pos";
-	static var T_ATTACH			= "$attach";
-	static var T_DO				= "$do";
-	static var T_END			= "$end";
-	static var T_BIRTH			= "$birth";
-	static var T_DEATH			= "$death";
-	static var T_EXPLODE		= "$exp";
-	static var T_ENTER			= "$enter";
-	static var T_NIGHTMARE		= "$night";
-	static var T_MIRROR			= "$mirror";
-	static var T_MULTI			= "$multi";
-	static var T_NINJA			= "$ninja";
-
-	static var E_SCORE			= "$e_score";
-	static var E_SPECIAL		= "$e_spec";
-	static var E_EXTEND			= "$e_ext";
-	static var E_BAD			= "$e_bad";
-	static var E_KILL			= "$e_kill";
-	static var E_TUTORIAL		= "$e_tuto";
-	static var E_MESSAGE		= "$e_msg";
-	static var E_KILLMSG		= "$e_killMsg";
-	static var E_POINTER		= "$e_pointer";
-	static var E_KILLPTR		= "$e_killPt";
-	static var E_MC				= "$e_mc";
-	static var E_PLAYMC			= "$e_pmc";
-	static var E_MUSIC			= "$e_music";
-	static var E_ADDTILE		= "$e_add";
-	static var E_REMTILE		= "$e_rem";
-	static var E_ITEMLINE		= "$e_itemLine";
-	static var E_GOTO			= "$e_goto";
-	static var E_HIDE			= "$e_hide";
-	static var E_HIDEBORDERS	= "$e_hideBorders";
-	static var E_CODETRIGGER	= "$e_ctrigger";
-	static var E_PORTAL			= "$e_portal";
-	static var E_SETVAR			= "$e_setVar";
-	static var E_OPENPORTAL		= "$e_openPortal";
-	static var E_DARKNESS		= "$e_darkness";
-	static var E_FAKELID		= "$e_fakelid";
-
-	static var VERBOSE_TRIGGERS = [
+	static string[] VERBOSE_TRIGGERS = new string[3] {
 		T_POS,
 		T_EXPLODE,
 		T_ENTER,
-	];
+	};
 
+	Modes.GameMode game;
+	public XDocument script;
+	string extraScript;
+	string baseScript;
+	Level.LevelData data;
+	int bads;
+	float cycle;
 
-	var game			 : mode.GameMode;
-
-	var script			: Xml;
-	var extraScript		: String;
-	var baseScript		: String;
-	var data			: levels.Data;
-	var bads			: int;
-	var cycle			: float;
-
-	var mcList			: Array< {sid:int, mc:MovieClip} >; // script attached MCs
-
-	var fl_compile		: bool;
-	var fl_birth		: bool;
-	var fl_death		: bool;
-	var fl_safe			: bool; // safe mode: blocks bads & items spawns
-
-	var fl_redraw		: bool; // true=r�-attache le level en fin de frame
-
-	var fl_elevatorOpen	: bool; // flag fin de jeu
-	var fl_firstTorch	: bool;
-
-	var history			: Array<String>;
-
-	var recentExp		: Array< {x:float, y:float, r:float} >;
-	var fl_onAttach		: bool;
-	var bossDoorTimer	: float;
-	var entries			: Array< {cx:int,cy:int} >;
-
+/* 	var mcList			: Array< {sid:int, mc:MovieClip} >; // script attached MCs
  */
+	bool fl_compile;
+	bool fl_birth;
+	bool fl_death;
+	bool fl_safe; // safe mode: blocks bads & items spawns
+	bool fl_redraw; // true=r�-attache le level en fin de frame
+	bool fl_elevatorOpen; // flag fin de jeu
+	bool fl_firstTorch;
+
+	List<string> history;
+	List<Vector3> recentExp;
+	bool fl_onAttach;
+	float bossDoorTimer;
+	List<Vector2Int> entries;
+
+
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-/* 	function new(g, d:levels.Data) {
+	public ScriptEngine(Modes.GameMode g, Level.LevelData d) {
 		game			= g;
 		data			= d;
-		baseScript		= data.$script;
-		bossDoorTimer	= Data.SECOND*1.2;
+		baseScript		= data.script;
+		bossDoorTimer	= Data.SECOND*1.2f;
 		extraScript		= "";
 		cycle			= 0;
 		bads			= 0;
@@ -111,127 +96,123 @@ public class ScriptEngine : MonoBehaviour
 		fl_elevatorOpen	= false;
 		fl_onAttach		= false;
 		fl_firstTorch	= false;
-		recentExp		= new Array();
-		mcList			= new Array();
-		history			= new Array();
-		entries			= new Array();
+		recentExp		= new List<Vector3>();
+		/* mcList			= new List(); */
+		history			= new List<string>();
+		entries			= new List<Vector2Int>();
 	}
 
- */
+
 	/*------------------------------------------------------------------------
 	DESTRUCTION
 	------------------------------------------------------------------------*/
-/* 	function destroy() {
+	public void DestroyThis() {
 		script = null;
 		fl_compile = false;
-	} */
+	}
 
 
 	/*------------------------------------------------------------------------
 	AJOUTE UNE LIGNE � L'HISTORIQUE
 	------------------------------------------------------------------------*/
-/* 	function traceHistory(str) {
-		history.push("@"+Math.round(cycle*10)/10+"\t: "+str);
+	void TraceHistory(string str) {
+		history.Add("@"+Mathf.Round(cycle*10)/10+"\t: "+str);
 	}
 
- */
+
 
 	// *** EVENTS ***
 
 	/*------------------------------------------------------------------------
 	EVENT: RESURRECTION D'UN JOUEUR OU D�BUT DE NIVEAU
 	------------------------------------------------------------------------*/
-/* 	function onPlayerBirth() {
+	public void OnPlayerBirth() {
 		fl_birth = true;
 	}
 
-	function onPlayerDeath() {
+	public void OnPlayerDeath() {
 		fl_death = true;
 	}
- */
+
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION D'UNE BOMBE D'UN JOUEUR
 	------------------------------------------------------------------------*/
-/* 	function onExplode(x:float,y:float,radius:float) {
-		recentExp.push( {
-			x : x,
-			y : y,
-			r : radius
-		} );
+	public void OnExplode(float x, float y, float radius) {
+		recentExp.Add(new Vector3(x, y, radius));
 	}
- */
+
 	/*------------------------------------------------------------------------
 	EVENT: ENTR�E D'UN JOUEUR DANS UNE CASE
 	------------------------------------------------------------------------*/
-/* 	function onEnterCase(cx:int,cy:int) {
-		entries.push( {cx:cx,cy:cy} );
-	} */
+	void OnEnterCase(int cx, int cy) {
+		entries.Add(new Vector2Int(cx, cy));
+	}
 
 	/*------------------------------------------------------------------------
 	ATTACHEMENT DE LA VUE DU NIVEAU
 	------------------------------------------------------------------------*/
-/* 	function onLevelAttach() {
+	void OnLevelAttach() {
 		fl_onAttach = true;
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	GESTION MODE SAFE
 	------------------------------------------------------------------------*/
-/* 	function safeMode() {
+	void SafeMode() {
 		fl_safe = true;
 	}
 
-	function normalMode() {
+	void NormalMode() {
 		fl_safe	= false;
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LE TRIGGER AFFICHE UNE ALERTE EN CAS DE KEY MANQUANTE
 	------------------------------------------------------------------------*/
-/* 	function isVerbose(t) {
+	bool IsVerbose(string t) {
 		var fl_verbose = false;
-		for (var i=0;i<VERBOSE_TRIGGERS.length;i++) {
+		for (var i=0;i<VERBOSE_TRIGGERS.Length;i++) {
 			if (t==VERBOSE_TRIGGERS[i]) {
 				fl_verbose = true;
 			}
 		}
 		return fl_verbose;
 	}
- */
+
 
 	// *** ACCESSEURS ***/
 
 	/*------------------------------------------------------------------------
 	LECTURE D'UN CHAMP TYP� D'UNE NODE
 	------------------------------------------------------------------------*/
-/* 	function getInt( node, name ) : int {
-		if ( node.get(name)==null ) {
-			return null;
+	int GetInt(XElement node, string name) {
+		if (node.Attribute(name)==null) {
+			return -1;
 		}
 		else {
-			return Math.floor(  Std.parseInt( node.get(name),10 )  );
+			return Mathf.FloorToInt(Int32.Parse(node.Attribute(name).Value));
 		}
 	}
 
-	function getFloat( node, name ) : float {
-		if ( node.get(name)==null ) {
-			return null;
+	float GetFloat(XElement node, string name) {
+		if (node.Attribute(name)==null) {
+			return -1;
 		}
 		else {
-			return Std.parseInt( node.get(name),10 )
+			return float.Parse(node.Attribute(name).Value);
 		}
 	}
 
-	function getString( node, name ) {
-		if ( node.get(name)==null ) {
+	string GetString(XElement node, string name) {
+		if (node.Attribute(name)==null) {
 			return null;
 		}
 		else {
-			return node.get(name);
+			return node.Attribute(name).Value;
 		}
-	} */
+	}
 
 
 
@@ -240,104 +221,104 @@ public class ScriptEngine : MonoBehaviour
 	/*------------------------------------------------------------------------
 	SCRIPT: AJOUTE UN CODE DE SCRIPT
 	------------------------------------------------------------------------*/
-/* 	function addScript(str: String) {
-		if ( fl_compile ) {
-			var xml = new Xml(str);
-			if ( xml==null ) {
-				GameManager.fatal("invalid XML !");
+	void AddScript(string str) {
+		XDocument xml;
+		if (fl_compile) {
+			xml = XDocument.Parse(str);
+			if (xml==null) {
+				GameManager.Fatal("invalid XML !");
 			}
 			else {
-				script.appendChild( xml.firstChild );
+				script.Add(xml.FirstNode);
 			}
 		}
 		else {
 			extraScript+=" "+str;
 		}
 
-
 		// Debug: trace dans le log
-		var node = new Xml(str).firstChild;
-		traceHistory("+"+node.nodeName);
-		node = node.firstChild;
-		while ( node!=null ) {
-			traceHistory("  +"+node.nodeName);
-			node = node.nextSibling;
+		xml = XDocument.Parse(str);
+		XElement node;
+		TraceHistory("+"+xml.Root);
+		node = xml.FirstNode as XElement;
+		while (node!=null) {
+			TraceHistory("  +"+node.Name);
+			node = node.NextNode as XElement;
 		}
-
 	}
 
 
-	function addNode(name, att, inner) {
-		addScript("<"+name+" "+att+">"+inner+"</"+name+">");
+	void AddNode(string name, string att, string inner) {
+		AddScript("<"+name+" "+att+">"+inner+"</"+name+">");
 	}
 
 
-	function addShortNode(name,att) {
-		addScript("<"+name+" "+att+"/>");
-	} */
+	void AddShortNode(string name, string att) {
+		AddScript("<"+name+" "+att+"/>");
+	}
 
 
 	/*------------------------------------------------------------------------
 	SCRIPT: LANCE UN EVENT
 	------------------------------------------------------------------------*/
-/* 	function executeEvent( event:XmlNode ) {
-		if ( event.nodeName==null ) {
+	void ExecuteEvent(XElement e) {
+		if (e.Name==null) {
 			return;
 		}
 
-		traceHistory(" |--"+event.nodeName);
+		TraceHistory(" |--"+e.Name);
 
-		switch (event.nodeName) {
+		switch (e.Name.ToString()) {
 
-			case E_SCORE: // score item
-				var x = Entity.x_ctr(  getInt(event, "$x")  );
-				var y = Entity.y_ctr(  getInt(event, "$y")  );
-				x = game.flipCoordReal(x);
-				var id = getInt(event, "$i");
-				var subId = getInt(event, "$si");
-				var mc = entity.item.ScoreItem.attach(game, x,y, id, subId );
-				var inf = getInt(event, "$inf");
-				if ( inf==1 ) {
+			case E_SCORE: {// score item
+				var x = Entity.x_ctr(  GetInt(e, "x")  );
+				var y = Entity.y_ctr(  GetInt(e, "y")  );
+				x = game.FlipCoordReal(x);
+				var id = GetInt(e, "i");
+				var subId = GetInt(e, "si");
+				var mc = Entity.Item.ScoreItem.Attach(game, x, y, id, subId);
+				var inf = GetInt(e, "inf");
+				if (inf==1) {
 					mc.setLifeTimer(-1);
 				}
-				var scriptId = getInt(event, "$sid");
-				killById( scriptId );
+				var scriptId = GetInt(e, "sid");
+				KillById(scriptId);
 				mc.scriptId = scriptId;
-			break;
+			}break;
 
-			case E_SPECIAL: // special item
-				if ( game.canAddItem() && !fl_safe ) {
-					var x = Entity.x_ctr(  getInt(event, "$x")  );
-					x = game.flipCoordReal(x);
-					var y = Entity.y_ctr(  getInt(event, "$y")  );
-					var id = getInt(event, "$i");
-					var subId = getInt(event, "$si");
-					var mc = entity.item.SpecialItem.attach(game, x,y, id, subId );
-					var inf = getInt(event, "$inf");
+			case E_SPECIAL: {// special item
+				if ( game.CanAddItem() & !fl_safe ) {
+					var x = Entity.x_ctr(  GetInt(e, "x")  );
+					x = game.FlipCoordReal(x);
+					var y = Entity.y_ctr(  GetInt(e, "y")  );
+					var id = GetInt(e, "i");
+					var subId = GetInt(e, "si");
+					var mc = Entity.Item.SpecialItem.Attach(game, x,y, id, subId );
+					var inf = GetInt(e, "inf");
 					if ( inf==1 ) {
 						mc.setLifeTimer(-1);
 					}
-					var scriptId = getInt(event, "$sid");
-					killById( scriptId );
+					var scriptId = GetInt(e, "sid");
+					KillById( scriptId );
 					mc.scriptId = scriptId;
 				}
-			break;
+			}break;
 
-			case E_EXTEND: // extend
-				if ( game.canAddItem() && !fl_safe ) {
-					game.statsMan.attachExtend();
+			case E_EXTEND: {// extend
+				if ( game.CanAddItem() & !fl_safe ) {
+					game.statsMan.AttachExtend();
 				}
-			break;
+			}break;
 
-			case E_BAD: // bad
+			case E_BAD: {// bad
 				if ( !fl_safe ) { //&& !game.world.isVisited() ) {
-					var x = Entity.x_ctr( game.flipCoordCase( getInt(event, "$x") ) ) - Data.CASE_WIDTH*0.5;
-					var y = Entity.y_ctr( getInt(event, "$y")-1 );
-					var id = getInt(event, "$i");
-					var fl_sys = ( getInt(event, "$sys")!=0 && getInt(event, "$sys")!=null );
-					var mc = game.attachBad( id, x,y );
+					var x = Entity.x_ctr( game.FlipCoordCase( GetInt(e, "x") ) ) - Data.CASE_WIDTH*0.5;
+					var y = Entity.y_ctr( GetInt(e, "y")-1 );
+					var id = GetInt(e, "i");
+					var fl_sys = ( GetInt(e, "sys")!=0 & GetInt(e, "sys")!=-1 );
+					var mc = game.AttachBad( id, x,y );
 					if ( (mc.types&Data.BAD_CLEAR)>0 ) {
-						if ( fl_sys && game.world.isVisited() ) {
+						if ( fl_sys & game.world.IsVisited() ) {
 							mc.destroy();
 							game.badCount--;
 							break;
@@ -347,76 +328,76 @@ public class ScriptEngine : MonoBehaviour
 							game.fl_clear = false;
 						}
 					}
-					var scriptId = getInt(event, "$sid");
-					killById( scriptId );
+					var scriptId = GetInt(e, "sid");
+					KillById( scriptId );
 					mc.scriptId = scriptId;
 				}
-			break;
+			}break;
 
-			case E_KILL: // kill by id
-				var id = getInt(event, "$sid");
-				killById(id);
-			break;
+			case E_KILL: {// kill by id
+				var id = GetInt(e, "sid");
+				KillById(id);
+			}break;
 
-			case E_TUTORIAL: // message tutorial
-				var id = getInt(event, "$id");
-				var msg;
-				if ( id==null ) {
-					msg = event.firstChild.nodeValue;
-					GameManager.warning("@ level "+game.world.currentId+", script still using inline text value");
+			case E_TUTORIAL: {// message tutorial
+				var id = GetInt(e, "id");
+				string msg;
+				if ( id==-1 ) {
+					msg = (e.FirstNode as XElement).Value;
+					GameManager.Warning("@ level "+game.world.currentId+", script still using inline text value");
 				}
 				else {
-					msg = Lang.get(id);
+					msg = Lang.Get(id);
 				}
 				if ( msg!=null ) {
-					game.attachPop("\n"+msg,true);
+					game.AttachPop("\n"+msg,true);
 				}
-			break;
+			}break;
 
-			case E_MESSAGE: // message standard
-				var id = getInt(event, "$id");
-				var msg;
-				if ( id==null ) {
-					msg = event.firstChild.nodeValue;
-					GameManager.warning("@ level "+game.world.currentId+", script still using inline text value");
+			case E_MESSAGE: {// message standard
+				var id = GetInt(e, "id");
+				string msg;
+				if ( id==-1 ) {
+					msg = (e.FirstNode as XElement).Value;
+					GameManager.Warning("@ level "+game.world.currentId+", script still using inline text value");
 				}
 				else {
-					msg = Lang.get(id);
+					msg = Lang.Get(id);
 				}
 				if ( msg!=null ) {
-					game.attachPop("\n"+msg,false);
+					game.AttachPop("\n"+msg,false);
 				}
-			break;
+			}break;
 
-			case E_KILLMSG:
-				game.killPop();
-			break;
+			case E_KILLMSG: {
+				game.KillPop();
+			}break;
 
-			case E_POINTER:
-				var p = game.getOne(Data.PLAYER);
-				var cx = getInt(event, "$x");
-				var cy = getInt(event, "$y");
-				cx = game.flipCoordCase(cx);
-				game.attachPointer( cx,cy, p.cx,p.cy )
-			break;
+			case E_POINTER: {
+				var p = game.GetOne(Data.PLAYER);
+				var cx = GetInt(e, "x");
+				var cy = GetInt(e, "y");
+				cx = game.FlipCoordCase(cx);
+				game.AttachPointer( cx,cy, p.cx,p.cy );
+			}break;
 
-			case E_KILLPTR:
-				game.killPointer();
-			break;
+			case E_KILLPTR: {
+				game.KillPointer();
+			}break;
 
-			case E_MC:
-				var cx = getInt(event, "$x");
-				var cy = getInt(event, "$y");
-				var xr = getInt(event, "$xr");
-				var yr = getInt(event, "$yr");
-				var sid = getInt(event, "$sid");
-				var back = getInt(event, "$back");
-				var name = getString(event, "$n");
-				var p = getInt(event, "$p");
+			case E_MC: {
+				var cx = GetInt(e, "x");
+				var cy = GetInt(e, "y");
+				var xr = GetInt(e, "xr");
+				var yr = GetInt(e, "yr");
+				var sid = GetInt(e, "sid");
+				var back = GetInt(e, "back");
+				var name = GetString(e, "n");
+				var p = GetInt(e, "p");
 				// WARNING: "name" must be "$"-escaped against obfu
-				killById(sid);
-				var x,y;
-				if  ( xr==null ) {
+				KillById(sid);
+				int x, y;
+				if  (xr == -1) {
 					x = Entity.x_ctr(cx);
 					y = Entity.y_ctr(cy);
 				}
@@ -424,13 +405,13 @@ public class ScriptEngine : MonoBehaviour
 					x = xr;
 					y = yr;
 				}
-				x = game.flipCoordReal(x);
+				x = game.FlipCoordReal(x);
 				if ( game.fl_mirror ) {
 					x += Data.CASE_WIDTH;
 				}
-				var mc = game.world.view.attachSprite(  name, x, y, (back==1)?true:false );
+				var mc = game.world.view.AttachSprite(name, x, y, (back==1)?true:false);
 				if ( game.fl_mirror ) {
-					mc._xscale *= -1;
+					mc.transform.localScale.Set(mc.transform.localScale.x*-1, mc.transform.localScale.y, mc.transform.localScale.z);
 				}
 				if ( p>0 ) {
 					mc.play();
@@ -438,36 +419,36 @@ public class ScriptEngine : MonoBehaviour
 				else {
 					mc.stop();
 				}
-				downcast(mc).sub.stop();
-				if ( name=="$torch" ) {
+				mc.sub.stop();
+				if ( name=="torch" ) {
 					if ( !fl_firstTorch ) {
-						game.clearExtraHoles();
+						game.ClearExtraHoles();
 					}
-					game.addHole(x+Data.CASE_WIDTH*0.5,y-Data.CASE_HEIGHT*0.5,180);
-					game.updateDarkness();
+					game.AddHole(x+Data.CASE_WIDTH*0.5f,y-Data.CASE_HEIGHT*0.5f,180);
+					game.UpdateDarkness();
 					fl_firstTorch = true;
 				}
-				mcList.push(  {sid:sid, mc:mc}  );
-			break;
+				mcList.Add(sid, mc);
+			}break;
 
-			case E_PLAYMC:
-				var sid = getInt(event,"$sid");
-				playById(sid);
-			break;
+			case E_PLAYMC: {
+				var sid = GetInt(e,"sid");
+				PlayById(sid);
+			}break;
 
-			case E_MUSIC:
-				var id = getInt(event, "$id");
-				game.playMusic(id);
-			break;
+			case E_MUSIC: {
+				var id = GetInt(e, "id");
+				game.PlayMusic(id);
+			}break;
 
-			case E_ADDTILE:
-				var cx1	= getInt(event, "$x1");
-				var cy1	= getInt(event, "$y1");
-				var cx2	= getInt(event, "$x2");
-				var cy2	= getInt(event, "$y2");
-				cx1 = game.flipCoordCase(cx1);
-				cx2 = game.flipCoordCase(cx2);
-				var id	= getInt(event, "$type");
+			case E_ADDTILE: {
+				var cx1	= GetInt(e, "x1");
+				var cy1	= GetInt(e, "y1");
+				var cx2	= GetInt(e, "x2");
+				var cy2	= GetInt(e, "y2");
+				cx1 = game.FlipCoordCase(cx1);
+				cx2 = game.FlipCoordCase(cx2);
+				var id	= GetInt(e, "type");
 				if ( id > 0 ) {
 					id = -id;
 				}
@@ -475,48 +456,48 @@ public class ScriptEngine : MonoBehaviour
 					id = Data.GROUND;
 				}
 				while ( cx1!=cx2 || cy1!=cy2 ) {
-					game.world.forceCase( cx1,cy1, id );
+					game.world.ForceCase( cx1,cy1, id );
 					if ( cx1 < cx2 )	{ cx1++; }
 					if ( cx1 > cx2 )	{ cx1--; }
 					if ( cy1 < cy2 )	{ cy1++; }
 					if ( cy1 > cy2 )	{ cy1--; }
 				}
-				game.world.forceCase( cx1,cy1, id );
+				game.world.ForceCase( cx1,cy1, id );
 				fl_redraw = true;
-			break;
+			}break;
 
-			case E_REMTILE:
-				var cx1 = getInt(event, "$x1");
-				var cy1 = getInt(event, "$y1");
-				var cx2 = getInt(event, "$x2");
-				var cy2 = getInt(event, "$y2");
-				cx1 = game.flipCoordCase(cx1);
-				cx2 = game.flipCoordCase(cx2);
-				while ( cx1!=cx2 || cy1!=cy2 ) {
-					game.world.forceCase( cx1,cy1, 0 );
+			case E_REMTILE: {
+				var cx1 = GetInt(e, "x1");
+				var cy1 = GetInt(e, "y1");
+				var cx2 = GetInt(e, "x2");
+				var cy2 = GetInt(e, "y2");
+				cx1 = game.FlipCoordCase(cx1);
+				cx2 = game.FlipCoordCase(cx2);
+				while ( cx1!=cx2 | cy1!=cy2 ) {
+					game.world.ForceCase( cx1, cy1, 0 );
 					if ( cx1 < cx2 )	{ cx1++; }
 					if ( cx1 > cx2 )	{ cx1--; }
 					if ( cy1 < cy2 )	{ cy1++; }
 					if ( cy1 > cy2 )	{ cy1--; }
 				}
-				game.world.forceCase( cx1,cy1, 0 );
+				game.world.ForceCase( cx1,cy1, 0 );
 				fl_redraw = true;
-			break;
+			}break;
 
-			case E_ITEMLINE:
-				var cx1	= getInt(event, "$x1");
-				var cx2	= getInt(event, "$x2");
-				var cy	= getInt(event, "$y");
-				var id	= getInt(event, "$i");
-				var subId	= getInt(event, "$si");
-				var time	= getInt(event, "$t");
+			case E_ITEMLINE: {
+				var cx1	= GetInt(e, "x1");
+				var cx2	= GetInt(e, "x2");
+				var cy	= GetInt(e, "y");
+				var id	= GetInt(e, "i");
+				var subId	= GetInt(e, "si");
+				var time	= GetInt(e, "t");
 				var i=0;
 				var fl_done = false;
 				while ( !fl_done ) {
-					addScript(
-						'<'+T_TIMER+' $t="'+(cycle+i*time)+'">'+
-						'<'+E_SCORE+' $i="'+id+'" $si="'+subId+'" $x="'+cx1+'" $y="'+cy+'" $inf="1" />'+
-						'</$'+T_TIMER+'>'
+					AddScript(
+						"<"+T_TIMER+" t=\""+(cycle+i*time)+"\">"+
+						"<"+E_SCORE+" i="+id+"\" si=\""+subId+"\" x=\""+cx1+"\" y=\""+cy+"\" inf=\"1\" />"+
+						"</"+T_TIMER+">"
 					);
 
 					if ( cx1==cx2 ) {
@@ -526,256 +507,252 @@ public class ScriptEngine : MonoBehaviour
 					if ( cx1 > cx2 )	{ cx1--; }
 					i++;
 				}
-			break;
+			}break;
 
-			case E_GOTO:
-				var id = getInt(event,"$id");
-				game.forcedGoto(id);
-			break;
+			case E_GOTO: {
+				var id = GetInt(e,"id");
+				game.ForcedGoto(id);
+			}break;
 
-			case E_HIDE:
-				var fl_t = (getInt(event, "$tiles")==1)?true:false;
-				var fl_b = (getInt(event, "$borders")==1)?true:false;
+			case E_HIDE: {
+				var fl_t = (GetInt(e, "tiles")==1)?true:false;
+				var fl_b = (GetInt(e, "borders")==1)?true:false;
 				game.world.view.fl_hideTiles = fl_t;
 				game.world.view.fl_hideBorders = fl_b;
-				game.world.view.detach();
-				game.world.view.attach();
-				game.world.view.moveToPreviousPos();
-			break;
+				game.world.view.Detach();
+				game.world.view.Attach();
+				game.world.view.MoveToPreviousPos();
+			}break;
 
-			case E_HIDEBORDERS:
+			case E_HIDEBORDERS: {
 				game.world.view.fl_hideTiles = true;
-				game.world.view.detach();
-				game.world.view.attach();
-				game.world.view.moveToPreviousPos();
-			break;
+				game.world.view.Detach();
+				game.world.view.Attach();
+				game.world.view.MoveToPreviousPos();
+			}break;
 
 
-			case E_CODETRIGGER :
-				var id = getInt(event,"$id");
-				codeTrigger(id);
-			break;
+			case E_CODETRIGGER : {
+				var id = GetInt(e,"id");
+				CodeTrigger(id);
+			}break;
 
 
-			case E_PORTAL:
-				if ( game.fl_clear && cycle>10 ) {
-					var pid = getInt(event,"$pid");
-					if ( !game.usePortal(pid, null) ) {
+			case E_PORTAL: {
+				if ( game.fl_clear & cycle>10 ) {
+					var pid = GetInt(e,"pid");
+					if (!game.UsePortal(pid, null)) {
 						// do nothing ?
 					}
 				}
-			break;
+			}break;
 
 
-			case E_SETVAR:
-				var name = getString(event,"$var");
-				var value = getString(event,"$value");
-				game.setDynamicVar(name,value);
-			break;
+			case E_SETVAR: {
+				var name = GetString(e,"var");
+				var value = GetString(e,"value");
+				game.SetDynamicVar(name, value);
+			}break;
 
-			case E_OPENPORTAL:
-				var cx = getInt(event,"$x");
-				var cy = getInt(event,"$y");
-				var pid = getInt(event,"$pid");
-				game.openPortal(cx,cy,pid);
-			break;
+			case E_OPENPORTAL: {
+				var cx = GetInt(e,"x");
+				var cy = GetInt(e,"y");
+				var pid = GetInt(e,"pid");
+				game.OpenPortal(cx,cy,pid);
+			}break;
 
-			case E_DARKNESS:
-				var v = getInt(event, "$v");
+			case E_DARKNESS: {
+				var v = GetInt(e, "v");
 				game.forcedDarkness = v;
-				game.updateDarkness();
-			break;
+				game.UpdateDarkness();
+			}break;
 
-			case E_FAKELID:
-				var lid = getInt(event, "$lid");
-				if ( Std.isNaN(lid) ) {
-					game.fakeLevelId = null;
+			case E_FAKELID: {
+				var lid = GetInt (e, "lid");
+				if (lid == -1) {
+					game.fakeLevelId = -1;
 					game.gi.hideLevel();
 				}
 				else {
 					game.fakeLevelId = lid;
 					game.gi.setLevel(lid);
 				}
-			break;
+			}break;
 
 
-			default:
-				// Event inconnu ? Peut etre un trigger ?
-				if ( isTrigger(event.nodeName) ) {
-					script.appendChild(event);
+			default: {
+				// e inconnu ? Peut etre un trigger ?
+				if ( IsTrigger(e.Name.ToString()) ) {
+					script.Add(e);
 				}
 				else {
-					GameManager.warning("unknown event: "+event.nodeName+" (not a trigger)");
+					GameManager.Warning("unknown event: "+e.Name+" (not a trigger)");
 				}
-			break;
+			}break;
 		}
 	}
 
- */
+
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LE NOM DE NODE DONN� EST UN TRIGGER
 	------------------------------------------------------------------------*/
-/* 	function isTrigger(n:String) {
-		return (n==T_TIMER || n==T_POS || n==T_ATTACH || n==T_DO || n==T_END || n==T_BIRTH || n==T_DEATH ||
-				n==T_EXPLODE || n==T_ENTER || n==T_NIGHTMARE || n==T_MIRROR || n==T_MULTI || n==T_NINJA );
-	} */
+	bool IsTrigger(string n) {
+		return (n==T_TIMER | n==T_POS | n==T_ATTACH | n==T_DO | n==T_END | n==T_BIRTH | n==T_DEATH |
+				n==T_EXPLODE | n==T_ENTER | n==T_NIGHTMARE | n==T_MIRROR | n==T_MULTI | n==T_NINJA );
+	}
 
 	/*------------------------------------------------------------------------
 	SCRIPT: TESTE SI UN TRIGGER EST ACTIV�
 	------------------------------------------------------------------------*/
-/* 	function checkTrigger( trigger:XmlNode ) : bool {
-		if ( trigger.nodeName==null || trigger.nodeName=="" ) {
+	bool CheckTrigger(XElement trigger) {
+		if ( trigger.Name==null | trigger.Name=="" ) {
 			return false;
 		}
 
-
-		switch (trigger.nodeName) {
-			case T_TIMER: // timer
-				if ( cycle >= getInt(trigger,"$t") ) {
+		switch (trigger.Name.ToString()) {
+			case T_TIMER: {// timer
+				if ( cycle >= GetInt(trigger,"t") ) {
 					return true;
 				}
-			break;
-			case T_POS: // player position
-				var l = game.getPlayerList();
-				var x = getInt(trigger,"$x");
-				var y = getInt(trigger,"$y");
-				x = game.flipCoordCase(x);
-				var dist = getInt(trigger,"$d");
-				for (var i=0;i<l.length;i++) {
-					if ( !l[i].fl_kill && !l[i].fl_destroy ) {
-						var d = l[i].distanceCase(x,y);
-						if ( d<=dist && !Std.isNaN(d) ) {
+			}break;
+			case T_POS: {// player position
+				var l = game.GetPlayerList();
+				var x = GetInt(trigger,"x");
+				var y = GetInt(trigger,"y");
+				x = game.FlipCoordCase(x);
+				var dist = GetInt(trigger,"d");
+				for (var i=0;i<l.Count;i++) {
+					if ( !l[i].fl_kill & !l[i].fl_destroy ) {
+						var d = l[i].DistanceCase(x,y);
+						if ( d<=dist & d!=-1) {
 							return true;
 						}
 					}
 				}
-			break;
-			case T_ATTACH: // attachement du niveau
+			}break;
+			case T_ATTACH: {// attachement du niveau
 				if ( fl_onAttach ) {
 					return true;
 				}
-			break;
-			case T_DO: // ex�cution inconditionnelle d'events
+			}break;
+			case T_DO: {// ex�cution inconditionnelle d'events
 				return true;
-			break;
-			case T_END: // level termin�
-				if ( game.fl_clear && cycle>10 ) {
+			}
+			case T_END: {// level termin�
+				if ( game.fl_clear & cycle>10 ) {
 					return true;
 				}
-			break;
-			case T_BIRTH: // le joueur depuis le dernier cycle
+			}break;
+			case T_BIRTH: {// le joueur depuis le dernier cycle
 				if ( fl_birth ) {
 					return true;
 				}
-			break;
-			case T_DEATH:
+			}break;
+			case T_DEATH: {
 				if ( fl_death ) {
 					return true;
 				}
-			break;
-			case T_EXPLODE:
-				var x = Entity.x_ctr(  getInt(trigger,"$x")  );
-				var y = Entity.y_ctr(  getInt(trigger,"$y")  );
-				x = game.flipCoordReal(x);
-				for (var i=0;i<recentExp.length;i++) {
+			}break;
+			case T_EXPLODE: {
+				var x = Entity.x_ctr(  GetInt(trigger,"x")  );
+				var y = Entity.y_ctr(  GetInt(trigger,"y")  );
+				x = game.FlipCoordReal(x);
+				for (var i=0;i<recentExp.Count;i++) {
 					var expl = recentExp[i];
-					var sqrDist = Math.pow(x-expl.x, 2) + Math.pow(y-expl.y, 2);
-					if ( sqrDist <= Math.pow(expl.r, 2) ) {
-						if ( Math.sqrt(sqrDist) <= expl.r ) {
+					var sqrDist = Mathf.Pow(x-expl.x, 2) + Mathf.Pow(y-expl.y, 2);
+					if ( sqrDist <= Mathf.Pow(expl.z, 2) ) {
+						if ( Mathf.Sqrt(sqrDist) <= expl.z ) {
 							return true;
 						}
 					}
 				}
-			break;
-			case T_ENTER:
-				var cx = getInt(trigger,"$x");
-				var cy = getInt(trigger,"$y");
-				cx = game.flipCoordCase(cx);
-				for (var i=0;i<entries.length;i++) {
-					if ( entries[i].cx==cx && entries[i].cy==cy ) {
+			}break;
+			case T_ENTER: {
+				var cx = GetInt(trigger,"x");
+				var cy = GetInt(trigger,"y");
+				cx = game.FlipCoordCase(cx);
+				for (var i=0;i<entries.Count;i++) {
+					if ( entries[i].x==cx & entries[i].y==cy ) {
 						return true;
 					}
 				}
-			break;
+			}break;
 
-			case T_NIGHTMARE:
+			case T_NIGHTMARE: {
 				return game.fl_nightmare;
-			break;
+			}
 
-			case T_MIRROR:
+			case T_MIRROR: {
 				return game.fl_mirror;
-			break;
+			}
 
-			case T_MULTI:
-				return game.getPlayerList().length>1;
-			break;
+			case T_MULTI: {
+				return game.GetPlayerList().Count>1;
+			}
 
-			case T_NINJA:
+			case T_NINJA: {
 				return game.fl_ninja;
-			break;
+			}
 
-			default:
-				GameManager.warning("unknown trigger "+trigger.nodeName);
-			break;
+			default: {
+				GameManager.Warning("unknown trigger "+trigger.Name);
+			}break;
 		}
 		return false;
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	SCRIPT: LANCE UN TRIGGER
 	------------------------------------------------------------------------*/
-/* 	function executeTrigger( trigger:XmlNode ) {
-		var event;
+	void ExecuteTrigger(ref XElement trigger) {
 
-		traceHistory(trigger.nodeName);
+		XElement e;
+		TraceHistory(trigger.Name.ToString());
 
-		event = trigger.firstChild;
-		while (event!=null) {
-			executeEvent(event);
-			event = event.nextSibling;
+		e = trigger.FirstNode as XElement;
+		while (e != null) {
+			ExecuteEvent(e);
+			e = e.NextNode as XElement;
 		}
 
-
 		// Compteur de r�p�tition
-		var total = getInt(trigger,"$repeat");
-		if ( !Std.isNaN(total) ) {
+		var total = GetInt(trigger, "repeat");
+		if (total != -1) {
 			total--;
-			traceHistory("R "+trigger.nodeName+": "+total);
-			trigger.set("$repeat",""+total);
+			TraceHistory("R "+trigger.Name+": "+total);
+			trigger.SetAttributeValue("repeat", total.ToString());
 
 
-			if ( total==0 ) {
+			if (total==0) {
 				// Fin de r�p�tition
-				trigger.removeNode();
+				trigger.Remove();
 			}
 			else {
 				// R�p�tition
-				if ( trigger.nodeName==T_TIMER ) {
-					var str = trigger.get("$base");
+				if ( trigger.Name==T_TIMER ) {
+					var str = trigger.Attribute("base").Value;
 					if ( str==null ) {
-						str = trigger.get("$t");
-						trigger.set("$base", str);
+						str = trigger.Attribute("t").Value;
+						trigger.SetAttributeValue("base", str);
 					}
-					var timer = Std.parseInt(str,10);
+					var timer = float.Parse(str);
 					timer += cycle;
-					trigger.set("$t",""+timer);
+					trigger.SetAttributeValue("t", timer.ToString());
 				}
 			}
 		}
 		else {
-			traceHistory("X "+trigger.nodeName);
-			trigger.removeNode();
+			TraceHistory("X "+trigger.Name);
+			trigger.Remove();
 		}
-
-
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	INSERTION DE LA BADLIST DANS LE SCRIPT
 	------------------------------------------------------------------------*/
-/* 	function insertBads():int {
+	public int InsertBads() {
 //		if ( game.globalActives[12] ) { // parapluie bleu
 //			game.globalActives[12] = false;
 //			return 0;
@@ -785,156 +762,157 @@ public class ScriptEngine : MonoBehaviour
 //			return 0;
 //		}
 		var str='<'+T_DO+'>';
-		for (var i=0;i<data.$badList.length;i++) {
-			var b = data.$badList[i];
-			str+='<'+E_BAD+' $i="'+b.$id+'" $x="'+b.$x+'" $y="'+b.$y+'" $sys="1"/>';
+		for (var i=0;i<data.badList.Length;i++) {
+			var b = data.badList[i];
+			str+='<'+E_BAD+"\" i=\""+b.id+"\" x=\""+b.x+"\" y=\""+b.y+"\" sys=\"1\"/>";
 		}
-		str+='</'+T_DO+'>';
-		addScript(str);
-		return data.$badList.length;
+		str+="</"+T_DO+'>';
+		AddScript(str);
+		return data.badList.Length;
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	INSERTION: ITEM
 	------------------------------------------------------------------------*/
-/* 	function insertItem(event:String, id:int,subId:int, x:int,y:int, t:int, repeat:int, fl_inf, fl_clearAtEnd) {
-		var subStr;
-		if (subId==null) {
+	void InsertItem(string e, int id, int subId, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
+		string subStr;
+		if (subId==-1) {
 			subStr="";
 		}
 		else {
-			subStr=string(subId);
+			subStr=subId.ToString();
 		}
 
 		var doStr = "";
-		if (repeat!=null) {
-			doStr = ' $repeat="'+repeat+'"';
+		if (repeat!=-1) {
+			doStr = " repeat=\""+repeat+"\"";
 		}
 
-		addScript (
-			'<'+T_TIMER+' $t="'+(cycle+t)+'" '+doStr+' $endClear="'+(fl_clearAtEnd?'1':'0')+'">'+
-			'<'+event+' $x="'+x+'" $y="'+y+'" $i="'+id+'" $si="'+subStr+'" $inf="'+(fl_inf?'1':'')+'" $sys="1"/>'+
-			'</'+T_TIMER+'>'
+		AddScript (
+			"<"+T_TIMER+" t=\""+(cycle+t)+"\" "+doStr+" endClear=\""+(fl_clearAtEnd?"1":"0")+"\">"+
+			"<"+e+" x=\""+x+"\" y=\""+y+"\" i=\""+id+"\" si=\""+subStr+"\" inf=\""+(fl_inf?"1":"")+"\" sys=\"1\"/>"+
+			"</"+T_TIMER+">"
 		);
 	}
- */
+
 	/*------------------------------------------------------------------------
 	INSERTION: ITEM SP�CIAL
 	------------------------------------------------------------------------*/
-/* 	function insertSpecialItem(id:int,sid:int, x:int,y:int, t:int, repeat:int, fl_inf, fl_clearAtEnd) {
-		insertItem(E_SPECIAL, id,sid,x,y,t,repeat,fl_inf, fl_clearAtEnd);
+	void InsertSpecialItem(int id, int sid, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
+		InsertItem(E_SPECIAL, id,sid,x,y,t,repeat,fl_inf, fl_clearAtEnd);
 	}
- */
+
 	/*------------------------------------------------------------------------
 	INSERTION: BONUS
 	------------------------------------------------------------------------*/
-/* 	function insertScoreItem(id:int,sid:int, x:int,y:int, t:int, repeat:int, fl_inf, fl_clearAtEnd) {
-		insertItem(E_SCORE, id,sid,x,y,t,repeat,fl_inf, fl_clearAtEnd);
+	void InsertScoreItem(int id, int sid, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
+		InsertItem(E_SCORE, id,sid,x,y,t,repeat,fl_inf, fl_clearAtEnd);
 	}
 
- */
+
 	/*------------------------------------------------------------------------
 	INSERTION DES EXTENDS R�GULIERS
 	------------------------------------------------------------------------*/
-/* 	function insertExtend() {
-		var s = '<'+T_TIMER+' $t="'+Data.EXTEND_TIMER+'" $repeat="-1" $endClear="1"><'+E_EXTEND+'/></'+T_TIMER+'>';
-		addScript(s);
+	void InsertExtend() {
+		var s = "<"+T_TIMER+" t=\""+Data.EXTEND_TIMER+"\" repeat=\"-1\" endClear=\"1\"><"+E_EXTEND+"/></"+T_TIMER+">";
+		AddScript(s);
 	}
- */
 
-/* 	function insertPortal(cx:int,cy:int,pid:int) {
-		addScript(
-			'<'+T_POS+' $x="'+cx+'" $y="'+cy+'" $d="1" $repeat="-1">'+
-			'<'+E_PORTAL+' $pid="'+pid+'"/>'+
-			'</'+T_POS+'>'
+
+	public void InsertPortal(int cx,int cy,int pid) {
+		AddScript(
+			"<"+T_POS+" x=\""+cx+"\" y=\""+cy+"\" d=\"1\" repeat=\"-1\">"+
+			"<"+E_PORTAL+" pid=\""+pid+"\"/>"+
+			"</"+T_POS+">"
 		);
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	SCRIPT: EX�CUTE LE SCRIPT DU NIVEAU
 	------------------------------------------------------------------------*/
-/* 	function runScript() {
-		var trigger : XmlNode;
-		if ( script==null ) {
+	void RunScript() {
+		XElement trigger;
+		if (script==null) {
 			return;
 		}
 
-		trigger = script.firstChild;
-		while ( trigger!=null ) {
-			if ( checkTrigger(trigger) ) {
+		trigger = script.FirstNode as XElement;
+		while (trigger!=null) {
+			if (CheckTrigger(trigger)) {
 				// World keys
-				var kid = getInt(trigger, "$key");
-				if ( !game.hasKey(kid) ) {
-					if ( isVerbose(trigger.nodeName) ) {
-						game.fxMan.keyRequired( kid );
+				var kid = GetInt(trigger, "key");
+				if ( !game.HasKey(kid) ) {
+					if ( IsVerbose(trigger.Name.ToString()) ) {
+						game.fxMan.KeyRequired( kid );
 					}
 				}
 				else {
-					if ( kid!=null ) {
-						game.fxMan.keyUsed( kid );
+					if ( kid != -1 ) {
+						game.fxMan.KeyUsed( kid );
 					}
-					executeTrigger(trigger);
+					ExecuteTrigger(ref trigger);
 				}
 			}
-
-			trigger = trigger.nextSibling;
+			trigger = trigger.NextNode as XElement;
 		}
 		fl_birth		= false;
 		fl_death		= false;
 		fl_onAttach		= false;
-		recentExp		= new Array();
-		entries			= new Array();
+		recentExp		= new List<Vector3>();
+		entries			= new List<Vector2Int>();
 		fl_onAttach		= false;
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	CR�ATION DE LA NODE XML DU SCRIPT
 	------------------------------------------------------------------------*/
-/* 	function compile() {
-		history = new Array();
+	public void Compile() {
+		history = new List<string>();
 
 		// Debug: log
-		traceHistory(baseScript);
-		var node = new Xml(baseScript).firstChild;
+		TraceHistory(baseScript);
+		XDocument doc = XDocument.Parse(baseScript);
+		XElement node = doc.FirstNode as XElement;
 		while ( node!=null ) {
-			if ( node.nodeName!=null ) {
-				traceHistory("b "+node.nodeName);
+			if ( node.Name!=null ) {
+				TraceHistory("b "+node.Name);
 			}
-			node = node.nextSibling;
+			node = node.NextNode as XElement;
 		}
-		node = new Xml(extraScript).firstChild;
+
+		doc = XDocument.Parse(extraScript);
+		node = doc.FirstNode as XElement;
 		while ( node!=null ) {
-			if ( node.nodeName!=null ) {
-				traceHistory("b2 "+node.nodeName);
+			if ( node.Name!=null ) {
+				TraceHistory("b2 "+node.Name);
 			}
-			node = node.nextSibling;
+			node = node.NextNode as XElement;
 		}
 
 		// Compilation
-		var doc = new Xml(baseScript+" "+extraScript);
-		doc.ignoreWhite = true;
+		doc = XDocument.Parse(baseScript + " " + extraScript);	
 		if ( doc==null ) {
-			GameManager.fatal("compile: invalid XML");
+			GameManager.Fatal("compile: invalid XML");
 		}
 		else {
 			this.script = doc;
 		}
 
 
-		normalMode();
+		NormalMode();
 		fl_compile	= true;
-		traceHistory("first="+cycle);
-		runScript(); // lecture du premier cycle du script
+		TraceHistory("first="+cycle);
+		RunScript(); // lecture du premier cycle du script
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	D�TRUIT LE SCRIPT "COMPIL�"
 	------------------------------------------------------------------------*/
-/* 	function clearScript() {
+	void ClearScript() {
 		this.script = null;
 		baseScript = "";
 		extraScript = "";
@@ -942,225 +920,225 @@ public class ScriptEngine : MonoBehaviour
 		fl_compile = false;
 	}
 
- */
+
 	/*------------------------------------------------------------------------
 	D�TRUIT TOUS LES TRIGGERS TIM�S
 	------------------------------------------------------------------------*/
-/* 	function clearEndTriggers() {
-		var trigger : XmlNode;
-		trigger = script.firstChild;
+	public void ClearEndTriggers() {
+		XElement trigger;
+		trigger = script.FirstNode as XElement;
 		while (trigger!=null) {
-			var next = trigger.nextSibling;
-			if ( trigger.get("$endClear")== "1" ) {
-				traceHistory("eX "+trigger.nodeName);
-				trigger.removeNode();
+			XElement next = trigger.NextNode as XElement;
+			if (trigger.Attribute("endClear").Value == "1") {
+				TraceHistory("eX "+trigger.Name);
+				trigger.Remove();
 			}
 			trigger = next;
 		}
-	} */
+	}
 
 
 	/*------------------------------------------------------------------------
 	REMISE � Z�RO (D�BUT DE LEVEL)
 	------------------------------------------------------------------------*/
-/* 	function reset() {
+	void Reset() {
 		cycle=0;
-		traceHistory("(r)");
+		TraceHistory("(r)");
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	D�TRUIT UNE ENTIT� CR��E PAR UN SCRIPT
 	------------------------------------------------------------------------*/
-/* 	function killById(id:int) {
-		if ( id==null ) {
+	void KillById(int id) {
+		if (id== -1) {
 			return;
 		}
-		var l = game.getList(Data.ENTITY);
-		for (var i=0;i<l.length;i++) {
+		var l = game.GetList(Data.ENTITY);
+		for (var i=0;i<l.Count;i++) {
 			if ( l[i].scriptId == id ) {
-				l[i].destroy();
+				l[i].DestroyThis();
 			}
 		}
 
-		for (var i=0;i<mcList.length;i++) {
+		for (var i=0;i<mcList.Count;i++) {
 			if ( mcList[i].sid == id ) {
 				mcList[i].mc.removeMovieClip();
-				mcList.splice(i,1);
+				mcList.RemoveAt(i);
 				i--;
 			}
 		}
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	JOUE UNE ENTIT� CR��E PAR UN SCRIPT
 	------------------------------------------------------------------------*/
-/* 	function playById(id:int) {
-		if ( id==null ) {
+	void PlayById(int id) {
+		if (id== -1) {
 			return;
 		}
-		for (var i=0;i<mcList.length;i++) {
+		for (var i=0;i<mcList.Count;i++) {
 			if ( mcList[i].sid == id ) {
 				mcList[i].mc.play();
-				downcast(mcList[i].mc).sub.play();
+				mcList[i].mc.sub.play();
 			}
 		}
 	}
- */
+
 
 	/*------------------------------------------------------------------------
 	CODES SPéCIFIQUES NON-SCRIPTABLES
 	------------------------------------------------------------------------*/
-/* 	void codeTrigger(int id) {
+	void CodeTrigger(int id) {
 		switch (id) {
-			case 0: // Seau 1er level
+			case 0: {// Seau 1er level
 				game.fl_warpStart = true;
-			break;
+			}break;
 
-			case 1: // long hurry up
-				game.huTimer -= Timer.tmod*0.5;
-			break;
+			case 1: {// long hurry up
+				game.huTimer -= Time.fixedDeltaTime*0.5f;
+			}break;
 
-			case 2: // anti fleche de sortie
-				game.fxMan.detachExit();
-			break;
+			case 2: {// anti fleche de sortie
+				game.fxMan.DetachExit();
+			}break;
 
-			case 3: // libération des fruits
-				playById(101);
+			case 3: {// libération des fruits
+				PlayById(101);
 				fl_elevatorOpen = true;
-				var l = game.getPlayerList();
-				for (var i=0;i<l.length;i++) {
+				var l = game.GetPlayerList();
+				for (var i=0;i<l.Count;i++) {
 					l[i].lockControls(Data.SECOND*12.5);
 					l[i].dx = 0;
 				}
 				game.huTimer = 0;
-			break;
+			}break;
 
-			case 4: // sortie par l'ascenseur
+			case 4: {// sortie par l'ascenseur
 				if ( fl_elevatorOpen ) {
-					var l = game.getPlayerList();
-					for (var i=0;i<l.length;i++) {
+					var l = game.GetPlayerList();
+					for (var i=0;i<l.Count;i++) {
 						l[i].hide();
 						l[i].lockControls(99999);
 						game.huTimer = 0;
 					}
 
-					for (var i=0;i<mcList.length;i++) {
+					for (var i=0;i<mcList.Count;i++) {
 						if ( mcList[i].sid == 101 ) {
-							downcast(mcList[i].mc).head = game.getPlayerList()[0].head
+							mcList[i].mc.head = game.GetPlayerList()[0].head;
 						}
 					}
-					playById(101);
+					PlayById(101);
 					game.endModeTimer = Data.SECOND*14;
 					fl_elevatorOpen = false;
 				}
-			break;
+			}break;
 
-			case 5: // sortie apr�s tuberculoz
-				if ( downcast(game.getOne(Data.BOSS)).fl_defeated ) {
-					bossDoorTimer-=Timer.tmod;
+			case 5: {// sortie apr�s tuberculoz
+				if ( game.GetOne(Data.BOSS).fl_defeated ) {
+					bossDoorTimer-=Time.fixedDeltaTime;
 					if ( bossDoorTimer<=0 ) {
-						game.destroyList(Data.BOSS);
-						game.world.view.destroy();
-						game.forcedGoto(102);
+						game.DestroyList(Data.BOSS);
+						game.world.view.DestroyThis();
+						game.ForcedGoto(102);
 					}
 				}
-			break;
+			}break;
 
-			case 6: // attachement de ballons en sur les slots sp�ciaux
-				var s = game.world.current.$specialSlots[ Std.random(game.world.current.$specialSlots.length) ];
-				var b = entity.bomb.player.SoccerBall.attach(
+			case 6: {// attachement de ballons en sur les slots sp�ciaux
+				var s = game.world.current.specialSlots[ UnityEngine.Random.Range(0, game.world.current.specialSlots.Length) ];
+				var b = Entity.Bomb.Player.SoccerBall.attach(
 					game,
-					Entity.x_ctr(s.$x),
-					Entity.y_ctr(s.$y)
+					Entity.x_ctr(s.x),
+					Entity.y_ctr(s.y)
 				);
-				b.dx = (10+Std.random(10)) * (Std.random(2)*2-1);
-				b.dy = -Std.random(5)-5
-			break;
+				b.dx = (10+UnityEngine.Random.Range(0, 10)) * (UnityEngine.Random.Range(0, 2)*2-1);
+				b.dy = -UnityEngine.Random.Range(0, 5)-5;
+			}break;
 
-			case 7: // igor pleure
-				var pl = game.getPlayerList();
-				for (var i=0;i<pl.length;i++) {
+			case 7: {// igor pleure
+				var pl = game.GetPlayerList();
+				for (var i=0;i<pl.Count;i++) {
 					pl[i].setBaseAnims( Data.ANIM_PLAYER_WALK, Data.ANIM_PLAYER_STOP_L );
 				}
-			break;
+			}break;
 
-			case 8: // igor est content
-				var pl = game.getPlayerList();
-				for (var i=0;i<pl.length;i++) {
-					pl[i].setBaseAnims( Data.ANIM_PLAYER_WALK_V, Data.ANIM_PLAYER_STOP_V );
+			case 8: {// igor est content
+				var pl = game.GetPlayerList();
+				for (var i=0;i<pl.Count;i++) {
+					pl[i].SetBaseAnims( Data.ANIM_PLAYER_WALK_V, Data.ANIM_PLAYER_STOP_V );
 				}
-			break;
+			}break;
 
-			case 9: // rire tuberculoz
+			case 9: {// rire tuberculoz
 				game.soundMan.playSound("sound_boss_laugh", Data.CHAN_BAD);
-			break;
+			}break;
 
-			case 10: // d�sactive les jump down sur les monstres !
-				var l = game.getBadList();
-				for (var i=0;i<l.length;i++) {
-					downcast(l[i]).setJumpDown(null);
+			case 10: {// d�sactive les jump down sur les monstres !
+				var l = game.GetBadList();
+				for (var i=0;i<l.Count;i++) {
+					l[i].SetJumpDown(null);
 				}
-			break;
+			}break;
 
-			case 11: // tue tous les bads (clear only)
-				var l = game.getBadClearList();
-				for (var i=0;i<l.length;i++) {
+			case 11: {// tue tous les bads (clear only)
+				var l = game.GetBadClearList();
+				for (var i=0;i<l.Count;i++) {
 					var b = l[i];
-					game.fxMan.attachFx( b.x, b.y-Data.CASE_HEIGHT, "hammer_fx_pop" );
+					game.fxMan.AttachFx( b.x, b.y-Data.CASE_HEIGHT, "hammer_fx_pop" );
 					b.destroy();
 				}
-			break;
+			}break;
 
-			case 12: // force le hurry up (� utiliser avec parcimonie)
+			case 12: {// force le hurry up (� utiliser avec parcimonie)
 				while ( game.huState<2 ) {
-					var mc = game.onHurryUp();
+					var mc = game.OnHurryUp();
 					if ( game.huState<2 ) {
 						mc.removeMovieClip();
 					}
 				}
-			break;
+			}break;
 
-			case 13: // d�truit tous les items (score & special)
-				var l = game.getList(Data.ITEM);
-				for (var i=0;i<l.length;i++) {
+			case 13: {// d�truit tous les items (score & special)
+				var l = game.GetList(Data.ITEM);
+				for (var i=0;i<l.Count;i++) {
 					var it = l[i];
-					game.fxMan.attachFx( it.x, it.y-Data.CASE_HEIGHT, "hammer_fx_pop" );
-					it.destroy();
+					game.fxMan.AttachFx( it.x, it.y-Data.CASE_HEIGHT, "hammer_fx_pop" );
+					it.Destroy();
 				}
-			break;
+			}break;
 
-			case 14: // efface les lumi�res de torches
-				game.clearExtraHoles();
-			break;
+			case 14: {// efface les lumi�res de torches
+				game.ClearExtraHoles();
+			}break;
 
-			case 15: // reset hurry (dangeureux !)
-				game.resetHurry();
-			break;
+			case 15: {// reset hurry (dangeureux !)
+				game.ResetHurry();
+			}break;
 
-			default:
-				GameManager.fatal("code trigger #"+id+" not found!");
-			break;
+			default: {
+				GameManager.Fatal("code trigger #"+id+" not found!");
+			}break;
 		}
-	} */
+	}
 
 
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE
 	------------------------------------------------------------------------*/
-/* 	function update() {
+	public void Update() {
 		if (fl_compile) {
-			cycle+=Timer.tmod;
-			runScript();
+			cycle+=Time.fixedDeltaTime;
+			RunScript();
 		}
 
 		if (fl_redraw) {
 			fl_redraw = false;
-			game.world.view.detachLevel();
-			game.world.view.displayCurrent();
-			game.world.view.moveToPreviousPos();
+			game.world.view.DetachLevel();
+			game.world.view.DisplayCurrent();
+			game.world.view.MoveToPreviousPos();
 		}
 		fl_firstTorch = false;
-	} */
+	}
 } 

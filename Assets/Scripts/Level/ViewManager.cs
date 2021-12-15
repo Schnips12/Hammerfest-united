@@ -6,12 +6,12 @@ namespace Level;
 
 public class ViewManager : SetManager
 {
-    View view;
+    public View view;
 
 	public bool fl_hideTiles;
 	public bool fl_hideBorders;
 	bool fl_shadow;
-	int scrollDir;
+	protected int scrollDir;
 
 	bool fl_restoring;
 	bool fl_scrolling;
@@ -27,8 +27,7 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public ViewManager(GameManager m, string setName) {
-		//super(m,setName);
+	public ViewManager(GameManager m, string setName) : base(m, setName) {
 		fl_scrolling	= false;
 		fl_hscrolling	= false;
 		fl_hideTiles	= false;
@@ -41,18 +40,14 @@ public class ViewManager : SetManager
 		darknessFactor	= 0;
 	}
 
-    public ViewManager() {
-
-    }
-
 	/*------------------------------------------------------------------------
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
-/* 	void Destroy() {
-		super.destroy();
-		view.destroy();
-		fake.removeMovieClip();
-	} */
+	public override void DestroyThis() {
+		base.DestroyThis();
+		view.DestroyThis();
+		/* fake.removeMovieClip(); */
+	}
 
 
 
@@ -61,48 +56,44 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	EVENT: GENERIC TRANSITION CALLBACK
 	------------------------------------------------------------------------*/
-	IEnumerable OnTransitionDone() {
+	void OnTransitionDone() {
 /* 		view.moveTo(0,0);
 		fake.removeMovieClip();
 		if ( fl_mirror ) {
 			flipPortals();
 		} */
-        yield return true;
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: SCROLLING TERMIN�
 	------------------------------------------------------------------------*/
-	IEnumerable OnScrollDone() {
+	void OnScrollDone() {
 		fl_scrolling = false;
 		StartCoroutine("OnViewReady");
-        yield return true;
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: SCROLLING HORIZONTAL TERMIN�
 	------------------------------------------------------------------------*/
-	IEnumerable OnHScrollDone() {
+	protected virtual void OnHScrollDone() {
 		fl_hscrolling = false;
-        yield return true;
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: FADE TERMIN�
 	------------------------------------------------------------------------*/
-	IEnumerable OnFadeDone() {
+	protected virtual void OnFadeDone() {
 		fl_fading = false;
-        yield return true;
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: VUE PR�TE � �TRE JOUER
 	------------------------------------------------------------------------*/
-	void OnViewReady() {
+	protected virtual void OnViewReady() {
 		// do nothing
 	}
 
@@ -110,8 +101,8 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	EVENT: D�CODAGE TERMIN�
 	------------------------------------------------------------------------*/
-	IEnumerable OnDataReady() {
-		//super.onDataReady();
+	protected override void OnDataReady() {
+		base.OnDataReady();
 
 		if (!view.fl_attach) {
 			view = new View(currentId);
@@ -135,14 +126,13 @@ public class ViewManager : SetManager
 
 			fl_scrolling = true;
 		}
-        yield return true;
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: RESTORE TERMIN�
 	------------------------------------------------------------------------*/
-	IEnumerable OnRestoreReady() {
+	protected virtual void OnRestoreReady() {
 		//super.onRestoreReady();
 		fl_restoring = false;
 		if ( fl_fadeNextTransition ) {
@@ -154,7 +144,6 @@ public class ViewManager : SetManager
 			fl_hscrolling = true;
 			scrollCpt = 0;
 		}
-        yield return true;
 
 		// hack: scrolldir is set in GameMechanics
 	}
@@ -163,7 +152,7 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	ATTACH: VUE
 	------------------------------------------------------------------------*/
-/* 	View CreateView(int id) {
+	View CreateView(int id) {
 		View v = new View(this);
 		v.fl_hideTiles = fl_hideTiles;
 		v.fl_hideBorders = fl_hideBorders;
@@ -173,20 +162,20 @@ public class ViewManager : SetManager
 		}
 		v.Display(id);
 		return v;
-	} */
+	}
 
 
 	/*------------------------------------------------------------------------
 	GESTION MISE EN ATTENTE
 	------------------------------------------------------------------------*/
-	public void Suspend() {
-		//super.suspend();
+	public override void Suspend() {
+		base.Suspend();
 		view.Detach();
 		//fake.removeMovieClip();
 	}
 
-	void Restore(int lid) {
-		//super.restore(lid);
+	public override void Restore(int lid) {
+		base.Restore(lid);
 		fl_restoring = true;
 		//goto(lid);
 	}
@@ -195,7 +184,7 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	R�ACTIVATION AVEC ANIM DE TRANSITION DEPUIS UN SNAPSHOT
 	------------------------------------------------------------------------*/
-	void RestoreFrom(int lid) {
+	public void RestoreFrom(int lid) {
 		//prevSnap = snap;
 		//createFake(prevSnap);
 		//view.moveTo(Data.GAME_WIDTH,0);
@@ -206,7 +195,7 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE (SCROLLING)
 	------------------------------------------------------------------------*/
-	public void Update() {
+	public virtual void Update() {
 		//super.update();
 
 		if (fl_scrolling) {

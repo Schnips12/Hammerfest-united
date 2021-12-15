@@ -51,7 +51,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: INDICATEUR DE LEVEL
 	------------------------------------------------------------------------*/
-	void AttachLevelPop(string name, bool fl_label) {
+	public void AttachLevelPop(string name, bool fl_label) {
 /* 		if (name != null) {
 			levelName.RemoveMovieClip();
 			levelName = downcast(game.depthMan.attach("hammer_interf_zone",Data.DP_INTERF));

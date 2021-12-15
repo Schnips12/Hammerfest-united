@@ -91,12 +91,10 @@ public struct Cookie
 	/*------------------------------------------------------------------------
 	COOKIE => RUNTIME
 	------------------------------------------------------------------------*/
-	public Cookie ReadSet(string name) {
-        if (NAME == name) {
-            return new Cookie();
-        } else {
-            return new Cookie(name);
-        }
+	public string ReadFile(string name) {
+		string raw = File.ReadAllText(Application.dataPath+"/xml/"+name);
+		SetVar(name, raw);
+		return raw;
 	}
 
 	/*------------------------------------------------------------------------
@@ -115,7 +113,7 @@ public struct Cookie
 		}
 	}
 	
-	public Mode.Mode GetMode() {
+	public Mode GetMode() {
 		return manager.current;
 	}
 }

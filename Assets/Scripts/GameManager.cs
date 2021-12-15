@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
 	[SerializeField] public List<GameObject> misc;
 	[SerializeField] public List<GameObject> gui;
 
-	List<string> history;
+	public List<string> history;
 	List<string> families;
 	List<string> options;
 
@@ -116,7 +116,7 @@ public class GameManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	LOG DE PARTIE
 	------------------------------------------------------------------------*/
-	void LogAction(string str) {
+	public void LogAction(string str) {
 		str.Replace("$", "");
 		str.Replace(":", ".");
 		history.Add(str);

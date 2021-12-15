@@ -26,7 +26,7 @@ public class Chrono
 	/*------------------------------------------------------------------------
 	RENVOIE LA VALEUR DU CHRONO ACTUEL (millisecondes)
 	------------------------------------------------------------------------*/
-	float Get() {
+	public float Get() {
 		if (fl_stop) {
 			return haltedTimer;
 		}

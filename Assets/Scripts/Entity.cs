@@ -52,7 +52,7 @@ public class Entity : MonoBehaviour
 	float rotation;
 	float alpha;
 	float minAlpha;
-	float scaleFactor; // facteur (1.0)
+	float scaleFactor = 1; // facteur (1.0)
 	//BlendMode defaultBlend: BlendMode; //TODO obsolete
 	//int blendId		: int; // int value of blendMode
 
@@ -428,11 +428,11 @@ public class Entity : MonoBehaviour
 		return n*scaleY + scaleY;
 	}
 
-	public float x_ctr(int n) {
-		return n*scaleFactor + scaleFactor*0.5f ;
+	public static float x_ctr(int n) {
+		return n + 1*0.5f ;
 	}
-	public float y_ctr(int n) {
-		return n*scaleFactor + scaleFactor;
+	public static float y_ctr(int n) {
+		return n + 1;
 	}
 
 

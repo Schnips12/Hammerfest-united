@@ -49,6 +49,10 @@ public class View : MonoBehaviour
     public View(int levelId) {
 
     }
+	public View(ViewManager vm) {
+
+    }
+
 
 	private void Start() {
 		cam = Camera.main;
@@ -88,7 +92,7 @@ public class View : MonoBehaviour
 		}
     }
 
-	void Attach() {
+	public void Attach() {
 		DrawBackground();
         DrawGround();
 	}
@@ -392,8 +396,9 @@ public class View : MonoBehaviour
 	/*------------------------------------------------------------------------
 	AFFICHE UN SPRITE STATIQUE DE D�COR
 	------------------------------------------------------------------------*/
-	void AttachSprite(TileBase tile, int x, int y, bool fl_back) {
-		// TODO Create a new grid for managing extra background sprites
+	public GameObject AttachSprite(string spriteName, int x, int y, bool fl_back) {
+		return null;
+		// TODO Instantiate GameObjetcs here
 	}
 
 
@@ -434,6 +439,10 @@ public class View : MonoBehaviour
 	------------------------------------------------------------------------*/
 	public void displayCurrent() {
 		Display(currentId);
+	}
+
+	public void DestroyThis() {
+		Detach();
 	}
 
 }

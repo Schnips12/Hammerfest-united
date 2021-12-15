@@ -9,9 +9,9 @@ public class PortalData
  	public int cx;
 	public int cy;
 
-	float x; // for animation purpose only
-	float y;
-	float cpt;
+	public float x; // for animation purpose only
+	public float y;
+	public float cpt;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR

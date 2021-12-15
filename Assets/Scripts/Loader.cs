@@ -51,7 +51,7 @@ public class Loader : MonoBehaviour
 
         XmlDocument doc = new XmlDocument();
 		rawLang = File.ReadAllText(Application.dataPath+"/xml/lang/"+root.ReadVar("lang"));
-        doc.Load(rawLang);
+        doc.LoadXml(rawLang);
 		xmlLang = doc.FirstChild.FirstChild;
 		while (xmlLang != null & xmlLang.Name!="statics") {
 			xmlLang = xmlLang.NextSibling;

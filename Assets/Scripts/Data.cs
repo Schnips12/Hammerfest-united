@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using System.Xml;
+using System.Xml.Linq;
 
 public class Data : MonoBehaviour
 {
@@ -496,7 +496,7 @@ public class Data : MonoBehaviour
 	public static List<List<ItemFamilySet>> SCORE_ITEM_FAMILIES;
 	public static List<int> ITEM_VALUES;
 	public static List<int> FAMILY_CACHE;
-	public static List<PortalLink> LINKS;
+	public static List<Level.PortalLink> LINKS;
     public struct LevelTag {
         public string name;
         public int did;
@@ -526,23 +526,22 @@ public class Data : MonoBehaviour
 	------------------------------------------------------------------------*/
 	static int[] InitItemsRaw() {
 		List<int> tab = new List<int>();
-		string raw = manager.root.ReadSet("xml_items");
-		XmlDocument doc = new XmlDocument();
-        doc.LoadXml(raw);
-        XmlNode node = doc.FirstChild;
-		if (node.Name != "$items".Substring(1)) {
+		string raw = manager.root.ReadFile("xml_items");
+		XDocument doc = XDocument.Parse(raw);
+        XElement node = doc.FirstNode as XElement;
+		if (node.Name != "items") {
 			GameManager.Fatal("XML error: invalid node '"+node.Name+"'");
 			return null;
 		}
 
 		// DEBUG: lecture et stockage "raw" de tous les items dans une seule famille
-		XmlNode family = node.FirstChild;
-        XmlNode item;
+		XElement family = node.FirstNode as XElement;
+        XElement item;
 		while (family != null) {
-			item = family.FirstChild;
+			item = family.FirstNode as XElement;
 			while (item != null) {
-				int rarity = Int32.Parse(item.Attributes["$rarity".Substring(1)].Value);
-				int id = Int32.Parse(item.Attributes["$id".Substring(1)].Value);
+				int rarity = Int32.Parse(item.Attribute("rarity").Value);
+				int id = Int32.Parse(item.Attribute("id").Value);
 				int rand = Data.__NA;
 				switch (rarity) {
 					case 1	: rand = Data.COMM;break;
@@ -557,9 +556,9 @@ public class Data : MonoBehaviour
                     tab.Add(0);
                 }
 				tab[id] = rand;
-				item = item.NextSibling;
+				item = item.NextNode as XElement;
 			}
-			family = family.NextSibling;
+			family = family.NextNode as XElement;
 		}
 
 		return tab.ToArray();
@@ -570,38 +569,37 @@ public class Data : MonoBehaviour
 	------------------------------------------------------------------------*/
 	static List<List<ItemFamilySet>> Xml_readFamily(string xmlName) { // note: append leading "$" for obfuscator
 		var tab = new List<List<ItemFamilySet>>();
-		string raw = manager.root.ReadSet(xmlName);
+		string raw = manager.root.ReadFile(xmlName);
 
-        XmlDocument doc = new XmlDocument();
-        doc.LoadXml(raw);
-		XmlNode node = doc.FirstChild;
-		if (node.Name != "$items".Substring(1)) {
-			GameManager.Fatal("XML error ("+xmlName+" @ "+manager.root.NAME+"): invalid node '"+node.Name+"'");
+        XDocument doc = XDocument.Parse(raw);
+		XElement node = doc.FirstNode as XElement;
+		if (node.Name != "items") {
+			GameManager.Fatal("XML error ("+xmlName+" @ "+Cookie.NAME+"): invalid node '"+node.Name+"'");
 			return null;
 		}
 
-		XmlNode family = node.FirstChild;
+		XElement family = node.FirstNode as XElement;
 		while (family != null) {
-			XmlNode item = family.FirstChild;
-			int fid = Int32.Parse(family.Attributes["$id".Substring(1)].Value);
+			XElement item = family.FirstNode as XElement;
+			int fid = Int32.Parse(family.Attribute("id").Value);
             while(tab.Count < fid) {
                 tab.Add(null);
             }
 			tab[fid] = new List<ItemFamilySet>();
 			while (item != null) {
                 ItemFamilySet temp = new ItemFamilySet();
-				temp.id	= Int32.Parse(item.Attributes["$id".Substring(1)].Value);
-				temp.r	= Data.RARITY[Int32.Parse(item.Attributes["$rarity".Substring(1)].Value)];
-				temp.v	= Int32.Parse(item.Attributes["$value".Substring(1)].Value);
+				temp.id	= Int32.Parse(item.Attribute("id").Value);
+				temp.r	= Data.RARITY[Int32.Parse(item.Attribute("rarity").Value)];
+				temp.v	= Int32.Parse(item.Attribute("value").Value);
                 temp.name = Lang.GetItemName(temp.id);
 
 				/* if ( value==null ) {
 					value=0;
 				} */
 				tab[fid].Add(temp);
-				item = item.NextSibling;
+				item = item.NextNode as XElement;
 			}
-			family = family.NextSibling;
+			family = family.NextNode as XElement;
 		}
 		return tab;
 	}
@@ -719,40 +717,39 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	LECTURE DU XML DES PORTALS
 	------------------------------------------------------------------------*/
-	static List<PortalLink> Xml_readPortalLinks() {
-		List<PortalLink> list = new List<PortalLink>();
-		string raw = manager.root.ReadSet("xml_portalLinks");
+	static List<Level.PortalLink> Xml_readPortalLinks() {
+		List<Level.PortalLink> list = new List<Level.PortalLink>();
+		string raw = manager.root.ReadFile("xml_portalLinks");
 
-		XmlDocument doc = new XmlDocument();
+		XDocument doc = XDocument.Parse(raw);
 		//doc.ignoreWhite = true;
-		doc.Load(raw);
-		XmlNode node = doc.FirstChild;
-		if ( node.Name!="$links".Substring(1) ) {
-			GameManager.Fatal("XML error (xml_portals @ "+manager.root.NAME+"): invalid node '"+node.Name+"'");
+		XElement node = doc.FirstNode as XElement;
+		if ( node.Name!="links") {
+			GameManager.Fatal("XML error (xml_portals @ "+Cookie.NAME+"): invalid node '"+node.Name+"'");
 			return null;
 		}
 
 		// Lecture des tags de d�but de XML
-		node = node.FirstChild;
-		if (node.Name != "$tags".Substring(1)) {
-			GameManager.Fatal("XML error (xml_portals @ "+manager.root.NAME+"): invalid node '"+node.Name+"'");
+		node = node.FirstNode as XElement;
+		if (node.Name != "tags") {
+			GameManager.Fatal("XML error (xml_portals @ "+Cookie.NAME+"): invalid node '"+node.Name+"'");
 		}
 
-		XmlElement tag = node.FirstChild as XmlElement;
+		XElement tag = node.FirstNode as XElement;
 		LEVEL_TAG_LIST = new List<LevelTag>();
 		while (tag != null) {
             LevelTag temptag = new LevelTag();
-            temptag.name = tag.GetAttribute("$name".Substring(1)).ToLower();
-            temptag.did = Int32.Parse(tag.GetAttribute("$did".Substring(1)));
-            temptag.lid = Int32.Parse(tag.GetAttribute("$lid".Substring(1)));
-			tag = tag.NextSibling as XmlElement;
+            temptag.name = tag.Attribute("name").Value.ToLower();
+            temptag.did = Int32.Parse(tag.Attribute("did").Value);
+            temptag.lid = Int32.Parse(tag.Attribute("lid").Value);
+			tag = tag.NextNode as XElement;
 		}
-		node = node.NextSibling;
-		if (node.Name!="$ways".Substring(1)) {
+		node = node.NextNode as XElement;
+		if (node.Name!="ways") {
 			GameManager.Fatal("xml_readPortalLinks: unknown node "+node.Name);
 			return null;
 		}
-		XmlElement elem = node.FirstChild as XmlElement;
+		XElement elem = node.FirstNode as XElement;
 
 
 		// Lecture des links
@@ -760,19 +757,19 @@ public class Data : MonoBehaviour
 
 			string att;
 
-			att = elem.GetAttribute("$from".Substring(1));
+			att = elem.Attribute("from").Value;
             att.Replace("(", ",");
             att.Replace(")", "");
             att.Replace(" ", "");
             string[] from = att.Split(',');
 
-            att = elem.GetAttribute("$to".Substring(1));
+            att = elem.Attribute("to").Value;
             att.Replace("(", ",");
             att.Replace(")", "");
             att.Replace(" ", "");
             string[] to = att.Split(',');
 
-			PortalLink link	= new PortalLink();
+			Level.PortalLink link	= new Level.PortalLink();
 			LevelTag linfo = GetLevelFromTag(from[0]);
 			link.from_did	= linfo.did;
 			link.from_lid	= linfo.lid;
@@ -787,8 +784,8 @@ public class Data : MonoBehaviour
 			list.Add(link);
 
 			// 2-way portal
-			if (elem.Name == "$twoway".Substring(1)) {
-				PortalLink backLink = new PortalLink();
+			if (elem.Name == "twoway") {
+				Level.PortalLink backLink = new Level.PortalLink();
 				backLink.from_did	= link.to_did;
 				backLink.from_lid	= link.to_lid;
 				backLink.from_pid	= link.to_pid;
@@ -798,7 +795,7 @@ public class Data : MonoBehaviour
 				list.Add(backLink);
 			}
 
-			elem = elem.NextSibling as XmlElement;
+			elem = elem.NextNode as XElement;
 		}
 
 		return list;
@@ -807,30 +804,30 @@ public class Data : MonoBehaviour
 
 
 	// *** MODE OPTIONS
-	public static string OPT_MIRROR		    = "$mirror".Substring(1);
-	public static string OPT_MIRROR_MULTI	= "$mirrormulti".Substring(1);
-	public static string OPT_NIGHTMARE_MULTI= "$nightmaremulti".Substring(1);
-	public static string OPT_NIGHTMARE		= "$nightmare".Substring(1);
-	public static string OPT_LIFE_SHARING	= "$lifesharing".Substring(1);
-	public static string OPT_SOCCER_BOMBS	= "$soccerbomb".Substring(1);
-	public static string OPT_KICK_CONTROL	= "$kickcontrol".Substring(1);
-	public static string OPT_BOMB_CONTROL	= "$bombcontrol".Substring(1);
-	public static string OPT_NINJA			= "$ninja".Substring(1);
-	public static string OPT_BOMB_EXPERT	= "$bombexpert".Substring(1);
-	public static string OPT_BOOST			= "$boost".Substring(1);
+	public static string OPT_MIRROR		    = "mirror";
+	public static string OPT_MIRROR_MULTI	= "mirrormulti";
+	public static string OPT_NIGHTMARE_MULTI= "nightmaremulti";
+	public static string OPT_NIGHTMARE		= "nightmare";
+	public static string OPT_LIFE_SHARING	= "lifesharing";
+	public static string OPT_SOCCER_BOMBS	= "soccerbomb";
+	public static string OPT_KICK_CONTROL	= "kickcontrol";
+	public static string OPT_BOMB_CONTROL	= "bombcontrol";
+	public static string OPT_NINJA			= "ninja";
+	public static string OPT_BOMB_EXPERT	= "bombexpert";
+	public static string OPT_BOOST			= "boost";
 
-	public static string OPT_SET_TA_0		= "$set_ta_0".Substring(1);
-	public static string OPT_SET_TA_1		= "$set_ta_1".Substring(1);
-	public static string OPT_SET_TA_2		= "$set_ta_2".Substring(1);
+	public static string OPT_SET_TA_0		= "set_ta_0";
+	public static string OPT_SET_TA_1		= "set_ta_1";
+	public static string OPT_SET_TA_2		= "set_ta_2";
 
-	public static string OPT_SET_MTA_0		= "$set_mta_0".Substring(1);
-	public static string OPT_SET_MTA_1		= "$set_mta_1".Substring(1);
-	public static string OPT_SET_MTA_2		= "$set_mta_2".Substring(1);
+	public static string OPT_SET_MTA_0		= "set_mta_0";
+	public static string OPT_SET_MTA_1		= "set_mta_1";
+	public static string OPT_SET_MTA_2		= "set_mta_2";
 
-	public static string OPT_SET_SOC_0		= "$set_soc_0".Substring(1);
-	public static string OPT_SET_SOC_1		= "$set_soc_1".Substring(1);
-	public static string OPT_SET_SOC_2		= "$set_soc_2".Substring(1);
-	public static string OPT_SET_SOC_3		= "$set_soc_3".Substring(1);
+	public static string OPT_SET_SOC_0		= "set_soc_0";
+	public static string OPT_SET_SOC_1		= "set_soc_1";
+	public static string OPT_SET_SOC_2		= "set_soc_2";
+	public static string OPT_SET_SOC_3		= "set_soc_3";
 
 
 
@@ -983,11 +980,11 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE LE LINK CORRESPONDANT � UN PORTAL DONN�
 	------------------------------------------------------------------------*/
-	static PortalLink GetLink(int did, int lid, int pid) {
-        PortalLink link = null;
+	public static Level.PortalLink GetLink(int did, int lid, int pid) {
+        Level.PortalLink link = null;
         int i=0;
 		while (i < Data.LINKS.Count & link == null) {
-			PortalLink l = Data.LINKS[i];
+			Level.PortalLink l = Data.LINKS[i];
 			if (l.from_did == did & l.from_lid == lid & l.from_pid == pid ) {
 				link = l;
 			}

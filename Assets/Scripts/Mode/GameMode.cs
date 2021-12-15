@@ -21,45 +21,45 @@ public class GameMode : Mode
     [SerializeField] GameObject darknessPrefab;
     private GameObject darkness;
 
-    FxManager fxMan;
-    StatsManager statsMan;
-    RandomManager randMan;
-    bool fl_static; // si true, le comportement initial des monstres sera prévisible (random sinon)
-    bool fl_bullet;
-    bool fl_disguise;
-    bool fl_map;
-    bool fl_mirror;
-    bool fl_nightmare;
-    bool fl_bombControl;
-    bool fl_ninja;
-    bool fl_bombExpert;
-    bool fl_ice;
-    bool fl_aqua;
-    bool fl_badsCallback;
+    public FxManager fxMan;
+    public StatsManager statsMan;
+    public RandomManager randMan;
+    protected bool fl_static; // si true, le comportement initial des monstres sera prévisible (random sinon)
+    protected bool fl_bullet;
+    protected bool fl_disguise;
+    protected bool fl_map;
+    public bool fl_mirror;
+    public bool fl_nightmare;
+    protected bool fl_bombControl;
+    public bool fl_ninja;
+    protected bool fl_bombExpert;
+    protected bool fl_ice;
+    protected bool fl_aqua;
+    protected bool fl_badsCallback;
 
-    float duration;
-    float gFriction;
-    float sFriction;
-    float speedFactor;
-    float diffFactor;
+    protected float duration;
+    protected float gFriction;
+    protected float sFriction;
+    protected float speedFactor;
+    protected float diffFactor;
 
-    List<List<Entity>> lists;
-    List<Entity> killList;
-    Dictionary<int, Entity> unregList;
-    Level.GameMechanics world;
+    protected List<List<Entity>> lists;
+    protected List<Entity> killList;
+    protected Dictionary<int, Entity> unregList;
+    public Level.GameMechanics world;
 
-    List<int> comboList;
-    int badCount;
-    int friendsLimit;
+    protected List<int> comboList;
+    public int badCount;
+    protected int friendsLimit;
 
-    bool fl_clear;
-    bool fl_gameOver;
-    bool fl_pause;
-    bool fl_rightPortal;
+    public bool fl_clear;
+    protected bool fl_gameOver;
+    protected bool fl_pause;
+    public bool fl_rightPortal;
 
-    float huTimer;
-    int huState;
-    float endModeTimer;
+    public float huTimer;
+    public int huState;
+    public float endModeTimer;
     float shakeTotal;
     float shakeTimer;
     float shakePower;
@@ -70,7 +70,7 @@ public class GameMode : Mode
     bool fl_flipY;
     float aquaTimer;
 
-    List<bool> globalActives;
+    protected List<bool> globalActives;
 
     /* var mapIcons		: Array<MovieClip>; */
     float dfactor;
@@ -86,13 +86,13 @@ public class GameMode : Mode
     List<int> savedScores;
 
     List<Level.GameMechanics> dimensions;
-    int currentDim;
-    int portalId;
+    protected int currentDim;
+    protected int portalId;
     List<Entity.Player> latePlayers;		// liste de players arrivant en retard d'un portal
     List<Level.PortalLink> portalMcList;
 
     /* var gi				: gui.GameInterface; */
-    Chrono gameChrono;
+    public Chrono gameChrono;
 
     struct eventAndTravel {
         public int lid;
@@ -106,9 +106,9 @@ public class GameMode : Mode
     Color color;
     int colorHex;
     List<bool> worldKeys;
-    int forcedDarkness;
+    public int? forcedDarkness;
     Level.PortalLink nextLink;
-    int fakeLevelId;
+    public int fakeLevelId;
     int perfectItemCpt;
 
 
@@ -208,14 +208,14 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISATION DE LA VARIABLE WORLD
     ------------------------------------------------------------------------*/
-    void InitWorld() {
+    protected virtual void InitWorld() {
         // do nothing
     }
 
     /*------------------------------------------------------------------------
     INITIALISE LE JEU SUR LE PREMIER LEVEL
     ------------------------------------------------------------------------*/
-    void InitGame() {
+    protected virtual void InitGame() {
         InitWorld();
     }
 
@@ -223,7 +223,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISE L'INTERFACE DE JEU (non appelé dans la classe gamemode)
     ------------------------------------------------------------------------*/
-    void InitInterface() {
+    protected virtual void InitInterface() {
         gui.Destroy();
         gui = new gui.GameInterface(this);
     }
@@ -232,7 +232,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISE LE LEVEL
     ------------------------------------------------------------------------*/
-    void InitLevel() {
+    protected virtual void InitLevel() {
         if (!world.IsVisited()) {
             ResetHurry();
         }
@@ -253,7 +253,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISE UN JOUEUR
     ------------------------------------------------------------------------*/
-    void InitPlayer(Entity.Player p) {
+    protected void InitPlayer(Entity.Player p) {
         // do nothing
     }
 
@@ -328,7 +328,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     REMET LE HURRY UP À ZÉRO
     ------------------------------------------------------------------------*/
-    void ResetHurry() {
+    public virtual void ResetHurry() {
         huTimer = 0;
         huState = 0;
 
@@ -488,7 +488,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     ITEMS PAR NIVEAU (DÉPENDANT DU MODE)
     ------------------------------------------------------------------------*/
-    void AddLevelItems() {
+    public virtual void AddLevelItems() {
         // do nothing
     }
 
@@ -496,7 +496,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DÉMARRE LE LEVEL
     ------------------------------------------------------------------------*/
-    void StartLevel() {
+    protected virtual void StartLevel() {
         var n=0;
         n = world.scriptEngine.InsertBads();
         if (n==0) {
@@ -526,7 +526,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     PASSE AU NIVEAU SUIVANT
     ------------------------------------------------------------------------*/
-    void NextLevel() {
+    protected virtual void NextLevel() {
         fakeLevelId++;
         Goto(world.currentId+1);
     }
@@ -535,7 +535,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     PASSAGE FORCÉ À UN NIVEAU
     ------------------------------------------------------------------------*/
-    void ForcedGoto(int id) {
+    public void ForcedGoto(int id) {
         fakeLevelId += id-world.currentId;
         world.fl_hideBorders	= false;
         world.fl_hideTiles		= false;
@@ -576,12 +576,12 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     CHANGE DE NIVEAU
     ------------------------------------------------------------------------*/
-    void Goto(int id) {
+    protected virtual void Goto(int id) {
         if (fl_lock | fl_gameOver) {
             return;
         }
 
-        if (id>=world.levels.Count) {
+        if (id>=world.worldmap.Count) {
             world.OnEndOfSet();
             return;
         }
@@ -624,12 +624,12 @@ public class GameMode : Mode
     }
 
 
-    protected override void Lock() {
+    public override void Lock() {
         base.Lock();
         gameChrono.Stop();
     }
 
-    protected override void Unlock() {
+    public override void Unlock() {
         base.Unlock();
         gameChrono.Begin();
     }
@@ -646,8 +646,8 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE TRUE SI LE POP D'ITEM EST ENCORE AUTORISÉ
     ------------------------------------------------------------------------*/
-    bool CanAddItem() {
-        return !fl_clear | world.current.badList.Count==0;
+    public bool CanAddItem() {
+        return !fl_clear | world.current.badList.Length==0;
     }
 
 
@@ -734,7 +734,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE TRUE SI LE LEVEL COMPORTE UN BOSS
     ------------------------------------------------------------------------*/
-    bool IsBossLevel(int id) {
+    protected virtual bool IsBossLevel(int id) {
         return false;
     }
 
@@ -742,7 +742,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     FLIP HORIZONTAL D'UN X, SI NÉCESSAIRE
     ------------------------------------------------------------------------*/
-    int FlipCoordReal(int x) {
+    public int FlipCoordReal(int x) {
         if (fl_mirror) {
             return Data.GAME_WIDTH-x-1;
         }
@@ -751,7 +751,7 @@ public class GameMode : Mode
         }
     }
 
-    int FlipCoordCase(int cx) {
+    public int FlipCoordCase(int cx) {
         if (fl_mirror) {
             return Data.LEVEL_WIDTH-cx-1;
         }
@@ -815,7 +815,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DÉFINI UNE VARIABLE DYNAMIQUE
     ------------------------------------------------------------------------*/
-    void SetDynamicVar(string name, string value) {
+    public void SetDynamicVar(string name, string value) {
         dvars[name.ToLower()] = value;
     }
 
@@ -851,7 +851,7 @@ public class GameMode : Mode
     MÉMORISE LE SCORE D'UN JOUEUR
     ------------------------------------------------------------------------*/
     void RegisterScore(int pid, int score) {
-        if (savedScores[pid]==null | savedScores[pid]<=0) { // TODO Use nullable int ?
+        if (savedScores[pid]<=0) {
             savedScores[pid] = score;
         }
     }
@@ -901,7 +901,7 @@ public class GameMode : Mode
         worldKeys[id] = true;
     }
 
-    bool HasKey(int id) {
+    public bool HasKey(int id) {
         return worldKeys[id]==true;
     }
 
@@ -980,7 +980,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISE ET AJOUTE UNE DIMENSION
     ------------------------------------------------------------------------*/
-    Level.GameMechanics AddWorld(string name) {
+    protected Level.GameMechanics AddWorld(string name) {
         Level.GameMechanics dim;
         dim = new Level.GameMechanics(manager, name);
         dim.fl_mirror = fl_mirror;
@@ -1054,7 +1054,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     UTILISE UN PORTAL (renvoie false si pas de correspondance)
     ------------------------------------------------------------------------*/
-    bool UsePortal(int pid, Entity.Physics e) {
+    public bool UsePortal(int pid, Entity.Physics e) {
         if (nextLink!=null) {
             return false;
         }
@@ -1100,7 +1100,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     OUVRE UN PORTAIL FLOTTANT
     ------------------------------------------------------------------------*/
-    bool OpenPortal(int cx, int cy, int pid) {
+    public bool OpenPortal(int cx, int cy, int pid) {
         if (portalMcList[pid]!=null) {
             return false;
         }
@@ -1141,7 +1141,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE LA LISTE D'ENTITÉS DU TYPE DEMANDÉ
     ------------------------------------------------------------------------*/
-    List<Entity> GetList(int type) {
+    public List<Entity> GetList(int type) {
         return lists[GetListId(type)];
     }
 
@@ -1169,13 +1169,13 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE DES LISTES SPÉCIFIQUES TYPÉES // TODO Define IEntity ?
     ------------------------------------------------------------------------*/
-    List<Entity.Bad> GetBadList() {
+    public List<Entity.Bad> GetBadList() {
         return GetList(Data.BAD);
     }
-    List<Entity.Bad> GetBadClearList() {
+    public List<Entity.Bad> GetBadClearList() {
         return GetList(Data.BAD_CLEAR);
     }
-    List<Entity.Player> GetPlayerList() {
+    public List<Entity.Player> GetPlayerList() {
         return GetList(Data.PLAYER);
     }
 
@@ -1221,7 +1221,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RETOURNE UNE ENTITÉ AU HASARD D'UN TYPE DONNÉ, OU NULL
     ------------------------------------------------------------------------*/
-    Entity GetOne(int type) {
+    public Entity GetOne(int type) {
         List<Entity> l = GetList(type);
         return l[UnityEngine.Random.Range(0, l.Count)];
     }
@@ -1230,7 +1230,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RETOURNE UNE ENTITÉ AU HASARD D'UN TYPE DONNÉ, OU NULL
     ------------------------------------------------------------------------*/
-    Entity GetAnotherOne(int type, Entity e) {
+    protected Entity GetAnotherOne(int type, Entity e) {
         List<Entity> l = GetList(type);
         if (l.Count <= 1) {
             return null;
@@ -1265,7 +1265,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DÉTRUIT TOUS LES MCS D'UNE LISTE
     ------------------------------------------------------------------------*/
-    void DestroyList(int type) {
+    public void DestroyList(int type) {
         List<Entity> list = GetList(type);
         foreach (Entity e in list) {
             e.Destroy();
@@ -1312,10 +1312,9 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     FIN DE MODE
     ------------------------------------------------------------------------*/
-    void ExitGame() {
+    protected void ExitGame() {
 /*         var codec = new PersistCodec();
         var out = codec.encode( codec.encode(specialPicks)+":"+codec.encode(scorePicks) ); */
-        manager.Redirect("endGame.html", out);
     }
 
 
@@ -1335,12 +1334,12 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     ATTACHE UN JOUEUR
     ------------------------------------------------------------------------*/
-    Entity InsertPlayer(int cx, int cy) {
+    protected Entity InsertPlayer(int cx, int cy) {
         // Calcul du PID
         int pid = 0;
         List<Entity.Player> pl = GetPlayerList();
-        foreach (Entity.Player p in pl) {
-            if (!p.fl_destroy ) {
+        foreach (Entity.Player player in pl) {
+            if (!player.fl_destroy ) {
                 pid++;
             }
         }
@@ -1355,7 +1354,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     ATTACH: ENNEMI
     ------------------------------------------------------------------------*/
-    Entity.Bad AttachBad(int id, float x,float y) {
+    public Entity.Bad AttachBad(int id, float x,float y) {
         Entity.Bad bad;
         switch (id) {
             case Data.BAD_POMME			 : Entity.Bad.Walker.Pomme.Attach(this,x,y) ; break;
@@ -1396,7 +1395,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     ATTACH: POP UP IN-GAME
     ------------------------------------------------------------------------*/
-    void AttachPop(string msg, bool fl_tuto) {
+    public void AttachPop(string msg, bool fl_tuto) {
         KillPop();
         popup = GameObject.Instantiate(popupPrefab, Vector3.zero, Quaternion.identity);
         popup.GetComponent<TMP_Text>().text = msg;
@@ -1413,7 +1412,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     ATTACH: POINTEUR DE CIBLAGE
     ------------------------------------------------------------------------*/
-    void AttachPointer(int cx, int cy, int ocx, int ocy) {
+    public void AttachPointer(int cx, int cy, int ocx, int ocy) {
         KillPointer();
         var x = Entity.x_ctr(cx);
         var y = Entity.y_ctr(cy);
@@ -1428,7 +1427,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     ATTACH: CERCLE DE DEBUG
     ------------------------------------------------------------------------*/
-    void AttachRadius(float x, float y, float r) {
+    public void AttachRadius(float x, float y, float r) {
 /*         KillRadius();
         radiusMC = depthMan.attach("debug_radius", Data.DP_INTERF);
         radiusMC._x = x;
@@ -1441,7 +1440,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     AFFICHE UN NOM D'ITEM SPÉCIAL RAMASSÉ
     ------------------------------------------------------------------------*/
-    void AttachItemName(List<List<ItemFamilySet>> family, int id) {
+    public void AttachItemName(List<List<ItemFamilySet>> family, int id) {
         // Recherche du nom
         string s = "";
         int i = 0;
@@ -1459,7 +1458,7 @@ public class GameMode : Mode
         if (s!="" && s!=null) {
             // Affichage
             KillItemName();
-            itemNameMC = downcast( depthMan.attach("hammer_interf_item_name", Data.DP_TOP) );
+            itemNameMC = depthMan.attach("hammer_interf_item_name", Data.DP_TOP);
             itemNameMC._x = Data.GAME_WIDTH*0.5 + 20; // icon width
             itemNameMC._y = 15;//Data.GAME_HEIGHT-20; // 15;
             itemNameMC.field.text = s;
@@ -1478,7 +1477,7 @@ public class GameMode : Mode
             icon._y = 10;
             icon._xscale = 75;
             icon._yscale = icon._xscale;
-            Downcast(icon).sub.stop();
+            icon.sub.stop();
         }
     }
 
@@ -1486,24 +1485,24 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DETACHEMENTS
     ------------------------------------------------------------------------*/
-    void KillPop() {
+    public void KillPop() {
         GameObject.Destroy(popup);
     }
 
-    void KillPointer() {
+    public void KillPointer() {
         GameObject.Destroy(pointer);
     }
 
-    void KillRadius() {
+    public void KillRadius() {
         GameObject.Destroy(radius);
     }
 
-    void KillItemName() {
+    public void KillItemName() {
         GameObject.Destroy(itemName);
     }
 
 
-    void KillPortals() { // TODO Change portalMCList type to List of GameObject?
+    public void KillPortals() { // TODO Change portalMCList type to List of GameObject?
         foreach (Level.PortalLink ptl in portalMcList) {
             GameObject.Destroy(ptl.mc);
         }
@@ -1537,8 +1536,8 @@ public class GameMode : Mode
         if ( txt==null ) {
             txt = "?";
         }
-        downcast(mc).field.text = txt;
-        mapIcons.push(mc);
+        mc.field.text = txt;
+        mapIcons.Add(mc);
     }
 
 
@@ -1566,7 +1565,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: LEVEL PRÊT À ÊTRE JOUÉ (APRÈS SCROLLING)
     ------------------------------------------------------------------------*/
-    void OnLevelReady() {
+    public virtual void OnLevelReady() {
 //		if ( world.currentId==0 ) {
 //			gameChrono.reset();
 //		}
@@ -1612,7 +1611,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: LEVEL RESTAURÉ, PRÊT À ÊTRE JOUÉ
     ------------------------------------------------------------------------*/
-    void OnRestore() {
+    public void OnRestore() {
         Unlock();
 
 
@@ -1661,7 +1660,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: NIVEAU TERMINÉ
     ------------------------------------------------------------------------*/
-    void OnLevelClear() {
+    protected virtual void OnLevelClear() {
         if (fl_clear) {
             return;
         }
@@ -1694,7 +1693,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: HURRY UP!
     ------------------------------------------------------------------------*/
-    void OnHurryUp() {
+    public virtual GameObject OnHurryUp() {
         huState++;
         huTimer = 0;
 
@@ -1720,7 +1719,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: FIN DE PARTIE
     ------------------------------------------------------------------------*/
-    void OnGameOver() {
+    protected virtual void OnGameOver() {
         fl_gameOver = true;
     }
 
@@ -1728,7 +1727,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: MORT D'UN BAD
     ------------------------------------------------------------------------*/
-    void OnKillBad(Entity.Bad b) {
+    protected virtual void OnKillBad(Entity.Bad b) {
         // do nothing
     }
 
@@ -1873,7 +1872,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: EXPLOSION D'UNE BOMBE (event pour les scripts)
     ------------------------------------------------------------------------*/
-    void OnExplode(float x, float y, float radius) {
+    protected virtual void OnExplode(float x, float y, float radius) {
         world.scriptEngine.OnExplode(x, y, radius);
     }
 
@@ -1881,7 +1880,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: FIN DU SET DE LEVELS
     ------------------------------------------------------------------------*/
-    void OnEndOfSet() {
+    public virtual void OnEndOfSet() {
         // do nothing
     }
 
@@ -1889,7 +1888,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     GÈRE L'OBSCURITÉ
     ------------------------------------------------------------------------*/
-    void UpdateDarkness() {
+    public void UpdateDarkness() {
 
 
 //		if ( forcedDarkness==null ) {
@@ -1991,7 +1990,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     AJOUTE UN SPOT DE LUMIÈRE
     ------------------------------------------------------------------------*/
-    void AddHole(float x, float y, float diameter) {
+    public void AddHole(float x, float y, float diameter) {
         extraHoles.Add(x, y, diameter);
     }
 
@@ -2004,7 +2003,7 @@ public class GameMode : Mode
     }
 
 
-    void ClearExtraHoles() {
+    public void ClearExtraHoles() {
         DetachExtraHoles();
         extraHoles = new Array();
     }
