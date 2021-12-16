@@ -1,31 +1,21 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
-namespace Entity;
+using System;
 
 public class Player : Physics
 {
 	string name;
 
 	PlayerController ctrl;
-	SpecialManager specialMan;
+	public SpecialManager specialMan;
 
 	int baseColor; // hexa
 	int darkColor; // hexa
 
-	struct animParam {
-		public int id;
-		public bool loop;
-		public animParam(int id, bool loop) {
-			this.id = id;
-			this.loop = loop;
-		}
-	}
-	List<animParam> baseWalkAnim;
-	List<animParam> baseStopAnim;
+	Data.animParam baseWalkAnim;
+	Data.animParam baseStopAnim;
 
-	float speedFactor;
+	public float speedFactor;
 	bool fl_lockControls;
 	bool fl_entering;
 
@@ -35,15 +25,15 @@ public class Player : Physics
 	int dbg_lastKey;
 	int dbg_grid;
 
-	int currentWeapon;
-	int maxBombs;
-	int initialMaxBombs;
+	public int currentWeapon;
+	public int maxBombs;
+	public int initialMaxBombs;
 	int dir;
 	float coolDown;
 	int lastBomb;
 
-	int lives;
-	bool fl_shield;
+	public int lives;
+	public bool fl_shield;
 	float shieldTimer;
 	float oxygen;
 
@@ -53,7 +43,7 @@ public class Player : Physics
 	List<bool> extendList;
 	List<int> extendOrder;
 
-	int pid;
+	public int pid;
 
 	string debugInput;
 
@@ -69,7 +59,7 @@ public class Player : Physics
 	bool fl_carot;
 	bool fl_candle;
 	bool fl_torch;
-	int head;
+	public int head;
 	int defaultHead;
 	int bounceLimit;
 
@@ -77,15 +67,22 @@ public class Player : Physics
 
 	int skin;
 
-	Dictionary<float, int> recentKicks;
-
+	struct bombTracker {
+		public int bid;
+		public float t;
+		public bombTracker(float t, int bid) {
+			this.bid = bid;
+			this.t = t;
+		}
+	}
+	List<bombTracker> recentKicks;
 
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	Player() : base() {
-		name			= "$Igor".Substring(1);
+		name			= "Igor";
 
 		baseWalkAnim	= Data.ANIM_PLAYER_WALK;
 		baseStopAnim	= Data.ANIM_PLAYER_STOP;
@@ -112,7 +109,7 @@ public class Player : Physics
 		skin			= 1;
 		oxygen			= 100;
 
-		recentKicks	= new Array();
+		recentKicks	= new List<bombTracker>();
 
 		currentWeapon	= Data.WEAPON_B_CLASSIC;
 		lastBomb		= 1;
@@ -152,7 +149,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	void Init(Mode.GameMode g) {
+	protected override void Init(GameMode g) {
 		base.Init(g) ;
 		ctrl = new PlayerController(this) ;
 		Register(Data.PLAYER) ;
@@ -161,20 +158,20 @@ public class Player : Physics
 //		box.init(this) ;
 
 		specialMan = new SpecialManager(game, this) ;
-		game.manager.logAction("$P:"+lives);
+		game.manager.LogAction("P:"+lives);
 	}
 
 
 	/*------------------------------------------------------------------------
 	INITIALISATION: JOUEUR
 	------------------------------------------------------------------------*/
-	void InitPlayer(Mode.GameMode g, float x, float y) {
+	void InitPlayer(GameMode g, float x, float y) {
 		Init(g) ;
 		MoveTo(x, y) ;
 		if ( game.fl_nightmare ) {
 			speedFactor = 1.3f;
 		}
-		if ( game._name!="$time" && GameManager.CONFIG.HasOption(Data.OPT_BOOST) ) { // cadeau quete manettes
+		if ( game._name!="time" & GameManager.CONFIG.HasOption(Data.OPT_BOOST) ) { // cadeau quete manettes
 			speedFactor = 1.3f;
 			if ( game.fl_nightmare ) {
 				speedFactor = 1.6f;
@@ -188,127 +185,112 @@ public class Player : Physics
 	TOUCHES DE DEBUG
 	------------------------------------------------------------------------*/
 	void GetDebugControls() {
-		// Derni�re touche enfonc�e
-		if ( dbg_lastKey>0 && !Key.isDown(dbg_lastKey) ) {
-			dbg_lastKey = 0 ;
-		}
-
 
 		// Saisie d'un nb sur le pav� num
 		for (var i=0;i<10;i++) {
-			if ( Key.isDown(96+i) && dbg_lastKey!=96+i ) {
-				debugInput+=string(i) ;
-				dbg_lastKey = 96+i ;
+			if (Input.GetKeyDown(KeyCode.Keypad1)) {
+				debugInput+=i.ToString();
 			}
 		}
-		if (debugInput.length>=3) {
-			var n = Std.parseInt(debugInput,10) ;
-			if ( Key.isDown(Key.CONTROL) ) {
-				game.forcedGoto(n);
+		if (debugInput.Length>=3) {
+			var n = Int32.Parse(debugInput) ;
+			if (Input.GetKeyDown(KeyCode.LeftControl)) {
+				game.ForcedGoto(n);
 			}
 			else {
-				if ( Key.isDown(Key.ALT) ) {
-					entity.item.ScoreItem.attach(game, x+dir*30,y, n,null) ;
+				if (Input.GetKeyDown(KeyCode.LeftAlt)) {
+					ScoreItem.Attach(game, x+dir*30,y, n,null) ;
 				}
 				else {
-					entity.item.SpecialItem.attach(game, x+dir*30,y, n,null) ;
+					SpecialItem.Attach(game, x+dir*30,y, n,null) ;
 				}
 			}
 			debugInput = "" ;
 		}
-		if ( Key.isDown(Key.BACKSPACE) ) {
+		if (Input.GetKeyDown(KeyCode.Backspace)) {
 			debugInput="" ;
 		}
 
-		if ( debugInput.length>0 ) {
+		if (debugInput.Length>0) {
 			var str = debugInput ;
-			while ( str.length<3 ) {
-				str+="$_".substring(1);
+			while ( str.Length<3 ) {
+				str+="_";
 			}
-			Log.print("INPUT: "+str) ;
-			Log.print("(backspace to clear)");
+			Debug.Log("INPUT: "+str) ;
+			Debug.Log("(backspace to clear)");
 		}
 
 		// Niveau suivant "n"
-		if ( Key.isDown(78) && dbg_lastKey!=78 ) {
-			game.nextLevel() ;
-			dbg_lastKey = 78 ;
+		if (Input.GetKeyDown(KeyCode.N)) {
+			game.NextLevel() ;
 		}
 
 		// Se p�ter de cl�s "k"
-		if ( Key.isDown(75) && dbg_lastKey!=75 ) {
+		if (Input.GetKeyDown(KeyCode.M)) {
 			for (var i=0;i<50;i++) {
-				game.giveKey(i);
+				game.GiveKey(i);
 			}
-			dbg_lastKey = 75;
 		}
 
 		// Spawn d'item "i"
-		if ( Key.isDown(73) && dbg_lastKey!=73 ) {
-			entity.item.SpecialItem.attach(
+		if (Input.GetKeyDown(KeyCode.I)) {
+			SpecialItem.Attach(
 				game,
-				Std.random(200)+200,
+				UnityEngine.Random.Range(0, 200)+200,
 				20,
-				game.randMan.draw(Data.RAND_ITEMS_ID),
+				game.randMan.Draw(Data.RAND_ITEMS_ID),
 				0
 			);
-			dbg_lastKey = 73 ;
 		}
 
 		// Force les hurry-ups "/"
-		if ( Key.isDown(111) && dbg_lastKey!=111 ) {
+		if (Input.GetKeyDown(KeyCode.Slash)) {
 			game.huTimer=9999999 ;
 			game.huState++ ;
-			dbg_lastKey = 111;
 		}
 
 		// Anger more "+"
-		if ( Key.isDown(107) && dbg_lastKey!=107 ) {
-			var l = game.getBadList() ;
-			for (var i=0;i<l.length;i++) {
-				l[i].angerMore() ;
+		if (Input.GetKeyDown(KeyCode.KeypadPlus)) {
+			var l = game.GetBadList() ;
+			for (var i=0;i<l.Count;i++) {
+				l[i].AngerMore() ;
 			}
-			dbg_lastKey = 107 ;
 		}
 
 		// Anger more "-"
-		if ( Key.isDown(109) && dbg_lastKey!=109 ) {
-			var l = game.getBadList() ;
-			for (var i=0;i<l.length;i++) {
-				l[i].calmDown() ;
+		if (Input.GetKeyDown(KeyCode.KeypadMinus)) {
+			var l = game.GetBadList() ;
+			for (var i=0;i<l.Count;i++) {
+				l[i].CalmDown() ;
 			}
-			dbg_lastKey = 109 ;
 		}
 
 		// Affiche une grid de map "g"
-		if ( Key.isDown(71) && dbg_lastKey!=71 ) {
-			world.view.detachGrid() ;
-			world.view.attachGrid( Math.round(Math.pow(2,dbg_grid)), true ) ;
-			GameManager.warning("grid: "+Data.GRID_NAMES[dbg_grid]);
+		if (Input.GetKeyDown(KeyCode.G)) {
+			world.view.DetachGrid() ;
+			world.view.AttachGrid(Mathf.RoundToInt(Mathf.Pow(2,dbg_grid)), true);
+			GameManager.Warning("grid: "+Data.GRID_NAMES[dbg_grid]);
 			dbg_grid++ ;
-			if ( Data.GRID_NAMES[dbg_grid]==null ) {
+			if (Data.GRID_NAMES[dbg_grid]==null) {
 				dbg_grid = 0;
 			}
-			dbg_lastKey = 71 ;
 		}
 
 		// Change d'arme "w"
-		if ( Key.isDown(87) && dbg_lastKey!=87 ) {
+		if (Input.GetKeyDown(KeyCode.W)) {
 			currentWeapon++ ;
 			if ( currentWeapon>9 ) {
 				currentWeapon=1;
 			}
-			changeWeapon(currentWeapon) ;
-			dbg_lastKey = 87 ;
+			ChangeWeapon(currentWeapon) ;
 		}
 
 		// Tue tous les bads "*"
-		if ( Key.isDown(106) && dbg_lastKey!=106) {
-			var l = game.getBadList() ;
-			for (var i=0;i<l.length;i++) {
-				l[i].destroy() ;
+		if (Input.GetKeyDown(KeyCode.KeypadMultiply)) {
+			var l = game.GetBadList() ;
+			for (var i=0;i<l.Count;i++) {
+				l[i].DestroyThis() ;
 			}
-			dbg_lastKey = 106 ;
 		}
 	}
 
@@ -316,8 +298,8 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-	static Player Attach(Mode.GameMode g, float x, float y) {
-		var mc : entity.Player = downcast( g.depthMan.attach("hammer_player",Data.DP_PLAYER) ) ;
+	static Player Attach(GameMode g, float x, float y) {
+		Player mc = g.depthMan.attach("hammer_player",Data.DP_PLAYER);
 		mc.InitPlayer(g, x, y);
 		return mc;
 	}
@@ -327,10 +309,10 @@ public class Player : Physics
 	CONTACT
 	------------------------------------------------------------------------*/
 	void Hit(Entity e) {
-		if ( (e.types & Data.ITEM) > 0 ) {
-			var et : entity.Item = downcast(e) ;
+		if ((e.types & Data.ITEM) > 0) {
+			Item et = e;
 			et.execute(this);
-			if ( et.id==Data.CONVERT_DIAMANT ) { // perle
+			if (et.id==Data.CONVERT_DIAMANT) { // perle
 //				if ( specialMan.actives[81] || specialMan.actives[96] || specialMan.actives[97] || specialMan.actives[98] ) {
 					specialMan.OnPickPerfectItem();
 //				}
@@ -351,7 +333,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	MORT
 	------------------------------------------------------------------------*/
-	void KillHit(float dx) {
+	public override void KillHit(float dx) {
 		if (fl_kill | fl_shield) {
 			return ;
 		}
@@ -361,34 +343,34 @@ public class Player : Physics
 		game.soundMan.playSound("sound_player_death", Data.CHAN_PLAYER);
 
 		// recup�re le signe de dx
-		var sign = dx/Math.abs(dx);
-		if ( Std.isNaN(sign) ) {
-			sign = Std.random(2)*2-1;
+		var sign = Mathf.Sign(dx);
+		if (dx == 0) {
+			sign = UnityEngine.Random.Range(0, 2)*2-1;
 		}
 
-		if ( x>=0.85*Data.GAME_WIDTH ) {
+		if (x>=0.85*Data.GAME_WIDTH) {
 			sign = -1;
 		}
-		if ( x<=0.15*Data.GAME_WIDTH ) {
+		if (x<=0.15*Data.GAME_WIDTH) {
 			sign = 1;
 		}
 
 		PlayAnim(Data.ANIM_PLAYER_DIE) ;
 
 		var power=20;
-		if ( Timer.tmod<=0.6 ) {
+		if (Time.fixedDeltaTime<=0.6 ) {
 			power=40;
 		}
 
-		base.killHit( sign*power ) ;
+		base.KillHit(sign*power);
 	}
 
 
 	/*------------------------------------------------------------------------
 	GAGNE DES POINTS
 	------------------------------------------------------------------------*/
-	void GetScore(Entity origin, int value) {
-		if ( origin != null ) {
+	public void GetScore(Entity origin, int value) {
+		if (origin != null) {
 			if ( specialMan.actives[95] ) { // effet sac � thunes
 				game.fxMan.AttachScorePop( baseColor, darkColor, origin.x, origin.y, ""+(value*2) );
 			}
@@ -399,19 +381,19 @@ public class Player : Physics
 		GetScoreHidden(value);
 	}
 
-	void GetScoreHidden(int value) {
-		if ( specialMan.actives[95] ) {
+	public void GetScoreHidden(int value) {
+		if (specialMan.actives[95]) {
 			value*=2;
 		}
-		var step = Data.EXTRA_LIFE_STEPS[extraLifeCurrent];
-		if ( step!=null && score<step && score+value>=step ) {
+		int? step = (extraLifeCurrent<Data.EXTRA_LIFE_STEPS.Length) ? Data.EXTRA_LIFE_STEPS[extraLifeCurrent] : null;
+		if (step!=null & score<step & score+value>=step) {
 			lives++;
 			game.gi.setLives( pid, lives );
-			game.manager.logAction("$EL"+extraLifeCurrent);
+			game.manager.LogAction("EL"+extraLifeCurrent);
 			extraLifeCurrent++;
 		}
-		if ( score!=0 && scoreCS^GameManager.KEY != score ) {
-			game.manager.logIllegal("$SCS");
+		if (score!=0 & (scoreCS^GameManager.KEY) != score) {
+			game.manager.LogIllegal("SCS");
 		}
 		score+=value;
 		scoreCS = score^GameManager.KEY;
@@ -422,20 +404,20 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	GAGNE UNE LETTRE EXTEND
 	------------------------------------------------------------------------*/
-	void GetExtend(int id) {
-		if ( extendList[id]!=true ) {
+	public void GetExtend(int id) {
+		if (extendList[id]!=true) {
 			game.gi.getExtend(pid,id);
 		}
 
 		// Perfect extend
-		if ( !extendList[id] ) {
+		if (!extendList[id]) {
 			extendOrder.Add(id);
 		}
 
 		extendList[id] = true ;
 
 		var complete = true ;
-		for(var i=0;i<Data.EXTENDS.length;i++) {
+		for(var i=0;i<Data.EXTENDS.Length;i++) {
 			if ( extendList[i]!=true ) {
 				complete = false ;
 			}
@@ -444,7 +426,7 @@ public class Player : Physics
 		// Termin� !
 		if ( complete ) {
 			var fl_perfect = true;
-			for (var i=0;i<extendOrder.length;i++) {
+			for (var i=0;i<extendOrder.Count;i++) {
 				if ( extendOrder[i]!=i ) {
 					fl_perfect = false;
 				}
@@ -461,7 +443,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	INFIXE
 	------------------------------------------------------------------------*/
-	void Infix() {
+	protected override void Infix() {
 		base.Infix() ;
 
 //		if ( fl_stable ) {
@@ -473,19 +455,19 @@ public class Player : Physics
 		// Changement d'arme
 		var id = world.GetCase(cx, cy) ;
 		if ( id>Data.FIELD_TELEPORT & id < 0 ) {
-			if (currentWeapon!=int(Mathf.Abs(id))) {
-				var fx = game.fxMan.attachShine(x,y-Data.CASE_HEIGHT*0.5) ;
+			if (currentWeapon!=Mathf.Abs(id)) {
+				var fx = game.fxMan.AttachShine(x,y-Data.CASE_HEIGHT*0.5) ;
 				fx.mc._xscale = 65 ;
 				fx.mc._yscale = fx.mc._xscale ;
 				game.soundMan.playSound("sound_field", Data.CHAN_FIELD);
 			}
-			ChangeWeapon(int(Mathf.Abs(id))) ;
+			ChangeWeapon(Mathf.Abs(id)) ;
 		}
 
 		// Champ d�sarmement
 		if ( id==Data.FIELD_PEACE ) {
-			if (currentWeapon!=int(Mathf.Abs(id))) {
-				var fx = game.fxMan.AttachShine(x,y-Data.CASE_HEIGHT*0.5) ;
+			if (currentWeapon!=Mathf.Abs(id)) {
+				var fx = game.fxMan.AttachShine(x,y-Data.CASE_HEIGHT*0.5f) ;
 				fx.mc._xscale = 65 ;
 				fx.mc._yscale = fx.mc._xscale ;
 				game.soundMan.PlaySound("sound_field", Data.CHAN_FIELD);
@@ -493,11 +475,9 @@ public class Player : Physics
 			ChangeWeapon(Data.WEAPON_NONE);
 		}
 
-
-		if ( !fl_kill && !fl_destroy ) {
+		if (!fl_kill & !fl_destroy) {
 			game.world.scriptEngine.OnEnterCase(cx,cy);
 		}
-
 		ShowTeleporters();
 	}
 
@@ -507,30 +487,29 @@ public class Player : Physics
 	------------------------------------------------------------------------*/
 	void KillPlayer() {
 		// Strike fx
-		game.fxMan.AttachFx(  x, Data.GAME_HEIGHT, "hammer_fx_death_player"  );
+		game.fxMan.AttachFx(x, Data.GAME_HEIGHT, "hammer_fx_death_player");
 
-		game.statsMan.Inc(Data.STAT_DEATH,1) ;
+		game.statsMan.Inc(Data.STAT_DEATH, 1) ;
 		lives-- ;
 		game.gi.SetLives(pid,lives) ;
 		if ( lives>=0 ) {
 			Resurrect();
 		}
 		else {
+			var pl = game.GetPlayerList();
 			// game over: il reste des vies chez un joueur  ?
 			var fl_over = true;
-			var l = game.getPlayerList();
-			for (var i=0;i<l.length;i++) {
-				if ( l[i].lives>=0 ) {
+			for (var i=0;i<pl.Count;i++) {
+				if (pl[i].lives>=0) {
 					fl_over = false;
 				}
 			}
-			if ( !fl_over ) {
+			if (!fl_over) {
 				// Partage de vies
-				if ( GameManager.CONFIG.HasOption(Data.OPT_LIFE_SHARING) ) {
-					var pl = game.GetPlayerList();
-					for (var i=0;i<pl.length;i++) {
+				if (GameManager.CONFIG.HasOption(Data.OPT_LIFE_SHARING)) {
+					for (var i=0;i<pl.Count;i++) {
 						var p = pl[i];
-						if ( p.uniqId!=uniqId && p.lives>0 ) {
+						if (p.uniqId!=uniqId & p.lives>0) {
 							p.lives--;
 							game.gi.SetLives(p.pid,p.lives);
 							Resurrect();
@@ -541,13 +520,13 @@ public class Player : Physics
 				}
 			}
 
-			var pl = game.GetPlayerList();
-			for (var i=0;i<pl.length;i++) {
+			
+			for (var i=0;i<pl.Count;i++) {
 				game.RegisterScore(pl[i].pid, pl[i].score);
 			}
 			game.OnGameOver();
 //			game.fxMan.attachAlert( name+" "+Lang.get(43) );
-			Destroy() ;
+			DestroyThis() ;
 		}
 	}
 
@@ -555,11 +534,11 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	R�SURRECTION
 	------------------------------------------------------------------------*/
-	void Resurrect() {
+	protected override void Resurrect() {
 		base.Resurrect() ;
-		game.manager.logAction("$R"+lives);
+		game.manager.LogAction("R"+lives);
 		// Joueur
-		moveTo( Entity.x_ctr(world.current.$playerX), Entity.y_ctr(world.current.$playerY) ) ;
+		MoveTo(Entity.x_ctr(world.current.playerX), Entity.y_ctr(world.current.playerY));
 		dx = 0;
 		dy = 0;
 		Shield(null);
@@ -568,21 +547,21 @@ public class Player : Physics
 		fl_knock = false;
 
 		// Effets actifs
-		specialMan.clearTemp();
-		specialMan.clearPerm();
-		specialMan.clearRec();
+		specialMan.ClearTemp();
+		specialMan.ClearPerm();
+		specialMan.ClearRec();
 
 		PlayAnim(Data.ANIM_PLAYER_RESURRECT);
 		StickAnim();
 		fl_lockControls = true;
 
-		if ( game.fl_nightmare ) {
-			speedFactor = 1.3;
+		if (game.fl_nightmare) {
+			speedFactor = 1.3f;
 		}
-		if ( game._name!="$time" && GameManager.CONFIG.hasOption(Data.OPT_BOOST) ) { // cadeau quete manettes
-			speedFactor = 1.3;
-			if ( game.fl_nightmare ) {
-				speedFactor = 1.6;
+		if (game._name!="time" & GameManager.CONFIG.HasOption(Data.OPT_BOOST)) { // cadeau quete manettes
+			speedFactor = 1.3f;
+			if (game.fl_nightmare) {
+				speedFactor = 1.6f;
 			}
 		}
 
@@ -594,18 +573,13 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	ACTIVE LE BOUCLIER
 	------------------------------------------------------------------------*/
-	void Shield(float duration) {
-		if (duration==null) {
-			duration = Data.SHIELD_DURATION ;
-		}
-
-
-		shieldMC.Destroy();
+	public void Shield(float? duration) {
+		shieldMC.DestroyThis();
 		shieldMC = game.fxMan.AttachFx(x,y,"hammer_player_shield");
 		shieldMC.fl_loop = true;
 		shieldMC.StopBlink();
 
-		shieldTimer			= duration ;
+		shieldTimer			= duration ?? Data.SHIELD_DURATION;
 		shieldMC.lifeTimer	= shieldTimer;
 		fl_shield			= true ;
 	}
@@ -625,8 +599,8 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	ASSOME LE JOUEUR
 	------------------------------------------------------------------------*/
-	void Knock(d) {
-		if ( fl_knock ) {
+	void Knock(float d) {
+		if (fl_knock) {
 			return;
 		}
 		fl_lockControls = true;
@@ -638,11 +612,11 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	AFFICHE/MASQUE LE JOUEUR
 	------------------------------------------------------------------------*/
-	void Hide() {
+	public override void Hide() {
 		base.Hide() ;
 		shieldMC.mc._visible = false ;
 	}
-	void Show() {
+	public override void Show() {
 		base.Show() ;
 		shieldMC.mc._visible = true ;
 	}
@@ -651,7 +625,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	REDIMENSIONNEMENT
 	------------------------------------------------------------------------*/
-	void Scale(float n) {
+	public void Scale(float n) {
 		base.Scale(n);
 		_xscale *= dir;
 	}
@@ -660,12 +634,12 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	DESTRUCTION
 	------------------------------------------------------------------------*/
-	void Destroy() {
+	public override void DestroyThis() {
 		game.RegisterScore(pid, score);
 		specialMan.ClearPerm() ;
 		specialMan.ClearTemp() ;
 		specialMan.ClearRec();
-		base.Destroy() ;
+		base.DestroyThis() ;
 	}
 
 
@@ -673,71 +647,71 @@ public class Player : Physics
 	AFFICHE UNE "MAL�DICTION" AU DESSUS DU JOUEUR
 	------------------------------------------------------------------------*/
 	void Curse(int id) {
-		var c = game.depthMan.attach("curse", Data.DP_FX);
+		var c = game.depthMan.Attach("curse", Data.DP_FX);
 		c._alpha = 70;
 		c.GotoAndStop(""+id);
-		Stick(c,0,-Data.CASE_HEIGHT*2.5);
-		SetElaStick(0.25);
+		Stick(c,0,-Data.CASE_HEIGHT*2.5f);
+		SetElaStick(0.25f);
 	}
 
 
 	/*------------------------------------------------------------------------
 	JOUE UNE ANIMATION
 	------------------------------------------------------------------------*/
-	void PlayAnim( a ) {
-		if ( a.id==baseWalkAnim.id && speedFactor>1 ) {
+	protected override void PlayAnim(Data.animParam a) {
+		if (a.id==baseWalkAnim.id & speedFactor>1) {
 			a = Data.ANIM_PLAYER_RUN;
 		}
 
-		if ( a.id==Data.ANIM_PLAYER_JUMP_DOWN.id && animId==Data.ANIM_PLAYER_AIRKICK.id ) {
+		if (a.id==Data.ANIM_PLAYER_JUMP_DOWN.id & animId==Data.ANIM_PLAYER_AIRKICK.id) {
 			return;
 		}
 
-		if ( fl_knock ) {
-			if ( a.id!=Data.ANIM_PLAYER_DIE.id && a.id!=Data.ANIM_PLAYER_KNOCK_IN.id ) {
+		if (fl_knock ) {
+			if ( a.id!=Data.ANIM_PLAYER_DIE.id & a.id!=Data.ANIM_PLAYER_KNOCK_IN.id) {
 				return;
 			}
 		}
-		if ( animId==Data.ANIM_PLAYER_KICK.id && a.id==Data.ANIM_PLAYER_JUMP_DOWN.id ) {
+		if (animId==Data.ANIM_PLAYER_KICK.id & a.id==Data.ANIM_PLAYER_JUMP_DOWN.id) {
 			return;
 		}
 
-		if ( animId==Data.ANIM_PLAYER_CARROT.id ) {
+		if (animId==Data.ANIM_PLAYER_CARROT.id) {
 			return;
 		}
 
-		base.playAnim( a );
+		base.PlayAnim(a);
 	}
 
 
 	/*------------------------------------------------------------------------
 	CHANGE LES ANIMS DE D�PLACEMENT DE BASE (null = pas de changement)
 	------------------------------------------------------------------------*/
-	void SetBaseAnims( a_walk, a_stop ) {
+	void SetBaseAnims(Data.animParam? a_walk, Data.animParam? a_stop) {
 		var fl_walk = false;
 		var fl_stop = false;
-		if ( animId == baseWalkAnim.id ) {
+		if (animId == baseWalkAnim.id) {
 			fl_walk = true;
 		}
-		if ( animId == baseStopAnim.id ) {
+		if (animId == baseStopAnim.id) {
 			fl_stop = true;
 		}
-		if ( animId==Data.ANIM_PLAYER_WAIT1.id || animId==Data.ANIM_PLAYER_WAIT2.id ) {
+		if (animId==Data.ANIM_PLAYER_WAIT1.id | animId==Data.ANIM_PLAYER_WAIT2.id) {
 			fl_stop = true;
 		}
 
-		if ( a_walk!=null ) {
-			baseWalkAnim = a_walk;
-		}
-		if ( a_stop!=null ) {
-			baseStopAnim = a_stop;
+		if (a_walk!=null) {
+			baseWalkAnim = a_walk ?? new Data.animParam();
+
+		if (a_stop!=null) {
+			baseStopAnim = a_stop ?? new Data.animParam();
 		}
 
-		if ( fl_walk ) {
-			playAnim(baseWalkAnim);
+		if (fl_walk) {
+			PlayAnim(baseWalkAnim);
 		}
-		if ( fl_stop ) {
-			playAnim(baseStopAnim);
+		if (fl_stop) {
+			PlayAnim(baseStopAnim);
 		}
 	}
 
@@ -745,7 +719,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	AUTORISE L'APPLICATION DU PATCH COLLISION AU SOL (ESCALIERS)
 	------------------------------------------------------------------------*/
-	void NeedsPatch() {
+	bool NeedsPatch() {
 		return true;
 	}
 
@@ -758,30 +732,30 @@ public class Player : Physics
 		var tl = world.teleporterList;
 
 		// Eteind tout
-		for (var i=0;i<tl.length;i++) {
-			world.hideField( tl[i] );
+		for (var i=0;i<tl.Count;i++) {
+			world.HideField(tl[i]);
 		}
 
 		// Allume les t�l�porteurs proches
-		for (var i=0;i<tl.length;i++) {
+		for (var i=0;i<tl.Count;i++) {
 			var td = tl[i];
 			var fl_close = false;
-			if (td.dir==Data.VERTICAL) {
-				if (  Math.abs(td.centerX-x)<=Data.TELEPORTER_DISTANCE && y>=td.startY-Data.CASE_HEIGHT*0.5 && y<=td.endY+Data.CASE_HEIGHT*0.5  ) {
+			if (td.direction==Data.VERTICAL) {
+				if (Mathf.Abs(td.centerX-x)<=Data.TELEPORTER_DISTANCE & y>=td.startY-Data.CASE_HEIGHT*0.5f & y<=td.endY+Data.CASE_HEIGHT*0.5f) {
 					fl_close = true;
 				}
 			}
 			else {
-				if (  Math.abs(td.centerY-y)<=Data.TELEPORTER_DISTANCE && x>=td.startX-Data.CASE_WIDTH && x<=td.endX+Data.CASE_WIDTH  ) {
+				if (Mathf.Abs(td.centerY-y)<=Data.TELEPORTER_DISTANCE & x>=td.startX-Data.CASE_WIDTH & x<=td.endX+Data.CASE_WIDTH) {
 					fl_close = true;
 				}
 			}
 
-			if ( fl_close ) {
-				world.showField(td);
-				var next = world.getNextTeleporter(td);
-				if ( next!=null && !next.fl_rand ) {
-					world.showField(next.td);
+			if (fl_close) {
+				world.ShowField(td);
+				var next = world.GetNextTeleporter(td);
+				if (next!=null & !next.fl_rand) {
+					world.ShowField(next.td);
 				}
 			}
 		}
@@ -801,9 +775,9 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LA BOMBE A �T� R�CEMMENT KICK�E PAR CE JOUEUR
 	------------------------------------------------------------------------*/
-	bool IsRecentKick(Entity.Bomb b) {
+	bool IsRecentKick(Bomb b) {
 		var fl_recent = false;
-		for (var i=0;i<recentKicks.length;i++) {
+		for (var i=0;i<recentKicks.Count;i++) {
 			if ( b.uniqId == recentKicks[i].bid ) {
 				fl_recent = true;
 			}
@@ -819,26 +793,25 @@ public class Player : Physics
 	POSE UNE BOMBE
 	------------------------------------------------------------------------*/
 	Entity Attack() {
-		if ( specialMan.actives[91] || specialMan.actives[85] ) { // curse chapeau luffy
+		if (specialMan.actives[91] | specialMan.actives[85]) { // curse chapeau luffy
 			return null;
 		}
 
 		switch (currentWeapon) {
-			case Data.WEAPON_B_CLASSIC	: return drop(	Entity.Bomb.player.Classic.Attach(game, x,y ) ) ; break;
-			case Data.WEAPON_B_BLACK	: return drop(	Entity.Bomb.player.Black.Attach(game, x,y ) ) ; break;
-			case Data.WEAPON_B_BLUE		: return drop(	Entity.Bomb.player.Blue.Attach(game, x,y ) ) ; break;
-			case Data.WEAPON_B_GREEN	: return drop(	Entity.Bomb.player.Green.Attach(game, x,y ) ) ; break;
-			case Data.WEAPON_B_RED		: return drop(	Entity.Bomb.player.Red.Attach(game, x,y ) ) ; break;
-			case Data.WEAPON_B_REPEL	: return drop(	Entity.Bomb.player.RepelBomb.Attach(game,x,y) ) ; break;
+			case Data.WEAPON_B_CLASSIC	: return Drop(	Entity.Bomb.player.Classic.Attach(game, x,y ) 	);
+			case Data.WEAPON_B_BLACK	: return Drop(	Entity.Bomb.player.Black.Attach(game, x,y ) 	);
+			case Data.WEAPON_B_BLUE		: return Drop(	Entity.Bomb.player.Blue.Attach(game, x,y ) 		);
+			case Data.WEAPON_B_GREEN	: return Drop(	Entity.Bomb.player.Green.Attach(game, x,y ) 	);
+			case Data.WEAPON_B_RED		: return Drop(	Entity.Bomb.player.Red.Attach(game, x,y ) 		);
+			case Data.WEAPON_B_REPEL	: return Drop(	Entity.Bomb.player.RepelBomb.Attach(game,x,y) 	);
 
-			case Data.WEAPON_S_ARROW	: return shoot(	Entity.Shoot.PlayerArrow.Attach(game,x,y) ) ; break;
-			case Data.WEAPON_S_FIRE		: return shoot(	Entity.Shoot.PlayerFireBall.Attach(game,x,y) ) ; break;
-			case Data.WEAPON_S_ICE		: return shoot(	Entity.Shoot.PlayerPearl.Attach(game,x,y) ) ; break;
+			case Data.WEAPON_S_ARROW	: return Shoot(	Entity.Shoot.PlayerArrow.Attach(game,x,y) 		);
+			case Data.WEAPON_S_FIRE		: return Shoot(	Entity.Shoot.PlayerFireBall.Attach(game,x,y) 	);
+			case Data.WEAPON_S_ICE		: return Shoot(	Entity.Shoot.PlayerPearl.Attach(game,x,y) 		);
 
 			default:
 				GameManager.Fatal("invalid weapon id : "+currentWeapon) ;
 				return null ;
-			break ;
 		}
 	}
 
@@ -849,17 +822,17 @@ public class Player : Physics
 	bool IsBombWeapon(int id) {
 		return
 			id == Data.WEAPON_B_CLASSIC |
-			id == Data.WEAPON_B_BLACK |
-			id == Data.WEAPON_B_BLUE |
-			id == Data.WEAPON_B_GREEN |
-			id == Data.WEAPON_B_RED |
+			id == Data.WEAPON_B_BLACK 	|
+			id == Data.WEAPON_B_BLUE 	|
+			id == Data.WEAPON_B_GREEN 	|
+			id == Data.WEAPON_B_RED 	|
 			id == Data.WEAPON_B_REPEL;
 	}
 
 	bool IsShootWeapon(int id) {
 		return
-			id == Data.WEAPON_S_ARROW |
-			id == Data.WEAPON_S_FIRE |
+			id == Data.WEAPON_S_ARROW 	|
+			id == Data.WEAPON_S_FIRE 	|
 			id == Data.WEAPON_S_ICE;
 	}
 
@@ -867,15 +840,15 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	POSE UNE BOMBE
 	------------------------------------------------------------------------*/
-	void Drop(Entity.Bomb.PlayerBomb b) {
-		if ( !fl_stable ) {
-			airJump();
+	void Drop(PlayerBomb b) {
+		if (!fl_stable) {
+			AirJump();
 		}
-		game.statsMan.inc(Data.STAT_BOMB,1) ;
-		b.setOwner(this);
+		game.statsMan.Inc(Data.STAT_BOMB,1) ;
+		b.SetOwner(this);
 		game.soundMan.playSound("sound_bomb_drop",Data.CHAN_PLAYER);
-		if ( !fl_stable ) {
-			kickBomb([upcast(b)], 1.0);
+		if (!fl_stable) {
+			KickBomb(b, 1.0f);
 		}
 //		b.x+=dir*Data.CASE_WIDTH*0.5;
 //		if ( dir>0 ) {
@@ -910,14 +883,14 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	TIR
 	------------------------------------------------------------------------*/
-	Entity.Shoot Shoot(Entity.Shoot s) {
-		game.statsMan.inc(Data.STAT_SHOT,1) ;
+	Shoot Shoot(Shoot s) {
+		game.statsMan.Inc(Data.STAT_SHOT,1) ;
 		coolDown = s.coolDown ;
 		if (dir<0) {
-			s.moveLeft(s.shootSpeed) ;
+			s.MoveLeft(s.shootSpeed) ;
 		}
 		else {
-			s.moveRight(s.shootSpeed) ;
+			s.MoveRight(s.shootSpeed) ;
 		}
 		return s ;
 	}
@@ -925,23 +898,23 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	D�FINI L'ARME DU JOUEUR
 	------------------------------------------------------------------------*/
-	void ChangeWeapon(int id) {
-		if ( id==null ) {
+	public void ChangeWeapon(int id) {
+		if (id==-1) {
 			id = lastBomb;
 		}
 
 		// Pas une arme
-		if ( id>0 && !IsBombWeapon(id) & !IsShootWeapon(id) ) {
+		if (id>0 & !IsBombWeapon(id) & !IsShootWeapon(id)) {
 			return;
 		}
 
 		// bombe -> tir
-		if ( IsBombWeapon(currentWeapon) & !IsBombWeapon(id) ) {
+		if (IsBombWeapon(currentWeapon) & !IsBombWeapon(id)) {
 			lastBomb = currentWeapon;
 		}
 
 		// ? -> bombe
-		if ( IsBombWeapon(id) ) {
+		if (IsBombWeapon(id)) {
 			lastBomb = id;
 		}
 
@@ -953,13 +926,13 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	KICK UNE OU PLUSIEURS BOMBES
 	------------------------------------------------------------------------*/
-	void KickBomb(List<Entity.Bomb> l, float powerFactor) {
+	void KickBomb(List<Bomb> l, float powerFactor) {
 		var i=0 ;
-		while ( i<l.length ) {
+		while (i<l.Count) {
 			var b = l[i] ;
-			if ( !IsRecentKick(b) ) {
-				if (  ( b.fl_airKick || (!b.fl_airKick && b.fl_stable) ) && !b.fl_explode  )  {
-					if ( !b.isType(Data.SOCCERBALL) ) {
+			if (!IsRecentKick(b)) {
+				if ((b.fl_airKick | (!b.fl_airKick & b.fl_stable)) & !b.fl_explode) {
+					if (!b.isType(Data.SOCCERBALL)) {
 						b.dx = dir * Data.PLAYER_HKICK_X;
 					}
 					else {
@@ -967,35 +940,35 @@ public class Player : Physics
 					}
 
 					// Escalier Gauche
-					if ( dir<0 && world.CheckFlag( {x:cx,y:cy}, Data.IA_CLIMB_LEFT) ) {
+					if (dir<0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_LEFT)) {
 						var h = world.GetWallHeight( cx-1,cy, Data.IA_CLIMB );
-						if ( h<=1 ) {
+						if (h<=1) {
 							b.MoveTo( b.x, b.y-Data.CASE_HEIGHT*0.5 );
 						}
 					}
 
 					// Escalier Droite
-					if ( dir>0 && world.CheckFlag( {x:cx,y:cy}, Data.IA_CLIMB_RIGHT) ) {
-						var h = world.GetWallHeight( cx+1,cy, Data.IA_CLIMB );
-						if ( h<=1 ) {
+					if (dir>0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT)) {
+						var h = world.GetWallHeight(cx+1, cy, Data.IA_CLIMB );
+						if (h<=1) {
 							b.MoveTo( b.x, b.y-Data.CASE_HEIGHT*0.5 );
 						}
 					}
 
-					if ( specialMan.actives[13] ) {
+					if (specialMan.actives[13]) {
 						b.dx*=2 ; // casque de moto
 					}
-					if ( game.fl_bombExpert && dx/b.dx>0 ) {
-						b.dx*=2.5;
+					if (game.fl_bombExpert & dx/b.dx>0) {
+						b.dx*=2.5f;
 					}
-					if ( specialMan.actives[115] ) {
-						b.dx*=1.5; // casque volley
+					if (specialMan.actives[115]) {
+						b.dx*=1.5f; // casque volley
 					}
 					b.dy = -Data.PLAYER_HKICK_Y ;
 					b.OnKick(this);
 					b.next = null;
 					b.fl_bounce = true ;
-					recentKicks.Push( {t:game.cycle, bid:b.uniqId} );
+					recentKicks.Add(new bombTracker(game.cycle, b.uniqId));
 	//				if ( fl_stable ) {
 						PlayAnim(Data.ANIM_PLAYER_KICK);
 	//				}
@@ -1004,11 +977,11 @@ public class Player : Physics
 	//				}
 					game.soundMan.PlaySound("sound_kick", Data.CHAN_PLAYER);
 					game.statsMan.Inc(Data.STAT_KICK,1) ;
-					if ( specialMan.actives[92] ) { // chapeau rose
-						if ( b.lifeTimer>0 ) {
+					if (specialMan.actives[92]) { // chapeau rose
+						if (b.lifeTimer>0) {
 							var b2 = b.Duplicate();
-							if ( b2.IsType(Data.PLAYER_BOMB) ) {
-								downcast(b2).owner = this;
+							if (b2.IsType(Data.PLAYER_BOMB)) {
+								b2.owner = this;
 							}
 							b2.lifeTimer = b.lifeTimer ;
 							b2.dx = -b.dx ;
@@ -1016,7 +989,7 @@ public class Player : Physics
 							b2.fl_bounce = true ;
 						}
 					}
-					if ( specialMan.actives[70] ) {// effet trefle
+					if (specialMan.actives[70]) {// effet trefle
 						GetScore(this, 10) ;
 					}
 				}
@@ -1030,34 +1003,34 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	UP KICK
 	------------------------------------------------------------------------*/
-	void UpKickBomb(List<Entity.Bomb> l) {
+	void UpKickBomb(List<Bomb> l) {
 		var i=0 ;
-		while ( i<l.length ) {
+		while (i<l.Count) {
 			var b = l[i] ;
-			if ( !isRecentKick(b) ) {
-				if (  ( b.fl_airKick || (!b.fl_airKick && b.fl_stable) ) && !b.fl_explode  )  {
+			if (!IsRecentKick(b)) {
+				if ((b.fl_airKick | (!b.fl_airKick & b.fl_stable) ) & !b.fl_explode) {
 					b.dx *= 2;
-					if ( Math.abs(b.dx)<= 1.5 ) {
+					if (Mathf.Abs(b.dx)<= 1.5) {
 						b.dx = 0.5*dir;
 					}
 					b.dy = -Data.PLAYER_VKICK;
-					if ( specialMan.actives[13] ) {
+					if (specialMan.actives[13]) {
 						b.dy*=2 ; // casque de moto
 					}
-					if ( specialMan.actives[115] ) {
+					if (specialMan.actives[115]) {
 						b.dy*=2; // casque volley
-						b.dx*=1.3;
+						b.dx*=1.3f;
 					}
 					b.next = null;
 					b.onKick(this);
 					b.fl_stable = false;
 					b.fl_bounce = true;
-					recentKicks.push( {t:game.cycle, bid:b.uniqId} );
-					playAnim(Data.ANIM_PLAYER_KICK);
-					game.soundMan.playSound("sound_kick", Data.CHAN_PLAYER);
-					game.statsMan.inc(Data.STAT_KICK,1) ;
-					if ( specialMan.actives[70] ) {// effet trefle
-						getScore(this, 10) ;
+					recentKicks.Add(new bombTracker(game.cycle, b.uniqId));
+					PlayAnim(Data.ANIM_PLAYER_KICK);
+					game.soundMan.PlaySound("sound_kick", Data.CHAN_PLAYER);
+					game.statsMan.Inc(Data.STAT_KICK,1) ;
+					if (specialMan.actives[70]) {// effet trefle
+						GetScore(this, 10) ;
 					}
 				}
 			}
@@ -1072,9 +1045,9 @@ public class Player : Physics
 	------------------------------------------------------------------------*/
 	int CountBombs() {
 		var n = 0 ;
-		var l = game.getList(Data.PLAYER_BOMB) ;
-		for (var i=0;i<l.length;i++) {
-			if ( !l[i].fl_explode & l[i].parent == this ) {
+		var l = game.GetList(Data.PLAYER_BOMB) ;
+		for (var i=0;i<l.Count;i++) {
+			if (!l[i].fl_explode & l[i].parent == this) {
 				n++ ;
 			}
 		}
@@ -1087,44 +1060,44 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	EVENT: FIN D'ANIM
 	------------------------------------------------------------------------*/
-	void OnEndAnim(int id) {
+	protected override void OnEndAnim(int id) {
 		base.OnEndAnim(id) ;
 
 		// Se rel�ve apr�s un knock
-		if ( id == Data.ANIM_PLAYER_KNOCK_OUT.id ) {
+		if (id == Data.ANIM_PLAYER_KNOCK_OUT.id) {
 			fl_lockControls = false;
 			PlayAnim(baseStopAnim);
 		}
 
-		if ( id == Data.ANIM_PLAYER_AIRKICK.id ) {
-			animId = null;
+		if (id == Data.ANIM_PLAYER_AIRKICK.id) {
+			animId = -1;
 			PlayAnim(Data.ANIM_PLAYER_JUMP_DOWN);
 		}
 
 		// Resurrection
-		if ( id == Data.ANIM_PLAYER_RESURRECT.id ) {
+		if (id == Data.ANIM_PLAYER_RESURRECT.id) {
 			fl_lockControls = false;
 			PlayAnim(baseStopAnim);
 		}
 
 		// Apr�s un air kick
-		if ( id == Data.ANIM_PLAYER_KICK.id && !fl_stable ) {
-			animId = null;
+		if (id == Data.ANIM_PLAYER_KICK.id & !fl_stable) {
+			animId = -1;
 			PlayAnim(Data.ANIM_PLAYER_JUMP_DOWN);
 			return;
 		}
 
 		// Carotte!
-		if ( id == Data.ANIM_PLAYER_CARROT.id ) {
+		if (id == Data.ANIM_PLAYER_CARROT.id) {
 			PlayAnim(baseStopAnim);
 		}
 
 		// Retour en anim normale apr�s kick ou attack
-		if ( id == Data.ANIM_PLAYER_KICK.id ||
-			id == Data.ANIM_PLAYER_ATTACK.id ||
-			id == Data.ANIM_PLAYER_WAIT1.id ||
-			id == Data.ANIM_PLAYER_WAIT2.id ||
-			id == Data.ANIM_PLAYER_JUMP_LAND.id ) {
+		if (id == Data.ANIM_PLAYER_KICK.id 		|
+			id == Data.ANIM_PLAYER_ATTACK.id 	|
+			id == Data.ANIM_PLAYER_WAIT1.id 	|
+			id == Data.ANIM_PLAYER_WAIT2.id 	|
+			id == Data.ANIM_PLAYER_JUMP_LAND.id) {
 				PlayAnim(baseStopAnim) ;
 		}
 	}
@@ -1133,17 +1106,17 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	EVENT: LIGNE DU BAS ATTEINTE
 	------------------------------------------------------------------------*/
-	void OnDeathLine() {
+	protected override void OnDeathLine() {
 		base.OnDeathLine() ;
 
-		if ( fl_kill ) {
-			killPlayer() ;
+		if (fl_kill) {
+			KillPlayer() ;
 		}
 		else {
-			if ( game.checkLevelClear() ) {
+			if (game.CheckLevelClear()) {
 				// Passage au level suivant
 				dy = 0 ;
-				game.nextLevel() ;
+				game.NextLevel() ;
 			}
 			else {
 				// Mort
@@ -1160,7 +1133,7 @@ public class Player : Physics
 	------------------------------------------------------------------------*/
 	void OnShieldOut() {
 		game.fxMan.AttachFx(x,y,"popShield");
-		shieldMC.Destroy();
+		shieldMC.DestroyThis();
 		CheckHits();
 	}
 
@@ -1171,11 +1144,11 @@ public class Player : Physics
 		fl_knock = false;
 		if ( fl_stable ) {
 			dx = 0;
-			playAnim(Data.ANIM_PLAYER_KNOCK_OUT);
+			PlayAnim(Data.ANIM_PLAYER_KNOCK_OUT);
 		}
 		else {
 			fl_lockControls = false;
-			playAnim(Data.ANIM_PLAYER_JUMP_DOWN);
+			PlayAnim(Data.ANIM_PLAYER_JUMP_DOWN);
 		}
 	}
 
@@ -1184,7 +1157,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	EVENT: T�L�PORTATION
 	------------------------------------------------------------------------*/
-	void OnTeleport() {
+	protected override void OnTeleport() {
 		base.OnTeleport() ;
 		dx = 0 ;
 		dy = 0 ;
@@ -1213,50 +1186,50 @@ public class Player : Physics
 	------------------------------------------------------------------------*/
 	void OnHitGround(float h) {
 		// Effet goldorak
-		if ( specialMan.actives[90] ) {
-			if ( !fl_knock & h>=Data.CASE_HEIGHT*2) {
-				knock(Data.SECOND);
+		if (specialMan.actives[90]) {
+			if (!fl_knock & h>=Data.CASE_HEIGHT*2) {
+				Knock(Data.SECOND);
 			}
 		}
 
-		super.onHitGround(h) ;
+		base.onHitGround(h) ;
 
 		// Hauteur de chute
 		if ( h >= Data.DUST_FALL_HEIGHT ) {
-			game.fxMan.dust(cx,cy+1);
+			game.fxMan.Dust(cx, cy+1);
 		}
-		game.fxMan.attachFx(x,y,"hammer_fx_fall");
+		game.fxMan.AttachFx(x,y,"hammer_fx_fall");
 
 		game.soundMan.playSound("sound_land",Data.CHAN_PLAYER);
 
 		// Effet stonehead
 		if ( specialMan.actives[39] ) {
-			game.shake(10,2) ;
-			var l = game.getBadClearList() ;
-			for (var i=0;i<l.length;i++) {
-				l[i].knock(Data.SECOND) ;
+			game.Shake(10,2) ;
+			var l = game.GetBadClearList() ;
+			for (var i=0;i<l.Count;i++) {
+				l[i].Knock(Data.SECOND) ;
 			}
 		}
 
-		showTeleporters();
+		ShowTeleporters();
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: TOUCHE UN MUR
 	------------------------------------------------------------------------*/
-	void OnHitWall() {
-		if ( fl_knock ) {
-			dx = -dx*0.5;
+	protected override void OnHitWall() {
+		if (fl_knock) {
+			dx = -dx*0.5f;
 			// Gros choc
-			if ( Math.abs(dx)>=10 && world.getCase( {x:cx,y:cy} )<=0 ) {
-				game.shake(Data.SECOND*0.7, 5);
-				game.fxMan.inGameParticlesDir(Data.PARTICLE_STONE, x,y, 1+Std.random(3), dx);
-				game.fxMan.inGameParticlesDir(Data.PARTICLE_CLASSIC_BOMB, x,y, 3+Std.random(5), dx);
+			if (Mathf.Abs(dx)>=10 & world.GetCase(cx, cy)<=0) {
+				game.Shake(Data.SECOND*0.7f, 5);
+				game.fxMan.InGameParticlesDir(Data.PARTICLE_STONE, x,y, 1+UnityEngine.Random.Range(0, 3), dx);
+				game.fxMan.InGameParticlesDir(Data.PARTICLE_CLASSIC_BOMB, x,y, 3+UnityEngine.Random.Range(0, 5), dx);
 			}
 		}
 		else {
-			vase.OnHitWall();
+			base.OnHitWall();
 		}
 	}
 
@@ -1266,20 +1239,20 @@ public class Player : Physics
 	------------------------------------------------------------------------*/
 	void OnStartLevel() {
 		this.Show() ;
-		game.manager.logAction(world.currentId+","+Math.floor(score/1000));
+		game.manager.LogAction(world.currentId+","+Mathf.Floor(score/1000));
 		if ( game.world.fl_mainWorld ) {
 			game.gi.setLevel(game.world.currentId);
 		}
 		else {
-			if ( game.fakeLevelId==null ) {
-				game.gi.hideLevel();
+			if (game.fakeLevelId==-1) {
+				game.gi.HideLevel();
 			}
 			else {
-				game.gi.setLevel(game.fakeLevelId);
+				game.gi.SetLevel(game.fakeLevelId);
 			}
 		}
-		if ( fl_shield && shieldMC==null ) {
-			shield(shieldTimer);
+		if (fl_shield & shieldMC==null) {
+			Shield(shieldTimer);
 		}
 		startX = x ;
 		fl_entering = true;
@@ -1289,11 +1262,11 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	EVENT: PORTAL WARP
 	------------------------------------------------------------------------*/
-	void OnPortal(int pid) {
-		super.onPortal(pid);
+	protected override void OnPortal(int pid) {
+		base.OnPortal(pid);
 
-		if ( !game.usePortal(pid, this) ) {
-			onPortalRefusal();
+		if (!game.UsePortal(pid, this)) {
+			OnPortalRefusal();
 		}
 	}
 
@@ -1301,22 +1274,22 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	EVENT: PORTAIL FERM�
 	------------------------------------------------------------------------*/
-	void OnPortalRefusal() {
-		super.onPortalRefusal();
+	protected override void OnPortalRefusal() {
+		base.OnPortalRefusal();
 		x = oldX;
 		y = oldY;
 		dx = -dx;
-		knock(Data.SECOND*0.5);
-		game.fxMan.inGameParticles( Data.PARTICLE_PORTAL, x,y, Std.random(5)+5 );
-		game.shake(Data.SECOND,3);
+		Knock(Data.SECOND*0.5f);
+		game.fxMan.InGameParticles(Data.PARTICLE_PORTAL, x,y, UnityEngine.Random.Range(0, 5)+5);
+		game.Shake(Data.SECOND,3);
 		fl_stopStepping = true;
 	}
 
 
-	void OnBump() {
-		super.onBump();
+	protected override void OnBump() {
+		base.OnBump();
 		fl_knock = false;
-		knock(Data.SECOND*0.7);
+		Knock(Data.SECOND*0.7f);
 	}
 
 
@@ -1326,51 +1299,52 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	void EndUpdate() {
-
+	protected override void EndUpdate() {
 		base.EndUpdate() ;
 
 		if ( shieldMC!=null ) {
 			if ( shieldTimer<=Data.SECOND*3 ) {
-				shieldMC.blink();
+				shieldMC.Blink();
 			}
 			shieldMC.mc._x	= shieldMC.mc._x + (this.x - shieldMC.mc._x)*0.75;
 			shieldMC.mc._y	= shieldMC.mc._y + (this.y-20 - shieldMC.mc._y)*0.75;
 		}
 
-		this._xscale = dir*Math.abs(this._xscale) ;
+		this._xscale = dir*Mathf.Abs(this._xscale) ;
 	}
 
 
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	void Update() {
+	protected override void Update() {
 		// Gestion des kicks
-		for (var i=0;i<recentKicks.length;i++) {
+		for (var i=0;i<recentKicks.Count;i++) {
 
-			if ( game.cycle-recentKicks[i].t > 2 ) {
-				recentKicks.splice(i,1);
+			if (game.cycle-recentKicks[i].t > 2 ) {
+				recentKicks.RemoveAt(i);
 				i--;
 			}
 		}
 
 		// Poup�e Guu
 		if ( specialMan.actives[100] ) {
-			game.fxMan.inGameParticles( Data.PARTICLE_RAIN, x + Std.random(20)*(Std.random(2)*2-1), y-60-Std.random(5), Std.random(2)+1 );
-			scale( Math.min(100, (scaleFactor+0.002*Timer.tmod)*100) );
-			if ( scaleFactor<=0.60 ) {
-				killHit(null);
+			game.fxMan.InGameParticles(Data.PARTICLE_RAIN, x +
+					UnityEngine.Random.Range(0, 20)*(UnityEngine.Random.Range(0, 2)*2-1),
+					y-60-UnityEngine.Random.Range(0, 5), UnityEngine.Random.Range(0, 2)+1 );
+			Scale(Mathf.Min(100, (scaleFactor+0.002f*Time.fixedDeltaTime)*100));
+			if (scaleFactor<=0.60) {
+				KillHit(0);
 				specialMan.Interrupt(100);
 			}
 		}
 
 
 		// Oxyg�ne
-		if ( !fl_kill && game.fl_aqua ) {
-			oxygen -= Timer.tmod*0.1;
+		if (!fl_kill & game.fl_aqua) {
+			oxygen -= Time.fixedDeltaTime*0.1f;
 			game.manager.Progress(oxygen/100);
-			if ( oxygen<=0 ) {
+			if (oxygen<=0) {
 				KillHit(0);
 			}
 		}
@@ -1380,54 +1354,53 @@ public class Player : Physics
 		specialMan.Main() ;
 
 		// D�placement
-		if ( !fl_kill && !fl_lockControls ) {
-			if ( !fl_entering && _visible ) {
+		if (!fl_kill & !fl_lockControls) {
+			if (!fl_entering & visible) {
 				ctrl.Update() ;
 			}
-			if ( pid==0 && game.manager.fl_debug ) {
+			if (pid==0 & game.manager.fl_debug) {
 				GetDebugControls() ;
 			}
 		}
-		if ( fl_entering ) {
-			if ( cy >= 0 ) {
+		if (fl_entering) {
+			if (cy >= 0) {
 				fl_entering = false;
 			}
 		}
 
 		// Refroidissement du tir
-		if ( coolDown>0 ) {
-			coolDown-=Timer.tmod ;
-			if ( coolDown<=0 ) {
+		if (coolDown>0) {
+			coolDown-=Time.fixedDeltaTime;
+			if (coolDown<=0) {
 				coolDown=0 ;
 			}
 		}
 
 		// Sonn�
-		if ( fl_knock ) {
-			knockTimer-=Timer.tmod;
-			if ( knockTimer<=0 ) {
+		if (fl_knock) {
+			knockTimer-=Time.fixedDeltaTime;
+			if (knockTimer<=0) {
 				OnWakeUp();
 			} else {
-				if ( fl_stable && animId!=Data.ANIM_PLAYER_KNOCK_IN.id ) {
+				if (fl_stable & animId!=Data.ANIM_PLAYER_KNOCK_IN.id) {
 					PlayAnim(Data.ANIM_PLAYER_KNOCK_IN);
 				}
-				if ( !fl_stable && animId!=Data.ANIM_PLAYER_DIE.id ) {
+				if (!fl_stable & animId!=Data.ANIM_PLAYER_DIE.id) {
 					PlayAnim(Data.ANIM_PLAYER_DIE);
 				}
 			}
 		}
 
-
 		// Gestion de verrou de contr�les
-		if ( fl_lockControls ) {
-			if ( fl_stable && animId==baseStopAnim.id ) {
+		if (fl_lockControls) {
+			if (fl_stable & animId==baseStopAnim.id) {
 				fl_lockControls = false;
 			}
 		}
 
-		if ( lockTimer>0 ) {
-			lockTimer-=Timer.tmod;
-			if ( lockTimer<=0 ) {
+		if (lockTimer>0) {
+			lockTimer-=Time.fixedDeltaTime;
+			if (lockTimer<=0) {
 				fl_lockControls = false;
 			}
 			else {
@@ -1436,41 +1409,40 @@ public class Player : Physics
 		}
 
 		// Bouclier
-		if ( fl_shield ) {
-			shieldTimer-=Timer.tmod;
-			if ( shieldTimer<=0 ) {
+		if (fl_shield) {
+			shieldTimer-=Time.fixedDeltaTime;
+			if (shieldTimer<=0) {
 				Unshield();
 			}
 		}
-
 
 		// M�J
 		base.Update() ;
 		UpdateCoords() ;
 
 		// RaZ des compteurs de glandage
-		if ( dx!=0 || dy!=0 ) {
+		if (dx!=0 | dy!=0) {
 			edgeTimer = 0;
 			waitTimer = 0;
 		}
 
-		if ( !fl_kill ) {
+		if (!fl_kill) {
 			// Animation de saut
-			if ( !fl_stable && dy>=0 && animId!=Data.ANIM_PLAYER_JUMP_DOWN.id && !fl_lockControls ) {
+			if (!fl_stable & dy>=0 & animId!=Data.ANIM_PLAYER_JUMP_DOWN.id & !fl_lockControls) {
 				PlayAnim(Data.ANIM_PLAYER_JUMP_DOWN);
 			}
-			if ( animId == Data.ANIM_PLAYER_JUMP_DOWN.id && fl_stable ) {
+			if (animId == Data.ANIM_PLAYER_JUMP_DOWN.id & fl_stable) {
 				PlayAnim(Data.ANIM_PLAYER_JUMP_LAND);
 			}
 
 			// Anim d'attente
-			if ( animId==Data.ANIM_PLAYER_STOP.id ) {
-				if ( waitTimer<=0 ) {
+			if (animId==Data.ANIM_PLAYER_STOP.id) {
+				if (waitTimer<=0) {
 					waitTimer = Data.WAIT_TIMER;
 				}
-				waitTimer-=Timer.tmod;
-				if ( waitTimer<=0 ) {
-					if ( Std.random(20)==0 ) {
+				waitTimer-=Time.fixedDeltaTime;
+				if (waitTimer<=0) {
+					if (UnityEngine.Random.Range(0, 20)==0) {
 						PlayAnim(Data.ANIM_PLAYER_WAIT1);
 					}
 					else {
@@ -1479,23 +1451,21 @@ public class Player : Physics
 				}
 			}
 
-
 			// Anim au bord du vide
-			if ( fl_stable && dx==0 ) {
-				if ( animId==baseStopAnim.id ) {
-					var pt = Entity.rtc( x+dir*Data.CASE_WIDTH*0.3, y+Data.CASE_HEIGHT );
-					if (  world.GetCase(pt)<=0  &&  world.GetCase(cx+dir, cy)==0  ) {
-						if ( edgeTimer<=0 ) {
+			if (fl_stable & dx==0) {
+				if (animId==baseStopAnim.id) {
+					var pt = Entity.rtc(x+dir*Data.CASE_WIDTH*0.3f, y+Data.CASE_HEIGHT);
+					if (world.GetCase(pt.x, pt.y)<=0 & world.GetCase(cx+dir, cy)==0) {
+						if (edgeTimer<=0) {
 							edgeTimer = Data.EDGE_TIMER;
 						}
-						edgeTimer-=Timer.tmod;
-						if ( edgeTimer<=0 ) {
+						edgeTimer-=Time.fixedDeltaTime;
+						if (edgeTimer<=0) {
 							PlayAnim(Data.ANIM_PLAYER_EDGE);
 						}
 					}
 				}
 			}
 		}
-
 	}
 }

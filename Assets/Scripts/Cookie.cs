@@ -81,8 +81,8 @@ public struct Cookie
 	/*------------------------------------------------------------------------
 	RUNTIME => COOKIE
 	------------------------------------------------------------------------*/
-	public void SaveSet(string name, string raw) {
-		this = JsonUtility.FromJson<Cookie>(raw);
+	public void SaveFile(string name, string raw) {
+		File.WriteAllText(Application.dataPath+"/xml/"+name, raw);
 		NAME = name;
 		Flush();
 	}
@@ -93,7 +93,6 @@ public struct Cookie
 	------------------------------------------------------------------------*/
 	public string ReadFile(string name) {
 		string raw = File.ReadAllText(Application.dataPath+"/xml/"+name);
-		SetVar(name, raw);
 		return raw;
 	}
 

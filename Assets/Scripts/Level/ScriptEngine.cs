@@ -1,10 +1,7 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Xml.Linq;
 using System;
-
-namespace Level;
 
 public class ScriptEngine
 {
@@ -54,11 +51,11 @@ public class ScriptEngine
 		T_ENTER,
 	};
 
-	Modes.GameMode game;
+	GameMode game;
 	public XDocument script;
 	string extraScript;
 	string baseScript;
-	Level.LevelData data;
+	LevelData data;
 	int bads;
 	float cycle;
 
@@ -82,7 +79,7 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public ScriptEngine(Modes.GameMode g, Level.LevelData d) {
+	public ScriptEngine(GameMode g, LevelData d) {
 		game			= g;
 		data			= d;
 		baseScript		= data.script;
@@ -151,7 +148,7 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	ATTACHEMENT DE LA VUE DU NIVEAU
 	------------------------------------------------------------------------*/
-	void OnLevelAttach() {
+	public void OnLevelAttach() {
 		fl_onAttach = true;
 	}
 
@@ -159,11 +156,11 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	GESTION MODE SAFE
 	------------------------------------------------------------------------*/
-	void SafeMode() {
+	public void SafeMode() {
 		fl_safe = true;
 	}
 
-	void NormalMode() {
+	public void NormalMode() {
 		fl_safe	= false;
 	}
 
@@ -276,7 +273,7 @@ public class ScriptEngine
 				x = game.FlipCoordReal(x);
 				var id = GetInt(e, "i");
 				var subId = GetInt(e, "si");
-				var mc = Entity.Item.ScoreItem.Attach(game, x, y, id, subId);
+				var mc = ScoreItem.Attach(game, x, y, id, subId);
 				var inf = GetInt(e, "inf");
 				if (inf==1) {
 					mc.setLifeTimer(-1);
@@ -293,7 +290,7 @@ public class ScriptEngine
 					var y = Entity.y_ctr(  GetInt(e, "y")  );
 					var id = GetInt(e, "i");
 					var subId = GetInt(e, "si");
-					var mc = Entity.Item.SpecialItem.Attach(game, x,y, id, subId );
+					var mc = SpecialItem.Attach(game, x,y, id, subId );
 					var inf = GetInt(e, "inf");
 					if ( inf==1 ) {
 						mc.setLifeTimer(-1);
@@ -312,14 +309,14 @@ public class ScriptEngine
 
 			case E_BAD: {// bad
 				if ( !fl_safe ) { //&& !game.world.isVisited() ) {
-					var x = Entity.x_ctr( game.FlipCoordCase( GetInt(e, "x") ) ) - Data.CASE_WIDTH*0.5;
+					var x = Entity.x_ctr( game.FlipCoordCase( GetInt(e, "x") ) ) - Data.CASE_WIDTH*0.5f;
 					var y = Entity.y_ctr( GetInt(e, "y")-1 );
 					var id = GetInt(e, "i");
 					var fl_sys = ( GetInt(e, "sys")!=0 & GetInt(e, "sys")!=-1 );
-					var mc = game.AttachBad( id, x,y );
+					var mc = game.AttachBad(id, x, y);
 					if ( (mc.types&Data.BAD_CLEAR)>0 ) {
 						if ( fl_sys & game.world.IsVisited() ) {
-							mc.destroy();
+							mc.DestroyThis();
 							game.badCount--;
 							break;
 						}
@@ -396,7 +393,7 @@ public class ScriptEngine
 				var p = GetInt(e, "p");
 				// WARNING: "name" must be "$"-escaped against obfu
 				KillById(sid);
-				int x, y;
+				float x, y;
 				if  (xr == -1) {
 					x = Entity.x_ctr(cx);
 					y = Entity.y_ctr(cy);
@@ -414,10 +411,10 @@ public class ScriptEngine
 					mc.transform.localScale.Set(mc.transform.localScale.x*-1, mc.transform.localScale.y, mc.transform.localScale.z);
 				}
 				if ( p>0 ) {
-					mc.play();
+					mc.Play();
 				}
 				else {
-					mc.stop();
+					mc.Stop();
 				}
 				mc.sub.stop();
 				if ( name=="torch" ) {
@@ -521,14 +518,14 @@ public class ScriptEngine
 				game.world.view.fl_hideBorders = fl_b;
 				game.world.view.Detach();
 				game.world.view.Attach();
-				game.world.view.MoveToPreviousPos();
+				/* game.world.view.MoveToPreviousPos(); */
 			}break;
 
 			case E_HIDEBORDERS: {
 				game.world.view.fl_hideTiles = true;
 				game.world.view.Detach();
 				game.world.view.Attach();
-				game.world.view.MoveToPreviousPos();
+				/* game.world.view.MoveToPreviousPos(); */
 			}break;
 
 
@@ -806,7 +803,7 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	INSERTION: BONUS
 	------------------------------------------------------------------------*/
-	void InsertScoreItem(int id, int sid, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
+	public void InsertScoreItem(int id, int sid, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
 		InsertItem(E_SCORE, id,sid,x,y,t,repeat,fl_inf, fl_clearAtEnd);
 	}
 
@@ -845,12 +842,12 @@ public class ScriptEngine
 				var kid = GetInt(trigger, "key");
 				if ( !game.HasKey(kid) ) {
 					if ( IsVerbose(trigger.Name.ToString()) ) {
-						game.fxMan.KeyRequired( kid );
+						/* game.fxMan.KeyRequired( kid ); */
 					}
 				}
 				else {
 					if ( kid != -1 ) {
-						game.fxMan.KeyUsed( kid );
+						/* game.fxMan.KeyUsed( kid ); */
 					}
 					ExecuteTrigger(ref trigger);
 				}
@@ -1009,7 +1006,7 @@ public class ScriptEngine
 				fl_elevatorOpen = true;
 				var l = game.GetPlayerList();
 				for (var i=0;i<l.Count;i++) {
-					l[i].lockControls(Data.SECOND*12.5);
+					l[i].LockControls(Data.SECOND*12.5);
 					l[i].dx = 0;
 				}
 				game.huTimer = 0;
@@ -1019,8 +1016,8 @@ public class ScriptEngine
 				if ( fl_elevatorOpen ) {
 					var l = game.GetPlayerList();
 					for (var i=0;i<l.Count;i++) {
-						l[i].hide();
-						l[i].lockControls(99999);
+						l[i].Hide();
+						l[i].LockControls(99999);
 						game.huTimer = 0;
 					}
 
@@ -1048,7 +1045,7 @@ public class ScriptEngine
 
 			case 6: {// attachement de ballons en sur les slots sp�ciaux
 				var s = game.world.current.specialSlots[ UnityEngine.Random.Range(0, game.world.current.specialSlots.Length) ];
-				var b = Entity.Bomb.Player.SoccerBall.attach(
+				var b = SoccerBall.Attach(
 					game,
 					Entity.x_ctr(s.x),
 					Entity.y_ctr(s.y)
@@ -1060,7 +1057,7 @@ public class ScriptEngine
 			case 7: {// igor pleure
 				var pl = game.GetPlayerList();
 				for (var i=0;i<pl.Count;i++) {
-					pl[i].setBaseAnims( Data.ANIM_PLAYER_WALK, Data.ANIM_PLAYER_STOP_L );
+					pl[i].SetBaseAnims( Data.ANIM_PLAYER_WALK, Data.ANIM_PLAYER_STOP_L );
 				}
 			}break;
 
@@ -1072,7 +1069,7 @@ public class ScriptEngine
 			}break;
 
 			case 9: {// rire tuberculoz
-				game.soundMan.playSound("sound_boss_laugh", Data.CHAN_BAD);
+				/* game.soundMan.playSound("sound_boss_laugh", Data.CHAN_BAD); */
 			}break;
 
 			case 10: {// d�sactive les jump down sur les monstres !
@@ -1086,8 +1083,8 @@ public class ScriptEngine
 				var l = game.GetBadClearList();
 				for (var i=0;i<l.Count;i++) {
 					var b = l[i];
-					game.fxMan.AttachFx( b.x, b.y-Data.CASE_HEIGHT, "hammer_fx_pop" );
-					b.destroy();
+					/* game.fxMan.AttachFx( b.x, b.y-Data.CASE_HEIGHT, "hammer_fx_pop" ); */
+					b.DestroyThis();
 				}
 			}break;
 
@@ -1095,7 +1092,7 @@ public class ScriptEngine
 				while ( game.huState<2 ) {
 					var mc = game.OnHurryUp();
 					if ( game.huState<2 ) {
-						mc.removeMovieClip();
+						/* mc.removeMovieClip(); */
 					}
 				}
 			}break;
@@ -1104,8 +1101,8 @@ public class ScriptEngine
 				var l = game.GetList(Data.ITEM);
 				for (var i=0;i<l.Count;i++) {
 					var it = l[i];
-					game.fxMan.AttachFx( it.x, it.y-Data.CASE_HEIGHT, "hammer_fx_pop" );
-					it.Destroy();
+					/* game.fxMan.AttachFx( it.x, it.y-Data.CASE_HEIGHT, "hammer_fx_pop" ); */
+					it.DestroyThis();
 				}
 			}break;
 
@@ -1135,9 +1132,9 @@ public class ScriptEngine
 
 		if (fl_redraw) {
 			fl_redraw = false;
-			game.world.view.DetachLevel();
+/* 			game.world.view.DetachLevel();
 			game.world.view.DisplayCurrent();
-			game.world.view.MoveToPreviousPos();
+			game.world.view.MoveToPreviousPos(); */
 		}
 		fl_firstTorch = false;
 	}

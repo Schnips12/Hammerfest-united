@@ -1,9 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-namespace Level;
-
 public class TeleporterData
 {
 
@@ -41,14 +35,14 @@ public class TeleporterData
 		// Calcul du point central
 		centerX	= cx * scaleX + scaleX/2;
 		centerY	= cy * scaleY + scaleY;
-		startX	= Entity.x_ctr(x, scaleX);
-		startY	= Entity.y_ctr(y, scaleY);
+		startX	= Entity.x_ctr(x);
+		startY	= Entity.y_ctr(y);
 
-		if (direction == 2) { // TODO Use Data.HORIZONTAL
+		if (direction == Data.HORIZONTAL) {
 			centerX += length/2*scaleX;
 			startX -= scaleX*0.5f;
 		}
-		if (direction == 1) { // TODO Use Data.VERTICAL
+		if (direction == Data.VERTICAL) {
 			centerY += length/2*scaleY ;
 			startY -= scaleY;
 		}
@@ -58,7 +52,7 @@ public class TeleporterData
 		ecx = cx;
 		ecy = cy;
 
-		if (direction == 2) { // TODO Use Data.HORIZONTAL
+		if (direction == Data.HORIZONTAL) {
 			ecx += length;
 			endX += length*scaleY;
 		}

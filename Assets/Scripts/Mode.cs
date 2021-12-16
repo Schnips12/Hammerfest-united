@@ -4,10 +4,10 @@ using UnityEngine;
 
 public class Mode
 {
-	float xFriction;
-	float yFriction;
+	public float xFriction;
+	public float yFriction;
 
-	protected GameManager manager;
+	public GameManager manager;
 	protected Cookie root;
 	protected AudioSource audio;
 	//DepthManager depthMan; //TODO replace with unity object
@@ -22,7 +22,7 @@ public class Mode
 	bool fl_hide;
 	public bool fl_runAsChild;
 
-	float cycle;
+	public float cycle;
 	int uniqId;
 
 	protected float xOffset; // décalage du mc du jeu
@@ -79,7 +79,7 @@ public class Mode
 	/*------------------------------------------------------------------------
 	RENVOIE UN ID UNIQUE INCRéMENTAL
 	------------------------------------------------------------------------*/
-	int GetUniqId() {
+	public int GetUniqId() {
 		uniqId++;
 		return uniqId;
 	}

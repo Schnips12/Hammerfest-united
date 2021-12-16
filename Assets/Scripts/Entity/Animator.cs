@@ -1,39 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace Entity;
-
-public class Animator : Entity.Trigger
+public class HAnimator : Trigger
 {
-    /* var sub; */
-	int animId;
+    protected GameObject sub;
+	Animator animator;
+	public int animId;
 
 	float frame;
-	float animFactor;
+	protected float animFactor;
 	float blinkTimer;
 
-	int blinkColor;
-	int blinkColorAlpha;
-	int blinkAlpha;
+	protected int blinkColor;
+	protected int blinkColorAlpha;
+	protected int blinkAlpha;
 
-
-	bool fl_anim;
-	bool fl_loop;
-	bool fl_blink;
-	bool fl_alphaBlink;
-	bool fl_stickyAnim;
+	protected bool fl_anim;
+	protected bool fl_loop;
+	protected bool fl_blink;
+	protected bool fl_alphaBlink;
+	protected bool fl_stickyAnim;
 
 	float fadeStep;
 
-	private bool fl_blinking;
-	private bool fl_blinked;
+	protected bool fl_blinking;
+	protected bool fl_blinked;
 
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Animator() : base() {
+	public HAnimator() : base() {
 		frame = 0;
 		fadeStep = 0;
 		animFactor = 1.0f;
@@ -55,10 +51,10 @@ public class Animator : Entity.Trigger
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	void Init(Mode.GameMode g) {
+	protected override void Init(GameMode g) {
 		base.Init(g);
-		this.GotoAndStop("1");
-		sub.Stop();
+		animator.SetBool("stop", true);
+		animator.SetInteger("frame", 1);
 	}
 
 
@@ -67,38 +63,38 @@ public class Animator : Entity.Trigger
 	------------------------------------------------------------------------*/
 	void EnableAnimator() {
 		fl_anim = true;
-		this.Stop();
+		animator.SetBool("stop", true);
 	}
 	void DisableAnimator() {
 		fl_anim = false;
-		this.Play();
+		animator.SetBool("stop", false);
 	}
 
 
 	/*------------------------------------------------------------------------
 	ACTIVE/D�SACTIVE LE CLIGNOTEMENT
 	------------------------------------------------------------------------*/
-	void Blink(int duration) {
+	void Blink(float duration) {
 		if (!fl_blink) {
 			return;
 		}
 		fl_blinking = true;
 		blinkTimer = duration;
 	}
-	void StopBlink() {
+	protected void StopBlink() {
 		fl_blinking = false;
 		if (fl_alphaBlink) {
 			alpha = 100;
 		}
 		else {
-			ResetColor();
+			/* ResetColor(); */
 		}
 	}
 
 	/*------------------------------------------------------------------------
 	LANCE UN CLIGNOTEMENT BAS� SUR LA DUR�E DE VIE
 	------------------------------------------------------------------------*/
-	void BlinkLife() {
+	protected void BlinkLife() {
 		if (lifeTimer/totalLife<=0.1f) {
 			Blink(Data.BLINK_DURATION_FAST);
 		}
@@ -111,7 +107,7 @@ public class Animator : Entity.Trigger
 	/*------------------------------------------------------------------------
 	RED�FINI LE PATH VERS L'ANIMATION
 	------------------------------------------------------------------------*/
-	void SetSub(mc) {
+	void SetSub(GameObject mc) {
 		sub = mc;
 	}
 
@@ -119,16 +115,16 @@ public class Animator : Entity.Trigger
 	/*------------------------------------------------------------------------
 	EVENT: FIN D'ANIM
 	------------------------------------------------------------------------*/
-	void OnEndAnim(int id) {
+	protected virtual void OnEndAnim(int id) {
 		UnstickAnim();
 		// Do nothing
 	}
 
-	void StickAnim() {
+	protected void StickAnim() {
 		fl_stickyAnim = true;
 	}
 
-	void UnstickAnim() {
+	protected void UnstickAnim() {
 		fl_stickyAnim = false;
 	}
 
@@ -136,18 +132,18 @@ public class Animator : Entity.Trigger
 	/*------------------------------------------------------------------------
 	MET L'ENTIT� DANS UNE PHASE D'ANIM DONN�E (1 � N)
 	------------------------------------------------------------------------*/
-	void PlayAnim(int id, bool loop) {
+	protected virtual void PlayAnim(Data.animParam a) {
 		if (fl_stickyAnim | fl_kill | !fl_anim) {
 			return;
 		}
-		if (animId == id & fl_loop == loop) {
+		if (animId == a.id & fl_loop == a.loop) {
 			return;
 		}
 
-		animId = id;
-		this.GotoAndStop(""+(animId+1));
-		sub.GotoAndStop("1");
-		fl_loop = loop;
+		animId = a.id;
+/* 		this.GotoAndStop(""+(animId+1));
+		sub.GotoAndStop("1"); */
+		fl_loop = a.loop;
 		frame = 0;
 	}
 
@@ -165,8 +161,8 @@ public class Animator : Entity.Trigger
 	void ReplayAnim() {
 		var id = animId;
 		var fid = ( (id==1)?2:1 );
-		PlayAnim(fid, fl_loop);
-		PlayAnim(id, fl_loop);
+		PlayAnim(new Data.animParam(fid, fl_loop));
+		PlayAnim(new Data.animParam(id, fl_loop));
 	}
 
 //	/*------------------------------------------------------------------------
@@ -182,7 +178,7 @@ public class Animator : Entity.Trigger
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	void Update() {
+	protected override void Update() {
 		base.Update();
 
 		// Clignotement
@@ -191,14 +187,14 @@ public class Animator : Entity.Trigger
 				BlinkLife();
 			}
 			if (fl_blinking) {
-				blinkTimer-=Timer.tmod;
+				blinkTimer-=Time.fixedDeltaTime;
 				if ( blinkTimer<=0 ) {
 					if ( fl_blinked ) {
 						if ( fl_alphaBlink ) {
 							alpha = 100;
 						}
 						else {
-							ResetColor();
+							/* ResetColor(); */
 						}
 						fl_blinked = false;
 					}
@@ -207,7 +203,7 @@ public class Animator : Entity.Trigger
 							alpha = blinkAlpha;
 						}
 						else {
-							SetColorHex(blinkColorAlpha,blinkColor);
+							/* SetColorHex(blinkColorAlpha,blinkColor); */
 						}
 						fl_blinked = true;
 					}

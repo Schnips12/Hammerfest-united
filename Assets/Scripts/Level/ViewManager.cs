@@ -1,8 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace Level;
 
 public class ViewManager : SetManager
 {
@@ -152,7 +148,7 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	ATTACH: VUE
 	------------------------------------------------------------------------*/
-	View CreateView(int id) {
+	protected virtual View CreateView(int id) {
 		View v = new View(this);
 		v.fl_hideTiles = fl_hideTiles;
 		v.fl_hideBorders = fl_hideBorders;

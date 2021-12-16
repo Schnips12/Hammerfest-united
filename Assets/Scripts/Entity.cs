@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Mode;
 
 public class Entity : MonoBehaviour
 {
@@ -12,67 +10,69 @@ public class Entity : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    protected void FixedUpdate()
     {
 		// Durée de vie
 		if (lifeTimer>0) {
-			lifeTimer-=Timer.tmod;
+			lifeTimer-=Time.fixedDeltaTime;
 			if (lifeTimer<=0) {
 				OnLifeTimer();
 			}
 		}
 
 		if (stickTimer>0) {
-			stickTimer-=Timer.tmod;
+			stickTimer-=Time.fixedDeltaTime;
 			if (stickTimer<=0) {
 				Unstick();
 			}
 		}        
     }
 
-    GameMode game;
+    protected GameMode game;
+	GameObject sticker;
 
 	public float x; // real coords
 	public float y;
 	public float width;
 	public float height;
 
-	float oldX; // previous real coords
-	float oldY;
+	protected float oldX; // previous real coords
+	protected float oldY;
 
 	public int cx; // bottom entity case coords
 	public int cy;
 
-	int fcx; // under feet case coords
-	int fcy;
+	protected int fcx; // under feet case coords
+	protected int fcy;
 
 	float _xOffset; // graphical offset of mc (for shoots)
 	float _yOffset;
 
-	float rotation;
-	float alpha;
-	float minAlpha;
-	float scaleFactor = 1; // facteur (1.0)
+	protected  float rotation;
+	public float alpha;
+	protected  float minAlpha;
+	protected  float scaleFactor = 1; // facteur (1.0)
 	//BlendMode defaultBlend: BlendMode; //TODO obsolete
 	//int blendId		: int; // int value of blendMode
 
 	public int types;
 
-	int scriptId;
+	public int scriptId;
 
-	float lifeTimer;
-	float totalLife;
+	protected float lifeTimer;
+	protected float totalLife;
 
-	bool fl_kill;
+	public bool fl_kill;
 	bool fl_destroy;
-	public GameMechanics world;
+	public Level.GameMechanics world;
 
-	int uniqId;
-	Entity parent;
+	public int uniqId;
+	protected Entity parent;
 	Color color;
 
 	//MovieClip sticker;
 	float stickerX;
+	float stickerY;
 	float elaStickFactor;
 	float stickTimer;
 	bool fl_stick;
@@ -80,9 +80,9 @@ public class Entity : MonoBehaviour
 	bool fl_stickBound;
 	bool fl_elastick;
 	bool fl_softRecal;
+	protected bool visible;
 
 	float softRecalFactor;
-
 
 
 	/*------------------------------------------------------------------------
@@ -121,7 +121,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	INIT
 	------------------------------------------------------------------------*/
-	void Init(GameMode g) {
+	protected virtual void Init(GameMode g) {
 		game = g;
 		uniqId = game.GetUniqId();
 		Register(Data.ENTITY) ;
@@ -133,7 +133,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	ENREGISTRE UN NOUVEL éLéMENT
 	------------------------------------------------------------------------*/
-	void Register(int type) {
+	protected void Register(int type) {
 		game.AddToList(type, this);
 		types |= type; // TODO might want to track types through a dedicated function (too limited for new types)
 	}
@@ -149,7 +149,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI L'ENTIT� EST DU TYPE SPéCIFIé
 	------------------------------------------------------------------------*/
-	bool IsType(int t) {
+	protected bool IsType(int t) {
 		return (types&t) > 0; // TODO might want to track types through a dedicated function (too limited for new types)
 	}
 
@@ -164,7 +164,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	DéFINI LE TEMPS DE VIE
 	------------------------------------------------------------------------*/
-	void SetLifeTimer(float t) {
+	protected void SetLifeTimer(float t) {
 		lifeTimer = t;
 		totalLife = t;
 	}
@@ -172,7 +172,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MET à JOUR LE TEMPS DE VIE (SANS CHANGER LE TOTAL INITIAL)
 	------------------------------------------------------------------------*/
-	void UpdateLifeTimer(float t) {
+	protected void UpdateLifeTimer(float t) {
 		if (totalLife == 0) {
 			SetLifeTimer(t);
 		}
@@ -186,19 +186,19 @@ public class Entity : MonoBehaviour
 	EVENT: FIN DE TIMER DE VIE // TODO manage that through an update function
 	------------------------------------------------------------------------*/
 	void OnLifeTimer() {
-		Destroy();
+		DestroyThis();
 	}
 
 
 	/*------------------------------------------------------------------------
 	HIT TEST DE BOUNDING BOX // TODO use unity colliders instead
 	------------------------------------------------------------------------*/
-	bool HitBound(Entity e) {
+	protected bool HitBound(Entity e) {
 		bool res = (
-			x+_width/2 > e.x-e._width/2 &&
-			y > e.y-e._height &&
-			x-_width/2 < e.x+e._width/2 &&
-			y-_height < e.y
+			x+width/2 > e.x-e.width/2 &
+			y > e.y-e.height &
+			x-width/2 < e.x+e.width/2 &
+			y-height < e.y
 			);
 		return res;
 	}
@@ -207,7 +207,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	L'ENTITé EN RENCONTRE UNE AUTRE // TODO use unity colliders instead
 	------------------------------------------------------------------------*/
-	void Hit(Entity e) {
+	public virtual void Hit(Entity e) {
 		// do nothing
 	}
 
@@ -215,13 +215,13 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
-	void Destroy() {
+	public virtual void DestroyThis() {
 		fl_kill = true;
 		fl_destroy = true;
 		Unstick();
 		for(int i=0 ; i<32 ; i++) {
 			if ((types&(1<<i)) > 0) {
-				//game.unregList.push( {type:Math.round(Math.pow(2,i)), ent:this} ) ; // TODO wtf
+				//game.unregList.Add( {type:Math.round(Math.pow(2,i)), ent:this} ) ; // TODO wtf
 			}
 		}
 		game.killList.Add(this);
@@ -231,8 +231,8 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	COLLE UN MC à L'ENTITé // TODO manage that through Unity editor
 	------------------------------------------------------------------------*/
-	void Stick(float ox, float oy) { //MovieClip mc, 
-		if (sticker._name!=null) {
+	protected void Stick(float ox, float oy) { //MovieClip mc, 
+		if (sticker.name!=null) {
 			Unstick();
 		}
 		//sticker = mc;
@@ -248,7 +248,7 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	ACTIVE L'ELASTICITé DU STICKER (algo du cameraman bourré) // TODO probably obsolete
 	------------------------------------------------------------------------*/
-	void SetElaStick(bool f) {
+	protected void SetElaStick(float f) {
 		if ( fl_elastick ) {
 			return;
 		}
@@ -264,7 +264,7 @@ public class Entity : MonoBehaviour
 	------------------------------------------------------------------------*/
 	void Unstick() {
 		fl_stick = false;
-		sticker.RemoveMovieClip() ;
+		Destroy(sticker);
 	}
 
 
@@ -273,14 +273,14 @@ public class Entity : MonoBehaviour
 	------------------------------------------------------------------------*/
 	void ActivateSoftRecal() {
 		fl_softRecal = true;
-		softRecalFactor = 0.1;
+		softRecalFactor = 0.1f;
 	}
 
 
 	// *** DEBUG ***
 	void Release() {
-		if (Key.isDown(Key.SHIFT)) {
-			if ( Key.isDown(Key.CONTROL) ) {
+		if (Input.GetKey(KeyCode.LeftShift)) {
+			if (Input.GetKey(KeyCode.LeftControl)) {
 				Debug.Log("Full serialization: "+Short());
 				//System.setClipboard( Log.toString(this) );
 			}
@@ -288,7 +288,10 @@ public class Entity : MonoBehaviour
 				//Log.clear();
 				Debug.Log(Short());
 				Debug.Log("----------");
-				Debug.Log("dir=" + dir + " dx="+ dx + " dy=" + dy +" xscale="+ _xscale);
+				Debug.Log("dir=" + sticker.transform.rotation +
+							" dx="+ sticker.GetComponent<Rigidbody2D>().velocity.x +
+							" dy=" + sticker.GetComponent<Rigidbody2D>().velocity.y +
+							" xscale="+ sticker.transform.localScale.x);
 			}
 		}
 	}
@@ -319,16 +322,16 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MASQUE/AFFICHE L'ENTIT�
 	------------------------------------------------------------------------*/
-	void Hide() {
-		_visible = false;
-		if (sticker._name!=null) {
-			sticker._visible = _visible;
+	protected virtual void Hide() {
+		visible = false;
+		if (sticker!=null) {
+			sticker.SetActive(visible);
 		}
 	}
-	void Show() {
-		_visible = true ;
-		if (sticker._name!=null) {
-			sticker._visible = _visible;
+	protected virtual void Show() {
+		visible = true ;
+		if (sticker!=null) {
+			sticker.SetActive(visible);
 		}
 	}
 
@@ -336,10 +339,9 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RE-SCALE DE L'ENTITé
 	------------------------------------------------------------------------*/
-	void scale(float n) {
+	void Scale(float n) {
 		scaleFactor = n/100 ;
-		_xscale = n ;
-		_yscale = _xscale ;
+		sticker.transform.localScale = new Vector3(n, n, 1);
 	}
 
 
@@ -396,24 +398,27 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MISE à JOUR DES COORDONNéES DE CASE
 	------------------------------------------------------------------------*/
-	void UpdateCoords() {
+	protected void UpdateCoords() {
 		cx = Entity.x_rtc(x);
 		cy = Entity.y_rtc(y);
 		fcx = Entity.x_rtc(x);
-		fcy = Entity.y_rtc(y+Math.floor(Data.CASE_HEIGHT/2));
+		fcy = Entity.y_rtc(y+Mathf.Floor(Data.CASE_HEIGHT/2));
 	}
 
 
 	/*------------------------------------------------------------------------
 	CONVERSION REAL -> CASE
 	------------------------------------------------------------------------*/
-	static Vector3Int rtc(int x, int y) {
-        return new Vector3Int(Entity.x_rtc(x), Entity.y_rtc(y), 0);       
+	public static Vector2Int rtc(int x, int y) {
+        return new Vector2Int(Entity.x_rtc(x), Entity.y_rtc(y));       
 	}
-	static int x_rtc(float n) {
+	public static Vector2Int rtc(float x, float y) {
+        return new Vector2Int(x_rtc(x), y_rtc(y));       
+	}
+	public static int x_rtc(float n) {
 		return Mathf.FloorToInt(n/Data.CASE_WIDTH) ;
 	}
-	static int y_rtc(float n) {
+	public static int y_rtc(float n) {
 		return Mathf.FloorToInt((n-Data.CASE_HEIGHT/2)/Data.CASE_HEIGHT) ;
 	}
 
@@ -421,18 +426,11 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONVERSION CASE -> REAL
 	------------------------------------------------------------------------*/
-	public static float x_ctr(int n, float scaleX) {
-		return n*scaleX + scaleX*0.5f ;
-	}
-	public static float y_ctr(int n, float scaleY) {
-		return n*scaleY + scaleY;
-	}
-
 	public static float x_ctr(int n) {
-		return n + 1*0.5f ;
+		return n*Data.CASE_WIDTH + Data.CASE_WIDTH*0.5f ;
 	}
 	public static float y_ctr(int n) {
-		return n + 1;
+		return n*Data.CASE_HEIGHT + Data.CASE_HEIGHT;
 	}
 
 
@@ -451,18 +449,18 @@ public class Entity : MonoBehaviour
 
 
 	void AdjustToLeft() {
-		x = x_ctr(cx, scaleFactor);
-		y = y_ctr(cy, scaleFactor);
+		x = x_ctr(cx);
+		y = y_ctr(cy);
 		x-=Data.CASE_WIDTH*0.5f+1;
 	}
 	void AdjustToRight() {
-		x = x_ctr(cx, scaleFactor);
-		y = y_ctr(cy, scaleFactor);
+		x = x_ctr(cx);
+		y = y_ctr(cy);
 		x+=Data.CASE_WIDTH*0.5f-1;
 	}
 	void CenterInCase() {
-		x = x_ctr(cx, scaleFactor);
-		y = y_ctr(cy, scaleFactor);
+		x = x_ctr(cx);
+		y = y_ctr(cy);
 	}
 
 
@@ -470,11 +468,11 @@ public class Entity : MonoBehaviour
 	RENVOIE LA DISTANCE DE L'ENTITé à UNE CASE // TODO use unity objects (vector2, Quaternions)
 	------------------------------------------------------------------------*/
 	float DistanceCase(int cx, int cy) {
-		return Mathf.Sqrt(Mathf.Pow(cy-this.cy,2) + Mathf.Pow(cx-this.cx,2));
+		return Mathf.Sqrt(Mathf.Pow(cy-this.cy, 2) + Mathf.Pow(cx-this.cx, 2));
 	}
 
-	float Distance(float cx, float cy) {
-		return Mathf.Sqrt(Mathf.Pow(y-this.y,2) + Mathf.Pow(x-this.x,2));
+	public float Distance(float cx, float cy) {
+		return Mathf.Sqrt(Mathf.Pow(y-this.y, 2) + Mathf.Pow(x-this.x, 2));
 	}
 
 
@@ -482,8 +480,8 @@ public class Entity : MonoBehaviour
 	RENVOIE LE NOM COURT DU MOVIE
 	------------------------------------------------------------------------*/
 	string Short() {
-		string str = ""+Std.cast(this) ; // TODO wtf
-		str = str.slice(str.lastIndexOf(".",9999)+1,9999);
+		string str = ""+this.ToString() ;
+		str = str.Substring(str.LastIndexOf(".",9999)+1,9999);
 		str = str + "(@"+cx+","+cy+")";
 		return str;
 	}
@@ -507,47 +505,43 @@ public class Entity : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CLOTURE DES UPDATES // TODO move to update ?
 	------------------------------------------------------------------------*/
-	void EndUpdate() {
+	protected virtual void EndUpdate() {
+		Vector3 pos = sticker.transform.position;
 		UpdateCoords();
 		if (fl_softRecal) {
 			var tx = x+_xOffset;
 			var ty = y+_yOffset;
-			_x = _x + (tx-_x)*softRecalFactor;
-			_y = _y + (ty-_y)*softRecalFactor;
-			softRecalFactor += 0.02*Timer.tmod;
-			if (softRecalFactor>=1 || ( Math.abs(tx-_x)<=1.5 && Math.abs(ty-_y)<=1.5 )) {
+			sticker.transform.position += new Vector3(tx-pos.x*softRecalFactor, ty-pos.y*softRecalFactor, 0);
+			softRecalFactor += 0.02f*Time.fixedDeltaTime;
+			if (softRecalFactor>=1 | ( Mathf.Abs(tx-pos.x)<=1.5 & Mathf.Abs(ty-pos.y)<=1.5 )) {
 				fl_softRecal = false;
 			}
 		}
 		if (!fl_softRecal) {
-			_x = x+_xOffset ;
-			_y = y+_yOffset ;
+			sticker.transform.position += new Vector3(_xOffset, _yOffset, 0);
 		}
-		_rotation = rotation ;
-		_alpha = Math.max(minAlpha, alpha) ;
-		if (alpha!=100 && blendId<=2) {
-			blendMode = BlendMode.LAYER;
-		}
-		else {
-			blendMode = defaultBlend;
-		}
+		sticker.transform.rotation = Quaternion.Euler(0, 0, rotation);
+		Color color = sticker.GetComponent<Material>().color;
+		color.a = Mathf.Max(minAlpha, alpha);
+		sticker.GetComponent<Material>().SetColor("Scripted alpha", color);
+
 		oldX = x ;
 		oldY = y ;
+		pos = sticker.transform.position;
 		if (fl_stick) {
 			if ( fl_elastick ) {
-				sticker._x = sticker._x + (x-sticker._x)*elaStickFactor + stickerX;
-				sticker._y = sticker._y + (y-sticker._y)*elaStickFactor + stickerY;
+				sticker.transform.position += new Vector3((x-pos.x)*elaStickFactor + stickerX, (y-pos.y)*elaStickFactor + stickerY, 0);
 			}
 			else {
-				sticker._x = x + stickerX;
-				sticker._y = y + stickerY;
+				sticker.transform.position += new Vector3(stickerX, stickerY, 0);
 			}
 			if (fl_stickRot) {
-				sticker._rotation+=8*Timer.tmod;
+				sticker.transform.Rotate(Vector3.forward*8*Time.fixedDeltaTime);
 			}
 			if (fl_stickBound) {
-				sticker._x = Math.max( sticker._x, sticker._width*0.5 );
-				sticker._x = Math.min( sticker._x, Data.GAME_WIDTH-sticker._width*0.5 );
+				sticker.transform.position = new Vector3(Mathf.Max( pos.x, width*0.5f ), 					pos.y, pos.z);
+				pos = sticker.transform.position;
+				sticker.transform.position = new Vector3(Mathf.Min( pos.x, Data.GAME_WIDTH-width*0.5f ), 	pos.y, pos.z);
 			}
 		}
 	}

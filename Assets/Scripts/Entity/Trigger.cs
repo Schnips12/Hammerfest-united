@@ -1,8 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-
-namespace Entity;
 
 public class Trigger : Entity
 {
@@ -24,7 +20,7 @@ public class Trigger : Entity
 		if (cx<0 | cx>=Data.LEVEL_WIDTH | cy<0 | cy>=Data.LEVEL_HEIGHT) {
 			return ;
 		}
-		world.triggers[cx][cy].push(this) ;
+		world.triggers[cx][cy].Add(this) ;
 	}
 
 
@@ -48,7 +44,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	AJOUTE L'ENTIT� � L'ENSEMBLE DES CASES QU'ELLE OCCUPE
 	------------------------------------------------------------------------*/
-	void TAdd(int cx, int cy) {
+	protected void TAdd(int cx, int cy) {
 		TAddSingle(cx,cy) ;
 		TAddSingle(cx-1,cy) ;
 		TAddSingle(cx+1,cy) ;
@@ -61,7 +57,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	RETIRE L'ENTIT� DE L'ENSEMBLE DES CASES QU'ELLE OCCUPE
 	------------------------------------------------------------------------*/
-	void TRem(int cx, int cy) {
+	protected void TRem(int cx, int cy) {
 		TRemSingle(cx,cy) ;
 		TRemSingle(cx-1,cy) ;
 		TRemSingle(cx+1,cy) ;
@@ -75,7 +71,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	T�L�PORTE L'ENTIT� � UN AUTRE POINT
 	------------------------------------------------------------------------*/
-	void MoveTo(float x, float y) {
+	protected void MoveTo(float x, float y) {
 		TRem(cx, cy);
 		this.x=x;
 		this.y=y-1;
@@ -87,15 +83,15 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	T�L�PORTE L'ENTIT� � UN AUTRE POINT (PAR CASE)
 	------------------------------------------------------------------------*/
-	void MoveToCase(int cx, int cy) {
-		MoveTo(this.x_ctr(cx), this.y_ctr(cy));
+	protected void MoveToCase(int cx, int cy) {
+		MoveTo(Trigger.x_ctr(cx), Trigger.y_ctr(cy));
 	}
 
 
 	/*------------------------------------------------------------------------
 	RENVOIE LA LISTE DES ENTIT�S D'UN TYPE DONN� DANS LA CASE COURANTE
 	------------------------------------------------------------------------*/
-	List<Entity> GetByType(int type) {
+	protected List<Entity> GetByType(int type) {
 		List<Entity> list = world.triggers[cx][cy] ;
 		List<Entity> res = new List<Entity>() ;
 		foreach (Entity e in list) {
@@ -105,5 +101,9 @@ public class Trigger : Entity
 		}
 
 		return res ;
+	}
+
+	protected virtual void Update() {
+
 	}
 }

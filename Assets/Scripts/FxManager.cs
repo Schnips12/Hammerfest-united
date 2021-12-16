@@ -73,7 +73,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: ALERTE CENTRALE (hurry, boss...etc)
 	------------------------------------------------------------------------*/
-	void AttachAlert(string str) {
+	public void AttachAlert(string str) {
 /* 		var mc = game.depthMan.attach("hurryUp",Data.DP_INTERF);
 		mc._x = Data.GAME_WIDTH/2;
 		mc._y = Data.GAME_HEIGHT/2;

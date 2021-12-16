@@ -1,11 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System;
 using System.IO;
-
-namespace Level;
 
 public class View : MonoBehaviour
 {
@@ -57,7 +54,7 @@ public class View : MonoBehaviour
 	private void Start() {
 		cam = Camera.main;
         string json = File.ReadAllText(Application.dataPath+"/json/levels/adventure.json");
-        levels = JsonUtility.FromJson<LevelsArray>("{\"thisArray\":"+json+"}").thisArray; // TODO load a single level
+        levels = JsonUtility.FromJson<LevelData.LevelsArray>("{\"thisArray\":"+json+"}").thisArray; // TODO load a single level
 	
 		fl_attach		= false;
 		fl_shadow		= true;

@@ -1,9 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Modes;
-
-namespace GameModes;
 
 public class Adventure : GameMode
 {
@@ -40,7 +37,7 @@ public class Adventure : GameMode
 		InitGame();
 
 		var pl = GetPlayerList();
-		foreach (Entity.Player p in pl) {
+		foreach (Player p in pl) {
 			InitPlayer(p);
 		}
 
@@ -54,7 +51,7 @@ public class Adventure : GameMode
 	public override void AddLevelItems() {
 		base.AddLevelItems();
 		int n;
-		Level._slot pt;
+		_slot pt;
 
 		// Extends
 		if ( world.current.specialSlots.Length>0 ) {
@@ -114,8 +111,8 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	ATTACHEMENT BAD: GESTION DU PERFECT ORDER POUR LE SUPA ITEM
 	------------------------------------------------------------------------*/
-	Entity.Bad AttachBad(int id, int x, int y) {
-		Entity.Bad b = base.AttachBad(id, x, y);
+	Bad AttachBad(int id, int x, int y) {
+		Bad b = base.AttachBad(id, x, y);
 		if ( (b.types & Data.BAD_CLEAR) > 0 ) {
 			perfectOrder.Add(b.uniqId);
 			perfectCount++;
@@ -278,7 +275,7 @@ public class Adventure : GameMode
 			for (var i=0;i<pl.Count;i++) {
 				/* pl[i].setBaseAnims(Data.ANIM_PLAYER_WALK_V, Data.ANIM_PLAYER_STOP_V); */ // TODO Use animation flags
 			}
-			Entity.Supa.SupaItem.attach(this, perfectCount-1);
+			SupaItem.Attach(this, perfectCount-1);
 			statsMan.Inc(Data.STAT_SUPAITEM,1);
 		}
 	}
@@ -353,9 +350,7 @@ public class Adventure : GameMode
 			manager.history.Add("illegal");
 		}
 
-
 		StopMusic();
-
 		SaveScore();
 	}
 

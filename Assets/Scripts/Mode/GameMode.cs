@@ -4,8 +4,6 @@ using UnityEngine;
 using System;
 using TMPro;
 
-namespace Modes;
-
 public class GameMode : Mode
 {
     static int WATER_COLOR		= 0x0000ff;
@@ -32,21 +30,22 @@ public class GameMode : Mode
     public bool fl_nightmare;
     protected bool fl_bombControl;
     public bool fl_ninja;
-    protected bool fl_bombExpert;
-    protected bool fl_ice;
-    protected bool fl_aqua;
+    public bool fl_bombExpert;
+    public bool fl_ice;
+    public bool fl_aqua;
     protected bool fl_badsCallback;
+    public bool fl_warpStart;
 
     protected float duration;
     protected float gFriction;
-    protected float sFriction;
+    public float sFriction;
     protected float speedFactor;
     protected float diffFactor;
 
     protected List<List<Entity>> lists;
-    protected List<Entity> killList;
+    public List<Entity> killList;
     protected Dictionary<int, Entity> unregList;
-    public Level.GameMechanics world;
+    public GameMechanics world;
 
     protected List<int> comboList;
     public int badCount;
@@ -63,14 +62,14 @@ public class GameMode : Mode
     float shakeTotal;
     float shakeTimer;
     float shakePower;
-    float windSpeed;
+    public float windSpeed;
     float windTimer;
-    bool fl_wind;
+    public bool fl_wind;
     bool fl_flipX;
     bool fl_flipY;
     float aquaTimer;
 
-    protected List<bool> globalActives;
+    public List<bool> globalActives;
 
     /* var mapIcons		: Array<MovieClip>; */
     float dfactor;
@@ -85,11 +84,11 @@ public class GameMode : Mode
     List<int> scorePicks;
     List<int> savedScores;
 
-    List<Level.GameMechanics> dimensions;
+    List<GameMechanics> dimensions;
     protected int currentDim;
     protected int portalId;
-    List<Entity.Player> latePlayers;		// liste de players arrivant en retard d'un portal
-    List<Level.PortalLink> portalMcList;
+    List<Player> latePlayers;		// liste de players arrivant en retard d'un portal
+    List<PortalLink> portalMcList;
 
     /* var gi				: gui.GameInterface; */
     public Chrono gameChrono;
@@ -107,9 +106,9 @@ public class GameMode : Mode
     int colorHex;
     List<bool> worldKeys;
     public int? forcedDarkness;
-    Level.PortalLink nextLink;
+    PortalLink nextLink;
     public int fakeLevelId;
-    int perfectItemCpt;
+    public int perfectItemCpt;
 
 
     /*------------------------------------------------------------------------
@@ -160,7 +159,7 @@ public class GameMode : Mode
 
         globalActives	= new List<bool>();
         /* endLevelStack	= new Array(); */
-        portalMcList	= new List<Level.PortalLink>();
+        portalMcList	= new List<PortalLink>();
         /* extraHoles		= new Array(); */
         dfactor			= 0;
 
@@ -184,8 +183,8 @@ public class GameMode : Mode
         scorePicks		= new List<int>();
 
         currentDim	= 0;
-        dimensions	= new List<Level.GameMechanics>();
-        latePlayers	= new List<Entity.Player>();
+        dimensions	= new List<GameMechanics>();
+        latePlayers	= new List<Player>();
         /* mapIcons	= new Array(); */
         mapEvents	= new List<eventAndTravel>();
         mapTravels	= new List<eventAndTravel>();
@@ -225,7 +224,7 @@ public class GameMode : Mode
     ------------------------------------------------------------------------*/
     protected virtual void InitInterface() {
         gui.Destroy();
-        gui = new gui.GameInterface(this);
+        gui = new GameInterface(this);
     }
 
 
@@ -240,7 +239,7 @@ public class GameMode : Mode
         forcedDarkness	= 0;
         fl_clear		= false;
         var l = GetPlayerList();
-        foreach (Entity.Player player in l) {
+        foreach (Player player in l) {
             player.OnStartLevel();
             if (player.y<0) {
                 fxMan.AttachEnter(player.x, 0); //l[i].pid );
@@ -253,7 +252,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISE UN JOUEUR
     ------------------------------------------------------------------------*/
-    protected void InitPlayer(Entity.Player p) {
+    protected void InitPlayer(Player p) {
         // do nothing
     }
 
@@ -261,7 +260,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DÉCLENCHE UN TREMBLEMENT DE TERRE
     ------------------------------------------------------------------------*/
-    void Shake(float duration, float power) {
+    public void Shake(float duration, float power) {
         if (duration == 0) {
             shakeTimer = 0;
             shakeTimer = 0;
@@ -296,7 +295,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INVERSION HORIZONTALE // TODO Fix
     ------------------------------------------------------------------------*/
-    void FlipX(bool fl) {
+    public void FlipX(bool fl) {
         fl_flipX = fl;
         if (fl) {
 /*                 mc._xscale = -100;
@@ -312,7 +311,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INVERSION VERTICALE // TODO Fix
     ------------------------------------------------------------------------*/
-    void FlipY(bool fl) {
+    public void FlipY(bool fl) {
         fl_flipY = fl;
         if (fl) {
 /*                 mc._yscale = -100;
@@ -335,7 +334,7 @@ public class GameMode : Mode
         // Calcul variateur de difficulté
         var max = 0;
         var pl = GetPlayerList();
-        foreach (Entity.Player p in pl) {
+        foreach (Player p in pl) {
             max = (p.lives>max) ? p.lives : max;
         }
         if (max < 4) {
@@ -352,7 +351,7 @@ public class GameMode : Mode
         DestroyList(Data.HU_BAD);
 
         var l = GetBadList();
-        foreach (Entity.Bad bad in l) {
+        foreach (Bad bad in l) {
             bad.CalmDown();
         }
 
@@ -367,7 +366,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE TRUE SI LEVEL EST TERMINÉ
     ------------------------------------------------------------------------*/
-    bool CheckLevelClear() {
+    public bool CheckLevelClear() {
         if (fl_clear) {
             return true;
         }
@@ -461,7 +460,7 @@ public class GameMode : Mode
 
         // Déguisements
         if (fl_disguise & Input.GetKeyDown(KeyCode.D)) {
-            Entity.Player p = GetPlayerList()[0];
+            Player p = GetPlayerList()[0];
             int old = p.head;
             p.head++;
             if ( p.head==Data.HEAD_AFRO & !GameManager.CONFIG.HasFamily(109) ) p.head++; // touffe
@@ -526,7 +525,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     PASSE AU NIVEAU SUIVANT
     ------------------------------------------------------------------------*/
-    protected virtual void NextLevel() {
+    public virtual void NextLevel() {
         fakeLevelId++;
         Goto(world.currentId+1);
     }
@@ -541,8 +540,8 @@ public class GameMode : Mode
         world.fl_hideTiles		= false;
         Goto(id);
 
-        List<Entity.Player> lp = GetPlayerList();
-        foreach (Entity.Player p in lp) {
+        List<Player> lp = GetPlayerList();
+        foreach (Player p in lp) {
             p.MoveTo(
                 Entity.x_ctr(world.current.playerX),
                 Entity.y_ctr(world.current.playerY-1)
@@ -587,7 +586,7 @@ public class GameMode : Mode
         }
 
         List<Entity> l;
-        List<Entity.Player> lp;
+        List<Player> lp;
 
         ClearExtraHoles();
         world.Lock();
@@ -605,13 +604,13 @@ public class GameMode : Mode
 
         // Le 1er player arrivé en bas débarque en 1er au level suivant
         lp = GetPlayerList();
-        Entity.Player best = null;
-        foreach (Entity.Player p in lp) {
+        Player best = null;
+        foreach (Player p in lp) {
             if (best==null | p.y > best.y) {
                 best = p;
             }
         }
-        foreach (Entity.player p in lp) {
+        foreach (Player p in lp) {
             p.MoveTo(best.x, -600);
             p.Hide();
             p.OnNextLevel();
@@ -734,7 +733,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE TRUE SI LE LEVEL COMPORTE UN BOSS
     ------------------------------------------------------------------------*/
-    protected virtual bool IsBossLevel(int id) {
+    public virtual bool IsBossLevel(int id) {
         return false;
     }
 
@@ -742,7 +741,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     FLIP HORIZONTAL D'UN X, SI NÉCESSAIRE
     ------------------------------------------------------------------------*/
-    public int FlipCoordReal(int x) {
+    public float FlipCoordReal(float x) {
         if (fl_mirror) {
             return Data.GAME_WIDTH-x-1;
         }
@@ -764,7 +763,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     AJOUTE UN ÉVÈNEMENT À LA CARTE
     ------------------------------------------------------------------------*/
-    void RegisterMapEvent(int eid, string misc) {
+    public void RegisterMapEvent(int eid, string misc) {
         int lid = dimensions[0].currentId;
 
         if (!world.fl_mainWorld) {
@@ -822,11 +821,11 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     LIT UNE VARIABLE DYNAMIQUE
     ------------------------------------------------------------------------*/
-    string GetDynamicVar(string name) {
+    public string GetDynamicVar(string name) {
         return dvars[name.ToLower()].ToString();
     }
 
-    int GetDynamicInt(string name) {
+    public int GetDynamicInt(string name) {
         return Int32.Parse(GetDynamicVar(name));
     }
 
@@ -850,7 +849,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     MÉMORISE LE SCORE D'UN JOUEUR
     ------------------------------------------------------------------------*/
-    void RegisterScore(int pid, int score) {
+    public void RegisterScore(int pid, int score) {
         if (savedScores[pid]<=0) {
             savedScores[pid] = score;
         }
@@ -897,7 +896,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     GESTION DES WORLD KEYS
     ------------------------------------------------------------------------*/
-    void GiveKey(int id) {
+    public void GiveKey(int id) {
         worldKeys[id] = true;
     }
 
@@ -923,9 +922,9 @@ public class GameMode : Mode
 
         ResetHurry();
 
-        latePlayers = new List<Entity.Player>();
+        latePlayers = new List<Player>();
         var l = GetPlayerList();
-        foreach (Entity.player p in l) {
+        foreach (Player p in l) {
             p.specialMan.ClearTemp();
             p.specialMan.ClearRec();
             p._xscale = p.scaleFactor*100;
@@ -980,9 +979,9 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     INITIALISE ET AJOUTE UNE DIMENSION
     ------------------------------------------------------------------------*/
-    protected Level.GameMechanics AddWorld(string name) {
-        Level.GameMechanics dim;
-        dim = new Level.GameMechanics(manager, name);
+    protected GameMechanics AddWorld(string name) {
+        GameMechanics dim;
+        dim = new GameMechanics(manager, name);
         dim.fl_mirror = fl_mirror;
         dim.SetGame(this);
         if (dimensions.Count>0) {
@@ -1054,11 +1053,11 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     UTILISE UN PORTAL (renvoie false si pas de correspondance)
     ------------------------------------------------------------------------*/
-    public bool UsePortal(int pid, Entity.Physics e) {
+    public bool UsePortal(int pid, Physics e) {
         if (nextLink!=null) {
             return false;
         }
-        Level.PortalLink link = Data.GetLink(currentDim, world.currentId, pid);
+        PortalLink link = Data.GetLink(currentDim, world.currentId, pid);
         if (link==null) {
             return false;
         }
@@ -1075,8 +1074,8 @@ public class GameMode : Mode
         }
 
         if (e==null) {
-            List<Entity.Player> pl = GetPlayerList();
-            foreach (Entity.Player p in pl) {
+            List<Player> pl = GetPlayerList();
+            foreach (Player p in pl) {
                 p.dx = (portalMcList[pid].x-p.x)*0.018;
                 p.dy = (portalMcList[pid].y-p.y)*0.018;
                 p.fl_hitWall = false;
@@ -1169,13 +1168,13 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE DES LISTES SPÉCIFIQUES TYPÉES // TODO Define IEntity ?
     ------------------------------------------------------------------------*/
-    public List<Entity.Bad> GetBadList() {
+    public List<Bad> GetBadList() {
         return GetList(Data.BAD);
     }
-    public List<Entity.Bad> GetBadClearList() {
+    public List<Bad> GetBadClearList() {
         return GetList(Data.BAD_CLEAR);
     }
-    public List<Entity.Player> GetPlayerList() {
+    public List<Player> GetPlayerList() {
         return GetList(Data.PLAYER);
     }
 
@@ -1197,7 +1196,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE LES ENTITÉS À PROXIMITÉ D'UN POINT DONNÉ
     ------------------------------------------------------------------------*/
-    List<Entity> GetClose(int type, float x, float y, float radius, bool fl_onGround) {
+    public List<Entity> GetClose(int type, float x, float y, float radius, bool fl_onGround) {
         List<Entity> l = GetList(type);
         List<Entity> res = new List<Entity>();
         float sqrRad = Mathf.Pow(radius, 2);
@@ -1249,7 +1248,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     AJOUTE À UNE LISTE D'UPDATE
     ------------------------------------------------------------------------*/
-    void AddToList(int type, Entity e) {
+    public void AddToList(int type, Entity e) {
         lists[GetListId(type)].Add(e);
     }
 
@@ -1257,7 +1256,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RETIRE D'UNE LISTE D'UPDATE
     ------------------------------------------------------------------------*/
-    void RemoveFromList(int type, Entity e) {
+    public void RemoveFromList(int type, Entity e) {
         lists[GetListId(type)].Remove(e);
     }
 
@@ -1268,7 +1267,7 @@ public class GameMode : Mode
     public void DestroyList(int type) {
         List<Entity> list = GetList(type);
         foreach (Entity e in list) {
-            e.Destroy();
+            e.DestroyThis();
         }
     }
 
@@ -1280,7 +1279,7 @@ public class GameMode : Mode
         List<Entity> l = GetListCopy(type);
         while (l.Count>0 & n>0) {
             int i = UnityEngine.Random.Range(0, l.Count);
-            l[i].Destroy();
+            l[i].DestroyThis);
             l.RemoveAt(i);
             n--;
         }
@@ -1337,14 +1336,14 @@ public class GameMode : Mode
     protected Entity InsertPlayer(int cx, int cy) {
         // Calcul du PID
         int pid = 0;
-        List<Entity.Player> pl = GetPlayerList();
-        foreach (Entity.Player player in pl) {
-            if (!player.fl_destroy ) {
+        List<Player> pl = GetPlayerList();
+        foreach (Player player in pl) {
+            if (!player.fl_destroy) {
                 pid++;
             }
         }
 
-        Entity.Player p = Entity.Player.Attach(this, Entity.x_ctr(cx) ,Entity.y_ctr(cy));
+        Player p = Player.Attach(this, Entity.x_ctr(cx) ,Entity.y_ctr(cy));
         p.Hide();
         p.pid = pid;
 
@@ -1354,29 +1353,29 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     ATTACH: ENNEMI
     ------------------------------------------------------------------------*/
-    public Entity.Bad AttachBad(int id, float x,float y) {
-        Entity.Bad bad;
+    public Bad AttachBad(int id, float x,float y) {
+        Bad bad;
         switch (id) {
-            case Data.BAD_POMME			 : Entity.Bad.Walker.Pomme.Attach(this,x,y) ; break;
-            case Data.BAD_CERISE		 : Entity.Bad.Walker.Cerise.Attach(this,x,y) ; break;
-            case Data.BAD_BANANE		 : Entity.Bad.Walker.Banane.Attach(this,x,y) ; break;
-            case Data.BAD_ANANAS		 : Entity.Bad.Walker.Ananas.Attach(this,x,y) ; break;
-            case Data.BAD_ABRICOT		 : Entity.Bad.Walker.Abricot.Attach(this,x,y,true) ; break;
-            case Data.BAD_ABRICOT2		 : Entity.Bad.Walker.Abricot.Attach(this,x,y,false) ; break;
-            case Data.BAD_POIRE			 : Entity.Bad.Walker.Poire.Attach(this,x,y) ; break;
-            case Data.BAD_BOMBE			 : Entity.Bad.Walker.Bombe.Attach(this,x,y) ; break;
-            case Data.BAD_ORANGE		 : Entity.Bad.Walker.Orange.Attach(this,x,y) ; break;
-            case Data.BAD_FRAISE		 : Entity.Bad.Walker.Fraise.Attach(this,x,y) ; break;
-            case Data.BAD_CITRON		 : Entity.Bad.Walker.Citron.Attach(this,x,y) ; break;
-            case Data.BAD_BALEINE		 : Entity.Bad.flyer.Baleine.Attach(this,x,y) ; break;
-            case Data.BAD_SPEAR			 : Entity.Bad.Spear.Attach(this,x,y) ; break;
-            case Data.BAD_CRAWLER		 : Entity.Bad.Ww.Crawler.Attach(this,x,y) ; break;
-            case Data.BAD_TZONGRE		 : Entity.Bad.Flyer.Tzongre.Attach(this,x,y) ; break;
-            case Data.BAD_SAW			 : Entity.Bad.Ww.Saw.Attach(this,x,y) ; break;
-            case Data.BAD_LITCHI		 : Entity.Bad.Walker.Litchi.Attach(this,x,y) ; break;
-            case Data.BAD_KIWI			 : Entity.Bad.Walker.Kiwi.Attach(this,x,y) ; break;
-            case Data.BAD_LITCHI_WEAK	 : Entity.Bad.Walker.LitchiWeak.Attach(this,x,y) ; break;
-            case Data.BAD_FRAMBOISE		 : Entity.Bad.Walker.Framboise.Attach(this,x,y) ; break;
+            case Data.BAD_POMME			 : Pomme.Attach(this,x,y) ; break;
+            case Data.BAD_CERISE		 : Cerise.Attach(this,x,y) ; break;
+            case Data.BAD_BANANE		 : Banane.Attach(this,x,y) ; break;
+            case Data.BAD_ANANAS		 : Ananas.Attach(this,x,y) ; break;
+            case Data.BAD_ABRICOT		 : Abricot.Attach(this,x,y,true) ; break;
+            case Data.BAD_ABRICOT2		 : Abricot.Attach(this,x,y,false) ; break;
+            case Data.BAD_POIRE			 : Poire.Attach(this,x,y) ; break;
+            case Data.BAD_BOMBE			 : Bombe.Attach(this,x,y) ; break;
+            case Data.BAD_ORANGE		 : Orange.Attach(this,x,y) ; break;
+            case Data.BAD_FRAISE		 : Fraise.Attach(this,x,y) ; break;
+            case Data.BAD_CITRON		 : Citron.Attach(this,x,y) ; break;
+            case Data.BAD_BALEINE		 : Baleine.Attach(this,x,y) ; break;
+            case Data.BAD_SPEAR			 : Spear.Attach(this,x,y) ; break;
+            case Data.BAD_CRAWLER		 : Ww.Crawler.Attach(this,x,y) ; break;
+            case Data.BAD_TZONGRE		 : Flyer.Tzongre.Attach(this,x,y) ; break;
+            case Data.BAD_SAW			 : Ww.Saw.Attach(this,x,y) ; break;
+            case Data.BAD_LITCHI		 : Walker.Litchi.Attach(this,x,y) ; break;
+            case Data.BAD_KIWI			 : Walker.Kiwi.Attach(this,x,y) ; break;
+            case Data.BAD_LITCHI_WEAK	 : Walker.LitchiWeak.Attach(this,x,y) ; break;
+            case Data.BAD_FRAMBOISE		 : Walker.Framboise.Attach(this,x,y) ; break;
 
             default :
                 GameManager.Fatal("(attachBad) unknown bad "+id);
@@ -1503,10 +1502,10 @@ public class GameMode : Mode
 
 
     public void KillPortals() { // TODO Change portalMCList type to List of GameObject?
-        foreach (Level.PortalLink ptl in portalMcList) {
+        foreach (PortalLink ptl in portalMcList) {
             GameObject.Destroy(ptl.mc);
         }
-        portalMcList = new List<Level.PortalLink>();
+        portalMcList = new List<PortalLink>();
     }
 
 
@@ -1583,7 +1582,7 @@ public class GameMode : Mode
 
     void OnBadsReady() {
         if (fl_ninja & GetBadClearList().Count>1) {
-            Entity.bad foe = GetOne(Data.BAD_CLEAR);
+            Bad foe = GetOne(Data.BAD_CLEAR);
             foe.fl_ninFoe = true;
 
             if (fl_nightmare | !world.fl_mainWorld | world.fl_mainWorld & world.currentId>=20) {
@@ -1598,7 +1597,7 @@ public class GameMode : Mode
             }
             friendsLimit = Mathf.Min(GetBadClearList().Count-1, friendsLimit);
             while(friendsLimit>0) {
-                Entity.Bad b = GetAnotherOne(Data.BAD_CLEAR, foe);
+                Bad b = GetAnotherOne(Data.BAD_CLEAR, foe);
                 if (!b.fl_ninFriend) {
                     b.fl_ninFriend = true;
                     friendsLimit--;
@@ -1650,7 +1649,7 @@ public class GameMode : Mode
     MISE À JOUR VARIABLE WORLD DES ENTITÉS
     ------------------------------------------------------------------------*/
     void UpdateEntitiesWorld() {
-        List <Entity> l = GetList(Data.ENTITY);
+        List<Entity> l = GetList(Data.ENTITY);
         for (var i=0;i<l.Count;i++) {
             l[i].world = world;
         }
@@ -1673,7 +1672,7 @@ public class GameMode : Mode
 
         var l = GetList(Data.SPECIAL_ITEM);
         for (var i=0;i<l.Count;i++) {
-            Entity.Item it = l[i];
+            Item it = l[i];
             if (it.id==0) {
                 it.Destroy();
             }
@@ -1719,7 +1718,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: FIN DE PARTIE
     ------------------------------------------------------------------------*/
-    protected virtual void OnGameOver() {
+    public virtual void OnGameOver() {
         fl_gameOver = true;
     }
 
@@ -1727,7 +1726,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: MORT D'UN BAD
     ------------------------------------------------------------------------*/
-    protected virtual void OnKillBad(Entity.Bad b) {
+    protected virtual void OnKillBad(Bad b) {
         // do nothing
     }
 
@@ -1859,7 +1858,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: RÉSURRECTION
     ------------------------------------------------------------------------*/
-    void OnResurrect() {
+    public void OnResurrect() {
         RegisterMapEvent( Data.EVENT_DEATH, null );
         DestroyList(Data.SUPA);
         ResetHurry() ;
@@ -1872,7 +1871,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: EXPLOSION D'UNE BOMBE (event pour les scripts)
     ------------------------------------------------------------------------*/
-    protected virtual void OnExplode(float x, float y, float radius) {
+    public virtual void OnExplode(float x, float y, float radius) {
         world.scriptEngine.OnExplode(x, y, radius);
     }
 
@@ -2271,7 +2270,7 @@ public class GameMode : Mode
         // Enervement minimum
         if (fl_nightmare) {
             var bl = GetBadList();
-            foreach (Entity.Bad b in bl) {
+            foreach (Bad b in bl) {
                 if (b.IsType(Data.BAD_CLEAR) & b.anger) {
                     b.Angermore();
                 }

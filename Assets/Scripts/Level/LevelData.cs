@@ -1,18 +1,35 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using System;
-
-namespace Level;
-
-[Serializable] // Wrapper for deserializing JSON files to LevelData
-public class LevelsArray {
-	public LevelData[] thisArray;
-}
 
 [Serializable]
 public class LevelData
 {
+	[Serializable] // Wrapper for deserializing JSON files to LevelData
+	public struct _slot {
+		public int x;
+		public int y;
+
+		public _slot(_slot toCopy) {
+			x = toCopy.x;
+			y = toCopy.y;
+		}
+	}
+
+	[Serializable] // Wrapper for deserializing JSON files to LevelData
+	public struct _column {
+		public int[] column;
+
+		public _column(int height) {
+			column = new int[height];
+		}
+	}
+
+	[Serializable] // Wrapper for deserializing JSON files to LevelData
+	public struct LevelsArray {
+		public LevelData[] thisArray;
+	}
+
+
     public _column[] map;
 	public BadData[] badList;
 
@@ -26,7 +43,6 @@ public class LevelData
 	public _slot[] scoreSlots;
 
 	public string script;
-
 	public int ID;
 
 	public void NewMap(int width, int height) {
@@ -60,22 +76,5 @@ public class LevelData
 	}
 }
 
-[Serializable] // Wrapper for deserializing JSON files to LevelData
-public class _slot {
-	public int x;
-	public int y;
 
-	public _slot(_slot toCopy) {
-		x = toCopy.x;
-		y = toCopy.y;
-	}
-}
 
-[Serializable] // Wrapper for deserializing JSON files to LevelData
-public class _column {
-	public int[] column;
-
-	public _column(int height) {
-		column = new int[height];
-	}
-}

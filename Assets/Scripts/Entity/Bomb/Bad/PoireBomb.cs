@@ -2,17 +2,73 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PoireBomb : MonoBehaviour
+public class PoireBomb : BadBomb
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	PoireBomb() : base() {
+		duration = 45;
+		power = 30;
+		radius = Data.CASE_WIDTH*4;
+	}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+	/*------------------------------------------------------------------------
+	ATTACH
+	------------------------------------------------------------------------*/
+	static PoireBomb Attach(Modes.GameMode g, float x, float y) {
+		var linkage = "hammer_bomb_poire";
+		PoireBomb mc = g.depthMan.Attach(linkage,Data.DP_BOMBS);
+		mc.InitBomb(g, x,y );
+		return mc;
+	}
+
+
+	/*------------------------------------------------------------------------
+	DUPLICATION
+	------------------------------------------------------------------------*/
+	PoireBomb Duplicate() {
+		return Attach(game, x, y);
+	}
+
+
+	/*------------------------------------------------------------------------
+	G�LE LA BOMBE
+	------------------------------------------------------------------------*/
+//	function getFrozen(uid) {
+//		var b = entity.bomb.player.PoireBombFrozen.attach(game, x, y);
+//		b.uniqId = uid;
+//		return b;
+//	}
+
+
+	/*------------------------------------------------------------------------
+	EVENT: EXPLOSION
+	------------------------------------------------------------------------*/
+	public override void OnExplode() {
+		base.OnExplode();
+
+		game.fxMan.AttachExplodeZone(x,y,radius);
+
+		var l = game.GetClose(Data.PLAYER,x,y,radius,false);
+
+		for (var i=0;i<l.Count;i++) {
+			Player e = l[i];
+			e.KillHit(0);
+			ShockWave(e, radius, power);
+			if (!e.fl_shield) {
+				e.dy = -10-Random.Range(0, 20);
+			}
+		}
+	}
+
+
+	/*------------------------------------------------------------------------
+	EVENT: KICK (CES BOMBES SONT FACILEMENT REPOUSSABLES)
+	------------------------------------------------------------------------*/
+	protected override void OnKick(Player p) {
+		base.OnKick(p);
+		SetLifeTimer(lifeTimer + Data.SECOND*0.5f);
+	}
 }

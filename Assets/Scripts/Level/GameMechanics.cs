@@ -1,12 +1,9 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Level;
-
 public class GameMechanics : ViewManager
 {
-    Modes.GameMode game;
+    protected GameMode game;
 
 	bool fl_parsing;
 	bool flcurrentIA;
@@ -17,13 +14,11 @@ public class GameMechanics : ViewManager
 
 	List<List<int>> flagMap; // flags IA
 	List<List<int>> fallMap; // hauteur de chute par case
-	List<List<List<Entity>>> triggers;
+	public List<List<List<Entity>>> triggers;
 
 	Vector2Int _iteration;
 
 	public ScriptEngine scriptEngine;
-
-    public int currentId; // inherit
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -37,7 +32,6 @@ public class GameMechanics : ViewManager
 		ResetIA();
 
 		//triggers = Entity[LEVEL_WIDTH, LEVEL_HEIGHT, 1]; // TODO fix length
-
 	}
 
 	public override void DestroyThis() {
@@ -49,7 +43,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	DéFINI LE GAME INTERNE
 	------------------------------------------------------------------------*/
-	public void SetGame(Modes.GameMode g) {
+	public void SetGame(GameMode g) {
 		game = g;
 	}
 
@@ -79,17 +73,17 @@ public class GameMechanics : ViewManager
 	RENVOIE TRUE SI LES DONN�ES SONT PRETES
 	------------------------------------------------------------------------*/
 	public override bool IsDataReady() {
-		return base.IsDataReady() && flcurrentIA;
+		return base.IsDataReady() & flcurrentIA;
 	}
 
 
 	/*------------------------------------------------------------------------
 	ATTACHEMENT D'UNE VUE
 	------------------------------------------------------------------------*/
-/* 	int CreateView(int id) {
+	protected override View CreateView(int id) {
 		scriptEngine.OnLevelAttach();
 		return base.CreateView(id);
-	} */
+	}
 
 
 	/*------------------------------------------------------------------------
@@ -151,7 +145,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RETOURNE UNE CASE DE LA MAP IA
 	------------------------------------------------------------------------*/
-	bool CheckFlag(Vector2Int pt, int flag) {
+	public bool CheckFlag(Vector2Int pt, int flag) {
 		int x = pt.x;
 		int y = pt.y;
 		if (x>=0 & x<Data.LEVEL_WIDTH & y>=0 & y<Data.LEVEL_HEIGHT) {
@@ -237,7 +231,6 @@ public class GameMechanics : ViewManager
 
 			// Au pied d'un mur
 			if ( (flags & Data.IA_TILE_TOP)>0 ) {
-
 				// Calcule la distance au plafond
 				var maxHeight=1;
 				var d=1;
@@ -272,7 +265,6 @@ public class GameMechanics : ViewManager
 
 			// Escalier dans le vide
 			if ((flags & Data.IA_FALL_SPOT)>0) {
-
 				// Calcule la distance au plafond
 				var maxHeight=1;
 				var d=1;
@@ -338,7 +330,7 @@ public class GameMechanics : ViewManager
 			n++;
 		}
 
-		manager.Progress(cy/Data.LEVEL_HEIGHT);
+		/* manager.Progress(cy/Data.LEVEL_HEIGHT); */ // TODO Uncomment
 
 		if (n!=Data.MAX_ITERATION) {
 			OnParseIAComplete() ;
@@ -387,7 +379,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RENVOIE LA HAUTEUR D'UN MUR (AVEC UN MAX �VENTUEL, -1 SI MAX ATTEINT)
 	------------------------------------------------------------------------*/
-	int GetWallHeight(int cx, int cy, int max) {
+	public int GetWallHeight(int cx, int cy, int max) {
 		int h=0;
 		while (GetCase(cx,cy-h)>0 & h<max) {
 			h++;
@@ -535,7 +527,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RENVOIE LE TELEPORTER D'UNE CASE DONNéE
 	------------------------------------------------------------------------*/
-	TeleporterData GetTeleporter(object e, int cx, int cy) {
+	public TeleporterData GetTeleporter(Physics e, int cx, int cy) {
 		TeleporterData outport = null;
 		if (GetCase(cx,cy) != Data.FIELD_TELEPORT) {
 			return null ;
@@ -567,14 +559,13 @@ public class GameMechanics : ViewManager
 		return outport ;
 	}
 
-
 	/*------------------------------------------------------------------------
 	RENVOIE LE TéLéPORTEUR D'ARRIVéE POUR UN TéLéPORTEUR DONNé
 	------------------------------------------------------------------------*/
-	TeleporterData GetNextTeleporter(TeleporterData start) {
+	public TeleporterData GetNextTeleporter(TeleporterData start, ref bool fl_rand) {
 		TeleporterData outport = null ;
 		var fl_break = false;
-		var fl_rand = false;
+		fl_rand = false;
 
 		// Recherche de correspondance face à face
 		for (int i=0;i<teleporterList.Count & !fl_break;i++) {
@@ -637,10 +628,8 @@ public class GameMechanics : ViewManager
 		if (outport==null) {
 			GameManager.Fatal("target teleporter not found in level "+currentId) ;
 		}
-		return outport; // TODO Need to return the fl_rand info too
+		return outport;
 	}
-
-
 
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE
@@ -657,22 +646,20 @@ public class GameMechanics : ViewManager
 			scriptEngine.Update();
 		}
 
-
 		// Flottement des fields Portal
 		for (var i=0;i<portalList.Count;i++) {
 			var p = portalList[i];
-			p.mc._y = p.y + 3*Mathf.Sin(p.cpt);
+/* 			p.mc._y = p.y + 3*Mathf.Sin(p.cpt);
 			p.cpt += Time.fixedDeltaTime*0.1f;
 			if ( Random.Range(0, 5)==0 ) {
-				var a = game.fxMan.AttachFx(
+				var a = game.fxMan.AttachFx( // TODO FXMan
 					p.x + Data.CASE_WIDTH*0.5 + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
 					p.y + Data.CASE_WIDTH*0.5 + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
 					"hammer_fx_star"
 				);
 				a.mc._xscale	= Random.Range(0, 70)+30;
 				a.mc._yscale	= a.mc._xscale;
-			}
+			} */
 		}
-
 	}
 }

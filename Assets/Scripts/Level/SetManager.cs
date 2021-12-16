@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-namespace Level;
-
 public class SetManager : MonoBehaviour
 {
     protected GameManager manager;
@@ -20,7 +18,7 @@ public class SetManager : MonoBehaviour
     public List<PortalData> portalList;
 
     public LevelData current;
-    protected int currentId;
+    public int currentId;
     protected LevelData _previous;
     protected int _previousId;
 
@@ -35,7 +33,7 @@ public class SetManager : MonoBehaviour
 	BOUCLE PRINCIPALE
 	------------------------------------------------------------------------*/
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         // do nothing
     }
@@ -52,32 +50,19 @@ public class SetManager : MonoBehaviour
 		portalList		= new List<PortalData>();
 
 		// Lecture niveaux
-		string data = manager.root.NAME;
+		string data = manager.root.ReadFile(Cookie.NAME);
 		json = new List<string>(data.Split(':'));
-		if (manager.root.ReadSet(setName+"_back_xml") == null ) {
-			manager.root.SaveSet(setName+"_back_xml", String.Join(":", json));
+		if (manager.root.ReadFile(setName+"_back_xml") == null ) {
+			manager.root.SaveFile(setName+"_back_xml", String.Join(":", json));
 		}
-
-		/*
-		csum = 0;
-		var list = data.split("0");
-		var cc = setName.charCodeAt(3);
-		for (var n=0;n<list.length;n++) {
-			var l = list[n];
-			if(l.length>30)
-				csum += l.charCodeAt(cc%5) + l.charCodeAt(cc%9) * l.charCodeAt(cc%15) + l.charCodeAt(cc%19) + l.charCodeAt(cc%22);
-		}
-//		Log.trace(Md5.encode(setName)+" => "+Md5.encode(""+csum));
-		if(GameManager.HH.get("$"+Md5.encode(setName))!="$"+Md5.encode(""+csum)) {GameManager.fatal(""); return;}
-		*/
 
 		ImportCookie();
+		
 		if (json.Count == 0) {
 			Debug.Log("Error reading "+setName+" (null value)");
 			return;
 		}
 		worldmap = new List<LevelData>();
-		//levels[raw.length-1] = null; // fix for correct .length attribute
 	}
 
 
@@ -95,20 +80,20 @@ public class SetManager : MonoBehaviour
 	éCRASE LE CONTENU DU XML EN MéMOIRE
 	------------------------------------------------------------------------*/
 	void Overwrite(string sdata) {
-        if (manager.root.ReadSet(setName+"_back") == null ) { //TODO getter and setter for the setname in manager
-			manager.root.SaveSet(setName+"_back", String.Join(":", json));
+        if (manager.root.ReadFile(setName+"_back") == null ) {
+			manager.root.SaveFile(setName+"_back", String.Join(":", json));
 		}
 		json = new List<string>(sdata.Split(':'));
-		manager.root.SaveSet(setName, sdata);
+		manager.root.SaveFile(setName, sdata);
 	}
 
 	/*------------------------------------------------------------------------
 	RELIS LA DERNIèRE VERSION SAUVEGARDéE
 	------------------------------------------------------------------------*/
 	void Rollback() {
-		if (manager.root.ReadSet(setName+"_back") != null ) {
-			string rawStr = manager.root.ReadSet(setName+"_back");
-            manager.root.SaveSet(setName, rawStr);
+		string rawStr = manager.root.ReadFile(setName+"_back");
+		if (rawStr != null ) {
+            manager.root.SaveFile(setName, rawStr);
 			json = new List<string>(rawStr.Split(':'));
 		}
 	}
@@ -118,8 +103,8 @@ public class SetManager : MonoBehaviour
 	RELIS LA VERSION XML COMPILéE
 	------------------------------------------------------------------------*/
 	void Rollback_xml() {
-		string rawStr = manager.root.ReadSet(setName+"_back_xml");
-		manager.root.SaveSet(setName, rawStr);
+		string rawStr = manager.root.ReadFile(setName+"_back_xml");
+		manager.root.SaveFile(setName, rawStr);
 		json = new List<string>(rawStr.Split(':'));
 	}
 
@@ -160,7 +145,7 @@ public class SetManager : MonoBehaviour
 			return;
 		}
 		if (!fl_read[id]) {
-			worldmap[id] = JsonUtility.FromJson<LevelsArray>("{\"thisArray\":"+json+"}").thisArray[id];
+			worldmap[id] = JsonUtility.FromJson<LevelData.LevelsArray>("{\"thisArray\":"+json+"}").thisArray[id];
 		}
 		SetCurrent(id);
 		OnReadComplete();
@@ -215,8 +200,8 @@ public class SetManager : MonoBehaviour
 		lf.skinBg		= l.skinBg;
 		lf.script		= l.script;
 		lf.badList		= new BadData[l.badList.Length];
-		lf.specialSlots = new _slot[l.specialSlots.Length];
-		lf.scoreSlots	= new _slot[l.scoreSlots.Length];
+		lf.specialSlots = new LevelData._slot[l.specialSlots.Length];
+		lf.scoreSlots	= new LevelData._slot[l.scoreSlots.Length];
 
 		// map
 		lf.NewMap(l.mapWidth(), l.mapHeight());
@@ -236,13 +221,13 @@ public class SetManager : MonoBehaviour
 
 		// special slots
 		for (int i=0; i < l.specialSlots.Length ; i++) {
-			lf.specialSlots[i] = new _slot(l.specialSlots[i]);
+			lf.specialSlots[i] = new LevelData._slot(l.specialSlots[i]);
 			lf.specialSlots[i].x = lf.mapWidth() - lf.specialSlots[i].x - 1;
 		}
 
 		// score slots
 		for (int i=0; i < l.scoreSlots.Length ; i++) {
-			lf.scoreSlots[i] = new _slot(l.scoreSlots[i]);
+			lf.scoreSlots[i] = new LevelData._slot(l.scoreSlots[i]);
 			lf.scoreSlots[i].x = lf.mapWidth() - lf.scoreSlots[i].x - 1;
 		}		
 
@@ -266,7 +251,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI L'ID DE LEVEL SPéCIFIé EST VIDE
 	------------------------------------------------------------------------*/
-	bool IsEmptyLevel(int id, Mode.GameMode g) {
+	public bool IsEmptyLevel(int id, GameMode g) {
 		if (id >= worldmap.Count) {
 			return true;
 		}
@@ -282,9 +267,7 @@ public class SetManager : MonoBehaviour
 			defX = def.playerX;
 		}
 		else {
-			// TODO Use GameMode function
-			//defX = g.FlipCoordCase(def.playerX);
-			defX = current.mapHeight()-def.playerX-1;
+			defX = g.FlipCoordCase(def.playerX);
 		}
 		return
 			ld.playerX == defX 				&
@@ -332,6 +315,9 @@ public class SetManager : MonoBehaviour
 			return Data.OUT_WALL;
 		}
 	}
+	public int GetCase(Vector2Int pos) {
+		return GetCase(pos.x, pos.y);
+	}
 
 	/*------------------------------------------------------------------------
 	MODIFIE DYNAMIQUEMENT UNE CASE
@@ -364,7 +350,7 @@ public class SetManager : MonoBehaviour
 	------------------------------------------------------------------------*/
 	bool ShapeInBound(Entity e) {
 		return (
-			e.x >= -e.width 			& // TODO Use the entity.transform bounding box instead
+			e.x >= -e.width 			&
 			e.x < current.mapWidth() 	&
 			e.y >= -e.height 			&
 			e.y < current.mapHeight()
@@ -374,18 +360,18 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE LE PREMIER SOL RENCONTRé A PARTIR D'UNE CASE DONNéE
 	------------------------------------------------------------------------*/
-	public int[] GetGround(int cx, int cy) {
+	public Vector2Int GetGround(ref int cx, ref int cy) {
 		int ty, n;
 		for (n=0, ty=cy ; n <= current.mapHeight() ; n++, ty--) {
 			if (ty > 0 & GetCase(cx, ty) == Data.GROUND) {
-				return new int[2] {cx, ty+1};
+				return new Vector2Int(cx, ty+1);
 			}
 			if (ty >= current.mapHeight()) {
 				ty=0;
 			}
 		}
 
-		return new int[2] {cx, cy};
+		return new Vector2Int(cx, cy);
 	}
 
 
@@ -473,20 +459,14 @@ public class SetManager : MonoBehaviour
 	EXPORT
 	------------------------------------------------------------------------*/
 	void ExportCookie() {
-		if (!manager.fl_cookie) {
-			return;
-		}
-		manager.cookie.SaveSet(setName, String.Join(":", json.ToArray()));
+		manager.cookie.SaveFile(setName, String.Join(":", json.ToArray()));
 	}
 
 	/*------------------------------------------------------------------------
 	IMPORT
 	------------------------------------------------------------------------*/
 	void ImportCookie() {
-		if (!manager.fl_cookie) {
-			return;
-		}
-		string rawStr = manager.cookie.ReadSet(setName);
+		string rawStr = manager.cookie.ReadFile(setName);
 		if (rawStr != "") {
 			json = new List<string>(rawStr.Split(':'));
 		}
@@ -506,5 +486,11 @@ public class SetManager : MonoBehaviour
 		Debug.Log("Level " + id + ":");
 		Debug.Log("player: " + current.playerX + "," + current.playerY);
 		Debug.Log(current.map);
+	}
+	public virtual void Suspend() {
+
+	}
+	public virtual void Restore(int lid) {
+		
 	}
 }

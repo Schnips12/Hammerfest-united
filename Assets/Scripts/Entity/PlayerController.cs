@@ -1,13 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Entity;
-
 public class PlayerController : MonoBehaviour
 {
-	Entity.Player player;
-	Mode.GameMode game;
+	Player player;
+	GameMode game;
 
 	List<int> lastKeys;
 	List<bool> keyLocks;
@@ -30,15 +27,15 @@ public class PlayerController : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	PlayerController(Entity.Player p) {
+	PlayerController(Player p) {
 		lastKeys		= new List<int>();
 		keyLocks		= new List<bool>();
 		alts			= new List<int>();
 		player			= p;
 		game			= player.game;
-		fl_upKick		= GameManager.CONFIG.hasFamily(101);
+		fl_upKick		= GameManager.CONFIG.HasFamily(101);
 		fl_powerControl	= false;
-		setKeys(
+		SetKeys(
 			Key.UP,
 			Key.DOWN,
 			Key.LEFT,
@@ -46,7 +43,7 @@ public class PlayerController : MonoBehaviour
 			Key.SPACE
 		);
 
-		setAlt(attack, Key.CONTROL);
+		SetAlt(attack, Key.CONTROL);
 		walkTimer		= 0;
 		waterJump		= 0;
 	}
@@ -99,7 +96,7 @@ public class PlayerController : MonoBehaviour
 	void GetControls() {
 
 		// Derni�res touches enfonc�es
-		for (var i=0;i<lastKeys.length;i++)
+		for (var i=0;i<lastKeys.Count;i++)
 		if ( !Key.isDown(lastKeys[i]) ) {
 			keyLocks[lastKeys[i]] = false;
 			lastKeys.splice(i,1);
@@ -276,7 +273,7 @@ public class PlayerController : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	void Update() {
+	public void Update() {
 		GetControls();
 	}
 }
