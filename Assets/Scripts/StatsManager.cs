@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StatsManager
 {
-	Modes.GameMode game;
+	GameMode game;
 	List<Stat> stats;
 	List<int> extendList;
 
@@ -12,7 +12,7 @@ public class StatsManager
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public StatsManager(Modes.GameMode g) {
+	public StatsManager(GameMode g) {
 		game = g;
 		stats = new List<Stat>();
 		for (int i=0 ; i < 50 ; i++) {
@@ -99,15 +99,17 @@ public class StatsManager
 	/*------------------------------------------------------------------------
 	ATTACH: LETTRE D'EXTEND
 	------------------------------------------------------------------------*/
-	public Entity.Item.SpecialItem AttachExtend() {
+	public SpecialItem AttachExtend() {
 		if (game.fl_clear) {
 			return null;
 		}
-		var pt = game.world.GetGround(Random.Range(0, Data.LEVEL_WIDTH), Random.Range(0, Data.LEVEL_HEIGHT));
+		int tempx = Random.Range(0, Data.LEVEL_WIDTH);
+		int tempy = Random.Range(0, Data.LEVEL_HEIGHT);
+		var pt = game.world.GetGround(ref tempx, ref tempy);
 		float x = Entity.x_ctr(pt[0]);
 		float y = Entity.y_ctr(pt[1]);
 		int id = extendList[Random.Range(0, extendList.Count)];
-		var mc = Entity.Item.SpecialItem.Attach(game, x,y, 0, id);
+		var mc = SpecialItem.Attach(game, x, y, 0, id);
 		return mc;
 	}
 

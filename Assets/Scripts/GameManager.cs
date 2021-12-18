@@ -184,7 +184,7 @@ public class GameManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	LANCE UN MODE DE JEU
 	------------------------------------------------------------------------*/
-	void StartGameMode(Modes.GameMode m) {
+	void StartGameMode(GameMode m) {
 		Transition(current, m);
 	}
 
@@ -267,7 +267,7 @@ public class GameManager : MonoBehaviour
 			return;
 		} */
 		if (IsAdventure()) {
-			StartGameMode(new GameModes.Adventure(this, 0));
+			StartGameMode(new Adventure(this, 0));
 			return;
 		}
 

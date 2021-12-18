@@ -4,46 +4,54 @@ using UnityEngine;
 
 public class FxManager
 {
-	Mode.GameMode game;
+	GameMode game;
 
-	/* var mcList		: Array<MovieClip>; */
+	List<MovieClip> mcList;
 	List<Animation> animList;
-	/* var lastAlert	: MovieClip; */
+	MovieClip lastAlert;
 
     struct bg {
         public int id;
         public int subId;
         public float timer;
+		public bg(int id, int subId, float timer) {
+			this.id = id;
+			this.subId = subId;
+			this.timer = timer;
+		}
     }
 	List<bg> bgList;
-	string levelName;
+	MovieClip levelName;
 	float nameTimer;
-	string igMsg;
+	MovieClip igMsg;
 
-
-	/* var mc_exitArrow: {> MovieClip, label:String}; */
+	MovieClip mc_exitArrow;
 	bool fl_bg;
-//	var bg			: { > MovieClip, sub:MovieClip };
 
-    struct stackable {
+    class stackable {
         public float t;
         public string link;
         public float x;
         public float y;
+		public stackable(float t, string link, float x, float y) {
+			this.t = t;
+        	this.link = link;
+        	this.x = x;
+        	this.y = y;
+		}
     }
 	List<stackable> stack;
-
 
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	FxManager(Mode.GameMode g) {
+	public FxManager(GameMode g) {
 		game = g;
 		animList = new List<Animation>();
-		bgList = new Array();
-		mcList = new Array();
-		stack = new Array();
+		bgList = new List<bg>();
+		mcList = new List<MovieClip>();
+		stack = new List<stackable>();
 		fl_bg = false;
 	}
 
@@ -52,45 +60,45 @@ public class FxManager
 	ATTACH: INDICATEUR DE LEVEL
 	------------------------------------------------------------------------*/
 	public void AttachLevelPop(string name, bool fl_label) {
-/* 		if (name != null) {
+		if (name != null) {
 			levelName.RemoveMovieClip();
-			levelName = downcast(game.depthMan.attach("hammer_interf_zone",Data.DP_INTERF));
+			levelName = game.depthMan.Attach("hammer_interf_zone",Data.DP_INTERF);
 			levelName._x = -10;
 			levelName._y = Data.GAME_HEIGHT-1;
-			levelName.field.text = name
-			addGlow(levelName, 0x0, 2);
+			levelName.field.text = name;
+			AddGlow(levelName, Data.ToColor(0x0), 2);
 			if ( fl_label ) {
-				levelName.label.text = Lang.get(13);
+				levelName.label.text = Lang.Get(13);
 			}
 			else {
 				levelName.label.text = "";
 			}
 			nameTimer = Data.SECOND * 5;
-		} */
+		}
 	}
 
 
 	/*------------------------------------------------------------------------
 	ATTACH: ALERTE CENTRALE (hurry, boss...etc)
 	------------------------------------------------------------------------*/
-	public void AttachAlert(string str) {
-/* 		var mc = game.depthMan.attach("hurryUp",Data.DP_INTERF);
+	public MovieClip AttachAlert(string str) {
+		MovieClip mc = game.depthMan.Attach("hurryUp",Data.DP_INTERF);
 		mc._x = Data.GAME_WIDTH/2;
 		mc._y = Data.GAME_HEIGHT/2;
-		downcast(mc).label = str;
-		mcList.push(mc);
+		mc.label.text = str;
+		mcList.Add(mc);
 		lastAlert = mc;
-		return mc; */
+		return mc;
 	}
 
-	void DetachLastAlert() {
-		for (int i=0;i<mcList.length;i++) {
+	public void DetachLastAlert() {
+		for (int i=0;i<mcList.Count;i++) {
 			if (mcList[i]._name==lastAlert._name) {
-				mcList.splice(i,1);
+				mcList.RemoveAt(i);
 				i--;
 			}
 		}
-		lastAlert.removeMovieClip();
+		lastAlert.RemoveMovieClip();
 	}
 
 	/*------------------------------------------------------------------------
@@ -104,7 +112,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: INDICATEUR DE BOSS
 	------------------------------------------------------------------------*/
-	void AttachWarning() {
+	public void AttachWarning() {
 		AttachAlert(Lang.Get(12));
 	}
 
@@ -115,11 +123,11 @@ public class FxManager
 	------------------------------------------------------------------------*/
 	public void AttachExit() {
 		DetachExit();
-/* 		var mc = downcast( game.depthMan.attach("hammer_fx_exit",Data.DP_INTERF) );
+		MovieClip mc = game.depthMan.Attach("hammer_fx_exit",Data.DP_INTERF);
 		mc._x = Data.GAME_WIDTH/2;
 		mc._y = Data.GAME_HEIGHT;
-		mc.label = Lang.get(3);
-		mc_exitArrow = mc; */
+		mc.label.text = Lang.Get(3);
+		mc_exitArrow = mc;
 	}
 
 
@@ -131,26 +139,26 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: INDICATEUR DE LEVEL
 	------------------------------------------------------------------------*/
-	public void AttachEnter(GameObject x, int pid) {
-/* 		var mc = game.depthMan.attach("hammer_fx_enter",Data.DP_INTERF);
+	public void AttachEnter(float x, int pid) {
+		var mc = game.depthMan.Attach("hammer_fx_enter",Data.DP_INTERF);
 		mc._x = x;
 		mc._y = 0;
-		var field : TextField = downcast(mc).field;
-		if ( pid==0 ) {
+		MovieClip field = mc.field;
+		if (pid==0) {
 			field.text = "";
 		}
 		else {
 			field.text = "Player "+pid;
-			field.textColor = Data.BASE_COLORS[pid-1];
+			field.textColor = Data.ToColor(Data.BASE_COLORS[pid-1]);
 		}
-		mcList.push(mc); */
+		mcList.Add(mc);
 	}
 
 
 	/*------------------------------------------------------------------------
 	ATTACH: SCORE GAGN�
 	------------------------------------------------------------------------*/
-	void AttachScorePop(Color color, Color glowColor, float x, float y, string txt) {
+	public void AttachScorePop(Color color, Color glowColor, float x, float y, string txt) {
 		Animation anim = AttachFx(x, y, "popScore");
 		anim.fl_loop = false;
 
@@ -158,33 +166,32 @@ public class FxManager
 
 		AddGlow(anim.mc, glowColor, 2);
 
-		downcast(anim.mc).label.field.textColor = color;
-		downcast(anim.mc).value = txt;
+		anim.mc.label.field.textColor = color;
+		anim.mc.value = txt;
 	}
 
 
 	/*------------------------------------------------------------------------
 	ATTACH: EXPLOSION
 	------------------------------------------------------------------------*/
-	GameObject AttachExplodeZone(float x, float y, float radius) {
+	Animation AttachExplodeZone(float x, float y, float radius) {
 		if (game.fl_lock) {
 			return null;
 		}
-		GameObject a = AttachFx(x, y, "explodeZone");
+		Animation a = AttachFx(x, y, "explodeZone");
 		a.mc._width = radius*2;
 		a.mc._height = a.mc._width;
 		return a;
 	}
 
 
-	function attachExplosion(x,y,radius) {
-		if ( game.fl_lock ) {
+	public Animation AttachExplosion(float x, float y, float radius) {
+		if (game.fl_lock) {
 			return null;
 		}
-		var a = attachFx(x,y,"explodeZone");
+		var a = AttachFx(x,y,"explodeZone");
 		a.mc._width = radius*2;
 		a.mc._height = a.mc._width;
-		a.mc.blendMode	= BlendMode.OVERLAY;
 		return a;
 	}
 
@@ -192,14 +199,14 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: PARTICULES S'ENVOLANT
 	------------------------------------------------------------------------*/
-	function attachShine(x,y) {
+	public Animation AttachShine(float x, float y) {
 		if ( game.fl_lock ) {
 			return null;
 		}
-		var fx = attachFx(x,y,"shine");
-		fx.mc._xscale *= 1.5;
+		Animation fx = AttachFx(x, y, "shine");
+		fx.mc._xscale *= 1.5f;
 		fx.mc._yscale = fx.mc._xscale;
-		fx.mc._xscale *= Std.random(2)*2-1;
+		fx.mc._xscale *= Random.Range(0, 2)*2-1;
 		return fx;
 	}
 
@@ -207,12 +214,12 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	AFFICHE UN MESSAGE EN JEU
 	------------------------------------------------------------------------*/
-	function keyRequired(kid:int) {
-		igMsg.removeMovieClip();
-		igMsg = downcast( game.depthMan.attach("hammer_interf_inGameMsg",Data.DP_TOP) );
-		igMsg.label.text = Lang.get(40);
-		igMsg.field.text = Lang.getKeyName(kid);
-		addGlow(igMsg,0x0, 2);
+	public void KeyRequired(int kid) {
+		igMsg.RemoveMovieClip();
+		igMsg = game.depthMan.Attach("hammer_interf_inGameMsg", Data.DP_TOP);
+		igMsg.label.text = Lang.Get(40);
+		igMsg.field.text = Lang.GetKeyName(kid);
+		AddGlow(igMsg, Data.ToColor(0x0), 2);
 		igMsg.timer = Data.SECOND*2;
 	}
 
@@ -220,12 +227,12 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	AFFICHE UN MESSAGE EN JEU
 	------------------------------------------------------------------------*/
-	function keyUsed(kid:int) {
-		igMsg.removeMovieClip();
-		igMsg = downcast( game.depthMan.attach("hammer_interf_inGameMsg",Data.DP_TOP) );
-		igMsg.label.text = Lang.get(41);
-		igMsg.field.text = Lang.getKeyName(kid);
-		addGlow(igMsg,0x0, 2);
+	public void keyUsed(int kid) {
+		igMsg.RemoveMovieClip();
+		igMsg = game.depthMan.Attach("hammer_interf_inGameMsg", Data.DP_TOP);
+		igMsg.label.text = Lang.Get(41);
+		igMsg.field.text = Lang.GetKeyName(kid);
+		AddGlow(igMsg, Data.ToColor(0x0), 2);
 		igMsg.timer = Data.SECOND*3;
 	}
 
@@ -233,13 +240,13 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: ANIMATION TEMPORAIRE � DUR�E DE VIE LIMIT�E
 	------------------------------------------------------------------------*/
-	function attachFx(x:float,y:float, link:String) : Animation {
+	public Animation AttachFx(float x, float y, string link) {
 		if ( game.fl_lock ) {
 			return null;
 		}
-		var a = new Animation(game);
-		a.attach(x,y, link, Data.DP_FX);
-		animList.push(a);
+		Animation a = new Animation(game);
+		a.Attach(x, y, link, Data.DP_FX);
+		animList.Add(a);
 		return a;
 	}
 
@@ -247,34 +254,32 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	PARTICULES DE POUSSI�RE TOMBANT D'UNE DALLE
 	------------------------------------------------------------------------*/
-	function dust(cx,cy) {
+	public void Dust(int cx, int cy) {
 		if ( !GameManager.CONFIG.fl_detail ) {
 			return;
 		}
-
 		var x = Entity.x_ctr(cx);
 		var y = Entity.y_ctr(cy);
 		var n = 7;
-		var xMin = x - Data.CASE_WIDTH*0.5;
-		var xMax = x + Data.CASE_WIDTH*0.5;
-		if ( game.world.getCase( {x:cx-1,y:cy} )==Data.GROUND ) {
+		var xMin = x - Data.CASE_WIDTH*0.5f;
+		var xMax = x + Data.CASE_WIDTH*0.5f;
+		if ( game.world.GetCase(cx-1, cy)==Data.GROUND) {
 			xMin -= Data.CASE_WIDTH;
 		}
-		if ( game.world.getCase( {x:cx+1,y:cy} )==Data.GROUND ) {
+		if ( game.world.GetCase(cx+1, cy)==Data.GROUND) {
 			xMax += Data.CASE_WIDTH;
 		}
-		var wid = Math.round(xMax-xMin);
-		for (var i=0;i<n;i++) {
-			var fx = attachFx(
-				xMin + Std.random(wid) ,
+		var wid = Mathf.RoundToInt(xMax-xMin);
+		for (int i=0 ; i<n ; i++) {
+			Animation fx = AttachFx(
+				xMin + Random.Range(0, wid) ,
 				y,
 				"hammer_fx_dust"
 			);
-//			fx.mc._x = Std.random( Math.round(Data.CASE_WIDTH*0.5) ) * (Std.random(2)*2-1);
-			fx.mc._xscale = Std.random(50)+50 * (Std.random(2)*2-1);
-			fx.mc._yscale = Std.random(80)+10;
-			fx.mc._alpha = Std.random(50)+50;
-			fx.mc.gotoAndStop( ""+(Std.random(5)+5) );
+			fx.mc._xscale = Random.Range(0, 50)+50 * (Random.Range(0, 2)*2-1);
+			fx.mc._yscale = Random.Range(0, 80)+10;
+			fx.mc._alpha  = Random.Range(0, 50)+50;
+			fx.mc.GotoAndStop((Random.Range(0, 5)+5));
 		}
 	}
 
@@ -282,50 +287,50 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	AJOUTE UN FX LANC� AVEC UN D�CALAGE DANS LE TEMPS
 	------------------------------------------------------------------------*/
-	function delayFx(t, x,y,link) {
-		stack.push( {t:t, x:x,y:y,link:link} );
+	void DelayFx(float t, float x, float y, string link) {
+		stack.Add(new stackable(t, link, x, y));
 	}
 
 
 	/*------------------------------------------------------------------------
 	PARTICULES BONDISSANTES AVEC COLLISION AU D�COR (LENTES !!)
 	------------------------------------------------------------------------*/
-	function inGameParticles(id:int, x:float,y:float, n:int) {
-		inGameParticlesDir(id, x,y, n, null);
+	public void InGameParticles(int id, float x, float y, int n) {
+		InGameParticlesDir(id, x, y, n, null);
 	}
 
 
-	function inGameParticlesDir(id:int, x:float,y:float, n:int, dir) {
-		if ( game.fl_lock ) {
+	void InGameParticlesDir(int id, float x, float y, int n, int? dir) {
+		if (game.fl_lock) {
 			return;
 		}
-		if ( !GameManager.CONFIG.fl_detail ) {
+		if (!GameManager.CONFIG.fl_detail) {
 			return;
 		}
 
 		// Epuration des fx
-		var l = game.getList(Data.FX);
-		if ( l.length+n>Data.MAX_FX ) {
-			n = Math.ceil(n*0.5);
-			game.destroySome(Data.FX, n+l.length-Data.MAX_FX);
+		var l = game.GetList(Data.FX);
+		if ( l.Count+n>Data.MAX_FX ) {
+			n = Mathf.CeilToInt(n*0.5f);
+			game.DestroySome(Data.FX, n+l.Count-Data.MAX_FX);
 		}
 
-		var fl_left = (Std.random(2)==0)?true:false;
+		var fl_left = (Random.Range(0, 2)==0)?true:false;
 		for (var i=0;i<n;i++) {
-			var mc = Particle.attach(game, id, x,y);
-			if ( x<=Data.CASE_WIDTH ) {
+			var mc = Particle.Attach(game, id, x, y);
+			if (x<=Data.CASE_WIDTH) {
 				fl_left = false;
 			}
-			if ( x>=Data.GAME_WIDTH-Data.CASE_WIDTH ) {
+			if (x>=Data.GAME_WIDTH-Data.CASE_WIDTH) {
 				fl_left = true;
 			}
 			fl_left = (dir!=null) ? dir<0 : fl_left;
 
 			if (fl_left) {
-				mc.next.dx = -Math.abs(mc.next.dx)
+				mc.next.dx = -Mathf.Abs(mc.next.dx);
 			}
 			else {
-				mc.next.dx = Math.abs(mc.next.dx)
+				mc.next.dx = Mathf.Abs(mc.next.dx);
 			}
 			fl_left = !fl_left;
 		}
@@ -335,48 +340,45 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH UN FOND TEMPORAIRE SP�CIAL
 	------------------------------------------------------------------------*/
-	function attachBg(id, subId, timer) {
-		if (timer==null) {
-			timer=15;
-		}
-		bgList.push( {id:id, subId:subId, timer:timer} );
+	void AttachBg(int id, int subId, float? timer) {
+		bgList.Add(new bg(id, subId, timer??15));
 	}
 
-	function detachBg() {
+	void DetachBg() {
 		fl_bg = false;
-		game.world.view.detachSpecialBg();
+		game.world.view.DetachSpecialBg();
 	}
 
 
 	/*------------------------------------------------------------------------
 	D�TRUIT LES FONDS TEMPORAIRES
 	------------------------------------------------------------------------*/
-	function clearBg() {
-		bgList = new Array();
-		detachBg();
+	void ClearBg() {
+		bgList = new List<bg>();
+		DetachBg();
 	}
 
 
 	/*------------------------------------------------------------------------
 	D�TRUIT TOUS LES FX
 	------------------------------------------------------------------------*/
-	function clear() {
-		mc_exitArrow.removeMovieClip();
-		levelName.removeMovieClip();
-		clearBg();
-		game.destroyList(Data.FX);
+	public void Clear() {
+		mc_exitArrow.RemoveMovieClip();
+		levelName.RemoveMovieClip();
+		ClearBg();
+		game.DestroyList(Data.FX);
 
-		for (var i=0;i<animList.length;i++) {
-			animList[i].destroy();
+		for (var i=0;i<animList.Count;i++) {
+			animList[i].DestroyThis();
 		}
-		animList = new Array();
+		animList = new List<Animation>();
 
-		for (var i=0;i<mcList.length;i++) {
-			mcList[i].removeMovieClip();
+		for (var i=0;i<mcList.Count;i++) {
+			mcList[i].RemoveMovieClip();
 		}
-		mcList = new Array();
+		mcList = new List<MovieClip>();
 
-		game.cleanKills();
+		game.CleanKills();
 	}
 
 
@@ -384,25 +386,25 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	EVENT: LEVEL SUIVANT
 	------------------------------------------------------------------------*/
-	function onNextLevel() {
-		stack = new Array();
-		clear();
-		levelName.removeMovieClip();
-		detachExit();
+	void OnNextLevel() {
+		stack = new List<stackable>();
+		Clear();
+		levelName.RemoveMovieClip();
+		DetachExit();
 	}
 
 
 	/*------------------------------------------------------------------------
 	STATIC: AFFICHE UN CONTOUR SUR UN MC
 	------------------------------------------------------------------------*/
-	static function addGlow(mc:MovieClip, color, length) {
-    	var f = new flash.filters.GlowFilter();
+	static void AddGlow(MovieClip mc, Color color, int length) {
+    	var f = new MovieClip.Filter();
 		f.color = color;
     	f.quality	= 1;
     	f.strength	= 100;
     	f.blurX		= length;
     	f.blurY		= f.blurX;
-    	mc.filters = [f];
+    	mc.filter = f;
 	}
 
 
@@ -410,61 +412,61 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	function main() {
+	void Main() {
 		// Gestion des BGs
-		if ( bgList.length>0 ) {
+		if (bgList.Count>0) {
 			var b = bgList[0];
 			if ( !fl_bg ) {
 				fl_bg = true;
-				game.world.view.attachSpecialBg(b.id,b.subId);
+				game.world.view.AttachSpecialBg(b.id,b.subId);
 			}
-			b.timer-=Timer.tmod;
+			b.timer-=Time.fixedDeltaTime;
 			if ( b.timer<=0 ) {
-				bgList.splice(0,1);
-				detachBg();
+				bgList.RemoveAt(0);
+				DetachBg();
 			}
 		}
 
 		// Level name life-timer
 		if ( levelName._name!=null ) {
-			nameTimer-=Timer.tmod;
+			nameTimer-=Time.fixedDeltaTime;
 			if ( nameTimer<=0 ) {
-				levelName._y+=Timer.tmod*0.7;
+				levelName._y+=Time.fixedDeltaTime*0.7f;
 				if ( levelName._y>=Data.GAME_HEIGHT+30 ) {
-					levelName.removeMovieClip();
+					levelName.RemoveMovieClip();
 				}
 			}
 		}
 
 		// FX delay�s
-		for (var i=0;i<stack.length;i++) {
-			stack[i].t-=Timer.tmod;
+		for (int i=0 ; i<stack.Count ; i++) {
+			stack[i].t-=Time.fixedDeltaTime;
 			if ( stack[i].t<=0 ) {
-				attachFx( stack[i].x, stack[i].y, stack[i].link );
-				stack.splice(i,1);
+				AttachFx( stack[i].x, stack[i].y, stack[i].link );
+				stack.RemoveAt(i);
 				i--;
 			}
 		}
 
 		// Joue les anims
-		for (var i=0;i<animList.length;i++) {
+		for (int i=0;i<animList.Count;i++) {
 			var a = animList[i];
-			a.update();
-			if ( a.fl_kill ) {
+			a.Update();
+			if (a.fl_kill) {
 				animList[i] = null;
-				animList.splice(i,1);
+				animList.RemoveAt(i);
 				i--;
 			}
 		}
 
 		// In-game message
-		if ( igMsg._name!=null ) {
-			igMsg.timer-=Timer.tmod;
-			if ( igMsg.timer<=0 ) {
-				igMsg._alpha-=Timer.tmod*2;
+		if (igMsg._name!=null) {
+			igMsg.timer-=Time.fixedDeltaTime;
+			if (igMsg.timer<=0) {
+				igMsg._alpha-=Time.fixedDeltaTime*2;
 			}
-			if ( igMsg._alpha<=0 ) {
-				igMsg.removeMovieClip();
+			if (igMsg._alpha<=0) {
+				igMsg.RemoveMovieClip();
 			}
 		}
 	}

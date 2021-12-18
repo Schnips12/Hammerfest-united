@@ -12,8 +12,8 @@ public class GameMechanics : ViewManager
 	List<bool> fl_visited;
 	public bool fl_mainWorld;
 
-	List<List<int>> flagMap; // flags IA
-	List<List<int>> fallMap; // hauteur de chute par case
+	public List<List<int>> flagMap; // flags IA
+	public List<List<int>> fallMap; // hauteur de chute par case
 	public List<List<List<Entity>>> triggers;
 
 	Vector2Int _iteration;
@@ -394,7 +394,7 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RENVOIE LA HAUTEUR D'UNE MARCHE DANS LE VIDE
 	------------------------------------------------------------------------*/
-	int GetStepHeight(int cx, int cy, int max) {
+	public int GetStepHeight(int cx, int cy, int max) {
 		int h=0;
 		while (GetCase(cx,cy-h)<=0  &  h<max) {
 			h++;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using TMPro;
+using System.Linq;
 
 public class GameMode : Mode
 {
@@ -22,7 +23,8 @@ public class GameMode : Mode
     public FxManager fxMan;
     public StatsManager statsMan;
     public RandomManager randMan;
-    protected bool fl_static; // si true, le comportement initial des monstres sera prévisible (random sinon)
+    public DepthManager depthMan;
+    public bool fl_static; // si true, le comportement initial des monstres sera prévisible (random sinon)
     protected bool fl_bullet;
     protected bool fl_disguise;
     protected bool fl_map;
@@ -39,13 +41,16 @@ public class GameMode : Mode
     protected float duration;
     protected float gFriction;
     public float sFriction;
-    protected float speedFactor;
+    public float speedFactor;
     protected float diffFactor;
 
-    protected List<List<Entity>> lists;
-    public List<Entity> killList;
-    protected Dictionary<int, Entity> unregList;
-    public GameMechanics world;
+    protected List<List<IEntity>> lists;
+    public List<IEntity> killList;
+    public struct killedEntity {
+        public int type;
+        public IEntity ent;
+    }
+    public List<killedEntity> unregList;
 
     protected List<int> comboList;
     public int badCount;
@@ -152,9 +157,9 @@ public class GameMode : Mode
         comboList = new List<int>();
         killList = new List<Entity>();
         unregList = new Dictionary<int, Entity>();
-        lists = new List<List<Entity>>();
+        lists = new List<List<IEntity>>();
         for(int i=0 ; i < 200 ; i++) {
-            lists[i] = new List<Entity>();
+            lists[i] = new List<IEntity>();
         }
 
         globalActives	= new List<bool>();
@@ -223,8 +228,8 @@ public class GameMode : Mode
     INITIALISE L'INTERFACE DE JEU (non appelé dans la classe gamemode)
     ------------------------------------------------------------------------*/
     protected virtual void InitInterface() {
-        gui.Destroy();
-        gui = new GameInterface(this);
+        gi.Destroy();
+        gi = new GameInterface(this);
     }
 
 
@@ -546,7 +551,7 @@ public class GameMode : Mode
                 Entity.x_ctr(world.current.playerX),
                 Entity.y_ctr(world.current.playerY-1)
             );
-            p.Shield(Data.SHIELD_DURATION*1.3);
+            p.Shield(Data.SHIELD_DURATION*1.3f);
             p.Hide();
         }
     }
@@ -585,7 +590,7 @@ public class GameMode : Mode
             return;
         }
 
-        List<Entity> l;
+        List<IEntity> l;
         List<Player> lp;
 
         ClearExtraHoles();
@@ -598,8 +603,8 @@ public class GameMode : Mode
         world.Goto(id);
 
         l = GetList(Data.ENTITY);
-        for (var i=0 ; i < l.Count ; i++) {
-            l[i].world = world;
+        foreach (IEntity e in l) {
+            (e as Entity).world = world;
         }
 
         // Le 1er player arrivé en bas débarque en 1er au level suivant
@@ -637,7 +642,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     COMPTEUR DE COMBO POUR UN ID UNIQUE
     ------------------------------------------------------------------------*/
-    int CountCombo(int id) {
+    public int CountCombo(int id) {
         return ++comboList[id];
     }
 
@@ -1106,7 +1111,7 @@ public class GameMode : Mode
         else {
             world.scriptEngine.InsertPortal(cx, cy, pid);
             var x = Entity.x_ctr(FlipCoordCase(cx));
-            var y = Entity.y_ctr(cy)-Data.CASE_HEIGHT*0.5;
+            var y = Entity.y_ctr(cy)-Data.CASE_HEIGHT*0.5f;
             var p = depthMan.Attach("hammer_portal", Data.DP_SPRITE_BACK_LAYER);
             p._x = x;
             p._y = y;
@@ -1140,14 +1145,14 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE LA LISTE D'ENTITÉS DU TYPE DEMANDÉ
     ------------------------------------------------------------------------*/
-    public List<Entity> GetList(int type) {
+    public List<IEntity> GetList(int type) {
         return lists[GetListId(type)];
     }
 
-    List<Entity> GetListAt(int type, int cx,int cy) {
-        List<Entity> l = GetList(type);
-        List<Entity> res = new List<Entity>();
-        foreach (Entity e in l) {
+    List<IEntity> GetListAt(int type, int cx,int cy) {
+        List<IEntity> l = GetList(type);
+        List<IEntity> res = new List<IEntity>();
+        foreach (IEntity e in l) {
             if (e.cx==cx & e.cy==cy) {
                 res.Add(e);
             }
@@ -1164,28 +1169,27 @@ public class GameMode : Mode
     }
 
 
-
     /*------------------------------------------------------------------------
-    RENVOIE DES LISTES SPÉCIFIQUES TYPÉES // TODO Define IEntity ?
+    RENVOIE DES LISTES SPÉCIFIQUES TYPÉES
     ------------------------------------------------------------------------*/
     public List<Bad> GetBadList() {
-        return GetList(Data.BAD);
+        return GetList(Data.BAD).OfType<Bad>().ToList();
     }
     public List<Bad> GetBadClearList() {
-        return GetList(Data.BAD_CLEAR);
+        return GetList(Data.BAD_CLEAR).OfType<Bad>().ToList();
     }
     public List<Player> GetPlayerList() {
-        return GetList(Data.PLAYER);
+        return GetList(Data.PLAYER).OfType<Player>().ToList();
     }
 
 
     /*------------------------------------------------------------------------
     RENVOIE UNE DUPLICATION D'UNE LISTE D'ENTITÉS
     ------------------------------------------------------------------------*/
-    List<Entity> GetListCopy(int type) {
-        List<Entity> l = GetList(type);
-        List<Entity> res = new List<Entity>();
-        foreach (Entity e in l) {
+    List<IEntity> GetListCopy(int type) {
+        List<IEntity> l = GetList(type);
+        List<IEntity> res = new List<IEntity>();
+        foreach (IEntity e in l) {
             res.Add(e);
         }
 
@@ -1196,12 +1200,12 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE LES ENTITÉS À PROXIMITÉ D'UN POINT DONNÉ
     ------------------------------------------------------------------------*/
-    public List<Entity> GetClose(int type, float x, float y, float radius, bool fl_onGround) {
-        List<Entity> l = GetList(type);
-        List<Entity> res = new List<Entity>();
+    public List<IEntity> GetClose(int type, float x, float y, float radius, bool fl_onGround) {
+        List<IEntity> l = GetList(type);
+        List<IEntity> res = new List<IEntity>();
         float sqrRad = Mathf.Pow(radius, 2);
 
-        foreach (Entity e in l) {
+        foreach (IEntity e in l) {
             float square = Mathf.Pow(e.x-x, 2) + Mathf.Pow(e.y-y, 2);
             if (square <= sqrRad) {
                 if (Mathf.Sqrt(square) <= radius) {
@@ -1220,8 +1224,8 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RETOURNE UNE ENTITÉ AU HASARD D'UN TYPE DONNÉ, OU NULL
     ------------------------------------------------------------------------*/
-    public Entity GetOne(int type) {
-        List<Entity> l = GetList(type);
+    public IEntity GetOne(int type) {
+        List<IEntity> l = GetList(type);
         return l[UnityEngine.Random.Range(0, l.Count)];
     }
 
@@ -1229,8 +1233,8 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RETOURNE UNE ENTITÉ AU HASARD D'UN TYPE DONNÉ, OU NULL
     ------------------------------------------------------------------------*/
-    protected Entity GetAnotherOne(int type, Entity e) {
-        List<Entity> l = GetList(type);
+    protected IEntity GetAnotherOne(int type, IEntity e) {
+        List<IEntity> l = GetList(type);
         if (l.Count <= 1) {
             return null;
         }
@@ -1248,7 +1252,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     AJOUTE À UNE LISTE D'UPDATE
     ------------------------------------------------------------------------*/
-    public void AddToList(int type, Entity e) {
+    public void AddToList(int type, IEntity e) {
         lists[GetListId(type)].Add(e);
     }
 
@@ -1256,7 +1260,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RETIRE D'UNE LISTE D'UPDATE
     ------------------------------------------------------------------------*/
-    public void RemoveFromList(int type, Entity e) {
+    public void RemoveFromList(int type, IEntity e) {
         lists[GetListId(type)].Remove(e);
     }
 
@@ -1265,7 +1269,7 @@ public class GameMode : Mode
     DÉTRUIT TOUS LES MCS D'UNE LISTE
     ------------------------------------------------------------------------*/
     public void DestroyList(int type) {
-        List<Entity> list = GetList(type);
+        List<IEntity> list = GetList(type);
         foreach (Entity e in list) {
             e.DestroyThis();
         }
@@ -1275,11 +1279,11 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DÉTRUIT N ENTITÉ AU HASARD D'UNE LISTE
     ------------------------------------------------------------------------*/
-    void DestroySome(int type, int n) {
-        List<Entity> l = GetListCopy(type);
+    public void DestroySome(int type, int n) {
+        List<IEntity> l = GetListCopy(type);
         while (l.Count>0 & n>0) {
             int i = UnityEngine.Random.Range(0, l.Count);
-            l[i].DestroyThis);
+            l[i].DestroyThis();
             l.RemoveAt(i);
             n--;
         }
@@ -1289,12 +1293,12 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     NETTOIE LES LISTES DE DESTRUCTION
     ------------------------------------------------------------------------*/
-    void CleanKills() {
+    public void CleanKills() {
         // Dés-enregistrement d'entités détruites dans ce tour
         for (var i=0; i<unregList.Count; i++) {
             RemoveFromList( unregList[i].type, unregList[i].ent );
         }
-        unregList = new Dictionary<int, Entity>();
+        unregList = new List<killedEntity>();
 
         // Suppression d'entités en fin de tour
         for (var i=0; i<killList.Count; i++) {
@@ -1302,9 +1306,9 @@ public class GameMode : Mode
 //			if ( (e.types&Data.BAD_CLEAR) > 0 && !fl_lock) {
 //				checkLevelClear();
 //			}
-            e.removeMovieClip();
+            e.RemoveMovieClip();
         }
-        killList = new List<Entity>();
+        killList = new List<IEntity>();
     }
 
 
@@ -1356,28 +1360,29 @@ public class GameMode : Mode
     public Bad AttachBad(int id, float x,float y) {
         Bad bad;
         switch (id) {
-            case Data.BAD_POMME			 : Pomme.Attach(this,x,y) ; break;
-            case Data.BAD_CERISE		 : Cerise.Attach(this,x,y) ; break;
-            case Data.BAD_BANANE		 : Banane.Attach(this,x,y) ; break;
-            case Data.BAD_ANANAS		 : Ananas.Attach(this,x,y) ; break;
-            case Data.BAD_ABRICOT		 : Abricot.Attach(this,x,y,true) ; break;
-            case Data.BAD_ABRICOT2		 : Abricot.Attach(this,x,y,false) ; break;
-            case Data.BAD_POIRE			 : Poire.Attach(this,x,y) ; break;
-            case Data.BAD_BOMBE			 : Bombe.Attach(this,x,y) ; break;
-            case Data.BAD_ORANGE		 : Orange.Attach(this,x,y) ; break;
-            case Data.BAD_FRAISE		 : Fraise.Attach(this,x,y) ; break;
-            case Data.BAD_CITRON		 : Citron.Attach(this,x,y) ; break;
-            case Data.BAD_BALEINE		 : Baleine.Attach(this,x,y) ; break;
-            case Data.BAD_SPEAR			 : Spear.Attach(this,x,y) ; break;
-            case Data.BAD_CRAWLER		 : Ww.Crawler.Attach(this,x,y) ; break;
-            case Data.BAD_TZONGRE		 : Flyer.Tzongre.Attach(this,x,y) ; break;
-            case Data.BAD_SAW			 : Ww.Saw.Attach(this,x,y) ; break;
-            case Data.BAD_LITCHI		 : Walker.Litchi.Attach(this,x,y) ; break;
-            case Data.BAD_KIWI			 : Walker.Kiwi.Attach(this,x,y) ; break;
-            case Data.BAD_LITCHI_WEAK	 : Walker.LitchiWeak.Attach(this,x,y) ; break;
-            case Data.BAD_FRAMBOISE		 : Walker.Framboise.Attach(this,x,y) ; break;
+            case Data.BAD_POMME			 : bad = Pomme.Attach(this,x,y) ; break;
+            case Data.BAD_CERISE		 : bad = Cerise.Attach(this,x,y) ; break;
+            case Data.BAD_BANANE		 : bad = Banane.Attach(this,x,y) ; break;
+            case Data.BAD_ANANAS		 : bad = Ananas.Attach(this,x,y) ; break;
+            case Data.BAD_ABRICOT		 : bad = Abricot.Attach(this,x,y,true) ; break;
+            case Data.BAD_ABRICOT2		 : bad = Abricot.Attach(this,x,y,false) ; break;
+            case Data.BAD_POIRE			 : bad = Poire.Attach(this,x,y) ; break;
+            case Data.BAD_BOMBE			 : bad = Bombe.Attach(this,x,y) ; break;
+            case Data.BAD_ORANGE		 : bad = Orange.Attach(this,x,y) ; break;
+            case Data.BAD_FRAISE		 : bad = Fraise.Attach(this,x,y) ; break;
+            case Data.BAD_CITRON		 : bad = Citron.Attach(this,x,y) ; break;
+            case Data.BAD_BALEINE		 : bad = Baleine.Attach(this,x,y) ; break;
+            case Data.BAD_SPEAR			 : bad = Spear.Attach(this,x,y) ; break;
+            case Data.BAD_CRAWLER		 : bad = Crawler.Attach(this,x,y) ; break;
+            case Data.BAD_TZONGRE		 : bad = Flyer.Tzongre.Attach(this,x,y) ; break;
+            case Data.BAD_SAW			 : bad = Saw.Attach(this,x,y) ; break;
+            case Data.BAD_LITCHI		 : bad = Litchi.Attach(this,x,y) ; break;
+            case Data.BAD_KIWI			 : bad = Kiwi.Attach(this,x,y) ; break;
+            case Data.BAD_LITCHI_WEAK	 : bad = LitchiWeak.Attach(this,x,y) ; break;
+            case Data.BAD_FRAMBOISE		 : bad = Framboise.Attach(this,x,y) ; break;
 
             default :
+                bad = null;
                 GameManager.Fatal("(attachBad) unknown bad "+id);
             break;
         }
@@ -1629,7 +1634,7 @@ public class GameMode : Mode
 
         for (var i=0;i<latePlayers.Count;i++) {
             var p = latePlayers[i];
-            p.Knock(Data.SECOND*1.3);
+            p.Knock(Data.SECOND*1.3f);
             p.dx = 0;
         }
 
@@ -1649,7 +1654,7 @@ public class GameMode : Mode
     MISE À JOUR VARIABLE WORLD DES ENTITÉS
     ------------------------------------------------------------------------*/
     void UpdateEntitiesWorld() {
-        List<Entity> l = GetList(Data.ENTITY);
+        List<IEntity> l = GetList(Data.ENTITY);
         for (var i=0;i<l.Count;i++) {
             l[i].world = world;
         }
@@ -1672,7 +1677,7 @@ public class GameMode : Mode
 
         var l = GetList(Data.SPECIAL_ITEM);
         for (var i=0;i<l.Count;i++) {
-            Item it = l[i];
+            Item it = (Item) l[i];
             if (it.id==0) {
                 it.Destroy();
             }
@@ -1726,7 +1731,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     EVENT: MORT D'UN BAD
     ------------------------------------------------------------------------*/
-    protected virtual void OnKillBad(Bad b) {
+    public virtual void OnKillBad(Bad b) {
         // do nothing
     }
 

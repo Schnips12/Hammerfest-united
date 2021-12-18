@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 public class ViewManager : SetManager
 {
     public View view;
+	DepthManager depthMan;
 
 	public bool fl_hideTiles;
 	public bool fl_hideBorders;
@@ -13,12 +15,11 @@ public class ViewManager : SetManager
 	bool fl_scrolling;
 	bool fl_hscrolling;
 	bool fl_fading;
-	bool fl_fadeNextTransition;
-	float darknessFactor;
+	public bool fl_fadeNextTransition;
+	public float darknessFactor;
 
 	// Scrolling
 	float scrollCpt;
-
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -42,9 +43,7 @@ public class ViewManager : SetManager
 	public override void DestroyThis() {
 		base.DestroyThis();
 		view.DestroyThis();
-		/* fake.removeMovieClip(); */
 	}
-
 
 
 	// *** EVENTS *****
@@ -53,11 +52,10 @@ public class ViewManager : SetManager
 	EVENT: GENERIC TRANSITION CALLBACK
 	------------------------------------------------------------------------*/
 	void OnTransitionDone() {
-/* 		view.moveTo(0,0);
-		fake.removeMovieClip();
-		if ( fl_mirror ) {
-			flipPortals();
-		} */
+		view.MoveTo(0, 0);
+		if (fl_mirror) {
+			FlipPortals();
+		}
 	}
 
 
@@ -66,7 +64,7 @@ public class ViewManager : SetManager
 	------------------------------------------------------------------------*/
 	void OnScrollDone() {
 		fl_scrolling = false;
-		StartCoroutine("OnViewReady");
+		OnViewReady();
 	}
 
 
@@ -101,23 +99,21 @@ public class ViewManager : SetManager
 		base.OnDataReady();
 
 		if (!view.fl_attach) {
-			view = new View(currentId);
+			view = CreateView(currentId);
 			if (fl_restoring) {
-				//view.moveTo(Data.GAME_WIDTH,0);
+				view.MoveTo(Data.GAME_WIDTH, 0);
 				OnRestoreReady();
 			}
 			else {
-				//view.moveTo(0,0);
+				view.MoveTo(0,0);
 				OnViewReady();
 			}
 		}
 		else {
-			//CloneView(view);
-
 			teleporterList = new List<TeleporterData>();
 
-			view = new View(currentId);
-			//view.moveTo(0,Data.GAME_HEIGHT);
+			view = CreateView(currentId);
+			view.MoveTo(0, Data.GAME_HEIGHT);
 			scrollCpt = 0;
 
 			fl_scrolling = true;
@@ -128,19 +124,18 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	EVENT: RESTORE TERMIN�
 	------------------------------------------------------------------------*/
-	protected virtual void OnRestoreReady() {
-		//super.onRestoreReady();
+	protected override void OnRestoreReady() {
+		base.OnRestoreReady();
 		fl_restoring = false;
 		if ( fl_fadeNextTransition ) {
 			fl_fadeNextTransition = false;
 			fl_fading = true;
-			//view.moveTo(0,0);
+			view.MoveTo(0, 0);
 		}
 		else {
 			fl_hscrolling = true;
 			scrollCpt = 0;
 		}
-
 		// hack: scrolldir is set in GameMechanics
 	}
 
@@ -149,7 +144,7 @@ public class ViewManager : SetManager
 	ATTACH: VUE
 	------------------------------------------------------------------------*/
 	protected virtual View CreateView(int id) {
-		View v = new View(this);
+		View v = new View(this, depthMan);
 		v.fl_hideTiles = fl_hideTiles;
 		v.fl_hideBorders = fl_hideBorders;
 		v.Detach();
@@ -167,13 +162,12 @@ public class ViewManager : SetManager
 	public override void Suspend() {
 		base.Suspend();
 		view.Detach();
-		//fake.removeMovieClip();
 	}
 
 	public override void Restore(int lid) {
 		base.Restore(lid);
 		fl_restoring = true;
-		//goto(lid);
+		Goto(lid);
 	}
 
 
@@ -181,9 +175,7 @@ public class ViewManager : SetManager
 	R�ACTIVATION AVEC ANIM DE TRANSITION DEPUIS UN SNAPSHOT
 	------------------------------------------------------------------------*/
 	public void RestoreFrom(int lid) {
-		//prevSnap = snap;
-		//createFake(prevSnap);
-		//view.moveTo(Data.GAME_WIDTH,0);
+		view.MoveTo(Data.GAME_WIDTH, 0);
 		Restore(lid);
 	}
 
@@ -191,53 +183,32 @@ public class ViewManager : SetManager
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE (SCROLLING)
 	------------------------------------------------------------------------*/
-	public virtual void Update() {
-		//super.update();
+	public override void Update() {
+		base.Update();
 
 		if (fl_scrolling) {
-/* 			scrollCpt += Data.SCROLL_SPEED * Timer.tmod ;
-			view.moveTo(0, Data.GAME_HEIGHT+Math.sin(scrollCpt)*(0-Data.GAME_HEIGHT) ) ;
-//			fake.moveTo(0, -Math.sin(scrollCpt)*(Data.GAME_HEIGHT) ) ;
-			fake._x = 0;
-			fake._y = -Math.sin(scrollCpt)*(Data.GAME_HEIGHT);
+			scrollCpt += Data.SCROLL_SPEED * Time.fixedDeltaTime;
+			view.MoveTo(0, Mathf.FloorToInt(Data.GAME_HEIGHT+Mathf.Sin(scrollCpt)*(0-Data.GAME_HEIGHT)));
 
-			if ( scrollCpt>=Math.PI/2 ) {
-				onTransitionDone();
-				onScrollDone() ;
-			} */
+			if ( scrollCpt>=Mathf.PI/2 ) {
+				OnTransitionDone();
+				OnScrollDone() ;
+			}
 		}
 
-		if ( fl_hscrolling ) {
-/* 			scrollCpt += scrollDir * Data.SCROLL_SPEED * Timer.tmod ;
-			if ( scrollDir>0 ) {
-				view.moveTo( 20+Data.GAME_WIDTH+Math.sin(scrollCpt)*(0-Data.GAME_WIDTH-20), 0 ) ;
+		if (fl_hscrolling) {
+			scrollCpt += scrollDir * Data.SCROLL_SPEED * Time.fixedDeltaTime;
+			if (scrollDir>0) {
+				view.MoveTo( Mathf.FloorToInt(20+Data.GAME_WIDTH+Mathf.Sin(scrollCpt)*(0-Data.GAME_WIDTH-20)), 0);
 			}
 			else {
-				view.moveTo( -Data.GAME_WIDTH-20-Math.sin(scrollCpt)*(Data.GAME_WIDTH+20), 0 ) ;
+				view.MoveTo( Mathf.FloorToInt(-Data.GAME_WIDTH-20-Mathf.Sin(scrollCpt)*(Data.GAME_WIDTH+20)), 0);
 			}
-			fake._x = -Math.sin(scrollCpt)*(Data.GAME_WIDTH+20);
-			fake._y = 0;
 
-			if ( scrollCpt>=Math.PI/2 || scrollCpt<=-Math.PI/2 ) {
-				onTransitionDone();
-				onHScrollDone() ;
-			} */
+			if (scrollCpt>=Mathf.PI/2 | scrollCpt<=-Mathf.PI/2) {
+				OnTransitionDone();
+				OnHScrollDone();
+			}
 		}
-
-		if ( fl_fading ) {
-/* 			fake._alpha -= Timer.tmod*Data.FADE_SPEED;
-
-			var f = new flash.filters.BlurFilter();
-			f.blurX			= 100-fake._alpha;
-			f.blurY			= f.blurX*0.3;
-			fake.filters	= [f];
-
-			if ( fake._alpha<=0 ) {
-				onTransitionDone();
-				onFadeDone();
-			} */
-		}
-
 	}
-
 }

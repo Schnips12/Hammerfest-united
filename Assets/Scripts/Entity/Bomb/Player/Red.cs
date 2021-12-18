@@ -43,9 +43,9 @@ public class Red : PlayerBomb
 		base.OnExplode();
 
 		// freeze bads
-		var l = BombGetClose(Data.BAD);
-		for (var i=0;i<l.Count;i++) {
-			Bad e = l[i];
+		var list = BombGetClose(Data.BAD);
+		for (var i=0;i<list.Count;i++) {
+			Bad e = list[i];
 			e.SetCombo(uniqId);
 			e.Freeze(Data.FREEZE_DURATION);
 			ShockWave(e, radius, power);
@@ -77,9 +77,8 @@ public class Red : PlayerBomb
 
 
 		// player bomb jump
-		l = game.GetList(Data.PLAYER) ;
-		for (var i=0;i<l.Count;i++) {
-			Player e = l[i];
+		var l = game.GetPlayerList() ;
+		foreach (Player e in l) {
 			var distX = (e.x-x);
 			var distY = (e.y-y);
 

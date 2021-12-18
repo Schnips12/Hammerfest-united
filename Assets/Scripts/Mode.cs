@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Mode
@@ -8,6 +6,7 @@ public class Mode
 	public float yFriction;
 
 	public GameManager manager;
+	public GameMechanics world;
 	protected Cookie root;
 	protected AudioSource audio;
 	//DepthManager depthMan; //TODO replace with unity object

@@ -1,18 +1,48 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Abricot : MonoBehaviour
+public class Abricot : Jumper
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	bool fl_spawner;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Abricot(MovieClip mc) : base(mc) {
+		animFactor = 0.65f;
+		SetJumpUp(5);
+		SetJumpH(100);
+		SetClimb(100,3);
+		SetFall(20);
+	}
+
+	/*------------------------------------------------------------------------
+	INITIALISATION
+	------------------------------------------------------------------------*/
+	protected override void Init(GameMode g) {
+		base.Init(g) ;
+		if (!fl_spawner) {
+			Scale(75) ;
+		}
+		dir = -1 ;
+	}
+
+	/*------------------------------------------------------------------------
+	ATTACHEMENT
+	------------------------------------------------------------------------*/
+	public static Abricot Attach(GameMode g, float x, float y, bool spawner) {
+		var linkage = Data.LINKAGES[Data.BAD_ABRICOT];
+		Abricot mc = new Abricot(g.depthMan.Attach(linkage,Data.DP_BADS));
+		mc.fl_spawner = spawner;
+		mc.InitBad(g,x,y);
+		return mc;
+	}
+
+	/*------------------------------------------------------------------------
+	EVENT: LIGNE DU BAS
+	------------------------------------------------------------------------*/
+	protected override void OnDeathLine() {
+		if (fl_spawner) {
+			game.AttachBad(Data.BAD_ABRICOT2, x-Data.CASE_WIDTH,-30);
+			game.AttachBad(Data.BAD_ABRICOT2, x+Data.CASE_WIDTH,-30);
+		}
+		base.OnDeathLine() ;
+	}
 }

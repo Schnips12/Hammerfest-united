@@ -6,239 +6,129 @@ using System.IO;
 
 public class View : MonoBehaviour
 {
-	// Testing area
-    [SerializeField] List<SmarterTile> groundTiles;
-	[SerializeField] List<SmarterTile> ground_endTiles;
-	[SerializeField] List<TileBase> backgroundTiles;
-    [SerializeField] Tilemap groundMap;
-	[SerializeField] Tilemap ground_endMap;
-	[SerializeField] Tilemap backgroundMap;
-    [SerializeField] GameObject gameArea;
-	[SerializeField] private LevelData[] levels;
-	[SerializeField] GameObject bombField;
-	[SerializeField] GameObject tpField;
-	[SerializeField] GameObject portalField;
-	[SerializeField] GameObject pod;
-	[SerializeField] GameObject[] bads;
+	bool fl_fast; // mode brouillon
 
-	private List<GameObject> mapThings;
-
-
-/* 	bool fl_cache; */
-	bool fl_fast;
-
-	float viewX;
-	float viewY;
+	int viewX;
+	int viewY;
 
 	SetManager world;
 	LevelData data;
-	Camera cam;
+	DepthManager depthMan;
 
+	DepthManager _top_dm; // bitmap cache
+	DepthManager _back_dm; // bitmap cache
+	DepthManager _field_dm; // no cache
+	DepthManager _sprite_top_dm; // no cache
+	DepthManager _sprite_back_dm; // no cache
+
+	float xOffset;
 	public bool fl_attach;
 	public bool fl_shadow;
 	public bool fl_hideTiles;
 	public bool fl_hideBorders;
-	public bool[,] _fieldMap;
-	int currentId;
+	int? levelId;
 
-	bool flashing;
+	// Movies
+	private MovieClip _top;
+	private MovieClip _back;
+	private MovieClip _field;
+	private MovieClip _sprite_top;
+	private MovieClip _sprite_back;
 
-    public View(int levelId) {
+	private MovieClip _tiles;
+	private MovieClip _bg;
+	private MovieClip _leftBorder;
+	private MovieClip _rightBorder;
+	private MovieClip _specialBg;
+	List<TileMC> tileList;
+	List<MovieClip> gridList;
+	List<MovieClip> mcList;
 
-    }
-	public View(ViewManager vm) {
+//	var thumb				: BitmapData;
+//	var fl_thumb			: bool;
 
-    }
+	private List<List<bool?>> _fieldMap;
 
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	public View(SetManager world, DepthManager dm) {
+		this.world = world;
 
-	private void Start() {
-		cam = Camera.main;
-        string json = File.ReadAllText(Application.dataPath+"/json/levels/adventure.json");
-        levels = JsonUtility.FromJson<LevelData.LevelsArray>("{\"thisArray\":"+json+"}").thisArray; // TODO load a single level
-	
+		depthMan	= dm;
+		xOffset		= 10;
+
 		fl_attach		= false;
 		fl_shadow		= true;
 		fl_hideTiles	= false;
 		fl_hideBorders	= false;
 
-		fl_fast	  = false;
+		tileList	= new List<TileMC>();
+		gridList	= new List<MovieClip>();
+		mcList		= new List<MovieClip>();
 
-		currentId = -1;
+		_sprite_top		= depthMan.Empty(Data.DP_SPRITE_TOP_LAYER);
+		_sprite_top._x	-= xOffset;
+		_sprite_back	= depthMan.Empty(Data.DP_SPRITE_BACK_LAYER);
+		_sprite_back._x	-= xOffset;
+		_sprite_top_dm	= new DepthManager(_sprite_top);
+		_sprite_back_dm	= new DepthManager(_sprite_back);
 
-		mapThings = new List<GameObject>();
-		flashing = false;
-
-		Debug.Log(String.Join("\n", levels[3].script.Split('\r')));
-	}
-
-	private void Update() {
-		if(Input.GetMouseButtonDown(0)) {
-			Detach();
-			currentId++;
-			Attach();		
-        }
-		if(Input.GetMouseButtonDown(1)) {
-			flashing = !flashing;
-			foreach (GameObject thing in mapThings) {
-				if (thing.name == tpField.name+"(Clone)") {
-					thing.GetComponentInChildren<Animator>().SetBool("flashing", flashing);
-				} else if(thing.name == pod.name+"(Clone)") {
-					thing.GetComponent<Animator>().SetBool("flashing", flashing);
-				}
-			}
-		}
-    }
-
-	public void Attach() {
-		DrawBackground();
-        DrawGround();
-	}
-
-	/// <summary>Replace the positive values of the map with codes for floors and columns.</summary>
-	void TraceLines(int index) {
-		bool tracing = false;
-		int startX = 0;
-		int startY = 0;
-		
-		_fieldMap = new bool[levels[currentId].mapWidth(), levels[currentId].mapHeight()];
-
-		// Reading the map line by line and detecting consecutive positive values.
-		for (int y=0 ; y <= levels[index].mapHeight() ; y++) {
-			for (int x=0 ; x <= levels[index].mapWidth() ; x++) {
-				if (!tracing) {
-					// Ignoring values greater than 100 as they result from vertical tracing.
-					if (levels[index].GetCase(x, y) > 0 & levels[index].GetCase(x, y) < 100) {
-						startX = x;
-						startY = y;
-						tracing = true;
-					}
-				}
-				
-				if (tracing) {
-					// End tracing when reaching an empty case or the end of the map
-					if (levels[index].GetCase(x, y) <= 0) {
-						int wid = x-startX;
-
-						if (wid==1 & IsWall(startX, startY)) {
-							int hei = 0;
-							// Vertical tracing because horizontal tracing ended after one step
-							if (!IsWall(startX, startY-1)) {
-								while (IsWall(startX, startY+hei)) {
-									hei++;
-								}
-							}
-
-							if (hei==1) { // The column is one unit tall so we treat it as a floor
-								AttachTile(startX, startY, 1);
-							} else {  // Otherwise we write the whole column
-								AttachColumn(startX, startY, hei);
-							}
-						}
-						else { // Writing the detected floor element
-							AttachTile(startX, startY, wid);
-						}
-						tracing = false;
-					}
-				}
-			}
-		}
-		
-		// Fields
-		for (int y=0 ; y<levels[currentId].mapHeight() ; y++) {
-			for (int x=0 ; x<levels[currentId].mapWidth() ; x++) {
-				if (levels[currentId].GetCase(x, y) < 0 & _fieldMap[x, y]==false) {
-					AttachField(x, y);
-				}
-			}
-		}
-	}
-
-	/// <sumary>Write values in the map coresponding to consecutive floor tiles</sumary>
-	void AttachTile(int startX, int startY, int width) {
-		for (int i=0 ; i < width ; i++) {
-			levels[currentId].SetCase(startX+i, startY, i+1);
-		}
-		levels[currentId].SetCase(startX+width-1, startY, width-1+1001);
-	}
-
-	/// <sumary>Write values in the map coresponding to consecutive column tiles</sumary>
-	// TODO This will have to be edited when attempting to flip the column sprites.
-	void AttachColumn(int startX, int startY, int height) {
-		for (int i=0 ; i < height ; i++) {
-			levels[currentId].SetCase(startX, startY+i, i+101);
-		}
-		levels[currentId].SetCase(startX, startY+height-1, height-1+1101);
-	}
-
-	void DrawGround() { // TODO instead of iteration over the background, should be using level dimensions
-		TraceLines(currentId);
-		float xSize = groundMap.transform.localScale.x;
-		float ySize = groundMap.transform.localScale.y;
-		Bounds bounds = gameArea.GetComponent<Renderer>().bounds;
-
-		string skinTiles = levels[currentId].skinTiles.ToString("00");
-
-		for (float x=bounds.min.x+5 ; x<bounds.max.x-5 ; x+=xSize) {
-			for (float y=bounds.min.y ; y<bounds.max.y ; y+=ySize) {
-				Vector3Int cellPos = groundMap.WorldToCell(new Vector3(x, y, 0));
-				int cellValue = levels[currentId].GetCase(cellPos.x, cellPos.y) % 100;
-				bool isColumn = levels[currentId].GetCase(cellPos.x, cellPos.y) % 1000 > 100;
-				bool isEnd 	  = levels[currentId].GetCase(cellPos.x, cellPos.y) > 1000;
-				if(cellValue > 0) { // TODO modify the SmartTile class to allow inverting tiles then flip columns upside down
-					Quaternion rotation = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-					if (isColumn) {
-						rotation = Quaternion.Euler(0.0f, 0.0f, 90.0f);
-					}
-
-					SmarterTile ground = groundTiles.Find(item => item.name.Substring(5, 2) == skinTiles & Int16.Parse(item.name.Substring(8))+1 == cellValue);
-					ground.rotation = rotation;
-					groundMap.SetTile(cellPos, ground);
-
-					if(isEnd) {
-						SmarterTile ground_end = ground_endTiles.Find(item => item.name.Substring(4, 2) == skinTiles);
-						ground_end.rotation = rotation;
-						ground_endMap.SetTile(cellPos, ground_end);
-					}
-				}
-			}
-		}
-	}
-
-	void DrawBackground() { // TODO instead of iteration over the background, should be using level dimensions
-		float xSize = backgroundMap.transform.localScale.x;
-		float ySize = backgroundMap.transform.localScale.y;
-		Bounds bounds = gameArea.GetComponent<Renderer>().bounds;
-
-		for (float x=bounds.min.x+5 ; x<bounds.max.x-5 ; x+=xSize) {
-			for (float y=bounds.min.y ; y<bounds.max.y ; y+=ySize) {
-				Vector3Int cellPos = backgroundMap.WorldToCell(new Vector3(x, y, 0));
-				TileBase background = backgroundTiles.Find(item => Int16.Parse(item.name.Substring(2, 2)) == levels[currentId].skinBg);
-				backgroundMap.SetTile(cellPos, background);
-			}
-		}
+		fl_fast		= false;
 	}
 
 	/*------------------------------------------------------------------------
-	RETOURNE SI UNE CASE EST UN MUR
+	VUE D'UN NIVEAU DU SET INTERNE
 	------------------------------------------------------------------------*/
-	bool IsWall(int cx, int cy) {
-		bool isWall = levels[currentId].GetCase(cx, cy) > 0;
-		
-		if (levels[currentId].GetCase(cx-1, cy) > 0) {
-			isWall = false;
+	public void Display(int id) {
+		this.data = this.world.worldmap[id];
+		levelId = id;
+		if (this.data==null) {
+			GameManager.Warning("null view");
 		}
+		Attach();
+	}
 
-		if (levels[currentId].GetCase(cx+1, cy) > 0) {
-			isWall = false;
-		}
-
-		return isWall;
+	/*------------------------------------------------------------------------
+	VUE DU NIVEAU EN COURS DANS LE SET
+	------------------------------------------------------------------------*/
+	void DisplayCurrent() {
+		Display(world.currentId);
 	}
 
 
+	/*------------------------------------------------------------------------
+	UTILISE UN OBJET CUSTOM POUR LA VUE
+	------------------------------------------------------------------------*/
+	void DisplayExternal(LevelData d) {
+		this.data = d;
+		levelId = null;
+		DetachLevel();
+		Attach();
+	}
+
 
 	/*------------------------------------------------------------------------
-	EFFACE LES OMBRES SOUS LES DALLES // TODO Add shadow management
+	SCALE DU NIVEAU
+	------------------------------------------------------------------------*/
+	void Scale(float ratio) {
+		var scale = Mathf.Round(ratio*100);
+		_tiles._xscale	= scale;
+		_tiles._yscale	= scale;
+		_bg._xscale		= scale;
+		_bg._yscale		= scale;
+		_sprite_back._xscale	= scale;
+		_sprite_back._yscale	= scale;
+		_sprite_top._xscale		= scale;
+		_sprite_top._yscale		= scale;
+
+		_leftBorder._visible = (ratio==1);
+		_rightBorder._visible = (ratio==1);
+	}
+
+
+	/*------------------------------------------------------------------------
+	EFFACE LES OMBRES SOUS LES DALLES
 	------------------------------------------------------------------------*/
 	public void RemoveShadows() {
 		fl_shadow = false;
@@ -246,11 +136,22 @@ public class View : MonoBehaviour
 
 
 	/*------------------------------------------------------------------------
-	CALCUL DES ID DE SKIN TILES / COLUMN // TODO check is still unused upon View completion and get rid of it
+	RETOURNE SI UNE CASE EST UN MUR
 	------------------------------------------------------------------------*/
-	int GetTileSkinId(int id) {
+	bool IsWall(int cx, int cy) {
+		return
+			data.GetCase(cx, cy)>0 &
+			( data.GetCase(cx-1, cy)<=0 | data.GetCase(cx-1, cy)==null ) &
+			( data.GetCase(cx+1, cy)<=0 | data.GetCase(cx+1, cy)==null );
+	}
+
+
+	/*------------------------------------------------------------------------
+	CALCUL DES ID DE SKIN TILES / COLUMN
+	------------------------------------------------------------------------*/
+	static int GetTileSkinId(int id) {
 		if (id>=100) {
-			id = id % 100;
+			id = id - Mathf.FloorToInt(id/100)*100;
 			return id;
 		}
 		else {
@@ -258,14 +159,14 @@ public class View : MonoBehaviour
 		}
 	}
 
-	int GetColumnSkinId(int id) {
+	static int GetColumnSkinId(int id) {
 		if (id>=100) {
-			id /= 100;
+			id = Mathf.FloorToInt(id/100);
 		}
 		return id;
 	}
 
-	int BuildSkinId(int tile, int column) {
+	static int BuildSkinId(int tile, int column) {
 		if (column==tile) {
 			return tile;
 		}
@@ -274,15 +175,60 @@ public class View : MonoBehaviour
 		}
 	}
 
-	void FlipBackground() {
-		Vector3 flippedPos = new Vector3(-backgroundMap.transform.position.x, backgroundMap.transform.position.y, backgroundMap.transform.position.z);
-		Vector3 flippedSca = new Vector3(-backgroundMap.transform.localScale.x, backgroundMap.transform.localScale.y, backgroundMap.transform.localScale.z);
 
-		backgroundMap.transform.position = flippedPos;
-		backgroundMap.transform.localScale = flippedSca;
+	/*------------------------------------------------------------------------
+	ATTACHE UN PLATEAU
+	------------------------------------------------------------------------*/
+	void AttachTile(int sx, int sy, int wid, int skin) {
+		skin = GetTileSkinId(skin);
+		if (fl_fast) {
+			skin = 30;
+		}
+		TileMC tile;
+		tile = new TileMC(_tiles, "tile", sy*Data.LEVEL_WIDTH+sx);
+
+		tile._x = sx*Data.CASE_WIDTH;
+		tile._y = sy*Data.CASE_HEIGHT;
+		tile.maskTile._width = wid*Data.CASE_WIDTH;
+
+		tile.SetSkin(skin);
+		tile.endTile.SetSkin(skin);
+
+		if (!fl_shadow | fl_fast) {
+			tile.ombre._visible = false;
+		}
+
+		tileList.Add(tile);
 	}
 
-	
+	/*------------------------------------------------------------------------
+	ATTACHE UNE COLONNE
+	------------------------------------------------------------------------*/
+	void AttachColumn(int sx, int sy, int wid, int skin) {
+		TileMC tile;
+		skin = GetColumnSkinId(skin);
+		if (fl_fast) {
+			skin = 30;
+		}
+		tile = new TileMC(_tiles, "tile", sy*Data.LEVEL_WIDTH+sx);
+
+		tile._yscale = -100;
+		tile._rotation = 90;
+		tile._x = sx*Data.CASE_WIDTH;
+		tile._y = sy*Data.CASE_HEIGHT;
+		tile.maskTile._width = wid*Data.CASE_WIDTH;
+
+		tile.SetSkin(skin);
+		tile.endTile.SetSkin(skin);
+
+		if (!fl_shadow | fl_fast) {
+			tile.ombre._visible = false;
+		}
+
+		tileList.Add(tile);
+	}
+
+
 	/*------------------------------------------------------------------------
 	ATTACHE UN CHAMP D'�NERGIE
 	------------------------------------------------------------------------*/
@@ -290,158 +236,401 @@ public class View : MonoBehaviour
 		if (fl_fast) {
 			return;
 		}
-		bool fl_flip = false;
-		int id = levels[currentId].GetCase(sx, sy);
+		var fl_flip = false;
+		MovieClip mc;
+		int id = data.GetCase(sx, sy)??0;
 		TeleporterData td = null;
 
 		// attachement
-		float depth = groundMap.transform.position.z - 1;
-		float scaleX = groundMap.transform.localScale.x;
-		float scaleY = groundMap.transform.localScale.y;
-		Vector3 pos = groundMap.CellToWorld(new Vector3Int(sx, sy, 0)) + new Vector3(scaleX/2, scaleY/2, depth);
+		mc = _field_dm.Attach("field", 1);
+		mc._x = sx*Data.CASE_WIDTH;
+		mc._y = sy*Data.CASE_HEIGHT;
 
-		GameObject f = null;
-		if (-5 <= id & id <= -1) {
-			f = Instantiate(bombField, pos, Quaternion.identity);
-			f.GetComponentInChildren<Field>().SetSkin(id);
-		} else if (id == -6) {
-			f = Instantiate(tpField, pos, Quaternion.identity);
-		} else if (id == -7) {
-			f = Instantiate(portalField, pos, Quaternion.identity);
-		}
-
-		if (f != null) {
-			mapThings.Add(f);
-		}
-		
-
-		if (levels[currentId].GetCase(sx+1, sy) == id) {
+		if (data.GetCase(sx+1, sy) == id) {
 			// horizontal
+			mc.GotoAndStop(2);
 			int i = sx;
-			while (levels[currentId].GetCase(i, sy) == id) {
-				_fieldMap[i, sy]=true;
+			while (data.GetCase(i, sy) == id) {
+				_fieldMap[i][sy]=true;
 				i++;
 			}
-			if (id == -6) { // TODO Use Data.FIELD_TELEPORT
-				td = new TeleporterData(sx, sy, i-sx, 2, scaleX, scaleY); // TODO Use Data.HORIZONTAL
+
+			if (id == Data.FIELD_TELEPORT) {
+				td = new TeleporterData(sx, sy, i-sx, Data.HORIZONTAL);
+				td.mc = mc;
 			}
-			f.transform.localScale = new Vector3(scaleX, (i-sx)*scaleY, 1);
-			f.transform.position += new Vector3(i-sx-1, 0, 0);
-			f.transform.rotation = Quaternion.Euler(0, 0, 90);
+			mc._width = Data.CASE_WIDTH * (i-sx);
 		}
 		else {
-			if (levels[currentId].GetCase(sx, sy+1) == id) {
+			if (data.GetCase(sx, sy+1) == id) {
 				// vertical
-				int i = sy;
-				while (levels[currentId].GetCase(sx, i) == id) {
-					_fieldMap[sx, i]=true;
+				mc.GotoAndStop(1);
+				var i = sy;
+				while ( data.GetCase(sx, i) == id ) {
+					_fieldMap[sx][i]=true;
 					i++;
 				}
 
-				if (id == -6) { // TODO Use Data.FIELD_TELEPORT
-					td = new TeleporterData(sx, sy, i-sy, 1, scaleX, scaleY); // TODO Use Data.HORIZONTAL
+				if (id==Data.FIELD_TELEPORT) {
+					td = new TeleporterData(sx, sy, i-sy, Data.VERTICAL);
+					td.mc = mc;
 				}
-				if (id == -7) { // TODO Use Data.FIELD_PORTAL
-					if (levels[currentId].GetCase(sx+1, sy) > 0) {
+				if (id==Data.FIELD_PORTAL) {
+					if (data.GetCase(sx+1, sy)>0) {
 						fl_flip = true;
 					}
 				}
-				f.transform.localScale = new Vector3(scaleX, (i-sy)*scaleY, 1);
-				f.transform.position += new Vector3(0, i-sy-1, 0);
+				mc._height = Data.CASE_HEIGHT * (i-sy);
 			}
 			else {
-				f.transform.localScale = new Vector3(scaleX, scaleY, 1);
-				f.transform.rotation = Quaternion.Euler(0, 0, 90);
+				mc.GotoAndStop(2);
+				mc._width = Data.CASE_WIDTH;
 			}
 		}
 
 		// skin
+		mc.SetSkin(Mathf.Abs(id));
+		mc.sub.Stop();
 		if (fl_flip) {
-			f.GetComponentInChildren<SpriteRenderer>().flipX = true;
+			mc.FlipTile();
 		}
 
-		// téléporteur
-		if (id == -6) { // TODO Use Data.FIELD_TELEPORT
-			pos = groundMap.CellToWorld(new Vector3Int(td.cx, td.cy, 0)) + new Vector3(scaleX/2, 0, depth-1);
-			GameObject fa = Instantiate(pod, pos, Quaternion.identity);
-			fa.transform.localScale = new Vector3(scaleX, scaleY, 1);
-			mapThings.Add(fa);
+		// t�l�porteur
+		if ( id == Data.FIELD_TELEPORT ) {
+			td.podA		= _field_dm.Attach( "hammer_pod", Data.DP_INTERF );
+			td.podA._x	= td.startX;
+			td.podA._y	= td.startY;
+			td.podA.Stop();
 
-			pos = groundMap.CellToWorld(new Vector3Int(td.ecx, td.ecy, 0)) + new Vector3(scaleX/2, 0, depth-1);
-			GameObject fb = Instantiate(pod, pos, Quaternion.identity);
-			fb.transform.localScale = new Vector3(scaleX, scaleY, 1);
-			fb.transform.rotation = Quaternion.Euler(0, 0, 180);
-			mapThings.Add(fb);
+			td.podB		= _field_dm.Attach( "hammer_pod", Data.DP_INTERF );
+			td.podB._x	= td.endX;
+			td.podB._y	= td.endY;
+			td.podB._rotation = 180;
+			td.podB.Stop();
 
-			if (td.direction == 2) {  // TODO Use Data.HORIZONTAL
-				fa.transform.Translate(new Vector3(-scaleX/2, scaleY/2, 0), Space.World);
-				fb.transform.Translate(new Vector3(-scaleX/2, scaleY/2, 0), Space.World);
+			td.mc.Stop();
+
+			if (td.direction==Data.HORIZONTAL) {
+				td.podA._y -= Data.CASE_HEIGHT*0.5f;
+				td.podB._y -= Data.CASE_HEIGHT*0.5f;
 			}
 			else {
-				fa.transform.Rotate(new Vector3(0, 0, 90));
-				fb.transform.Rotate(new Vector3(0, 0, 90));
+				td.podA._rotation += 90;
+				td.podB._rotation += 90;
 			}
-			//world.teleporterList.Add(td); // TODO uncomment
+//			td.podB = world.game.fxMan.attachFx( td.endX,td.endY, "hammer_fx_shine" );
+//			td.podB.gotoAndStop("2");
+			world.teleporterList.Add(td);
 		}
 
 		// portal
-		if (id == -7) { // Use Data.FIELD_PORTAL
-			//world.portalList.Add(new PortalData(sx, sy)); // TODO uncomment
+		if ( id == Data.FIELD_PORTAL ) {
+			world.portalList.Add(new PortalData(mc, sx, sy) );
+		}
+
+	}
+
+
+	/*------------------------------------------------------------------------
+	ATTACHE LE BG DE BASE DU LEVEL
+	------------------------------------------------------------------------*/
+	void AttachBg() {
+		_bg.RemoveMovieClip();
+		_bg = _back_dm.Attach("hammer_bg", 0);
+		_bg._x = xOffset;
+		_bg.GotoAndStop(data.skinBg);
+		if ( world.fl_mirror ) {
+			_bg._xscale *= -1;
+			_bg._x += Data.GAME_WIDTH;
 		}
 	}
+
+
+	/*------------------------------------------------------------------------
+	ATTACHE UN BACKGROUND SP�CIAL EN REMPLACEMENT TEMPORAIRE DE L'ACTUEL
+	------------------------------------------------------------------------*/
+	public MovieClip AttachSpecialBg(int id, int? subId) {
+		_specialBg = depthMan.Attach("hammer_special_bg", Data.DP_SPECIAL_BG);
+		_specialBg.GotoAndStop(id+1);
+
+		if (subId!=null) {
+			_specialBg.sub.GotoAndStop(1);
+		}
+		_bg._visible = false;
+
+		return _specialBg;
+	}
+
+
+	/*------------------------------------------------------------------------
+	DETACHE LE FOND SP�CIAL EN COURS
+	------------------------------------------------------------------------*/
+	public void DetachSpecialBg() {
+		_specialBg.RemoveMovieClip();
+		_bg._visible = true;
+	}
+
+
+	/*------------------------------------------------------------------------
+	ATTACHE CE LEVEL
+	------------------------------------------------------------------------*/
+	public void Attach() {
+		int startX = 0;
+		int startY = 0;
+		bool tracing = false;
+
+		world.teleporterList = new List<TeleporterData>();
+		world.portalList = new List<PortalData>();
+
+		// Containers g�n�raux
+		_top		= depthMan.Empty(Data.DP_TOP_LAYER);
+		_field		= depthMan.Empty(Data.DP_FIELD_LAYER);
+		_back		= depthMan.Empty(Data.DP_BACK_LAYER);
+		_top_dm		= new DepthManager(_top);
+		_field_dm	= new DepthManager(_field);
+		_back_dm	= new DepthManager(_back);
+		_top._x		= xOffset;
+
+		// Container pour les dalles
+		_tiles = _back_dm.Empty(2);
+		_tiles._x = xOffset;
+		_tiles._visible = !fl_hideTiles;
+
+		_fieldMap = new List<List<bool?>>();
+		for( var i=0;i<Data.LEVEL_WIDTH;i++ ) {
+			_fieldMap[i] = new List<bool?>();
+		}
+
+		// Background
+		if (!fl_fast) {
+			AttachBg();
+		}
+
+
+		// Tiles
+		for ( var y=0 ; y<Data.LEVEL_HEIGHT ; y++ ) {
+			for ( var x=0 ; x<=Data.LEVEL_WIDTH ; x++ ) {
+
+				if ( !tracing ) {
+					if ( data.GetCase(x, y) > 0 ) {
+						startX = x;
+						startY = y;
+						tracing = true;
+					}
+				}
+
+				// Fin de trace
+				if (tracing) {
+					if ( data.GetCase(x, y) <= 0 | x == Data.LEVEL_WIDTH ) {
+						int wid;
+						wid = x-startX;
+//						if ( x==Data.LEVEL_WIDTH && data.map[x-1][y] > 0 ) {
+//							wid ++;
+//						}
+						// Sol ou colonne ?
+						if (wid==1 & IsWall(x-1, y)) {
+							var hei=0;
+							var vtx = x-1 ; // vertical tracer
+							var vty = y;
+							if ( !IsWall(vtx,vty-1) ) {
+								while (IsWall(vtx,vty)) {
+									hei++;
+									vty++;
+								}
+								if ( hei==1 ) {
+									AttachTile( startX, startY, 1, data.skinTiles );
+								}
+								else {
+									AttachColumn( startX, startY, hei, data.skinTiles );
+								}
+							}
+						}
+						else {
+							AttachTile(startX, startY, wid, data.skinTiles);
+						}
+						tracing = false;
+					}
+				}
+			}
+		}
+
+
+		// Fields
+		for ( var y=0 ; y<Data.LEVEL_HEIGHT ; y++ ) {
+			for ( var x=0 ; x<Data.LEVEL_WIDTH ; x++ ) {
+				if ( data.GetCase(x, y) < 0 & _fieldMap[x][y]==null ) {
+					AttachField(x,y);
+				}
+			}
+		}
+
+
+		// Colonnes de pierre
+		if ( !fl_fast ) {
+			_leftBorder = _top_dm.Attach("hammer_sides", 2);
+			_leftBorder._x = 5;
+			_rightBorder = _top_dm.Attach("hammer_sides", 2);
+			_rightBorder._x = Data.GAME_WIDTH+15;
+
+			_leftBorder._visible = !fl_hideBorders;
+			_rightBorder._visible = !fl_hideBorders;
+		}
+
+
+		if (_specialBg._name!=null) {
+			_back_dm.DestroyThis();
+		}
+
+		fl_attach = true;
+
+	}
+
+
+	/*------------------------------------------------------------------------
+	AFFICHE LES SPOTS DES BADS
+	------------------------------------------------------------------------*/
+	void AttachBadSpots() {
+		for (var i=0;i<data.badList.Length;i++) {
+			var sp = data.badList[i];
+			MovieClip mc = _sprite_top_dm.Attach("hammer_editor_bad", Data.DP_BADS);
+			mc._x = Entity.x_ctr(sp.x) + Data.CASE_WIDTH*0.5f;
+			mc._y = Entity.y_ctr(sp.y);
+			mc.GotoAndStop(sp.id+1);
+		}
+	}
+
+
+
+	/*------------------------------------------------------------------------
+	AFFICHE LA GRILLE DE DEBUG
+	------------------------------------------------------------------------*/
+	public void AttachGrid(int flag, bool over) {
+		var depth = Data.DP_SPECIAL_BG;
+		if (over) {
+			depth = Data.DP_INTERF;
+		}
+
+		for (var cx=0;cx<Data.LEVEL_WIDTH;cx++) {
+			for (var cy=0;cy<Data.LEVEL_HEIGHT;cy++) {
+				MovieClip mc = _top_dm.Attach("debugGrid",depth);
+				mc._x = cx*Data.CASE_WIDTH+xOffset;
+				mc._y = cy*Data.CASE_HEIGHT;
+				if ((world.manager.current.world.flagMap[cx][cy] & flag) == 0) {
+					mc.GotoAndStop(1);
+				}
+				else {
+					mc.GotoAndStop(2);
+				}
+				gridList.Add(mc);
+			}
+		}
+	}
+
+
+	/*------------------------------------------------------------------------
+	D�TACHE LA GRILLE DE DEBUG
+	------------------------------------------------------------------------*/
+	public void DetachGrid() {
+		for (var i=0;i<gridList.Count;i++) {
+			gridList[i].RemoveMovieClip();
+		}
+		gridList = new List<MovieClip>();
+	}
+
 
 	/*------------------------------------------------------------------------
 	AFFICHE UN SPRITE STATIQUE DE D�COR
 	------------------------------------------------------------------------*/
-	public GameObject AttachSprite(string spriteName, int x, int y, bool fl_back) {
-		return null;
-		// TODO Instantiate GameObjetcs here
+	public MovieClip AttachSprite(string link, float x, float y, bool fl_back) {
+		var dm = fl_back?_sprite_back_dm:_sprite_top_dm;
+		var mc = dm.Attach(link, 10);
+		mc._x = x;
+		mc._y = y;
+		mcList.Add(mc);
+
+		return mc;
 	}
 
 
 	/*------------------------------------------------------------------------
-	AFFICHE LES SPOTS DES BADS // TODO Instantiate the bad prefabs
+	D�TACHEMENT
 	------------------------------------------------------------------------*/
-	void AttachBadSpots() {
-		foreach (BadData bad in levels[currentId].badList) {
-			Vector3 pos = groundMap.CellToWorld(new Vector3Int(bad.x, bad.y, 0));
-			mapThings.Add(Instantiate(bads[bad.id], pos, Quaternion.identity));
-		}
-	}
-
 	public void Detach() {
-		groundMap.ClearAllTiles();
-		ground_endMap.ClearAllTiles();
-		backgroundMap.ClearAllTiles();
-		foreach (GameObject thing in mapThings) {
-			Destroy(thing);
+		DetachLevel();
+		DetachSprites();
+		fl_attach = false;
+	}
+
+
+	void DetachLevel() {
+		for (var i=0;i<tileList.Count;i++) {
+			tileList[i].RemoveMovieClip();
 		}
-		mapThings = new List<GameObject>();
+		tileList = new List<TileMC>();
+
+		DetachGrid();
+
+		_top.RemoveMovieClip();
+		_back.RemoveMovieClip();
+		_field.RemoveMovieClip();
+	}
+
+
+	void DetachSprites() {
+		for (var i=0;i<mcList.Count;i++) {
+			mcList[i].RemoveMovieClip();
+		}
+		mcList = new List<MovieClip>();
+		_sprite_back_dm.DestroyThis();
+		_sprite_top_dm.DestroyThis();
+	}
+
+
+
+	/*------------------------------------------------------------------------
+	D�PLACE LE NIVEAU � UN POINT DONN�
+	------------------------------------------------------------------------*/
+	public void MoveTo(int x, int y) {
+		viewX		= x;
+		viewY		= y;
+		_top._x		= x - xOffset;
+		_top._y		= y;
+		_back._x	= _top._x;
+		_back._y	= _top._y;
+		_field._x	= _top._x+xOffset;
+		_field._y	= _top._y;
+		_sprite_back._x	= _top._x;
+		_sprite_back._y	= _top._y;
+		_sprite_top._x	= _top._x;
+		_sprite_top._y	= _top._y;
+	}
+
+
+	/*------------------------------------------------------------------------
+	APPLIQUE UN FILTRE � TOUT LE NIVEAU
+	------------------------------------------------------------------------*/
+	void SetFilter(MovieClip.Filter f) {
+		_top.filter = f;
+		_back.filter = f;
+		_field.filter = f;
+		_sprite_back.filter = f;
+		_sprite_top.filter = f;
+	}
+
+
+	/*------------------------------------------------------------------------
+	REPLACE LA VUE EN POSITION
+	------------------------------------------------------------------------*/
+	void MoveToPreviousPos() {
+		MoveTo(viewX, viewY);
 	}
 
 	/*------------------------------------------------------------------------
-	VUE D'UN NIVEAU DU SET INTERNE
+	D�TRUIT LA VUE
 	------------------------------------------------------------------------*/
-	public void Display(int id) {
-		this.data = world.worldmap[id];
-		currentId = id;
-		if (this.data==null) {
-			//GameManager.Warning("null view");
-		}
-		Attach();
-	}
-
-	/*------------------------------------------------------------------------
-	VUE DU NIVEAU EN COURS DANS LE SET
-	------------------------------------------------------------------------*/
-	public void displayCurrent() {
-		Display(currentId);
-	}
-
 	public void DestroyThis() {
 		Detach();
 	}
-
 }
 
 

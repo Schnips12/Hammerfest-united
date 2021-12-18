@@ -16,7 +16,7 @@ public class Classic : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static Classic Attach(Modes.GameMode g, float x, float y) {
+	public static Classic Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_classic";
 		Classic mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
 		mc.InitBomb(g, x, y);

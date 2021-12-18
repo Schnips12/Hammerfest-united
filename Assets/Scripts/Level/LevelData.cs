@@ -52,11 +52,11 @@ public class LevelData
 		}
 	}
 
-	public int GetCase(int x, int y) {
+	public int? GetCase(int x, int y) {
 		if(0<=x & x<mapWidth() & 0<=y & y<mapHeight()) {
 			return map[x].column[mapHeight()-y-1];
 		} else {
-			return 0;
+			return null;
 		}
 	}
 

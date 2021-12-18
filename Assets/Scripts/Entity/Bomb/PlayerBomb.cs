@@ -7,7 +7,7 @@ public class PlayerBomb : Bomb
     static float UPGRADE_FACTOR	= 1.5f;
 	static int MAX_UPGRADES	= 1;
 
-	Entities.Player owner;
+	Player owner;
 	int upgrades;
 	protected bool fl_unstable;
 
@@ -23,7 +23,7 @@ public class PlayerBomb : Bomb
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	protected override void Init(Modes.GameMode g) {
+	protected override void Init(GameMode g) {
 		base.Init(g);
 		Register(Data.PLAYER_BOMB);
 	}
@@ -32,7 +32,7 @@ public class PlayerBomb : Bomb
 	/*------------------------------------------------------------------------
 	D�FINI LE PLAYER PARENT DE LA BOMBE
 	------------------------------------------------------------------------*/
-	void SetOwner(Entity.Player p) {
+	public void SetOwner(Player p) {
 		owner = p;
 	}
 
@@ -56,17 +56,17 @@ public class PlayerBomb : Bomb
 	protected override void OnHitGround(float h) {
 		base.OnHitGround(h) ;
 		if (fl_unstable & fl_bounce) {
-			onExplode();
+			OnExplode();
 		}
 	}
 
 	/*------------------------------------------------------------------------
 	EVENT: BOMBE KICK�E
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Entity.Player p) {
+	protected override void OnKick(Player p) {
 		if (upgrades<MAX_UPGRADES) {
 			if (p.pid!=owner.pid) {
-				upgradeBomb(p);
+				UpgradeBomb(p);
 			}
 		}
 
@@ -80,7 +80,7 @@ public class PlayerBomb : Bomb
 	/*------------------------------------------------------------------------
 	AUGMENTE LA PUISSANCE D'UNE BOMBE
 	------------------------------------------------------------------------*/
-	void UpgradeBomb(Entity.Player p) {
+	void UpgradeBomb(Player p) {
 		game.fxMan.AttachFx(x,y,"hammer_fx_pop");
 		radius*=UPGRADE_FACTOR;
 		power*=UPGRADE_FACTOR;
@@ -99,7 +99,7 @@ public class PlayerBomb : Bomb
 	EVENT: DESTRUCTION
 	------------------------------------------------------------------------*/
 	protected override void OnLifeTimer() {
-		Entity.Player p = parent;
+		Player p = parent;
 //		if ( p!=null && world.currentId<100 ) { // patch anti score infini
 //			p.getScore( null,10 );
 //		}
@@ -110,7 +110,7 @@ public class PlayerBomb : Bomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		base.OnExplode();
 
 		if (upgrades>0) {
@@ -136,16 +136,16 @@ public class PlayerBomb : Bomb
 
 		if ( owner!=null ) {
 			if ( owner.specialMan.actives[14] ) { // champi bleu
-				entity.item.ScoreItem.attach(game, x,y, 47,0);
+				ScoreItem.attach(game, x,y, 47,0);
 			}
 			if ( owner.specialMan.actives[15] ) { // champi rouge
-				entity.item.ScoreItem.attach(game, x,y, 48,0);
+				ScoreItem.attach(game, x,y, 48,0);
 			}
 			if ( owner.specialMan.actives[16] ) { // champi vert
-				entity.item.ScoreItem.attach(game, x,y, 49,0);
+				ScoreItem.attach(game, x,y, 49,0);
 			}
 			if ( owner.specialMan.actives[17] ) { // champi or
-				entity.item.ScoreItem.attach(game, x,y, 50,0);
+				ScoreItem.attach(game, x,y, 50,0);
 			}
 
 		}

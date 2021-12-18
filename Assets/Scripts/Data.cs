@@ -15,6 +15,14 @@ public class Data : MonoBehaviour
         }
     }
 
+	public static Color ToColor(int HexVal)
+    {
+        byte R = (byte)((HexVal >> 16) & 0xFF);
+        byte G = (byte)((HexVal >> 8) & 0xFF);
+        byte B = (byte)((HexVal) & 0xFF);
+        return new Color(R, G, B, 255);
+    }
+
 
     public static GameManager manager = null;
 
@@ -99,7 +107,7 @@ public class Data : MonoBehaviour
 	public static int OUT_WALL		= 3;
 	public static int HORIZONTAL	= 1;
 	public static int VERTICAL		= 2;
-	public static float SCROLL_SPEED			= 0.04f; //0.05 ; // incr�ment cosinus
+	public static float SCROLL_SPEED		= 0.04f; //0.05 ; // incr�ment cosinus
 	public static int FADE_SPEED			= 8;
 	public static int FIELD_TELEPORT		= -6; // id dans la map du level
 	public static int FIELD_PORTAL			= -7;
@@ -132,9 +140,9 @@ public class Data : MonoBehaviour
 
 	// *** ANIMATIONS
 	public struct animParam {
-		public int id;
+		public int? id;
 		public bool loop;
-		public animParam(int id, bool loop) {
+		public animParam(int? id, bool loop) {
 			this.id = id;
 			this.loop = loop;
 		}
@@ -503,7 +511,7 @@ public class Data : MonoBehaviour
 	public static List<List<ItemFamilySet>> SCORE_ITEM_FAMILIES;
 	public static List<int> ITEM_VALUES;
 	public static List<int> FAMILY_CACHE;
-	public static List<Level.PortalLink> LINKS;
+	public static List<PortalLink> LINKS;
     public struct LevelTag {
         public string name;
         public int did;
@@ -724,8 +732,8 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	LECTURE DU XML DES PORTALS
 	------------------------------------------------------------------------*/
-	static List<Level.PortalLink> Xml_readPortalLinks() {
-		List<Level.PortalLink> list = new List<Level.PortalLink>();
+	static List<PortalLink> Xml_readPortalLinks() {
+		List<PortalLink> list = new List<PortalLink>();
 		string raw = manager.root.ReadFile("xml_portalLinks");
 
 		XDocument doc = XDocument.Parse(raw);
@@ -776,7 +784,7 @@ public class Data : MonoBehaviour
             att.Replace(" ", "");
             string[] to = att.Split(',');
 
-			Level.PortalLink link	= new Level.PortalLink();
+			PortalLink link	= new PortalLink();
 			LevelTag linfo = GetLevelFromTag(from[0]);
 			link.from_did	= linfo.did;
 			link.from_lid	= linfo.lid;
@@ -792,7 +800,7 @@ public class Data : MonoBehaviour
 
 			// 2-way portal
 			if (elem.Name == "twoway") {
-				Level.PortalLink backLink = new Level.PortalLink();
+				PortalLink backLink = new PortalLink();
 				backLink.from_did	= link.to_did;
 				backLink.from_lid	= link.to_lid;
 				backLink.from_pid	= link.to_pid;
@@ -987,11 +995,11 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE LE LINK CORRESPONDANT � UN PORTAL DONN�
 	------------------------------------------------------------------------*/
-	public static Level.PortalLink GetLink(int did, int lid, int pid) {
-        Level.PortalLink link = null;
+	public static PortalLink GetLink(int did, int lid, int pid) {
+        PortalLink link = null;
         int i=0;
 		while (i < Data.LINKS.Count & link == null) {
-			Level.PortalLink l = Data.LINKS[i];
+			PortalLink l = Data.LINKS[i];
 			if (l.from_did == did & l.from_lid == lid & l.from_pid == pid ) {
 				link = l;
 			}

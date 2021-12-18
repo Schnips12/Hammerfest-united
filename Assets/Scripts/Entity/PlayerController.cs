@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController
 {
 	Player player;
 	GameMode game;
@@ -27,7 +27,7 @@ public class PlayerController : MonoBehaviour
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	PlayerController(Player p) {
+	public PlayerController(Player p) {
 		lastKeys		= new List<int>();
 		keyLocks		= new List<bool>();
 		alts			= new List<int>();
@@ -35,29 +35,9 @@ public class PlayerController : MonoBehaviour
 		game			= player.game;
 		fl_upKick		= GameManager.CONFIG.HasFamily(101);
 		fl_powerControl	= false;
-		SetKeys(
-			Key.UP,
-			Key.DOWN,
-			Key.LEFT,
-			Key.RIGHT,
-			Key.SPACE
-		);
 
-		SetAlt(attack, Key.CONTROL);
 		walkTimer		= 0;
 		waterJump		= 0;
-	}
-
-
-	/*------------------------------------------------------------------------
-	D�FINI LES CONTR�LES CLAVIER
-	------------------------------------------------------------------------*/
-	void SetKeys(int j, int d, int l, int r, int a) {
-		jump = j;
-		down = d;
-		left = l;
-		right = r;
-		attack = a;
 	}
 
 

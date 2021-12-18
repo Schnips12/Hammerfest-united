@@ -3,12 +3,12 @@ using System.Collections.Generic;
 public class Trigger : Entity
 {
 
-	bool fl_largeTrigger;
+	protected bool fl_largeTrigger;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Trigger() : base() {
+	public Trigger(MovieClip mc) : base(mc) {
 		fl_largeTrigger = false;
 	}
 
@@ -71,7 +71,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	T�L�PORTE L'ENTIT� � UN AUTRE POINT
 	------------------------------------------------------------------------*/
-	protected void MoveTo(float x, float y) {
+	public void MoveTo(float x, float y) {
 		TRem(cx, cy);
 		this.x=x;
 		this.y=y-1;

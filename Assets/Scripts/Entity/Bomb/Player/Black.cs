@@ -17,9 +17,9 @@ public class Black : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static Black Attach(Modes.GameMode g, float x, float y) {
+	public static Black Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_black" ;
-		Black mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
+		Black mc = g.depthMan.Attach(linkage,Data.DP_BOMBS);
 		mc.InitBomb(g, x, y) ;
 		return mc ;
 	}

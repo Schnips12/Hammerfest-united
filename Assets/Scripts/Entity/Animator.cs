@@ -2,12 +2,12 @@ using UnityEngine;
 
 public class HAnimator : Trigger
 {
-    protected GameObject sub;
+    protected MovieClip sub;
 	Animator animator;
-	public int animId;
+	public int? animId;
 
 	float frame;
-	protected float animFactor;
+	public float animFactor;
 	float blinkTimer;
 
 	protected int blinkColor;
@@ -29,7 +29,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public HAnimator() : base() {
+	public HAnimator(MovieClip mc) : base(mc) {
 		frame = 0;
 		fadeStep = 0;
 		animFactor = 1.0f;
@@ -65,7 +65,7 @@ public class HAnimator : Trigger
 		fl_anim = true;
 		animator.SetBool("stop", true);
 	}
-	void DisableAnimator() {
+	protected void DisableAnimator() {
 		fl_anim = false;
 		animator.SetBool("stop", false);
 	}
@@ -74,7 +74,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	ACTIVE/D�SACTIVE LE CLIGNOTEMENT
 	------------------------------------------------------------------------*/
-	void Blink(float duration) {
+	public void Blink(float duration) {
 		if (!fl_blink) {
 			return;
 		}
@@ -107,7 +107,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	RED�FINI LE PATH VERS L'ANIMATION
 	------------------------------------------------------------------------*/
-	void SetSub(GameObject mc) {
+	void SetSub(MovieClip mc) {
 		sub = mc;
 	}
 
@@ -158,21 +158,12 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	RELANCE L'ANIMATION EN COURS
 	------------------------------------------------------------------------*/
-	void ReplayAnim() {
+	public void ReplayAnim() {
 		var id = animId;
 		var fid = ( (id==1)?2:1 );
 		PlayAnim(new Data.animParam(fid, fl_loop));
 		PlayAnim(new Data.animParam(id, fl_loop));
 	}
-
-//	/*------------------------------------------------------------------------
-//	LANCE UN FADE AU BLANC
-//	------------------------------------------------------------------------*/
-//	function fade(duration) {
-//		fadeStep = duration * Timer.fps / 100;
-//		// 20   1
-//		//      2
-//	}
 
 
 	/*------------------------------------------------------------------------
@@ -188,9 +179,9 @@ public class HAnimator : Trigger
 			}
 			if (fl_blinking) {
 				blinkTimer-=Time.fixedDeltaTime;
-				if ( blinkTimer<=0 ) {
+				if (blinkTimer<=0) {
 					if ( fl_blinked ) {
-						if ( fl_alphaBlink ) {
+						if (fl_alphaBlink) {
 							alpha = 100;
 						}
 						else {
@@ -199,7 +190,7 @@ public class HAnimator : Trigger
 						fl_blinked = false;
 					}
 					else {
-						if ( fl_alphaBlink ) {
+						if (fl_alphaBlink) {
 							alpha = blinkAlpha;
 						}
 						else {
@@ -217,25 +208,25 @@ public class HAnimator : Trigger
 
 
 		// Lecture du subMovie
-/* 		if (frame>=0) {
+		if (frame>=0) {
 			var fl_break=false;
-			frame += animFactor*Timer.tmod;
-			while (!fl_break && frame>=1) {
-				if (sub._currentframe==sub._totalframes ) {
+			frame += animFactor*Time.fixedDeltaTime;
+			while (!fl_break & frame>=1) {
+				if (sub.CurrentFrame()==sub.TotalFrames() ) {
 					if ( fl_loop ) {
-						sub.gotoAndStop("1");
+						sub.GotoAndStop(1);
 					}
 					else {
 						frame = -1;
-						onEndAnim(animId);
+						OnEndAnim(animId??-1);
 						fl_break=true;
 					}
 				}
 				if (!fl_break) {
-					sub.nextFrame();
+					sub.NextFrame();
 					frame--;
 				}
 			}
-		} */
+		}
 	}
 }

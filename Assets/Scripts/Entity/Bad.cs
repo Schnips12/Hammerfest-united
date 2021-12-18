@@ -1,43 +1,43 @@
 using UnityEngine;
 
-public class Bad : Mover
+public abstract class Bad : Mover
 {
-	Player player;
-	bool fl_playerClose;
+	protected Player player;
+	protected bool fl_playerClose;
 	int closeDistance;
 
 	float freezeTimer;
 	float freezeTotal;
-	bool fl_freeze;
+	protected bool fl_freeze;
 
 	bool fl_ninFriend;
 	bool fl_ninFoe;
 
 	float knockTimer;
-	bool fl_knock;
+	protected bool fl_knock;
 	bool fl_showIA; // shows an icon overhead when player is close
 
 	float deathTimer;
 
 	bool fl_trap; // false if immunity against traps (spears)
-	int comboId;
-	float yTrigger;
-	int anger;
-	float angerFactor;
-	float speedFactor;
+	int? comboId;
+	float? yTrigger;
+	protected int anger;
+	protected float angerFactor;
+	protected float speedFactor;
 
-	float chaseFactor;
+	protected float chaseFactor;
 	int maxAnger;
 
-	float realRadius; // if not null, will be used as additionnal check for "hitTest"
+	float? realRadius; // if not null, will be used as additionnal check for "hitTest"
 
-	GameObject iceMc;
+	MovieClip iceMc;
 
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Bad() : base() {
+	protected Bad(MovieClip mc) : base(mc) {
 		comboId = null;
 
 		freezeTimer	= 0;
@@ -55,7 +55,6 @@ public class Bad : Mover
 		fl_largeTrigger		= true;
 		closeDistance		= Data.IA_CLOSE_DISTANCE;
 
-
 		realRadius	= Data.CASE_WIDTH;
 
 		maxAnger	= Data.MAX_ANGER;
@@ -70,7 +69,7 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	void Init(GameModes g) {
+	protected override void Init(GameMode g) {
 		base.Init(g);
 		Register(Data.BAD);
 		Register(Data.BAD_CLEAR);
@@ -80,98 +79,95 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	INITIALISATION SP�CIALE DES BADS
 	------------------------------------------------------------------------*/
-	void InitBad(g:mode.GameMode,x:float,y:float):void {
-		init(g);
-		moveTo(x+Data.CASE_WIDTH*0.5, y+Data.CASE_HEIGHT) ; // colle les bads au sol
-		endUpdate();
+	protected void InitBad(GameMode g,float x, float y) {
+		Init(g);
+		MoveTo(x+Data.CASE_WIDTH*0.5f, y+Data.CASE_HEIGHT) ; // colle les bads au sol
+		EndUpdate();
 	}
 
 
 	/*------------------------------------------------------------------------
 	ANIM DE MORT
 	------------------------------------------------------------------------*/
-	function killHit(dx) {
-		if ( fl_freeze ) {
-			game.fxMan.inGameParticles( Data.PARTICLE_ICE, x,y, Std.random(3)+2 );
-			game.fxMan.attachExplosion( x,y-Data.CASE_HEIGHT*0.5, Data.CASE_WIDTH*2 );
-			melt();
+	public override void KillHit(float? dx) {
+		if (fl_freeze) {
+			game.fxMan.InGameParticles( Data.PARTICLE_ICE, x, y, Random.Range(0, 3)+2 );
+			game.fxMan.AttachExplosion( x,y-Data.CASE_HEIGHT*0.5f, Data.CASE_WIDTH*2 );
+			Melt();
 		}
 		if ( fl_knock) {
-			wakeUp();
+			WakeUp();
 		}
-		if (dx==null) {
-			dx = Std.random(200)/10 * (Std.random(2)*2-1);
-		}
-		playAnim(Data.ANIM_BAD_DIE);
-		super.killHit(dx);
+		PlayAnim(Data.ANIM_BAD_DIE);
+		base.KillHit(dx?? Random.Range(0, 200)/10 * (Random.Range(0, 2)*2-1));
 	}
 
 
 	/*------------------------------------------------------------------------
 	MORT SANS CONDITION, NON-CONTRABLE
 	------------------------------------------------------------------------*/
-	function forceKill(dx) {
-		killHit(dx);
+	public void ForceKill(float? dx) {
+		KillHit(dx);
 	}
 
 
 	/*------------------------------------------------------------------------
 	MORT SUR PLACE
 	------------------------------------------------------------------------*/
-	function burn() {
-		var fx = game.fxMan.attachFx( x,y, "hammer_fx_burning" );
-		dropReward() ;
-		onKill();
-		destroy();
+	void Burn() {
+		var fx = game.fxMan.AttachFx(x, y, "hammer_fx_burning" );
+		DropReward() ;
+		OnKill();
+		DestroyThis();
 	}
 
 
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LE MONSTRE EST EN �TAT DE FONCTIONNER
 	------------------------------------------------------------------------*/
-	function isHealthy() {
-		return !fl_kill && !fl_freeze && !fl_knock;
+	protected bool IsHealthy() {
+		return !fl_kill & !fl_freeze & !fl_knock;
 	}
 
 
 	/*------------------------------------------------------------------------
 	RENCONTRE UNE AUTRE ENTIT�
 	------------------------------------------------------------------------*/
-	function hit(e:Entity) {
+	public override void Hit(IEntity e) {
 		// Joueur
-		if ( (e.types & Data.PLAYER) > 0 ) {
-			var et:entity.Player = downcast(e);
+		if ((e.types & Data.PLAYER) > 0) {
+			Player et = (Player) e;
 
 			// additionnal (optionnal) check with distance
 			var fl_hit = true;
-			if ( realRadius!=null ) {
-				if (  distance(et.x,et.y) > realRadius  ) {
+			if (realRadius!=null) {
+				if (Distance(et.x,et.y) > realRadius) {
 					fl_hit = false;
 				}
 			}
-			if ( fl_hit ){
-				if ( et.specialMan.actives[86] ) {
+			if (fl_hit){
+				if (et.specialMan.actives[86]) {
 					// bonbon fantome
-					game.fxMan.attachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_shine");
-					et.getScore(this, 666);
-					this.destroy();
+					game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_shine");
+					et.GetScore(this, 666);
+					this.DestroyThis();
 				}
 				else {
-					if ( isHealthy() ) {
-						if ( et.specialMan.actives[114] && et.oldY<=y-Data.CASE_HEIGHT*0.5 && et.dy>0 ) {
-							et.dy = -Data.PLAYER_AIR_JUMP*2.5;
-							freeze(Data.FREEZE_DURATION);
-							setCombo(null);
-							game.fxMan.attachExplodeZone(x,y-5,30);
-							game.fxMan.inGameParticles(Data.PARTICLE_CLASSIC_BOMB, x,y-5, 3+Std.random(3));
+					if (IsHealthy()) {
+						if (et.specialMan.actives[114] & et.oldY<=y-Data.CASE_HEIGHT*0.5 & et.dy>0) {
+							et.dy = -Data.PLAYER_AIR_JUMP*2.5f;
+							Freeze(Data.FREEZE_DURATION);
+							SetCombo(null);
+							game.fxMan.AttachExplodeZone(x,y-5,30);
+							game.fxMan.InGameParticles(Data.PARTICLE_CLASSIC_BOMB, x,y-5, 3+Random.Range(0, 3));
 						}
 						else {
 							if ( !et.fl_shield ) {
 								if (et.x<x) {
-									et.killHit(-1);
+									et.KillHit(-1);
 								}
 								else {
-									et.killHit(1);
+									et.KillHit(1);
 								}
 							}
 						}
@@ -181,19 +177,19 @@ public class Bad : Mover
 		}
 
 		// Bads
-		if ( (e.types & Data.BAD) > 0 ) {
+		if ((e.types & Data.BAD) > 0) {
 			// Gel� qui shoot un autre monstre
-			var et:entity.Bad = downcast(e);
-			if ( fl_freeze && et.fl_freeze==false ) {
-				var spd = evaluateSpeed();
+			Bad et = (Bad) e;
+			if (fl_freeze & et.fl_freeze==false) {
+				var spd = EvaluateSpeed();
 				if ( spd>=Data.ICE_HIT_MIN_SPEED ) {
-					et.setCombo(comboId);
-					et.killHit(dx);
+					et.SetCombo(comboId);
+					et.KillHit(dx);
 				}
 				else {
 					if ( spd>=Data.ICE_KNOCK_MIN_SPEED ) {
-						et.setCombo(comboId);
-						et.knock(Data.KNOCK_DURATION);
+						et.SetCombo(comboId);
+						et.Knock(Data.KNOCK_DURATION);
 					}
 				}
 
@@ -205,7 +201,7 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	D�FINI L'ID DE COMBO
 	------------------------------------------------------------------------*/
-	function setCombo(id:int) {
+	void SetCombo(int? id) {
 		if (!fl_kill) {
 			comboId = id;
 		}
@@ -215,12 +211,12 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	JOUE UNE ANIM
 	------------------------------------------------------------------------*/
-	function playAnim(o) {
-		if ( o.id==Data.ANIM_BAD_WALK.id && anger>0 ) {
-			super.playAnim(Data.ANIM_BAD_ANGER);
+	protected override void PlayAnim(Data.animParam o) {
+		if (o.id==Data.ANIM_BAD_WALK.id & anger>0) {
+			base.PlayAnim(Data.ANIM_BAD_ANGER);
 		}
 		else {
-			super.playAnim(o);
+			base.PlayAnim(o);
 		}
 	}
 
@@ -228,18 +224,18 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	CALCULE LE FACTEUR VITESSE
 	------------------------------------------------------------------------*/
-	function calcSpeed() {
-		speedFactor = 1.0 + angerFactor*anger;
-		if ( game.globalActives[69] ) speedFactor *= 0.6 ; // tortue
-		if ( game.globalActives[80] ) speedFactor *= 0.3 ; // escargot
+	void CalcSpeed() {
+		speedFactor = 1.0f + angerFactor*anger;
+		if (game.globalActives[69]) speedFactor *= 0.6f; // tortue
+		if (game.globalActives[80]) speedFactor *= 0.3f; // escargot
 	}
 
 
 	/*------------------------------------------------------------------------
 	MODIFIE LE FACTEUR SPEED
 	------------------------------------------------------------------------*/
-	function updateSpeed() {
-		calcSpeed();
+	public virtual void UpdateSpeed() {
+		CalcSpeed();
 		// extended classes will add call for dx/dy update
 	}
 
@@ -247,27 +243,27 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	G�N�RE UNE R�COMPENSE SUR LE MONSTRE
 	------------------------------------------------------------------------*/
-	function dropReward() {
-		var itY;
+	void DropReward() {
+		float itY;
 		// Y de spawn de l'item
-		if ( world.inBound(cx,cy) ) {
+		if (world.InBound(cx, cy)) {
 			itY = y;
 		}
 		else {
 			itY = -30;
 		}
 
-		if ( comboId!=null ) {
+		if (comboId!=null) {
 			// Crystal normal
-			var n = game.countCombo(comboId) - 1;
-			if ( n+1 > game.statsMan.read( Data.STAT_MAX_COMBO ) ) {
-				game.statsMan.write( Data.STAT_MAX_COMBO, n+1 );
+			var n = game.CountCombo(comboId??0) - 1;
+			if ( n+1 > game.statsMan.Read(Data.STAT_MAX_COMBO)) {
+				game.statsMan.Write(Data.STAT_MAX_COMBO, n+1);
 			}
-			ScoreItem.attach(game, x,itY, 0,n);
+			ScoreItem.Attach(game, x, itY, 0,n);
 		}
 		else {
 			// Diamant
-			ScoreItem.attach(game, x,itY, Data.DIAMANT,null);
+			ScoreItem.Attach(game, x, itY, Data.DIAMANT,null);
 		}
 	}
 
@@ -275,28 +271,28 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	CALCULE LA VITESSE APPROXIMATIVE
 	------------------------------------------------------------------------*/
-	function evaluateSpeed() {
-		return Math.sqrt( Math.pow(dx,2)+Math.pow(dy,2) );
+	float EvaluateSpeed() {
+		return Mathf.Sqrt( Mathf.Pow(dx,2)+Mathf.Pow(dy,2) );
 	}
 
 
 	/*------------------------------------------------------------------------
 	DESTRUCTION
 	------------------------------------------------------------------------*/
-	function destroy() {
-		super.destroy();
+	public override void DestroyThis() {
+		base.DestroyThis();
 //		if ( (types&Data.BAD_CLEAR)>0 ) {
 //			game.checkLevelClear();
 //		}
-		iceMc.removeMovieClip();
+		iceMc.RemoveMovieClip();
 	}
 
 
 	/*------------------------------------------------------------------------
 	AUTORISE L'APPLICATION DU PATCH COLLISION AU SOL (ESCALIERS)
 	------------------------------------------------------------------------*/
-	function needsPatch() {
-		return fl_freeze || fl_knock;
+	bool NeedsPatch() {
+		return fl_freeze | fl_knock;
 	}
 
 
@@ -306,36 +302,36 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	EVENT: LIGNE DU BAS
 	------------------------------------------------------------------------*/
-	function onDeathLine() {
+	protected override void OnDeathLine() {
 		var mc = game.depthMan.attach("hammer_fx_death", Data.FX);
 		mc._x = x;
-		mc._y = Data.GAME_HEIGHT*0.5;
-		game.shake(10,3);
+		mc._y = Data.GAME_HEIGHT*0.5f;
+		game.Shake(10, 3);
 		game.soundMan.playSound("sound_bad_death", Data.CHAN_BAD);
 		deathTimer = 0;
 
-		super.onDeathLine();
+		base.OnDeathLine();
 
 		if ( !fl_kill ) {
 			onKill();
 		}
-		dropReward();
-		destroy();
+		DropReward();
+		DestroyThis();
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: FIN DE FREEZE
 	------------------------------------------------------------------------*/
-	function onMelt() {
-		iceMc.removeMovieClip();
+	protected virtual void OnMelt() {
+		iceMc.RemoveMovieClip();
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: FIN DE KNOCK
 	------------------------------------------------------------------------*/
-	function onWakeUp() {
+	protected virtual void OnWakeUp() {
 		// do nothing
 	}
 
@@ -343,10 +339,10 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	EVENT: FREEZE
 	------------------------------------------------------------------------*/
-	function onFreeze() {
-		playAnim(Data.ANIM_BAD_FREEZE);
+	protected virtual void OnFreeze() {
+		PlayAnim(Data.ANIM_BAD_FREEZE);
 		if ( iceMc._name==null ) {
-			iceMc = game.depthMan.attach("hammer_bad_ice", Data.DP_BADS);
+			iceMc = game.depthMan.Attach("hammer_bad_ice", Data.DP_BADS);
 		}
 	}
 
@@ -354,8 +350,8 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	EVENT: ASSOM�
 	------------------------------------------------------------------------*/
-	function onKnock() {
-		playAnim(Data.ANIM_BAD_KNOCK);
+	protected virtual void OnKnock() {
+		PlayAnim(Data.ANIM_BAD_KNOCK);
 	}
 
 
@@ -370,56 +366,56 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	EVENT: MORT
 	------------------------------------------------------------------------*/
-	function onKill() {
-		super.onKill();
+	protected override void OnKill() {
+		base.OnKill();
 
 		// friend is killed !
 		if ( fl_ninFriend ) {
-			var plist = game.getPlayerList();
-			for (var i=0;i<plist.length;i++) {
+			var plist = game.GetPlayerList();
+			for (var i=0;i<plist.Count;i++) {
 				var p = plist[i];
 				if ( !p.fl_kill ) {
-					p.unshield();
-					p.killHit( Std.random(20) );
-					game.fxMan.detachLastAlert();
-					game.fxMan.attachAlert(Lang.get(44));
+					p.Unshield();
+					p.KillHit( Random.Range(0, 20) );
+					game.fxMan.DetachLastAlert();
+					game.fxMan.AttachAlert(Lang.Get(44));
 				}
 			}
 		}
 
 		// foe killed
-		if ( fl_ninFoe ) {
-			var blist = game.getBadClearList();
+		if (fl_ninFoe) {
+			var blist = game.GetBadClearList();
 			var n=1;
-			for (var i=0;i<blist.length;i++) {
+			for (var i=0;i<blist.Count;i++) {
 				var b = blist[i];
 				b.fl_ninFriend = false;
 				if ( b.uniqId!=uniqId ) {
-					ScoreItem.attach(game, b.x,b.y, 0, n);
-					b.destroy();
+					ScoreItem.Attach(game, b.x,b.y, 0, n);
+					b.DestroyThis();
 					n++;
 				}
-				b.unstick();
+				b.Unstick();
 			}
 
-			ScoreItem.attach(game, Data.GAME_WIDTH*0.5,-20, 236, null);
-			game.fxMan.detachLastAlert();
-			game.fxMan.attachAlert(Lang.get(45));
+			ScoreItem.Attach(game, Data.GAME_WIDTH*0.5,-20, 236, null);
+			game.fxMan.DetachLastAlert();
+			game.fxMan.AttachAlert(Lang.Get(45));
 		}
 
 		deathTimer = Data.SECOND*5;
-		game.onKillBad(this);
+		game.OnKillBad(this);
 	}
 
 	/*------------------------------------------------------------------------
 	EVENT: TOUCHE LE SOL
 	------------------------------------------------------------------------*/
-	function onHitGround(h) {
-		super.onHitGround(h);
+	protected override void OnHitGround(float h) {
+		base.OnHitGround(h);
 		if ( fl_freeze ) {
-			game.fxMan.inGameParticles( Data.PARTICLE_ICE_BAD, x,y, Std.random(3)+2 );
+			game.fxMan.InGameParticles( Data.PARTICLE_ICE_BAD, x,y, Random.Range(0, 3)+2 );
 			if ( h >= Data.DUST_FALL_HEIGHT ) {
-				game.fxMan.dust(cx,cy+1);
+				game.fxMan.Dust(cx, cy+1);
 			}
 		}
 	}
@@ -430,11 +426,11 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	G�LE CE MONSTRE
 	------------------------------------------------------------------------*/
-	function freeze(timer) {
-		if ( fl_kill ) {
+	public void Freeze(float timer) {
+		if (fl_kill) {
 			return;
 		}
-		if ( fl_knock ) {
+		if (fl_knock) {
 			wakeUp();
 		}
 
@@ -445,119 +441,118 @@ public class Bad : Mover
 		freezeTimer = timer;
 		freezeTotal = timer;
 		fl_freeze = true;
-		onFreeze();
+		OnFreeze();
 	}
 
 
 	/*------------------------------------------------------------------------
 	ASSOME LE MONSTRE
 	------------------------------------------------------------------------*/
-	function knock(timer:float) {
+	public void Knock(float timer) {
 		if ( fl_freeze ) {
-			melt();
+			Melt();
 		}
 
 		fallFactor = Data.FALL_FACTOR_KNOCK;
 		knockTimer = timer;
 		fl_knock = true;
-		game.statsMan.inc(Data.STAT_KNOCK,1);
-		onKnock();
+		game.statsMan.Inc(Data.STAT_KNOCK,1);
+		OnKnock();
 	}
 
 
 	/*------------------------------------------------------------------------
 	MET FIN AU FREEZE
 	------------------------------------------------------------------------*/
-	function melt() {
+	void Melt() {
 		next = null;
-		angerMore();
+		AngerMore();
 		freezeTimer=0;
 		fl_freeze = false;
 		fl_slide = false;
-		fallFactor = 1.0;
-		onMelt();
+		fallFactor = 1.0f;
+		OnMelt();
 	}
 
 
 	/*------------------------------------------------------------------------
 	MET FIN AU KNOCK
 	------------------------------------------------------------------------*/
-	function wakeUp() {
+	void WakeUp() {
 		next = null;
 		knockTimer = 0;
 		fl_knock = false;
-		fallFactor = 1.0;
-		onWakeUp();
+		fallFactor = 1.0f;
+		OnWakeUp();
 	}
 
 
 	/*------------------------------------------------------------------------
 	LE BAD RETROUVE SON CALME
 	------------------------------------------------------------------------*/
-	function calmDown() {
+	public virtual void CalmDown() {
 		if ( fl_kill ) {
 			return;
 		}
 		anger = 0;
-		updateSpeed();
+		UpdateSpeed();
 	}
 
 	/*------------------------------------------------------------------------
 	�NERVEMENT
 	------------------------------------------------------------------------*/
-	function angerMore() {
-		anger = Math.round( Math.min( anger+1, maxAnger ) );
-		updateSpeed();
+	public virtual void AngerMore() {
+		anger = Mathf.Min(anger+1, maxAnger);
+		UpdateSpeed();
 	}
 
 	/*------------------------------------------------------------------------
 	D�FINI LE JOUEUR CIBLE DU MONSTRE
 	------------------------------------------------------------------------*/
-	function hate(p:entity.Player) {
+	void Hate(Player p) {
 		player = p;
 	}
-
 
 
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	function endUpdate() {
+	protected override void EndUpdate() {
 		if ( fl_ninFriend || fl_ninFoe ) {
-			if( isHealthy() && sticker._name==null ) {
-				var mc = game.depthMan.attach("hammer_interf_ninjaIcon", Data.DP_BADS);
+			if( IsHealthy() & sticker._name==null ) {
+				var mc = game.depthMan.Attach("hammer_interf_ninjaIcon", Data.DP_BADS);
 				if ( fl_ninFoe ) {
-					mc.gotoAndStop("1");
+					mc.GotoAndStop(1);
 				}
 				else {
-					mc.gotoAndStop("2");
+					mc.GotoAndStop(2);
 				}
-				stick(mc,0,-Data.CASE_HEIGHT*1.8);
+				Stick(mc,0,-Data.CASE_HEIGHT*1.8f);
 			}
 		}
 		var oldX = _x;
 		var oldY = _y;
 
-		if ( fl_softRecal ) {
-			softRecalFactor += 0.1 * Timer.tmod * speedFactor;
+		if (fl_softRecal) {
+			softRecalFactor += 0.1f * Time.fixedDeltaTime * speedFactor;
 		}
 
-		super.endUpdate();
+		base.EndUpdate();
 
 		var minSpeed = 2;
 		if ( GameManager.CONFIG.fl_detail ) {
-			if ( fl_freeze && fl_stable && Math.abs(dx)>minSpeed) {
-				var nb = Std.random(5)+2;
-				for (var i=0;i<nb;i++) {
-					var part = game.fxMan.attachFx(
-						oldX+Std.random(12)*(Std.random(2)*2-1),
-						oldY-Std.random(5)+2,
+			if ( fl_freeze & fl_stable & Mathf.Abs(dx)>minSpeed) {
+				var nb = Random.Range(0, 5)+2;
+				for (int i=0 ; i<nb ; i++) {
+					var part = game.fxMan.AttachFx(
+						oldX+Random.Range(0, 12)*(Random.Range(0, 2)*2-1),
+						oldY-Random.Range(0, 5)+2,
 						"hammer_fx_partIce"
 					);
-					part.mc._rotation = Std.random(360);
-					part.mc._xscale = Std.random(80)+20;
+					part.mc._rotation = Random.Range(0, 360);
+					part.mc._xscale = Random.Range(0, 80)+20;
 					part.mc._yscale = part.mc._xscale;
-					part.mc._alpha = Math.min(100, (Math.abs(dx)-minSpeed)/5*100);
+					part.mc._alpha = Mathf.Min(100, (Mathf.Abs(dx)-minSpeed)/5*100);
 
 					// particules physiques derri�re le bloc
 //					if ( Math.abs(dx)>minSpeed*2 && Std.random(40)==0 ) {
@@ -570,11 +565,11 @@ public class Bad : Mover
 		if ( iceMc._name!=null ) {
 			iceMc._x = this._x;
 			iceMc._y = this._y;
-			iceMc._xscale = 0.85*scaleFactor*100;
-			iceMc._yscale = 0.85*scaleFactor*freezeTimer/freezeTotal*100;
+			iceMc._xscale = 0.85f*scaleFactor*100;
+			iceMc._yscale = 0.85f*scaleFactor*freezeTimer/freezeTotal*100;
 		}
-		if ( !fl_stable && isHealthy() && ( animId==null || animId==Data.ANIM_BAD_WALK.id || animId==Data.ANIM_BAD_ANGER.id ) ) {
-			playAnim( Data.ANIM_BAD_JUMP );
+		if ( !fl_stable & IsHealthy() & ( animId==null | animId==Data.ANIM_BAD_WALK.id | animId==Data.ANIM_BAD_ANGER.id ) ) {
+			PlayAnim( Data.ANIM_BAD_JUMP );
 		}
 	}
 
@@ -582,40 +577,40 @@ public class Bad : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	function update() {
+	protected override void Update() {
 		if ( player._name==null ) {
-			hate( downcast( game.getOne(Data.PLAYER) ) );
+			Hate(game.GetOne(Data.PLAYER));
 		}
 
-		fl_playerClose = isHealthy() && ( distance(player.x,player.y) <= closeDistance*(anger+1) );
+		fl_playerClose = IsHealthy() & ( Distance(player.x,player.y) <= closeDistance*(anger+1) );
 
 		if ( fl_showIA ) {
 			if ( fl_playerClose ) {
 				if ( !fl_stick ) {
-					var mc = game.depthMan.attach("curse", Data.DP_FX) ;
+					var mc = game.depthMan.Attach("curse", Data.DP_FX) ;
 					mc.gotoAndStop(""+Data.CURSE_TAUNT) ;
-					stick(mc,0,-Data.CASE_HEIGHT*2.5);
+					Stick(mc,0,-Data.CASE_HEIGHT*2.5);
 				}
 			}
 			else {
-				unstick();
+				Unstick();
 			}
 		}
 
 		// Freez�
 		if ( freezeTimer>0 ) {
-			freezeTimer-=Timer.tmod;
+			freezeTimer-=Time.fixedDeltaTime;
 			if ( freezeTimer<=0 ) {
-				melt();
+				Melt();
 			}
 		}
 
 
 		// Fix: mort forc�e (utile ?)
 		if ( deathTimer>0 ) {
-			deathTimer-=Timer.tmod;
+			deathTimer-=Time.fixedDeltaTime;
 			if ( deathTimer<=0 ) {
-				game.fxMan.attachExplosion(x,y,80);
+				game.fxMan.AttachExplosion(x,y,80);
 				y = 1000;
 			}
 		}
@@ -623,13 +618,13 @@ public class Bad : Mover
 
 		// Sonn�
 		if ( knockTimer>0 ) {
-			knockTimer-=Timer.tmod;
+			knockTimer-=Time.fixedDeltaTime;
 			if ( knockTimer<=0 ) {
-				wakeUp();
+				WakeUp();
 			}
 		}
 
-		super.update();
+		base.Update();
 
 		// R�-active le contact au sol qui avait �t� d�sactiv�
 		if ( yTrigger!=null && !fl_kill ) {
@@ -641,8 +636,8 @@ public class Bad : Mover
 
 		// Perte de l'id de combo si est de nouveau healthy
 		if ( comboId!=null ) {
-			if ( isHealthy() ) {
-				setCombo(null);
+			if ( IsHealthy() ) {
+				SetCombo(null);
 			}
 		}
 	}

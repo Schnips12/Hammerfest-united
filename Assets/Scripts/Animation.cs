@@ -1,24 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Animation
 {
-    Mode.GameMode game;
+    GameMode game;
+	public MovieClip mc;
 
-	bool fl_kill;
-	bool fl_loop;
+	public bool fl_kill;
+	public bool fl_loop;
 	bool fl_loopDone;
 	bool fl_blink;
 
 	float frame;
-	float lifeTimer;
+	public float lifeTimer;
 	float blinkTimer;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Animation(Mode.GameMode g) {
+	public Animation(GameMode g) {
 		game		= g;
 		frame		= 0;
 		lifeTimer	= 0;
@@ -29,11 +28,20 @@ public class Animation
 		fl_blink	= false;
 	}
 
+	/*------------------------------------------------------------------------
+	ATTACHEMENT
+	------------------------------------------------------------------------*/
+	public void Attach(float x, float y, string link, int depth) {
+		mc = game.depthMan.Attach(link, depth) ;
+		mc._x = x ;
+		mc._y = y ;
+	}
+
 
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	public void Init(Mode.GameMode g) {
+	public void Init(GameMode g) {
 		game = g ;
 	}
 
@@ -41,7 +49,7 @@ public class Animation
 	/*------------------------------------------------------------------------
 	DESTRUCTION
 	------------------------------------------------------------------------*/
-	public void Destroy() {
+	public void DestroyThis() {
 		//mc.removeMovieClip() ;
 		fl_kill = true ;
 	}
@@ -56,6 +64,43 @@ public class Animation
 
 	public void StopBlink() {
 		fl_blink = false;
-		//mc._alpha = 100;
+		mc._alpha = 100;
+	}
+
+	/*------------------------------------------------------------------------
+	RENVOIE LES INFOS DE CET OBJET
+	------------------------------------------------------------------------*/
+	string Short() {
+		return mc._name+" @"+mc._x+","+mc._y;
+	}
+
+
+	public void Update() {
+		if ( fl_loopDone ) {
+			lifeTimer -= Time.fixedDeltaTime;
+			if ( lifeTimer<=0 ) {
+				DestroyThis() ;
+			}
+		}
+
+		if ( fl_blink ) {
+			blinkTimer-=Time.fixedDeltaTime;
+			if ( blinkTimer<=0 ) {
+				mc._alpha	= (mc._alpha==100)?30:100;
+				blinkTimer	= Data.BLINK_DURATION_FAST;
+			}
+		}
+
+		frame += Time.fixedDeltaTime;
+		while (frame>=1) {
+			mc.NextFrame();
+			if (mc.CurrentFrame() == mc.TotalFrames()) {
+				if (fl_loop) {
+					mc.GotoAndStop(1) ;
+				}
+				fl_loopDone = true ;
+			}
+			frame-- ;
+		}
 	}
 }

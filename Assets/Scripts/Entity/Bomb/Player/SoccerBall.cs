@@ -26,7 +26,7 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static SoccerBall Attach(Modes.GameMode g, float x, float y) {
+	public static SoccerBall Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_soccer";
 		SoccerBall mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
 		mc.InitBomb(g, x, y);
@@ -37,7 +37,7 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	protected override void Init(Modes.GameMode g) {
+	protected override void Init(GameMode g) {
 		base.Init(g);
 		Register(Data.SOCCERBALL);
 		FxManager.AddGlow(this, 0x808080, 2);

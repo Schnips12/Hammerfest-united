@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System;
 using UnityEngine;
 
-public class SetManager : MonoBehaviour
+public class SetManager
 {
-    protected GameManager manager;
+    public GameManager manager;
 
 	public List<LevelData> worldmap;
 	protected List<string> json;
@@ -22,21 +22,6 @@ public class SetManager : MonoBehaviour
     protected LevelData _previous;
     protected int _previousId;
 
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-	/*------------------------------------------------------------------------
-	BOUCLE PRINCIPALE
-	------------------------------------------------------------------------*/
-    // Update is called once per frame
-    void FixedUpdate()
-    {
-        // do nothing
-    }
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -70,7 +55,7 @@ public class SetManager : MonoBehaviour
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
 	public virtual void DestroyThis() {
-		//Suspend();
+		Suspend();
 		worldmap = new List<LevelData>();
 		fl_read = new List<bool>();
 	}
@@ -106,6 +91,40 @@ public class SetManager : MonoBehaviour
 		string rawStr = manager.root.ReadFile(setName+"_back_xml");
 		manager.root.SaveFile(setName, rawStr);
 		json = new List<string>(rawStr.Split(':'));
+	}
+
+
+	/*------------------------------------------------------------------------
+	ALLUME / �TEINT UN FIELD DE T�L�PORTATION
+	------------------------------------------------------------------------*/
+	void ShowField(TeleporterData td) {
+		if (td.fl_on) {
+			return;
+		}
+		td.fl_on = true;
+		td.mc.sub.GotoAndStop(2);
+		td.podA.GotoAndStop(2);
+		td.podB.GotoAndStop(2);
+	}
+
+	void HideField(TeleporterData td) {
+		if (!td.fl_on) {
+			return;
+		}
+		td.fl_on = false;
+		td.mc.sub.GotoAndStop(1);
+		td.podA.GotoAndStop(1);
+		td.podB.GotoAndStop(1);
+	}
+
+	/*------------------------------------------------------------------------
+	GESTION VERROU
+	------------------------------------------------------------------------*/
+	public virtual void Suspend() {
+		// do nothing
+	}
+	public virtual void Restore(int lid) {
+		// do nothing
 	}
 
 
@@ -209,7 +228,7 @@ public class SetManager : MonoBehaviour
         int y = 0;
 		for (x=0 ; x < l.map.Length ; x++) {
 			for (y=0 ; y < l.map[x].column.Length ; y++) {
-				lf.SetCase(l.mapWidth() - x - 1, y, l.GetCase(x, y));
+				lf.SetCase(l.mapWidth() - x - 1, y, l.GetCase(x, y)??0);
 			}
 		}
 		
@@ -238,12 +257,29 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	INVERSION HORIZONTALE DES PORTALS
 	------------------------------------------------------------------------*/
-	void FlipPortals() { //might have fucked up this function, see mt file
-		List<PortalData> list = new List<PortalData>();
-		foreach (PortalData portal in portalList) {
-			list.Add(portal);
+	protected void FlipPortals() {
+		List<List<PortalData>> ylist = new List<List<PortalData>>();
+		for (int i=0 ; i<25 ; i++) {
+			ylist.Add(null);
 		}
 
+		List<PortalData> list = new List<PortalData>();
+		for (int i=0 ; i<portalList.Count ; i++) {
+			PortalData p = portalList[i];
+			if (ylist[p.cy] == null) {
+				ylist[p.cy] = new List<PortalData>();
+			}
+			ylist[p.cy].Add(p);
+		}
+
+		for (int y=0 ; y<ylist.Count ; y++) {
+			if (ylist[y] != null) {
+				for (int i=ylist[y].Count-1 ; i>=0 ; i--) {
+					PortalData p = ylist[y][i];
+					list.Add(p);
+				}
+			}
+		}
 		portalList = list;
 	}
 
@@ -285,7 +321,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RETOURNE UNE CASE DE LA MAP
 	------------------------------------------------------------------------*/
-	public int GetCase(int x, int y) {
+	public int? GetCase(int x, int y) {
 		int cx = x;
 		int cy = y;
 		if (InBound(cx,cy)) {
@@ -315,7 +351,7 @@ public class SetManager : MonoBehaviour
 			return Data.OUT_WALL;
 		}
 	}
-	public int GetCase(Vector2Int pos) {
+	public int? GetCase(Vector2Int pos) {
 		return GetCase(pos.x, pos.y);
 	}
 
@@ -335,7 +371,7 @@ public class SetManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LES COORDONNéES DE CASE SONT DANS L'AIRE DE JEU
 	------------------------------------------------------------------------*/
-	protected bool InBound(int cx, int cy) {
+	public bool InBound(int cx, int cy) {
 		return (
             cx >= 0 					&
             cx < current.mapWidth() 	&
@@ -401,7 +437,7 @@ public class SetManager : MonoBehaviour
 	}
 
 
-	void OnRestoreReady() {
+	protected virtual void OnRestoreReady() {
 		// do nothing
 	}
 
@@ -487,10 +523,15 @@ public class SetManager : MonoBehaviour
 		Debug.Log("player: " + current.playerX + "," + current.playerY);
 		Debug.Log(current.map);
 	}
-	public virtual void Suspend() {
 
-	}
-	public virtual void Restore(int lid) {
-		
-	}
+
+	/*------------------------------------------------------------------------
+	BOUCLE PRINCIPALE
+	------------------------------------------------------------------------*/
+    public virtual void Update()
+    {
+        // do nothing
+    }
+
+
 }

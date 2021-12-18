@@ -9,7 +9,6 @@ public class Adventure : GameMode
 	int perfectCount;
 
 	int firstLevel;
-	bool fl_warpStart;
 	float trackPos;
 
 	static int BUCKET_X			= 11;
@@ -51,7 +50,7 @@ public class Adventure : GameMode
 	public override void AddLevelItems() {
 		base.AddLevelItems();
 		int n;
-		_slot pt;
+		LevelData._slot pt;
 
 		// Extends
 		if ( world.current.specialSlots.Length>0 ) {
@@ -92,7 +91,7 @@ public class Adventure : GameMode
 			if ( globalActives[94] ) {
 				var cx = Random.Range(0, Data.LEVEL_WIDTH);
 				var cy = Random.Range(0, Data.LEVEL_HEIGHT-5);
-				var ptC = world.GetGround(cx, cy);
+				var ptC = world.GetGround(ref cx, ref cy);
 				world.scriptEngine.InsertScoreItem(
 					Random.Range(0, Data.RAND_SCORES_ID),
 					null,
@@ -132,7 +131,7 @@ public class Adventure : GameMode
 		AddWorld("xml_hiko");
 		AddWorld("xml_ayame");
 		AddWorld("xml_hk");
-		if ( manager.IsDev() ) {
+		if (manager.IsDev()) {
 			AddWorld("xml_dev");
 		}
 	}
@@ -173,19 +172,19 @@ public class Adventure : GameMode
 		base.StartLevel();
 
 		// Boss 1
-		if ( world.fl_mainWorld & world.currentId == Data.BAT_LEVEL ) {
-			Entity.Boss.Bat.Attach(this);
+		if (world.fl_mainWorld & world.currentId == Data.BAT_LEVEL) {
+			Bat.Attach(this);
 			fl_clear = false;
 		}
 
 		// Boss 2
-		if ( world.fl_mainWorld & world.currentId == Data.TUBERCULOZ_LEVEL ) {
-			Entity.Boss.Tuberculoz.Attach(this);
+		if (world.fl_mainWorld & world.currentId == Data.TUBERCULOZ_LEVEL) {
+			Tuberculoz.Attach(this);
 			fl_clear = false;
 		}
 
 		// Pas de fleche au level 0
-		if ( world.fl_mainWorld & world.currentId==0 ) {
+		if (world.fl_mainWorld & world.currentId==0) {
 			fxMan.DetachExit();
 		}
 	}
@@ -193,8 +192,7 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	LANCE LE NIVEAU SUIVANT
 	------------------------------------------------------------------------*/
-	protected override void NextLevel() {
-
+	public override void NextLevel() {
 		base.NextLevel();
 
 		if ( fl_warpStart ) {
@@ -230,7 +228,7 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE POUR LES LEVELS DE BOSS
 	------------------------------------------------------------------------*/
-	protected override bool IsBossLevel(int id) {
+	public override bool IsBossLevel(int id) {
 		return
 			base.IsBossLevel(id) |
 			world.fl_mainWorld & (
@@ -245,7 +243,7 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: LEVEL PR�T � �TRE JOU� (APRES SCROLL)
 	------------------------------------------------------------------------*/
-	protected override void OnLevelReady() {
+	public override void OnLevelReady() {
 		base.OnLevelReady();
 		if ( fl_warpStart ) {
 			if ( world.fl_mainWorld ) {
@@ -253,7 +251,7 @@ public class Adventure : GameMode
 				world.view.AttachSprite(
 					"door_secret",
 					Entity.x_ctr( world.current.playerX ),
-					Entity.x_ctr( world.current.playerY ) + Data.CASE_HEIGHT*0.5,
+					Entity.x_ctr( world.current.playerY ) + Data.CASE_HEIGHT*0.5f,
 					true
 				);
 			}
@@ -270,7 +268,7 @@ public class Adventure : GameMode
 	------------------------------------------------------------------------*/
 	protected override void OnLevelClear() {
 		base.OnLevelClear();
-		if ( !world.IsVisited() & perfectOrder.Count==0 & world.scriptEngine.cycle>=10 ) {
+		if (!world.IsVisited() & perfectOrder.Count==0 & world.scriptEngine.cycle>=10) {
 			var pl = GetPlayerList();
 			for (var i=0;i<pl.Count;i++) {
 				/* pl[i].setBaseAnims(Data.ANIM_PLAYER_WALK_V, Data.ANIM_PLAYER_STOP_V); */ // TODO Use animation flags
@@ -289,30 +287,21 @@ public class Adventure : GameMode
 		base.OnKillBad(b);
 
 		// Boss Tuberculoz
-		if ( world.fl_mainWorld & world.currentId==Data.TUBERCULOZ_LEVEL ) {
+		if (world.fl_mainWorld & world.currentId==Data.TUBERCULOZ_LEVEL) {
 			GetOne(Data.BOSS).OnKillBad();
 		}
 
 		// Perfect order
-		if ( badCount>1 & b.uniqId==perfectOrder[0] ) {
+		if (badCount>1 & b.uniqId==perfectOrder[0]) {
 			perfectOrder.RemoveAt(0);
 		}
 	}
 
 
 	/*------------------------------------------------------------------------
-	LOOPS ON ADVENTURE MODE
-	------------------------------------------------------------------------*/
-//	function endMode() {
-//		world.destroy();
-//		manager.startGameMode(  new mode.Adventure(manager)  );
-//	}
-
-
-	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION D'UNE BOMBE DE JOUEUR
 	------------------------------------------------------------------------*/
-	protected override void OnExplode(float x, float y, float radius) {
+	public override void OnExplode(float x, float y, float radius) {
 		base.OnExplode(x,y,radius);
 
 		if ( world.fl_mainWorld & world.currentId==Data.TUBERCULOZ_LEVEL ) {
@@ -325,7 +314,7 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: FIN DU SET DE LEVELS
 	------------------------------------------------------------------------*/
-	protected override void OnEndOfSet() {
+	public override void OnEndOfSet() {
 		base.OnEndOfSet();
 		ExitGame();
 	}
@@ -334,7 +323,7 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: GAME OVER
 	------------------------------------------------------------------------*/
-	protected override void OnGameOver() {
+	public override void OnGameOver() {
 		base.OnGameOver();
 		manager.LogAction(
 			"t="+Mathf.Round(duration/Data.SECOND)
@@ -357,7 +346,7 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: HURRY UP !
 	------------------------------------------------------------------------*/
-	protected override GameObject OnHurryUp() {
+	public override GameObject OnHurryUp() {
 		GameObject mc = base.OnHurryUp();
 		if ( GameManager.CONFIG.HasMusic() & currentTrack==0 ) {
 			trackPos = audio.time;
@@ -370,11 +359,10 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	FIN DE HURRY UP
 	------------------------------------------------------------------------*/
-	protected override void ResetHurry() {
+	public override void ResetHurry() {
 		base.ResetHurry();
 		if ( currentTrack==2 ) {
 			PlayMusic(0);
-//			playMusicAt(0,trackPos);
 		}
 	}
 

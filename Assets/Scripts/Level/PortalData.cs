@@ -1,5 +1,6 @@
 public class PortalData
 {
+	MovieClip mc;
  	public int cx;
 	public int cy;
 
@@ -10,7 +11,8 @@ public class PortalData
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public PortalData(int cx, int cy) {
+	public PortalData(MovieClip mc, int cx, int cy) {
+		this.mc = mc;
 		this.cx = cx;
 		this.cy = cy;
 		cpt = 0;

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class Player : Physics
+public class Player : Physics, IEntity
 {
 	string name;
 
@@ -16,7 +16,7 @@ public class Player : Physics
 	Data.animParam baseStopAnim;
 
 	public float speedFactor;
-	bool fl_lockControls;
+	public bool fl_lockControls;
 	bool fl_entering;
 
 	int score;
@@ -47,7 +47,7 @@ public class Player : Physics
 
 	string debugInput;
 
-	Animator shieldMC;
+	HAnimator shieldMC;
 
 	float startX;
 	int extraLifeCurrent;
@@ -60,10 +60,10 @@ public class Player : Physics
 	bool fl_candle;
 	bool fl_torch;
 	public int head;
-	int defaultHead;
+	public int defaultHead;
 	int bounceLimit;
 
-	float lockTimer;
+	public float lockTimer;
 
 	int skin;
 
@@ -81,7 +81,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Player() : base() {
+	Player() : base(null) {
 		name			= "Igor";
 
 		baseWalkAnim	= Data.ANIM_PLAYER_WALK;
@@ -588,7 +588,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	RETIRE LE BOUCLIER
 	------------------------------------------------------------------------*/
-	void Unshield() {
+	public void Unshield() {
 		fl_shield	= false;
 		shieldTimer	= 0;
 
@@ -599,7 +599,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	ASSOME LE JOUEUR
 	------------------------------------------------------------------------*/
-	void Knock(float d) {
+	public void Knock(float d) {
 		if (fl_knock) {
 			return;
 		}
@@ -625,7 +625,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	REDIMENSIONNEMENT
 	------------------------------------------------------------------------*/
-	public void Scale(float n) {
+	public override void Scale(float n) {
 		base.Scale(n);
 		_xscale *= dir;
 	}
@@ -646,10 +646,10 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	AFFICHE UNE "MAL�DICTION" AU DESSUS DU JOUEUR
 	------------------------------------------------------------------------*/
-	void Curse(int id) {
+	public void Curse(int id) {
 		var c = game.depthMan.Attach("curse", Data.DP_FX);
 		c._alpha = 70;
-		c.GotoAndStop(""+id);
+		c.GotoAndStop(id);
 		Stick(c,0,-Data.CASE_HEIGHT*2.5f);
 		SetElaStick(0.25f);
 	}
@@ -658,7 +658,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	JOUE UNE ANIMATION
 	------------------------------------------------------------------------*/
-	protected override void PlayAnim(Data.animParam a) {
+	public override void PlayAnim(Data.animParam a) {
 		if (a.id==baseWalkAnim.id & speedFactor>1) {
 			a = Data.ANIM_PLAYER_RUN;
 		}
@@ -687,7 +687,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	CHANGE LES ANIMS DE D�PLACEMENT DE BASE (null = pas de changement)
 	------------------------------------------------------------------------*/
-	void SetBaseAnims(Data.animParam? a_walk, Data.animParam? a_stop) {
+	public void SetBaseAnims(Data.animParam? a_walk, Data.animParam? a_stop) {
 		var fl_walk = false;
 		var fl_stop = false;
 		if (animId == baseWalkAnim.id) {
@@ -798,16 +798,16 @@ public class Player : Physics
 		}
 
 		switch (currentWeapon) {
-			case Data.WEAPON_B_CLASSIC	: return Drop(	Entity.Bomb.player.Classic.Attach(game, x,y ) 	);
-			case Data.WEAPON_B_BLACK	: return Drop(	Entity.Bomb.player.Black.Attach(game, x,y ) 	);
-			case Data.WEAPON_B_BLUE		: return Drop(	Entity.Bomb.player.Blue.Attach(game, x,y ) 		);
-			case Data.WEAPON_B_GREEN	: return Drop(	Entity.Bomb.player.Green.Attach(game, x,y ) 	);
-			case Data.WEAPON_B_RED		: return Drop(	Entity.Bomb.player.Red.Attach(game, x,y ) 		);
-			case Data.WEAPON_B_REPEL	: return Drop(	Entity.Bomb.player.RepelBomb.Attach(game,x,y) 	);
+			case Data.WEAPON_B_CLASSIC	: return Drop(	Classic.Attach(game, x,y ) 	);
+			case Data.WEAPON_B_BLACK	: return Drop(	Black.Attach(game, x,y ) 	);
+			case Data.WEAPON_B_BLUE		: return Drop(	Blue.Attach(game, x,y ) 	);
+			case Data.WEAPON_B_GREEN	: return Drop(	Green.Attach(game, x,y ) 	);
+			case Data.WEAPON_B_RED		: return Drop(	Red.Attach(game, x,y ) 		);
+			case Data.WEAPON_B_REPEL	: return Drop(	RepelBomb.Attach(game,x,y) 	);
 
-			case Data.WEAPON_S_ARROW	: return Shoot(	Entity.Shoot.PlayerArrow.Attach(game,x,y) 		);
-			case Data.WEAPON_S_FIRE		: return Shoot(	Entity.Shoot.PlayerFireBall.Attach(game,x,y) 	);
-			case Data.WEAPON_S_ICE		: return Shoot(	Entity.Shoot.PlayerPearl.Attach(game,x,y) 		);
+			case Data.WEAPON_S_ARROW	: return Shoot(	PlayerArrow.Attach(game,x,y) 		);
+			case Data.WEAPON_S_FIRE		: return Shoot(	PlayerFireBall.Attach(game,x,y) 	);
+			case Data.WEAPON_S_ICE		: return Shoot(	PlayerPearl.Attach(game,x,y) 		);
 
 			default:
 				GameManager.Fatal("invalid weapon id : "+currentWeapon) ;
@@ -840,7 +840,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	POSE UNE BOMBE
 	------------------------------------------------------------------------*/
-	void Drop(PlayerBomb b) {
+	PlayerBomb Drop(PlayerBomb b) {
 		if (!fl_stable) {
 			AirJump();
 		}
@@ -850,15 +850,6 @@ public class Player : Physics
 		if (!fl_stable) {
 			KickBomb(b, 1.0f);
 		}
-//		b.x+=dir*Data.CASE_WIDTH*0.5;
-//		if ( dir>0 ) {
-////			b.moveToAng(-65,2);
-//			b.moveRight(1.5);
-//		}
-//		else {
-////			b.moveToAng(-115,2);
-//			b.moveLeft(1.5);
-//		}
 
 		return b;
 	}
@@ -898,7 +889,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	D�FINI L'ARME DU JOUEUR
 	------------------------------------------------------------------------*/
-	public void ChangeWeapon(int id) {
+	void ChangeWeapon(int id) {
 		if (id==-1) {
 			id = lastBomb;
 		}
@@ -1237,7 +1228,7 @@ public class Player : Physics
 	/*------------------------------------------------------------------------
 	EVENT: D�BUT DE NIVEAU
 	------------------------------------------------------------------------*/
-	void OnStartLevel() {
+	public void OnStartLevel() {
 		this.Show() ;
 		game.manager.LogAction(world.currentId+","+Mathf.Floor(score/1000));
 		if ( game.world.fl_mainWorld ) {

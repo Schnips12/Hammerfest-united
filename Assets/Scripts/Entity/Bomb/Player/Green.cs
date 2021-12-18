@@ -21,11 +21,11 @@ public class Green : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static Green Attach(Modes.GameMode g, float x, float y) {
-		var linkage = "hammer_bomb_green" ;
-		Green mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
-		mc.InitBomb(g, x, y) ;
-		return mc ;
+	public static MovieClip Attach(GameMode g, float x, float y) {
+		string linkage = "hammer_bomb_green";
+		MovieClip mc = g.depthMan.Attach(linkage, Data.DP_BOMBS);
+		InitBomb(g, x, y);
+		return mc;
 	}
 
 

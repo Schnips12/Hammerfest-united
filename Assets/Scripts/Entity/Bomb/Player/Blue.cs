@@ -18,9 +18,9 @@ public class Blue : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static Blue Attach(Modes.GameMode g, float x, float y) {
+	public static Blue Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_blue";
-		Blue mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
+		Blue mc = g.depthMan.Attach(linkage,Data.DP_BOMBS);
 		mc.InitBomb(g, x, y);
 		return mc;
 	}

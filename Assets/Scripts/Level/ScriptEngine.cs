@@ -57,10 +57,19 @@ public class ScriptEngine
 	string baseScript;
 	LevelData data;
 	int bads;
-	float cycle;
+	public float cycle;
 
-/* 	var mcList			: Array< {sid:int, mc:MovieClip} >; // script attached MCs
- */
+	struct ClipWithId {
+		public int sid;
+		public MovieClip mc;
+		public ClipWithId(int sid, MovieClip mc) {
+			this.sid = sid;
+			this.mc = mc;
+		}		
+	}
+
+	List<ClipWithId> mcList; // script attached MCs
+
 	bool fl_compile;
 	bool fl_birth;
 	bool fl_death;
@@ -141,7 +150,7 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	EVENT: ENTR�E D'UN JOUEUR DANS UNE CASE
 	------------------------------------------------------------------------*/
-	void OnEnterCase(int cx, int cy) {
+	public void OnEnterCase(int cx, int cy) {
 		entries.Add(new Vector2Int(cx, cy));
 	}
 
@@ -276,7 +285,7 @@ public class ScriptEngine
 				var mc = ScoreItem.Attach(game, x, y, id, subId);
 				var inf = GetInt(e, "inf");
 				if (inf==1) {
-					mc.setLifeTimer(-1);
+					mc.SetLifeTimer(-1);
 				}
 				var scriptId = GetInt(e, "sid");
 				KillById(scriptId);
@@ -290,10 +299,10 @@ public class ScriptEngine
 					var y = Entity.y_ctr(  GetInt(e, "y")  );
 					var id = GetInt(e, "i");
 					var subId = GetInt(e, "si");
-					var mc = SpecialItem.Attach(game, x,y, id, subId );
+					var mc = SpecialItem.Attach(game, x, y, id, subId);
 					var inf = GetInt(e, "inf");
 					if ( inf==1 ) {
-						mc.setLifeTimer(-1);
+						mc.SetLifeTimer(-1);
 					}
 					var scriptId = GetInt(e, "sid");
 					KillById( scriptId );
@@ -391,7 +400,7 @@ public class ScriptEngine
 				var back = GetInt(e, "back");
 				var name = GetString(e, "n");
 				var p = GetInt(e, "p");
-				// WARNING: "name" must be "$"-escaped against obfu
+
 				KillById(sid);
 				float x, y;
 				if  (xr == -1) {
@@ -408,7 +417,7 @@ public class ScriptEngine
 				}
 				var mc = game.world.view.AttachSprite(name, x, y, (back==1)?true:false);
 				if ( game.fl_mirror ) {
-					mc.transform.localScale.Set(mc.transform.localScale.x*-1, mc.transform.localScale.y, mc.transform.localScale.z);
+					mc._x *= -1;
 				}
 				if ( p>0 ) {
 					mc.Play();
@@ -416,16 +425,16 @@ public class ScriptEngine
 				else {
 					mc.Stop();
 				}
-				mc.sub.stop();
+				mc.sub.Stop();
 				if ( name=="torch" ) {
 					if ( !fl_firstTorch ) {
 						game.ClearExtraHoles();
 					}
-					game.AddHole(x+Data.CASE_WIDTH*0.5f,y-Data.CASE_HEIGHT*0.5f,180);
+					game.AddHole(x+Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f,180);
 					game.UpdateDarkness();
 					fl_firstTorch = true;
 				}
-				mcList.Add(sid, mc);
+				mcList.Add(new ClipWithId(sid, mc));
 			}break;
 
 			case E_PLAYMC: {
@@ -772,9 +781,9 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	INSERTION: ITEM
 	------------------------------------------------------------------------*/
-	void InsertItem(string e, int id, int subId, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
+	void InsertItem(string e, int id, int? subId, int x, int y, int t, int? repeat, bool fl_inf, bool fl_clearAtEnd) {
 		string subStr;
-		if (subId==-1) {
+		if (subId==null) {
 			subStr="";
 		}
 		else {
@@ -782,7 +791,7 @@ public class ScriptEngine
 		}
 
 		var doStr = "";
-		if (repeat!=-1) {
+		if (repeat!=null) {
 			doStr = " repeat=\""+repeat+"\"";
 		}
 
@@ -796,22 +805,22 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	INSERTION: ITEM SP�CIAL
 	------------------------------------------------------------------------*/
-	void InsertSpecialItem(int id, int sid, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
-		InsertItem(E_SPECIAL, id,sid,x,y,t,repeat,fl_inf, fl_clearAtEnd);
+	public void InsertSpecialItem(int id, int? sid, int x, int y, int t, int? repeat, bool fl_inf, bool fl_clearAtEnd) {
+		InsertItem(E_SPECIAL, id, sid, x, y, t, repeat, fl_inf, fl_clearAtEnd);
 	}
 
 	/*------------------------------------------------------------------------
 	INSERTION: BONUS
 	------------------------------------------------------------------------*/
-	public void InsertScoreItem(int id, int sid, int x, int y, int t, int repeat, bool fl_inf, bool fl_clearAtEnd) {
-		InsertItem(E_SCORE, id,sid,x,y,t,repeat,fl_inf, fl_clearAtEnd);
+	public void InsertScoreItem(int id, int? sid, int x, int y, int t, int? repeat, bool fl_inf, bool fl_clearAtEnd) {
+		InsertItem(E_SCORE, id, sid, x, y, t, repeat,fl_inf, fl_clearAtEnd);
 	}
 
 
 	/*------------------------------------------------------------------------
 	INSERTION DES EXTENDS R�GULIERS
 	------------------------------------------------------------------------*/
-	void InsertExtend() {
+	public void InsertExtend() {
 		var s = "<"+T_TIMER+" t=\""+Data.EXTEND_TIMER+"\" repeat=\"-1\" endClear=\"1\"><"+E_EXTEND+"/></"+T_TIMER+">";
 		AddScript(s);
 	}
@@ -960,7 +969,7 @@ public class ScriptEngine
 
 		for (var i=0;i<mcList.Count;i++) {
 			if ( mcList[i].sid == id ) {
-				mcList[i].mc.removeMovieClip();
+				mcList[i].mc.RemoveMovieClip();
 				mcList.RemoveAt(i);
 				i--;
 			}
@@ -977,8 +986,8 @@ public class ScriptEngine
 		}
 		for (var i=0;i<mcList.Count;i++) {
 			if ( mcList[i].sid == id ) {
-				mcList[i].mc.play();
-				mcList[i].mc.sub.play();
+				mcList[i].mc.Play();
+				mcList[i].mc.sub.Play();
 			}
 		}
 	}
@@ -1006,7 +1015,7 @@ public class ScriptEngine
 				fl_elevatorOpen = true;
 				var l = game.GetPlayerList();
 				for (var i=0;i<l.Count;i++) {
-					l[i].LockControls(Data.SECOND*12.5);
+					l[i].LockControls(Data.SECOND*12.5f);
 					l[i].dx = 0;
 				}
 				game.huTimer = 0;
@@ -1033,7 +1042,7 @@ public class ScriptEngine
 			}break;
 
 			case 5: {// sortie apr�s tuberculoz
-				if ( game.GetOne(Data.BOSS).fl_defeated ) {
+				if (game.GetOne(Data.BOSS).fl_defeated) {
 					bossDoorTimer-=Time.fixedDeltaTime;
 					if ( bossDoorTimer<=0 ) {
 						game.DestroyList(Data.BOSS);

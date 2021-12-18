@@ -2,17 +2,34 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Banane : MonoBehaviour
+public class Banane : Jumper
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Banane() : base() {
+		SetJumpUp(5) ;
+		SetJumpDown(5) ;
+		SetJumpH(100) ;
+		SetClimb(100,Data.IA_CLIMB);
+		SetFall(5) ;
+	}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	INITIALISATION
+	------------------------------------------------------------------------*/
+	protected override void Init(GameMode g) {
+		base.Init(g) ;
+	}
+
+	/*------------------------------------------------------------------------
+	ATTACHEMENT
+	------------------------------------------------------------------------*/
+	public static Banane Attach(GameMode g, float x, float y) {
+		var linkage = Data.LINKAGES[Data.BAD_BANANE];
+		Banane mc =new Banane();
+        mc.self = g.depthMan.Attach(linkage,Data.DP_BADS);
+		mc.InitBad(g,x,y) ;
+		return mc ;
+	}
 }

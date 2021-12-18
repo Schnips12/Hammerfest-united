@@ -21,7 +21,7 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	protected Mover() : base() {
+	protected Mover(MovieClip mc) : base(mc) {
 		fl_bounce		= false ;
 		bounceFactor	= 0.5f;
 	}
@@ -36,14 +36,14 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	D�FINI LA D�CISION SUIVANTE
 	------------------------------------------------------------------------*/
-	void SetNext(float dx, float dy, float delay, int action) {
+	protected void SetNext(float dx, float dy, float delay, int action) {
 		next = new movement(dx, dy, delay, action);
 	}
 
 	/*------------------------------------------------------------------------
 	SUIT LA D�CISION SUIVANTE
 	------------------------------------------------------------------------*/
-	void OnNext() {
+	protected virtual void OnNext() {
         if (next==null) {
             return;
         }
@@ -83,7 +83,7 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI L'ENTIT� EST EN �TAT D'AGIR
 	------------------------------------------------------------------------*/
-	bool IsReady() {
+	protected virtual bool IsReady() {
 		return fl_stable & next==null ;
 	}
 

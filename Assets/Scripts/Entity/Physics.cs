@@ -14,12 +14,12 @@ public class Physics : HAnimator
 
 	protected bool fl_stable;
 	protected bool fl_physics;
-	protected bool fl_friction;
-	protected bool fl_gravity;
+	public bool fl_friction;
+	public bool fl_gravity;
 	protected bool fl_strictGravity;
-	protected bool fl_hitGround;
+	public bool fl_hitGround;
 	protected bool fl_hitCeil;
-	protected bool fl_hitWall;
+	public bool fl_hitWall;
 	protected bool fl_hitBorder;
 	protected bool fl_slide;
 	protected bool fl_teleport;
@@ -32,12 +32,12 @@ public class Physics : HAnimator
 	protected bool fl_skipNextGravity;
 	protected bool fl_skipNextGround;
 
-	public Level.TeleporterData lastTeleporter;
+	public TeleporterData lastTeleporter;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Physics() : base() {
+	public Physics(MovieClip mc) : base(mc) {
 
 		dx = 0;
 		dy = 0;
@@ -334,7 +334,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	POSTFIXE
 	------------------------------------------------------------------------*/
-	void Postfix() {
+	protected virtual void Postfix() {
 		// Do nothing
 	}
 
@@ -417,7 +417,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	EVENT: TOUCHE LE PLAFOND
 	------------------------------------------------------------------------*/
-	void OnHitCeil() {
+	protected virtual void OnHitCeil() {
 		dy=0;
 	}
 
