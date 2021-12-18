@@ -8,14 +8,14 @@ public class Mine : BadBomb
 	static float HIDE_SPEED	= 3;
 	static float DETECT_RADIUS= Data.CASE_WIDTH*2.5f;
 
-	bool fl_trigger;
+	public bool fl_trigger;
 	bool fl_defuse;
 	bool fl_plant;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Mine() : base(){
+	public Mine(MovieClip mc) : base(mc){
 		fl_blink		= true;
 		fl_alphaBlink	= false;
 		duration		= Data.SECOND*15;
@@ -30,7 +30,7 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	INITIALISATION BOMBE
 	------------------------------------------------------------------------*/
-	protected override void InitBomb(Modes.GameMode g, float x, float y) {
+	protected override void InitBomb(GameMode g, float x, float y) {
 		base.InitBomb(g, x, y);
 		if (game.fl_bombExpert) {
 			radius*=1.3f; // higher factor than other badbombs !
@@ -41,9 +41,9 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static Mine Attach(Modes.GameMode g, float x, float y) {
+	public static Mine Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_mine" ;
-		Mine mc = g.depthMan.Attach(linkage,Data.DP_BOMBS);
+		Mine mc = new Mine(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y) ;
 		return mc;
 	}
@@ -74,17 +74,17 @@ public class Mine : BadBomb
 	------------------------------------------------------------------------*/
 	public override void OnExplode() {
 		if (!fl_trigger | fl_defuse) {
-			game.fxMan.attachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_pop") ;
+			game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_pop") ;
 			DestroyThis();
 		}
 		else {
 			base.OnExplode() ;
-			game.fxMan.attachExplodeZone(x,y,radius) ;
+			game.fxMan.AttachExplodeZone(x,y,radius) ;
 
 			var l = game.GetClose(Data.PLAYER,x,y,radius,false) ;
 
 			for (var i=0;i<l.Count;i++) {
-				Player e = l[i];
+				Player e = l[i] as Player;
 				e.KillHit(0) ;
 				ShockWave(e, radius, power) ;
 				if ( !e.fl_shield ) {
@@ -98,7 +98,7 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	EVENT: KICK (CES BOMBES SONT FACILEMENT REPOUSSABLES)
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Entity.Player p) {
+	protected override void OnKick(Player p) {
 		base.OnKick(p);
 		TriggerMine();
 
@@ -172,9 +172,9 @@ public class Mine : BadBomb
 
 		// D�clenchement
 		if (fl_plant & !fl_trigger) {
-			var l = game.GetClose(Data.PLAYER,x,y,DETECT_RADIUS,false);
+			var l = game.GetClose(Data.PLAYER, x, y, DETECT_RADIUS, false);
 			for (var i=0;i<l.Count;i++) {
-				if ( !l[i].fl_kill ) {
+				if ( !(l[i] as Player).fl_kill ) {
 					TriggerMine();
 				}
 			}

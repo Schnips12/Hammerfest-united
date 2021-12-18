@@ -7,7 +7,7 @@ public class ScoreItem : Item
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	ScoreItem() : base() {
+	ScoreItem(MovieClip mc) : base(mc) {
 
 	}
 
@@ -18,9 +18,9 @@ public class ScoreItem : Item
 		base.Init(g);
 	}
 
-	protected override void InitItem(GameMode g, float x, float y, int i, int si) {
-		base.InitItem(g, x, y,i, si);
-		if (id==Data.CONVERT_DIAMANT) {
+	protected override void InitItem(GameMode g, float x, float y, int i, int? sid) {
+		base.InitItem(g, x, y, i, sid);
+		if (sid==Data.CONVERT_DIAMANT) {
 			Register(Data.PERFECT_ITEM);
 		}
 	}
@@ -29,8 +29,8 @@ public class ScoreItem : Item
 	/*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-	public static ScoreItem Attach(GameMode g, float x, float y, int id, int subId) {
-		ScoreItem mc = g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS);
+	public static ScoreItem Attach(GameMode g, float x, float y, int id, int? subId) {
+		ScoreItem mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
 		if (id>=1000) {
 			id -= 1000;
 		}
@@ -43,21 +43,21 @@ public class ScoreItem : Item
 	ACTIVE L'ITEM AU PROFIT DE "E"
 	------------------------------------------------------------------------*/
 	protected override void Execute(Player p) {
-		int value = Data.ITEM_VALUES[id+1000];
+		int? value = Data.ITEM_VALUES[id+1000];
 
 		game.soundMan.PlaySound("sound_item_score", Data.CHAN_ITEM);
 
-		if ( value==0 || value==null ) {
+		if ( value==0 | value==null ) {
 
 			switch (id) {
 				case 0: // Cristaux
-					value = Data.GetCrystalValue(subId);
+					value = Data.GetCrystalValue(subId??0);
 				break;
 				case Data.DIAMANT: // Diamant par d�faut
 					value = 2000;
 				break;
 				case Data.CONVERT_DIAMANT: // Diamant de conversion de niveau
-					value = Mathf.RoundToInt(  Mathf.Min( 10000, 75*Mathf.Pow(subId+1,4) )  );
+					value = Mathf.RoundToInt(  Mathf.Min( 10000, 75*Mathf.Pow(subId??0+1,4) )  );
 				break;
 				default:
 					GameManager.Fatal("null value");
@@ -69,7 +69,7 @@ public class ScoreItem : Item
 		game.PickUpScore(id, subId);
 
 		// Recherche rarity
-		var r		= null;
+		int? r		= null;
 		var i		= 0;
 		var family	= Data.SCORE_ITEM_FAMILIES;
 		while (r==null & i<family.Count) {

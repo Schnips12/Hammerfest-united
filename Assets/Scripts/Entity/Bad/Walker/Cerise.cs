@@ -2,17 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cerise : MonoBehaviour
+public class Cerise : Walker
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
+    /*------------------------------------------------------------------------
+        CONSTRUCTEUR
+    ------------------------------------------------------------------------*/
+    Cerise(MovieClip mc) : base(mc) {
+        animFactor = 0.65f;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+
+    /*------------------------------------------------------------------------
+        ATTACHEMENT
+    ------------------------------------------------------------------------*/
+    public static Cerise Attach(GameMode g, float x, float y) {
+        var linkage = Data.LINKAGES[Data.BAD_CERISE];
+        Cerise mc = new Cerise(g.depthMan.Attach(linkage,Data.DP_BADS)) ;
+        mc.InitBad(g, x, y) ;
+        return mc ;
     }
 }

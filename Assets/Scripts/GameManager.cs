@@ -109,7 +109,7 @@ public class GameManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	SIGNALE UNE OPéRATION ILLéGALE
 	------------------------------------------------------------------------*/
-	void LogIllegal(string str) {
+	public void LogIllegal(string str) {
 		Debug.Log("$!"+str);
 	}
 

@@ -24,6 +24,7 @@ public class GameMode : Mode
     public StatsManager statsMan;
     public RandomManager randMan;
     public DepthManager depthMan;
+    public SoundManager soundMan;
     public bool fl_static; // si true, le comportement initial des monstres sera prévisible (random sinon)
     protected bool fl_bullet;
     protected bool fl_disguise;
@@ -39,10 +40,10 @@ public class GameMode : Mode
     public bool fl_warpStart;
 
     protected float duration;
-    protected float gFriction;
+    public float gFriction;
     public float sFriction;
     public float speedFactor;
-    protected float diffFactor;
+    public float diffFactor;
 
     protected List<List<IEntity>> lists;
     public List<IEntity> killList;
@@ -155,8 +156,8 @@ public class GameMode : Mode
         endModeTimer = 0;
 
         comboList = new List<int>();
-        killList = new List<Entity>();
-        unregList = new Dictionary<int, Entity>();
+        killList = new List<IEntity>();
+        unregList = new List<killedEntity>();
         lists = new List<List<IEntity>>();
         for(int i=0 ; i < 200 ; i++) {
             lists[i] = new List<IEntity>();
@@ -658,7 +659,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     LANCE UN EFFET BULLET TIME
     ------------------------------------------------------------------------*/
-    void BulletTime(int d) {
+    public void BulletTime(int d) {
         if (!fl_bullet) {
             return;
         }
@@ -678,11 +679,11 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     COMPTAGE D'ITEMS
     ------------------------------------------------------------------------*/
-    int PickUpSpecial(int id) {
+    public int PickUpSpecial(int id) {
         return ++specialPicks[id];
     }
 
-    int PickUpScore(int id, int subId) {
+    public int PickUpScore(int id, int? subId) {
         return ++scorePicks[id];
     }
 
@@ -1149,7 +1150,7 @@ public class GameMode : Mode
         return lists[GetListId(type)];
     }
 
-    List<IEntity> GetListAt(int type, int cx,int cy) {
+    public List<IEntity> GetListAt(int type, int cx,int cy) {
         List<IEntity> l = GetList(type);
         List<IEntity> res = new List<IEntity>();
         foreach (IEntity e in l) {
@@ -1164,7 +1165,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE LE NOMBRE D'ENTITÉS DU TYPE DEMANDÉ
     ------------------------------------------------------------------------*/
-    int CountList(int type) {
+    public int CountList(int type) {
         return lists[GetListId(type)].Count;
     }
 
@@ -1186,7 +1187,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RENVOIE UNE DUPLICATION D'UNE LISTE D'ENTITÉS
     ------------------------------------------------------------------------*/
-    List<IEntity> GetListCopy(int type) {
+    public List<IEntity> GetListCopy(int type) {
         List<IEntity> l = GetList(type);
         List<IEntity> res = new List<IEntity>();
         foreach (IEntity e in l) {
@@ -1233,7 +1234,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     RETOURNE UNE ENTITÉ AU HASARD D'UN TYPE DONNÉ, OU NULL
     ------------------------------------------------------------------------*/
-    protected IEntity GetAnotherOne(int type, IEntity e) {
+    public IEntity GetAnotherOne(int type, IEntity e) {
         List<IEntity> l = GetList(type);
         if (l.Count <= 1) {
             return null;
@@ -1581,13 +1582,13 @@ public class GameMode : Mode
 
         var l = GetList(Data.PLAYER);
         for (var i=0;i<l.Count;i++) {
-            l[i].show();
+            l[i].Show();
         }
     }
 
     void OnBadsReady() {
         if (fl_ninja & GetBadClearList().Count>1) {
-            Bad foe = GetOne(Data.BAD_CLEAR);
+            Bad foe = GetOne(Data.BAD_CLEAR) as Bad;
             foe.fl_ninFoe = true;
 
             if (fl_nightmare | !world.fl_mainWorld | world.fl_mainWorld & world.currentId>=20) {
@@ -1627,7 +1628,7 @@ public class GameMode : Mode
             p.Show();
             p.Unshield();
             if (pt.fl_unstable) {
-                p.knock(Data.SECOND*0.6);
+                p.Knock(Data.SECOND*0.6f);
 //				fxMan.attachExplosion( p.x,p.y-Data.CASE_HEIGHT, 45 );
             }
         }
@@ -1679,7 +1680,7 @@ public class GameMode : Mode
         for (var i=0;i<l.Count;i++) {
             Item it = (Item) l[i];
             if (it.id==0) {
-                it.Destroy();
+                it.DestroyThis();
             }
         }
 
@@ -1704,7 +1705,7 @@ public class GameMode : Mode
         // Énervement de tous les bads
         var lb = GetBadList();
         for (var i=0;i<lb.Count;i++) {
-            lb[i].onHurryUp();
+            lb[i].OnHurryUp();
         }
 
         // Annonce

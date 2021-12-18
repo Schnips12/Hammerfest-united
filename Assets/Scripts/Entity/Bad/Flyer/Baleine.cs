@@ -7,7 +7,7 @@ public class Baleine : Flyer
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Baleine() : base() {
+	Baleine(MovieClip mc) : base(mc) {
 
 	}
 
@@ -17,8 +17,7 @@ public class Baleine : Flyer
 	------------------------------------------------------------------------*/
 	public static Baleine Attach(GameMode g, float x, float y) {
 		var linkage = Data.LINKAGES[Data.BAD_BALEINE];
-		Baleine mc = new Baleine();
-		mc.self = g.depthMan.Attach(linkage,Data.DP_BADS);
+		Baleine mc = new Baleine(g.depthMan.Attach(linkage,Data.DP_BADS));
 		mc.InitBad(g, x, y) ;
 		return mc;
 	}

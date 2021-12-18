@@ -91,7 +91,7 @@ public class DepthManager
 		return d + plan * 1000;
 	}
 
-	void Swap(MovieClip mc, int plan) {
+	public void Swap(MovieClip mc, int plan) {
 		var src_plan = Mathf.FloorToInt(mc.GetDepth() / 1000);
 		if( src_plan == plan )
 			return;

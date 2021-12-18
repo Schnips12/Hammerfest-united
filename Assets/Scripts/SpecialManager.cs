@@ -289,7 +289,7 @@ public class SpecialManager
 	/*------------------------------------------------------------------------
 	EX�CUTE UN ITEM SP�CIAL
 	------------------------------------------------------------------------*/
-	void Execute(SpecialItem item) {
+	public void Execute(SpecialItem item) {
 		int id = item.id;
 		int subId = item.subId;
 

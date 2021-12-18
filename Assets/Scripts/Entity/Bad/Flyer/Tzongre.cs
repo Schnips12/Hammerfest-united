@@ -8,7 +8,7 @@ public class Tzongre : Flyer
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Tzongre() : base() {
+	Tzongre(MovieClip mc) : base(mc) {
 
 	}
 
@@ -27,16 +27,16 @@ public class Tzongre : Flyer
 	------------------------------------------------------------------------*/
 	public override void Freeze(float d) {}
 	public override void Knock(float d) {}
-	public override void KillHit(float dx) {}
+	public override void KillHit(float? dx) {}
 
 
 	/*------------------------------------------------------------------------
 	RENCONTRE UNE AUTRE ENTIT�
 	------------------------------------------------------------------------*/
-	public override void hit(Entity e) {
+	public override void Hit(IEntity e) {
 		// Joueur
 		if ( (e.types & Data.PLAYER) > 0 ) {
-			Player et = e;
+			Player et = e as Player;
 			game.fxMan.AttachFx(x, y-Data.CASE_HEIGHT, "hammer_fx_shine") ;
 			et.GetScore(this, 50000) ;
 			this.DestroyThis() ;
@@ -44,7 +44,7 @@ public class Tzongre : Flyer
 
 		// Bads
 		if ( (e.types & Data.BAD) >0 ) {
-			Bad et = e;
+			Bad et = e as Bad;
 			et.Knock(Data.KNOCK_DURATION) ;
 		}
 	}
@@ -55,7 +55,7 @@ public class Tzongre : Flyer
 	------------------------------------------------------------------------*/
 	static Tzongre Attach(GameMode g, float x, float y) {
 		var linkage = Data.LINKAGES[Data.BAD_TZONGRE];
-		Tzongre mc = g.depthMan.Attach(linkage,Data.DP_BADS);
+		Tzongre mc = new Tzongre(g.depthMan.Attach(linkage,Data.DP_BADS));
 		mc.InitBad(g,x,y) ;
 		mc.SetLifeTimer(Data.SECOND*60) ;
 		return mc ;

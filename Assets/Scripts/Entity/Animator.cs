@@ -61,7 +61,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	ACTIVE/D�SACTIVE L'ANIMATOR
 	------------------------------------------------------------------------*/
-	void EnableAnimator() {
+	protected void EnableAnimator() {
 		fl_anim = true;
 		animator.SetBool("stop", true);
 	}

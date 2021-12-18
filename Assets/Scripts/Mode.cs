@@ -24,7 +24,7 @@ public class Mode
 	public float cycle;
 	int uniqId;
 
-	protected float xOffset; // décalage du mc du jeu
+	public float xOffset; // décalage du mc du jeu
 	protected float yOffset;
 
 	public string _name;

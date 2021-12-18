@@ -38,7 +38,7 @@ public class Data : MonoBehaviour
 	public static int CASE_WIDTH=20;
 	public static int CASE_HEIGHT=20;
 
-	public static int SECOND = 32; // dur�e d'une sec en cycles de jeu
+	public const int SECOND = 32; // dur�e d'une sec en cycles de jeu
 
 	public static int auto_inc = 0;
 
@@ -294,24 +294,24 @@ public class Data : MonoBehaviour
 	public static float DEATH_LINE = GAME_HEIGHT+50;
 
 	// *** FX
-	public static int MAX_FX					= 16;
-	public static int DUST_FALL_HEIGHT			= CASE_HEIGHT * 4;
-	public static int PARTICLE_ICE				= 1;
-	public static int PARTICLE_CLASSIC_BOMB	    = 2;
-	public static int PARTICLE_STONE			= 3;
-	public static int PARTICLE_SPARK			= 4;
-	public static int PARTICLE_DUST			    = 5;
-	public static int PARTICLE_ORANGE			= 6;
-	public static int PARTICLE_METAL			= 7;
-	public static int PARTICLE_TUBERCULOZ		= 8;
-	public static int PARTICLE_RAIN			    = 9;
-	public static int PARTICLE_LITCHI			= 10;
-	public static int PARTICLE_PORTAL			= PARTICLE_SPARK;
-	public static int PARTICLE_BUBBLE			= 11;
-	public static int PARTICLE_ICE_BAD			= 12;
-	public static int PARTICLE_BLOB			    = 13;
-	public static int PARTICLE_FRAMB			= 14;
-	public static int PARTICLE_FRAMB_SMALL		= 14;
+	public const int MAX_FX					= 16;
+	public const int DUST_FALL_HEIGHT		= 80; // CASE_HEIGHT * 4
+	public const int PARTICLE_ICE			= 1;
+	public const int PARTICLE_CLASSIC_BOMB	= 2;
+	public const int PARTICLE_STONE			= 3;
+	public const int PARTICLE_SPARK			= 4;
+	public const int PARTICLE_DUST			= 5;
+	public const int PARTICLE_ORANGE		= 6;
+	public const int PARTICLE_METAL			= 7;
+	public const int PARTICLE_TUBERCULOZ	= 8;
+	public const int PARTICLE_RAIN			= 9;
+	public const int PARTICLE_LITCHI		= 10;
+	public const int PARTICLE_PORTAL		= PARTICLE_SPARK;
+	public const int PARTICLE_BUBBLE		= 11;
+	public const int PARTICLE_ICE_BAD		= 12;
+	public const int PARTICLE_BLOB			= 13;
+	public const int PARTICLE_FRAMB			= 14;
+	public const int PARTICLE_FRAMB_SMALL	= 14;
 
 	public static int BG_STAR			= 0;
 	public static int BG_FLASH			= 1;
@@ -472,13 +472,13 @@ public class Data : MonoBehaviour
 
 
 	// *** ITEMS
-	public static int MAX_ITEMS		        = 300;
-	public static int ITEM_LIFE_TIME	    = 8*SECOND;
-	public static int DIAMANT			    = 8;
-	public static int CONVERT_DIAMANT	    = 17;
-	public static string[] EXTENDS			= {"C","R","Y","S","T","A","L"};
-	public static int SPECIAL_ITEM_TIMER	= 8*SECOND;
-	public static int SCORE_ITEM_TIMER		= 12*SECOND;
+	public const int MAX_ITEMS		        = 300;
+	public const int ITEM_LIFE_TIME	    	= 8*SECOND;
+	public const int DIAMANT			    = 8;
+	public const int CONVERT_DIAMANT	    = 17;
+	public static readonly string[] EXTENDS	= {"C","R","Y","S","T","A","L"};
+	public const int SPECIAL_ITEM_TIMER		= 8*SECOND;
+	public const int SCORE_ITEM_TIMER		= 12*SECOND;
 
 
 	// *** ITEM RANDOMIZER
@@ -864,11 +864,11 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	VALEUR DES CRISTAUX
 	------------------------------------------------------------------------*/
-	static int GetCrystalValue(int id) {
+	public static int GetCrystalValue(int id) {
 		return (int) Math.Round(Mathf.Min(50000, (5*100)*Mathf.Round(Mathf.Pow(id+1,2))));
 	}
 
-	static int GetCrystalTime(int id) {
+	public static int GetCrystalTime(int id) {
 		int[] values = {1,3,5,7,9,10};
 		return values[ Mathf.Min(id, values.Length-1) ];
 	}
@@ -976,7 +976,7 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	GROUPEMENT PAR 3 CHIFFRES
 	------------------------------------------------------------------------*/
-	static string FormatNumber(int n) {
+	public static string FormatNumber(int n) {
 		string txt = n.ToString();
 		// Groupement des chiffres
 		if (txt.IndexOf("-") < 0) {

@@ -174,7 +174,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: EXPLOSION
 	------------------------------------------------------------------------*/
-	Animation AttachExplodeZone(float x, float y, float radius) {
+	public Animation AttachExplodeZone(float x, float y, float radius) {
 		if (game.fl_lock) {
 			return null;
 		}
@@ -300,7 +300,7 @@ public class FxManager
 	}
 
 
-	void InGameParticlesDir(int id, float x, float y, int n, int? dir) {
+	public void InGameParticlesDir(int id, float x, float y, int n, float? dir) {
 		if (game.fl_lock) {
 			return;
 		}
@@ -386,7 +386,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	EVENT: LEVEL SUIVANT
 	------------------------------------------------------------------------*/
-	void OnNextLevel() {
+	public void OnNextLevel() {
 		stack = new List<stackable>();
 		Clear();
 		levelName.RemoveMovieClip();

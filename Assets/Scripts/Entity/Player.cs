@@ -9,8 +9,8 @@ public class Player : Physics, IEntity
 	PlayerController ctrl;
 	public SpecialManager specialMan;
 
-	int baseColor; // hexa
-	int darkColor; // hexa
+	Color baseColor; // hexa
+	Color darkColor; // hexa
 
 	Data.animParam baseWalkAnim;
 	Data.animParam baseStopAnim;
@@ -333,7 +333,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	MORT
 	------------------------------------------------------------------------*/
-	public override void KillHit(float dx) {
+	public override void KillHit(float? dx) {
 		if (fl_kill | fl_shield) {
 			return ;
 		}
@@ -343,7 +343,7 @@ public class Player : Physics, IEntity
 		game.soundMan.playSound("sound_player_death", Data.CHAN_PLAYER);
 
 		// recup�re le signe de dx
-		var sign = Mathf.Sign(dx);
+		var sign = Mathf.Sign(dx??0);
 		if (dx == 0) {
 			sign = UnityEngine.Random.Range(0, 2)*2-1;
 		}
@@ -369,19 +369,19 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	GAGNE DES POINTS
 	------------------------------------------------------------------------*/
-	public void GetScore(Entity origin, int value) {
+	public void GetScore(Entity origin, int? value) {
 		if (origin != null) {
 			if ( specialMan.actives[95] ) { // effet sac � thunes
-				game.fxMan.AttachScorePop( baseColor, darkColor, origin.x, origin.y, ""+(value*2) );
+				game.fxMan.AttachScorePop( baseColor, darkColor, origin.x, origin.y, (value*2).ToString() );
 			}
 			else {
-				game.fxMan.AttachScorePop( baseColor, darkColor, origin.x, origin.y, ""+value );
+				game.fxMan.AttachScorePop( baseColor, darkColor, origin.x, origin.y, value.ToString() );
 			}
 		}
 		GetScoreHidden(value);
 	}
 
-	public void GetScoreHidden(int value) {
+	public void GetScoreHidden(int? value) {
 		if (specialMan.actives[95]) {
 			value*=2;
 		}
@@ -395,7 +395,7 @@ public class Player : Physics, IEntity
 		if (score!=0 & (scoreCS^GameManager.KEY) != score) {
 			game.manager.LogIllegal("SCS");
 		}
-		score+=value;
+		score+=value??0;
 		scoreCS = score^GameManager.KEY;
 		game.gi.setScore(pid,score);
 	}
@@ -1162,7 +1162,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	EVENT: CHANGEMENT DE LEVEL
 	------------------------------------------------------------------------*/
-	void OnNextLevel() {
+	public void OnNextLevel() {
 		ChangeWeapon(1) ;
 		if ( fl_shield ) {
 			shieldTimer = 1 ;

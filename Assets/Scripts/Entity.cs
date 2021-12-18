@@ -2,13 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface IEntity {
+	int types { get; set; }
+	int uniqId { get; set; }
     int cx { get; set; }
     int cy { get; set; }
 	GameMechanics world { get; set; }
 	float x { get; set; }
 	float y { get; set; }
+	bool fl_kill { get; set; }
 	void DestroyThis();
 	void RemoveMovieClip();
+	void Show();
+	bool IsType(int t);
 }
 
 public class Entity : MovieClip, IEntity
@@ -39,18 +44,18 @@ public class Entity : MovieClip, IEntity
 	protected  float minAlpha;
 	public  float scaleFactor = 1; // facteur (1.0)
 
-	public int types;
+	public int types { get; set; }
 
 	public int scriptId;
 
 	protected float lifeTimer;
 	protected float totalLife;
 
-	public bool fl_kill;
+	public bool fl_kill { get; set; }
 	public bool fl_destroy;
 
-	public int uniqId;
-	protected Entity parent;
+	public int uniqId { get; set; }
+	protected IEntity parent;
 	Color color;
 
 	//MovieClip sticker;
@@ -58,7 +63,7 @@ public class Entity : MovieClip, IEntity
 	float stickerY;
 	float elaStickFactor;
 	float stickTimer;
-	bool fl_stick;
+	protected bool fl_stick;
 	bool fl_stickRot;
 	bool fl_stickBound;
 	bool fl_elastick;
@@ -118,7 +123,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	ENREGISTRE UN NOUVEL éLéMENT
 	------------------------------------------------------------------------*/
-	void Unregister(int type) {
+	protected void Unregister(int type) {
 		game.RemoveFromList(type, this);
 		types ^= type;
 	}
@@ -208,11 +213,11 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	COLLE UN MC à L'ENTITé // TODO manage that through Unity editor
 	------------------------------------------------------------------------*/
-	protected void Stick(float ox, float oy) { //MovieClip mc, 
+	protected void Stick(MovieClip mc, float ox, float oy) { //MovieClip mc, 
 		if (sticker._name!=null) {
 			Unstick();
 		}
-		//sticker = mc;
+		sticker = mc;
 		stickerX = ox;
 		stickerY = oy;
 		fl_stick = true;
@@ -248,7 +253,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	ACTIVE LE SOFT-RECAL (coordonnées graphiques en retard sur les réelles) // TODO probably obsolete
 	------------------------------------------------------------------------*/
-	void ActivateSoftRecal() {
+	protected void ActivateSoftRecal() {
 		fl_softRecal = true;
 		softRecalFactor = 0.1f;
 	}
@@ -412,7 +417,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	NORMALISE UN ANGLE (EN DEGRé) DANS L'INTERVAL 0-360 // TODO use unity objects (vector2, Quaternions)
 	------------------------------------------------------------------------*/
-	float AdjustAngle(float a) {
+	protected float AdjustAngle(float a) {
 		while (a<0) {
 			a+=360;
 		}

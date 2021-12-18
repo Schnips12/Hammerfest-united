@@ -8,7 +8,7 @@ public class SpecialItem : Item
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	SpecialItem() : base() {
+	SpecialItem(MovieClip mc) : base(mc) {
 
 	}
 
@@ -24,11 +24,11 @@ public class SpecialItem : Item
 	/*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-	public static SpecialItem Attach(GameMode g, float x, float y, int id, int subId) {
+	public static SpecialItem Attach(GameMode g, float x, float y, int id, int? subId) {
 		if (g.fl_clear & id==0) { // pas d'extend si level clear
 			return null;
 		}
-		SpecialItem mc = g.depthMan.Attach("hammer_item_special",Data.DP_ITEMS);
+		SpecialItem mc = new SpecialItem(g.depthMan.Attach("hammer_item_special",Data.DP_ITEMS));
 		mc.InitItem(g, x, y, id, subId) ;
 		return mc;
 	}
@@ -59,7 +59,7 @@ public class SpecialItem : Item
 		base.Update();
 		if ( id!=0 ) {
 			if ( Random.Range(0, 4)==0 ) {
-				var a = game.fxMan.attachFx(
+				var a = game.fxMan.AttachFx(
 					x + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
 					y - Random.Range(0, 10),
 					"hammer_fx_star"

@@ -14,7 +14,7 @@ public class PlayerBomb : Bomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public PlayerBomb() : base() {
+	public PlayerBomb(MovieClip mc) : base(mc) {
 		fl_airKick	= true;
 		fl_unstable	= false;
 		upgrades	= 0;
@@ -40,7 +40,7 @@ public class PlayerBomb : Bomb
 	/*------------------------------------------------------------------------
 	TOUCHE UNE ENTIT�
 	------------------------------------------------------------------------*/
-	public override void Hit(Entity e) {
+	public override void Hit(IEntity e) {
 		base.Hit(e) ;
 		if (fl_unstable) {
 			if ((e.types&Data.BAD)>0) {
@@ -99,7 +99,7 @@ public class PlayerBomb : Bomb
 	EVENT: DESTRUCTION
 	------------------------------------------------------------------------*/
 	protected override void OnLifeTimer() {
-		Player p = parent;
+		Player p = parent as Player;
 //		if ( p!=null && world.currentId<100 ) { // patch anti score infini
 //			p.getScore( null,10 );
 //		}
@@ -136,16 +136,16 @@ public class PlayerBomb : Bomb
 
 		if ( owner!=null ) {
 			if ( owner.specialMan.actives[14] ) { // champi bleu
-				ScoreItem.attach(game, x,y, 47,0);
+				ScoreItem.Attach(game, x,y, 47,0);
 			}
 			if ( owner.specialMan.actives[15] ) { // champi rouge
-				ScoreItem.attach(game, x,y, 48,0);
+				ScoreItem.Attach(game, x,y, 48,0);
 			}
 			if ( owner.specialMan.actives[16] ) { // champi vert
-				ScoreItem.attach(game, x,y, 49,0);
+				ScoreItem.Attach(game, x,y, 49,0);
 			}
 			if ( owner.specialMan.actives[17] ) { // champi or
-				ScoreItem.attach(game, x,y, 50,0);
+				ScoreItem.Attach(game, x,y, 50,0);
 			}
 
 		}

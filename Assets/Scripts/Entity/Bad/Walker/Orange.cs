@@ -1,18 +1,21 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Orange : MonoBehaviour
+public class Orange : Jumper
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Orange(MovieClip mc) : base(mc) {
+		SetJumpH(100);
+	}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+	/*------------------------------------------------------------------------
+	ATTACHEMENT
+	------------------------------------------------------------------------*/
+	public static Orange Attach(GameMode g, float x, float y) {
+		var linkage = Data.LINKAGES[Data.BAD_ORANGE];
+		Orange mc = new Orange(g.depthMan.Attach(linkage,Data.DP_BADS));
+		mc.InitBad(g,x,y) ;
+		return mc ;
+	}
+
 }

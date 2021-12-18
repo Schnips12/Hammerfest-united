@@ -5,7 +5,7 @@ using UnityEngine;
 public abstract class Walker : Bad
 {
 
-	float speed;
+	protected float speed;
 	protected float dir;
 
 	protected bool fl_fall;
@@ -59,7 +59,7 @@ public abstract class Walker : Bad
 	/*------------------------------------------------------------------------
 	CALCULE LA VITESSE DE MARCHE DU MONSTRE
 	------------------------------------------------------------------------*/
-	void Walk() {
+	protected virtual void Walk() {
 		var b = speedFactor * speed * game.speedFactor;
 
 		if ( !IsReady() ) {
@@ -119,7 +119,7 @@ public abstract class Walker : Bad
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LE BAD EST DISPOS� � AGIR
 	------------------------------------------------------------------------*/
-	protected override bool IsReady() {
+	public override bool IsReady() {
 		return base.IsReady() & IsHealthy();
 	}
 
@@ -176,7 +176,7 @@ public abstract class Walker : Bad
 
 	// *** IA: D�CISIONS
 
-	protected bool DecideFall() {
+	protected virtual bool DecideFall() {
 		var d = player.cy - cy;
 		var fall = world.fallMap[cx][cy];
 		var fl_good = fall>0 & d>0 & fall<=d+3;
@@ -247,7 +247,7 @@ public abstract class Walker : Bad
 				}
 			}
 		}
-		if ( GameManager.CONFIG.fl_detail & fl_freeze & Mathf.Abs(dx)>=4 ) {
+		if ( GameManager.CONFIG.fl_detail & fl_freeze & Mathf.Abs(dx??0)>=4 ) {
 			if ( recentParticles<=0 ) {
 				if ( GameManager.CONFIG.fl_shaky ) {
 					game.Shake(Data.SECOND*0.2f, 2);

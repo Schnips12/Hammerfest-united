@@ -3,11 +3,11 @@ using UnityEngine;
 public class Mover : Physics
 {
     protected class movement {
-        public float dx;
-        public float dy;
-        public float delay;
+        public float? dx;
+        public float? dy;
+        public float? delay;
         public int action;
-        public movement(float dx, float dy, float delay, int action) {
+        public movement(float? dx, float? dy, float? delay, int action) {
             this.dx = dx;
             this.dy = dy;
             this.delay = delay;
@@ -36,7 +36,7 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	D�FINI LA D�CISION SUIVANTE
 	------------------------------------------------------------------------*/
-	protected void SetNext(float dx, float dy, float delay, int action) {
+	protected void SetNext(float? dx, float? dy, float? delay, int action) {
 		next = new movement(dx, dy, delay, action);
 	}
 
@@ -71,7 +71,7 @@ public class Mover : Physics
 	------------------------------------------------------------------------*/
 	protected override void OnHitGround(float h) {
 		if ( fl_bounce ) {
-			var b = bounceFactor*Mathf.Abs(dy) ;
+			var b = bounceFactor*Mathf.Abs(dy??0) ;
 			if (b>=2) {
 				SetNext(dx,-b,0,Data.ACTION_MOVE) ;
 				fl_skipNextGravity = true ;
@@ -83,7 +83,7 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI L'ENTIT� EST EN �TAT D'AGIR
 	------------------------------------------------------------------------*/
-	protected virtual bool IsReady() {
+	public virtual bool IsReady() {
 		return fl_stable & next==null ;
 	}
 

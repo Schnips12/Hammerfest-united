@@ -7,7 +7,7 @@ public class PoireBomb : BadBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	PoireBomb() : base() {
+	PoireBomb(MovieClip mc) : base(mc) {
 		duration = 45;
 		power = 30;
 		radius = Data.CASE_WIDTH*4;
@@ -17,9 +17,9 @@ public class PoireBomb : BadBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static PoireBomb Attach(Modes.GameMode g, float x, float y) {
+	static PoireBomb Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_poire";
-		PoireBomb mc = g.depthMan.Attach(linkage,Data.DP_BOMBS);
+		PoireBomb mc = new PoireBomb(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x,y );
 		return mc;
 	}
@@ -54,7 +54,7 @@ public class PoireBomb : BadBomb
 		var l = game.GetClose(Data.PLAYER,x,y,radius,false);
 
 		for (var i=0;i<l.Count;i++) {
-			Player e = l[i];
+			Player e = l[i] as Player;
 			e.KillHit(0);
 			ShockWave(e, radius, power);
 			if (!e.fl_shield) {

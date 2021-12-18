@@ -15,7 +15,7 @@ public class Flyer : Bad
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	protected Flyer() : base() {
+	protected Flyer(MovieClip mc) : base(mc) {
 		speed = 4 ;
 		angerFactor = 0.5f;
 		// attention changement: contenu d�plac� dans init()
@@ -77,7 +77,7 @@ public class Flyer : Bad
 	/*------------------------------------------------------------------------
 	MORT
 	------------------------------------------------------------------------*/
-	public override void KillHit(float dx) {
+	public override void KillHit(float? dx) {
 		base.KillHit(dx) ;
 		Land() ;
 	}
@@ -238,7 +238,7 @@ public class Flyer : Bad
 
 		// Collisions haut du niveau
 		if ( fl_fly & dy<0 & y<=Data.CASE_HEIGHT ) {
-			dy = Mathf.Abs(dy);
+			dy = dy==null ? null : Mathf.Abs(dy.Value);
 		}
 	}
 

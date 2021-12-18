@@ -1,18 +1,48 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Pomme : MonoBehaviour
+public class Pomme : Shooter
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Pomme(MovieClip mc) : base(mc) {
+		SetJumpUp(3) ;
+		SetJumpH(100) ;
+		SetClimb(100,1);
+		SetFall(20) ;
+		SetShoot(2) ;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+		InitShooter(20, 12) ;
+	}
+
+
+	/*------------------------------------------------------------------------
+	INITIALISATION
+	------------------------------------------------------------------------*/
+	protected override void Init(GameMode g) {
+		base.Init(g) ;
+	}
+
+
+	/*------------------------------------------------------------------------
+	ATTACHEMENT
+	------------------------------------------------------------------------*/
+	public static Pomme Attach(GameMode g, float x, float y) {
+		var linkage = Data.LINKAGES[Data.BAD_POMME];
+		Pomme mc = new Pomme(g.depthMan.Attach(linkage,Data.DP_BADS));
+		mc.InitBad(g,x,y) ;
+		return mc ;
+	}
+
+
+	/*------------------------------------------------------------------------
+	EVENT: TIR
+	------------------------------------------------------------------------*/
+	protected override void OnShoot() {
+		var s = Pepin.Attach(game, x, y) ;
+		if ( dir<0 ) {
+			s.moveLeft(s.shootSpeed) ;
+		}
+		else {
+			s.moveRight(s.shootSpeed) ;
+		}
+	}
 }

@@ -16,7 +16,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	S'AJOUTE � UNE CASE DONN�E
 	------------------------------------------------------------------------*/
-	void TAddSingle(int cx, int cy) {
+	protected void TAddSingle(int cx, int cy) {
 		if (cx<0 | cx>=Data.LEVEL_WIDTH | cy<0 | cy>=Data.LEVEL_HEIGHT) {
 			return ;
 		}
@@ -27,7 +27,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	QUITTE UNE CASE DONN�E
 	------------------------------------------------------------------------*/
-	void TRemSingle(int cx, int cy) {
+	protected void TRemSingle(int cx, int cy) {
 		if (cx<0 | cx>=Data.LEVEL_WIDTH | cy<0 | cy>=Data.LEVEL_HEIGHT) {
 			return ;
 		}
@@ -44,7 +44,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	AJOUTE L'ENTIT� � L'ENSEMBLE DES CASES QU'ELLE OCCUPE
 	------------------------------------------------------------------------*/
-	protected void TAdd(int cx, int cy) {
+	protected virtual void TAdd(int cx, int cy) {
 		TAddSingle(cx,cy) ;
 		TAddSingle(cx-1,cy) ;
 		TAddSingle(cx+1,cy) ;
@@ -57,7 +57,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	RETIRE L'ENTIT� DE L'ENSEMBLE DES CASES QU'ELLE OCCUPE
 	------------------------------------------------------------------------*/
-	protected void TRem(int cx, int cy) {
+	protected virtual void TRem(int cx, int cy) {
 		TRemSingle(cx,cy) ;
 		TRemSingle(cx-1,cy) ;
 		TRemSingle(cx+1,cy) ;

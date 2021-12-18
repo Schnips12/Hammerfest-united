@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class BadBomb : Bomb
 {
-    Entity.Bad owner;
+    Bad owner;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public BadBomb() : base() {
+	public BadBomb(MovieClip mc) : base(mc) {
 		fl_airKick = true;
 	}
 
@@ -17,7 +17,7 @@ public class BadBomb : Bomb
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	protected override void Init(Modes.GameMode g) {
+	protected override void Init(GameMode g) {
 		base.Init(g);
 		Register(Data.BAD_BOMB);
 	}
@@ -25,7 +25,7 @@ public class BadBomb : Bomb
 	/*------------------------------------------------------------------------
 	INITIALISATION BOMBE
 	------------------------------------------------------------------------*/
-	protected override void InitBomb(Modes.GameMode g, float x,float y) {
+	protected override void InitBomb(GameMode g, float x,float y) {
 		base.InitBomb(g,x,y);
 		if (game.fl_bombExpert) {
 			radius*=1.4f;
@@ -36,7 +36,7 @@ public class BadBomb : Bomb
 	/*------------------------------------------------------------------------
 	D�FINI LE BAD PARENT DE LA BOMBE
 	------------------------------------------------------------------------*/
-	void SetOwner(Entity.Bad b) {
+	void SetOwner(Bad b) {
 		owner = b;
 	}
 
@@ -44,7 +44,7 @@ public class BadBomb : Bomb
 	/*------------------------------------------------------------------------
 	G�LE LA BOMBE ET LA REND DANGEUREUSE POUR LE BAD
 	------------------------------------------------------------------------*/
-	public Entity.Bomb GetFrozen(int uid) {
+	public Bomb GetFrozen(int uid) {
 		return null; // do nothing
 	}
 
@@ -62,7 +62,7 @@ public class BadBomb : Bomb
 	/*------------------------------------------------------------------------
 	EVENT: KICK (BOMBES FACILES � REPOUSSER)
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Entity.Player p) {
+	protected override void OnKick(Player p) {
 		base.OnKick(p);
 		dx*=3;
 	}

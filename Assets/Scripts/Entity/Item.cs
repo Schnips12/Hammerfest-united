@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class Item : Physics
 {
-	int id;
-	int subId;
+	public int id;
+	protected int? subId;
 
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Item() : base() {
+	protected Item(MovieClip mc) : base(mc) {
 		DisableAnimator() ;
 		fl_alphaBlink		= true;
 		fl_largeTrigger		= true;
@@ -33,10 +33,10 @@ public class Item : Physics
 	/*------------------------------------------------------------------------
 	INIT D'ITEM
 	------------------------------------------------------------------------*/
-	protected virtual void InitItem(GameMode g, float x, float y, int id, int subId) {
-		Init(g) ;
-		MoveTo(x,y) ;
-		this.id = id ;
+	protected virtual void InitItem(GameMode g, float x, float y, int id, int? subId) {
+		Init(g);
+		MoveTo(x,y);
+		this.id = id;
 		this.subId = subId ;
 		if ( id>=1000 ) {
 			this.GotoAndStop(id-1000+1) ;
@@ -44,7 +44,7 @@ public class Item : Physics
 		else {
 			this.GotoAndStop(id+1) ;
 		}
-		this.sub.GotoAndStop(subId+1) ;
+		this.sub.GotoAndStop(subId??0 + 1) ;
 		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_shine") ;
 		EndUpdate() ;
 	}

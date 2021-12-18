@@ -12,10 +12,10 @@ public class Jumper : Walker
 	bool fl_jumper; // flag r�sumant les 3 pr�c�dents
 	bool fl_climb;
 
-	private float chanceJumpH;
-	private float chanceJumpUp;
-	private float chanceJumpDown;
-	private float chanceClimb;
+	protected float chanceJumpH;
+	protected float chanceJumpUp;
+	protected float chanceJumpDown;
+	protected float chanceClimb;
 
 	float? maxClimb;
 
@@ -138,11 +138,11 @@ public class Jumper : Walker
 	/*------------------------------------------------------------------------
 	LANCE UN SAUT
 	------------------------------------------------------------------------*/
-	void Jump(float dx, float dy, float delay) {
+	protected virtual void Jump(float dx, float dy, float? delay) {
 		Halt();
 		//    x = oldX;
 		//    y = oldY;
-		SetNext(dx,dy,delay,Data.ACTION_MOVE);
+		SetNext(dx, dy, delay,Data.ACTION_MOVE);
 		if (delay>0) {
 			PlayAnim( Data.ANIM_BAD_THINK );
 		}

@@ -52,6 +52,7 @@ public class MovieClip
     	public float strength;
     	public float blurX;
     	public float blurY;
+        public float alpha;
     }
     public Filter filter;
 

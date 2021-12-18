@@ -7,7 +7,7 @@ public class Banane : Jumper
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Banane() : base() {
+	Banane(MovieClip mc) : base(mc) {
 		SetJumpUp(5) ;
 		SetJumpDown(5) ;
 		SetJumpH(100) ;
@@ -27,8 +27,7 @@ public class Banane : Jumper
 	------------------------------------------------------------------------*/
 	public static Banane Attach(GameMode g, float x, float y) {
 		var linkage = Data.LINKAGES[Data.BAD_BANANE];
-		Banane mc =new Banane();
-        mc.self = g.depthMan.Attach(linkage,Data.DP_BADS);
+		Banane mc =new Banane(g.depthMan.Attach(linkage,Data.DP_BADS));
 		mc.InitBad(g,x,y) ;
 		return mc ;
 	}

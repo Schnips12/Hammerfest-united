@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class Physics : HAnimator
 {
-	public float dx;
-	public float dy;
+	public float? dx;
+	public float? dy;
 
 	protected float? fallStart; // use for fall height
 
@@ -12,8 +12,8 @@ public class Physics : HAnimator
 	public float? slideFriction; // default world value if "null"
 	public float shockResistance; // resistance to shockwaves
 
-	protected bool fl_stable;
-	protected bool fl_physics;
+	public bool fl_stable;
+	public bool fl_physics;
 	public bool fl_friction;
 	public bool fl_gravity;
 	protected bool fl_strictGravity;
@@ -80,11 +80,11 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	ACTIVATION/D�SACTIVATION DU MOTEUR PHYSIQUE
 	------------------------------------------------------------------------*/
-	void EnablePhysics() {
+	protected void EnablePhysics() {
 		fl_physics = true;
 	}
 
-	void DisablePhysics() {
+	protected void DisablePhysics() {
 		fl_physics = false;
 	}
 
@@ -115,7 +115,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	MORT AVEC ANIMATION DE SAUT
 	------------------------------------------------------------------------*/
-	public virtual void KillHit(float dx) {
+	public virtual void KillHit(float? dx) {
 		if (fl_kill) {
 			return;
 		}
@@ -146,7 +146,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	CALCULE LES DX,DY SELON UN ANGLE (EN DEGR�) ET UNE VITESSE
 	------------------------------------------------------------------------*/
-	void MoveToAng(float angDeg, float speed) {
+	public void MoveToAng(float angDeg, float speed) {
 		var rad = Mathf.PI*angDeg / 180;
 		dx = Mathf.Cos(rad)*speed;
 		dy = Mathf.Sin(rad)*speed;
@@ -155,7 +155,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	CALCULE LES DX,DY SELON UNE AUTRE ENTIT� CIBLE
 	------------------------------------------------------------------------*/
-	void MoveToTarget(Entity e, float speed) {
+	public void MoveToTarget(IEntity e, float speed) {
 		var rad = Mathf.Atan2(e.y-y,e.x-x);
 		dx = Mathf.Cos(rad)*speed;
 		dy = Mathf.Sin(rad)*speed;
@@ -164,7 +164,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	CALCULE DX / DY SELON UNE COORDONN�E
 	------------------------------------------------------------------------*/
-	void MoveToPoint(float x, float y, float speed) {
+	protected void MoveToPoint(float x, float y, float speed) {
 		var rad = Mathf.Atan2(y-this.y, x-this.x);
 		dx = Mathf.Cos(rad)*speed;
 		dy = Mathf.Sin(rad)*speed;
@@ -174,16 +174,16 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	D�PLACEMENT DANS UNE DIRECTION AU CHOIX
 	------------------------------------------------------------------------*/
-	void MoveUp(float speed) {
+	protected void MoveUp(float speed) {
 		MoveToAng( -90, speed );
 	}
-	void MoveDown(float speed) {
+	protected void MoveDown(float speed) {
 		MoveToAng( 90, speed );
 	}
-	void MoveLeft(float speed) {
+	protected void MoveLeft(float speed) {
 		MoveToAng( 180, speed );
 	}
-	void MoveRight(float speed) {
+	protected void MoveRight(float speed) {
 		MoveToAng( 0, speed );
 	}
 
@@ -220,7 +220,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	EX�CUTE LES COLLISIONS ENTRE ENTIT�S
 	------------------------------------------------------------------------*/
-	protected void CheckHits() {
+	protected virtual void CheckHits() {
 		var l = GetByType(Data.ENTITY);
 		for (var i=0;i<l.Count;i++) {
 			if ( !l[i].fl_kill & !fl_kill & this.HitBound(l[i]) & l[i].uniqId!=this.uniqId ) {
@@ -233,7 +233,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	PR�FIXE DU STEPPING
 	------------------------------------------------------------------------*/
-	void Prefix() {
+	protected virtual void Prefix() {
 		// do nothing
 	}
 
@@ -341,7 +341,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	RECALAGE Y
 	------------------------------------------------------------------------*/
-	void Recal() {
+	protected void Recal() {
 		y = Entity.y_ctr(Entity.y_rtc(y));
 		UpdateCoords();
 		while ( world.GetCase(cx, cy)==Data.GROUND ) {

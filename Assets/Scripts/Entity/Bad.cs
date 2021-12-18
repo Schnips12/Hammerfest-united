@@ -4,11 +4,12 @@ public abstract class Bad : Mover
 {
 	protected Player player;
 	protected bool fl_playerClose;
-	int closeDistance;
+	protected int closeDistance;
+	public bool fl_noreward;
 
 	float freezeTimer;
 	float freezeTotal;
-	protected bool fl_freeze;
+	public bool fl_freeze;
 
 	bool fl_ninFriend;
 	bool fl_ninFoe;
@@ -17,9 +18,9 @@ public abstract class Bad : Mover
 	protected bool fl_knock;
 	bool fl_showIA; // shows an icon overhead when player is close
 
-	float deathTimer;
+	protected float? deathTimer;
 
-	bool fl_trap; // false if immunity against traps (spears)
+	public bool fl_trap; // false if immunity against traps (spears)
 	int? comboId;
 	float? yTrigger;
 	protected int anger;
@@ -27,9 +28,9 @@ public abstract class Bad : Mover
 	protected float speedFactor;
 
 	protected float chaseFactor;
-	int maxAnger;
+	protected int maxAnger;
 
-	float? realRadius; // if not null, will be used as additionnal check for "hitTest"
+	protected float? realRadius; // if not null, will be used as additionnal check for "hitTest"
 
 	MovieClip iceMc;
 
@@ -79,7 +80,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	INITIALISATION SP�CIALE DES BADS
 	------------------------------------------------------------------------*/
-	protected void InitBad(GameMode g,float x, float y) {
+	protected virtual void InitBad(GameMode g,float x, float y) {
 		Init(g);
 		MoveTo(x+Data.CASE_WIDTH*0.5f, y+Data.CASE_HEIGHT) ; // colle les bads au sol
 		EndUpdate();
@@ -125,7 +126,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LE MONSTRE EST EN �TAT DE FONCTIONNER
 	------------------------------------------------------------------------*/
-	protected bool IsHealthy() {
+	protected virtual bool IsHealthy() {
 		return !fl_kill & !fl_freeze & !fl_knock;
 	}
 
@@ -224,7 +225,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	CALCULE LE FACTEUR VITESSE
 	------------------------------------------------------------------------*/
-	void CalcSpeed() {
+	protected virtual void CalcSpeed() {
 		speedFactor = 1.0f + angerFactor*anger;
 		if (game.globalActives[69]) speedFactor *= 0.6f; // tortue
 		if (game.globalActives[80]) speedFactor *= 0.3f; // escargot
@@ -243,7 +244,10 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	G�N�RE UNE R�COMPENSE SUR LE MONSTRE
 	------------------------------------------------------------------------*/
-	void DropReward() {
+	protected void DropReward() {
+		if(fl_noreward) {
+			return;
+		}
 		float itY;
 		// Y de spawn de l'item
 		if (world.InBound(cx, cy)) {
@@ -263,7 +267,7 @@ public abstract class Bad : Mover
 		}
 		else {
 			// Diamant
-			ScoreItem.Attach(game, x, itY, Data.DIAMANT,null);
+			ScoreItem.Attach(game, x, itY, Data.DIAMANT, null);
 		}
 	}
 
@@ -271,8 +275,8 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	CALCULE LA VITESSE APPROXIMATIVE
 	------------------------------------------------------------------------*/
-	float EvaluateSpeed() {
-		return Mathf.Sqrt( Mathf.Pow(dx,2)+Mathf.Pow(dy,2) );
+	public float EvaluateSpeed() {
+		return Mathf.Sqrt( Mathf.Pow(dx??0, 2)+Mathf.Pow(dy??0, 2) );
 	}
 
 
@@ -303,17 +307,17 @@ public abstract class Bad : Mover
 	EVENT: LIGNE DU BAS
 	------------------------------------------------------------------------*/
 	protected override void OnDeathLine() {
-		var mc = game.depthMan.attach("hammer_fx_death", Data.FX);
+		var mc = game.depthMan.Attach("hammer_fx_death", Data.FX);
 		mc._x = x;
 		mc._y = Data.GAME_HEIGHT*0.5f;
 		game.Shake(10, 3);
-		game.soundMan.playSound("sound_bad_death", Data.CHAN_BAD);
+		game.soundMan.PlaySound("sound_bad_death", Data.CHAN_BAD);
 		deathTimer = 0;
 
 		base.OnDeathLine();
 
 		if ( !fl_kill ) {
-			onKill();
+			OnKill();
 		}
 		DropReward();
 		DestroyThis();
@@ -358,8 +362,8 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	EVENT: HURRY UP!
 	------------------------------------------------------------------------*/
-	function onHurryUp() {
-		angerMore();
+	public virtual void OnHurryUp() {
+		AngerMore();
 	}
 
 
@@ -398,7 +402,7 @@ public abstract class Bad : Mover
 				b.Unstick();
 			}
 
-			ScoreItem.Attach(game, Data.GAME_WIDTH*0.5,-20, 236, null);
+			ScoreItem.Attach(game, Data.GAME_WIDTH*0.5f,-20, 236, null);
 			game.fxMan.DetachLastAlert();
 			game.fxMan.AttachAlert(Lang.Get(45));
 		}
@@ -426,12 +430,12 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	G�LE CE MONSTRE
 	------------------------------------------------------------------------*/
-	public void Freeze(float timer) {
+	public virtual void Freeze(float timer) {
 		if (fl_kill) {
 			return;
 		}
 		if (fl_knock) {
-			wakeUp();
+			WakeUp();
 		}
 
 //		game.soundMan.playSound("sound_freeze", Data.CHAN_BAD);
@@ -448,7 +452,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	ASSOME LE MONSTRE
 	------------------------------------------------------------------------*/
-	public void Knock(float timer) {
+	public virtual void Knock(float timer) {
 		if ( fl_freeze ) {
 			Melt();
 		}
@@ -509,7 +513,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	D�FINI LE JOUEUR CIBLE DU MONSTRE
 	------------------------------------------------------------------------*/
-	void Hate(Player p) {
+	protected void Hate(Player p) {
 		player = p;
 	}
 
@@ -527,7 +531,7 @@ public abstract class Bad : Mover
 				else {
 					mc.GotoAndStop(2);
 				}
-				Stick(mc,0,-Data.CASE_HEIGHT*1.8f);
+				Stick(mc, 0, -Data.CASE_HEIGHT*1.8f);
 			}
 		}
 		var oldX = _x;
@@ -579,7 +583,7 @@ public abstract class Bad : Mover
 	------------------------------------------------------------------------*/
 	protected override void Update() {
 		if ( player._name==null ) {
-			Hate(game.GetOne(Data.PLAYER));
+			Hate(game.GetOne(Data.PLAYER) as Player);
 		}
 
 		fl_playerClose = IsHealthy() & ( Distance(player.x,player.y) <= closeDistance*(anger+1) );
@@ -588,8 +592,8 @@ public abstract class Bad : Mover
 			if ( fl_playerClose ) {
 				if ( !fl_stick ) {
 					var mc = game.depthMan.Attach("curse", Data.DP_FX) ;
-					mc.gotoAndStop(""+Data.CURSE_TAUNT) ;
-					Stick(mc,0,-Data.CASE_HEIGHT*2.5);
+					mc.GotoAndStop(Data.CURSE_TAUNT) ;
+					Stick(mc,0,-Data.CASE_HEIGHT*2.5f);
 				}
 			}
 			else {
