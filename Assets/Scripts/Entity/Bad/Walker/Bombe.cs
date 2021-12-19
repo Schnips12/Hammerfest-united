@@ -21,7 +21,7 @@ public class Bombe : Jumper
 //		setFall(50);
 		fl_alphaBlink	= false;
 		fl_overheat		= false;
-		blinkColor		= 0xff9e5e;
+		blinkColor		= Data.ToColor(0xff9e5e);
 		blinkColorAlpha	= 50;
 	}
 
@@ -51,7 +51,7 @@ public class Bombe : Jumper
 	/*------------------------------------------------------------------------
 	LOOP SUR L'ANIM DE R�FLEXION
 	------------------------------------------------------------------------*/
-	protected override void PlayAnim(Data.animParam obj) {
+	public override void PlayAnim(Data.animParam obj) {
 		if (fl_overheat ) {
 			return;
 		}
@@ -104,7 +104,7 @@ public class Bombe : Jumper
 				e.dy = -10-Random.Range(0, 20) ;
 			}
 		}
-		game.soundMan.playSound("sound_bomb_black", Data.CHAN_BOMB);
+		game.soundMan.PlaySound("sound_bomb_black", Data.CHAN_BOMB);
 
 		// Item
 		DropReward();

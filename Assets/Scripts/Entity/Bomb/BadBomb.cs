@@ -62,7 +62,7 @@ public class BadBomb : Bomb
 	/*------------------------------------------------------------------------
 	EVENT: KICK (BOMBES FACILES � REPOUSSER)
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Player p) {
+	public override void OnKick(Player p) {
 		base.OnKick(p);
 		dx*=3;
 	}

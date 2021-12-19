@@ -32,9 +32,9 @@ public class Citron : Shooter
         var s = Zeste.Attach(game, x, y) ;
         var target = game.GetOne(Data.PLAYER) ;
         if ( target.y<y )
-        s.MoveUp(s.shootSpeed) ;
+        s.MoveUp(s.shootSpeed);
         else
-        s.MoveDown(s.shootSpeed) ;
+        s.MoveDown(s.shootSpeed);
     }
 
 }

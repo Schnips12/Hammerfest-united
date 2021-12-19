@@ -176,7 +176,7 @@ public class Saw : WallWalker
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 		if ( fl_stun ) {
 			var f = 1-stunTimer/STUN_DURATION;
@@ -220,7 +220,7 @@ public class Saw : WallWalker
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 
 		// Controle par variables dynamiques
 		var dyn_sp = game.GetDynamicInt("SAW_SPEED");

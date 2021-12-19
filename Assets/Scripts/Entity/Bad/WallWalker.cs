@@ -357,7 +357,7 @@ public class WallWalker : Bad
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 
 		if ( IsHealthy() ) {
@@ -386,7 +386,7 @@ public class WallWalker : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		// Radius auto (pour d�capiter ^^)
 		if ( game.GetOne(Data.PLAYER).y > y ) {
 			realRadius = Data.CASE_WIDTH*1.4f;

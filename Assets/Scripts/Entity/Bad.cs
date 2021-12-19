@@ -11,19 +11,19 @@ public abstract class Bad : Mover
 	float freezeTotal;
 	public bool fl_freeze;
 
-	bool fl_ninFriend;
-	bool fl_ninFoe;
+	public bool fl_ninFriend;
+	public bool fl_ninFoe;
 
 	float knockTimer;
-	protected bool fl_knock;
+	public bool fl_knock;
 	bool fl_showIA; // shows an icon overhead when player is close
 
 	protected float? deathTimer;
 
 	public bool fl_trap; // false if immunity against traps (spears)
 	int? comboId;
-	float? yTrigger;
-	protected int anger;
+	public float? yTrigger;
+	public int anger;
 	protected float angerFactor;
 	protected float speedFactor;
 
@@ -115,7 +115,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	MORT SUR PLACE
 	------------------------------------------------------------------------*/
-	void Burn() {
+	public void Burn() {
 		var fx = game.fxMan.AttachFx(x, y, "hammer_fx_burning" );
 		DropReward() ;
 		OnKill();
@@ -202,7 +202,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	D�FINI L'ID DE COMBO
 	------------------------------------------------------------------------*/
-	void SetCombo(int? id) {
+	public void SetCombo(int? id) {
 		if (!fl_kill) {
 			comboId = id;
 		}
@@ -212,7 +212,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	JOUE UNE ANIM
 	------------------------------------------------------------------------*/
-	protected override void PlayAnim(Data.animParam o) {
+	public override void PlayAnim(Data.animParam o) {
 		if (o.id==Data.ANIM_BAD_WALK.id & anger>0) {
 			base.PlayAnim(Data.ANIM_BAD_ANGER);
 		}
@@ -295,7 +295,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	AUTORISE L'APPLICATION DU PATCH COLLISION AU SOL (ESCALIERS)
 	------------------------------------------------------------------------*/
-	bool NeedsPatch() {
+	protected override bool NeedsPatch() {
 		return fl_freeze | fl_knock;
 	}
 
@@ -521,7 +521,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		if ( fl_ninFriend || fl_ninFoe ) {
 			if( IsHealthy() & sticker._name==null ) {
 				var mc = game.depthMan.Attach("hammer_interf_ninjaIcon", Data.DP_BADS);
@@ -545,7 +545,7 @@ public abstract class Bad : Mover
 
 		var minSpeed = 2;
 		if ( GameManager.CONFIG.fl_detail ) {
-			if ( fl_freeze & fl_stable & Mathf.Abs(dx)>minSpeed) {
+			if ( fl_freeze & fl_stable & Mathf.Abs(dx??0)>minSpeed) {
 				var nb = Random.Range(0, 5)+2;
 				for (int i=0 ; i<nb ; i++) {
 					var part = game.fxMan.AttachFx(
@@ -556,7 +556,7 @@ public abstract class Bad : Mover
 					part.mc._rotation = Random.Range(0, 360);
 					part.mc._xscale = Random.Range(0, 80)+20;
 					part.mc._yscale = part.mc._xscale;
-					part.mc._alpha = Mathf.Min(100, (Mathf.Abs(dx)-minSpeed)/5*100);
+					part.mc._alpha = Mathf.Min(100, (Mathf.Abs(dx??0)-minSpeed)/5*100);
 
 					// particules physiques derri�re le bloc
 //					if ( Math.abs(dx)>minSpeed*2 && Std.random(40)==0 ) {
@@ -581,7 +581,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		if ( player._name==null ) {
 			Hate(game.GetOne(Data.PLAYER) as Player);
 		}

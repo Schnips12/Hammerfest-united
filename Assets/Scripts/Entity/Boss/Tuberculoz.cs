@@ -60,7 +60,7 @@ public class Tuberculoz : Mover
 
 
 	int _firstUniq;
-	int lives;
+	public int lives;
 	int dir;
 
 	bool fl_trap; // entity.Bad compatibility (spikes)
@@ -69,7 +69,7 @@ public class Tuberculoz : Mover
 	bool fl_immune;
 	float immuneTimer;
 	bool fl_death;
-	bool fl_defeated;
+	public bool fl_defeated;
 
 	List<bool> recents;
 	int badKills;
@@ -270,9 +270,9 @@ public class Tuberculoz : Mover
 	MISE � JOUR BARRE DE VIE
 	------------------------------------------------------------------------*/
 	void UpdateBar() {
-		lifeBar.barFade._xscale = lifeBar.bar._xscale;
-		lifeBar.barFade.GotoAndPlay(1);
-		lifeBar.bar._xscale = lives/LIVES*100;
+		lifeBar.FindSub("barFade")._xscale = lifeBar.FindSub("bar")._xscale;
+		lifeBar.FindSub("barFade").GotoAndPlay(1);
+		lifeBar.FindSub("bar")._xscale = lives/LIVES*100;
 	}
 
 
@@ -870,7 +870,7 @@ public class Tuberculoz : Mover
 			for (var i=0;i<n;i++) {
 				var bx = i*Data.GAME_WIDTH/n + Data.CASE_WIDTH;
 				if ( Mathf.Abs(bx-x)>60 ) {
-					var s = FireBall.Attach(
+					var s = BossFireBall.Attach(
 						game,
 						bx,
 						Data.GAME_HEIGHT
@@ -912,7 +912,7 @@ public class Tuberculoz : Mover
 	/*------------------------------------------------------------------------
 	MORT D'UN BAD
 	------------------------------------------------------------------------*/
-	void OnKillBad() {
+	public void OnKillBad() {
 		badKills++;
 		totalKills++;
 
@@ -942,7 +942,7 @@ public class Tuberculoz : Mover
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION D'UNE BOMBE DANS LE LEVEL
 	------------------------------------------------------------------------*/
-	void OnExplode(float x, float y, float radius) {
+	public void OnExplode(float x, float y, float radius) {
 		if ( fl_death ) {
 			return;
 		}
@@ -956,7 +956,7 @@ public class Tuberculoz : Mover
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 
 		if ( dir<0 ) {
@@ -981,7 +981,7 @@ public class Tuberculoz : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		// Hurry up d�sactiv�
 		if ( !fl_death ) {
 			game.huTimer = 0;
@@ -1016,7 +1016,7 @@ public class Tuberculoz : Mover
 			fbCoolDown-=Time.fixedDeltaTime;
 			if ( action==WALK & fbCoolDown<=0 & game.CountList(Data.SHOOT)<2 & Random.Range(0, 1000)<=CHANCE_FINAL_ANGER ) {
 				fbCoolDown = Data.SECOND*0.5f;
-				var s = FireBall.Attach(
+				var s = BossFireBall.Attach(
 					game,
 					x,
 					y

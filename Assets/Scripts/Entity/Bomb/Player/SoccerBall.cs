@@ -4,16 +4,16 @@ using UnityEngine;
 
 public class SoccerBall : PlayerBomb
 {
-	static var TOP_SPEED	= 4;
+	static float TOP_SPEED	= 4;
 
 	float speed;
 	float burnTimer;
-	Player lastPlayer;
+	public Player lastPlayer;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public SoccerBall() : base() {
+	public SoccerBall(MovieClip mc) : base(mc) {
 		lastPlayer		= null;
 		duration		= 999999;
 		burnTimer		= 0;
@@ -28,7 +28,7 @@ public class SoccerBall : PlayerBomb
 	------------------------------------------------------------------------*/
 	public static SoccerBall Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_soccer";
-		SoccerBall mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
+		SoccerBall mc = new SoccerBall(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
 	}
@@ -40,7 +40,7 @@ public class SoccerBall : PlayerBomb
 	protected override void Init(GameMode g) {
 		base.Init(g);
 		Register(Data.SOCCERBALL);
-		FxManager.AddGlow(this, 0x808080, 2);
+		FxManager.AddGlow(this, Data.ToColor(0x808080), 2);
 		game.fxMan.AttachShine( x, y-Data.CASE_HEIGHT*0.5f );
 	}
 
@@ -48,7 +48,7 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	SoccerBall Duplicate() {
+	public override IBomb Duplicate() {
 		return null;
 	}
 
@@ -63,10 +63,10 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: KICK
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Player p) {
+	public override void OnKick(Player p) {
 		base.OnKick(p);
 		lastPlayer = p;
-		if ( Mathf.Abs(dx)<10 ) {
+		if ( Mathf.Abs(dx??0)<10 ) {
 			dx *= 3;
 			dy *= 1.1f;
 		}
@@ -76,7 +76,7 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	MET LE FEU AU BALLON
 	------------------------------------------------------------------------*/
-	void Burn() {
+	public void Burn() {
 		burnTimer = Data.SECOND;
 	}
 
@@ -84,7 +84,7 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		// never explodes
 	}
 
@@ -109,9 +109,9 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
-		sub._rotation += dx*5;
+		sub._rotation += dx??0*5;
 		if ( dx>0 ) {
 			sub._xscale = -Mathf.Abs(sub._xscale);
 		}
@@ -130,7 +130,7 @@ public class SoccerBall : PlayerBomb
 		var ocy = Entity.y_rtc(oldY);
 		if (world.GetCase(ocx, ocy) != Data.GROUND) {
 			dx = -dx;
-			if ( Mathf.Abs(dx)>7 ) {
+			if ( Mathf.Abs(dx??0)>7 ) {
 				game.fxMan.InGameParticlesDir( Data.PARTICLE_DUST, x,y, Random.Range(0, 5)+1, dx);
 			}
 		}
@@ -141,8 +141,8 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
-		speed = Mathf.Sqrt(Mathf.Pow(dx,2) + Mathf.Pow(dy,2));
+	public override void Update() {
+		speed = Mathf.Sqrt(Mathf.Pow(dx??0,2) + Mathf.Pow(dy??0,2));
 		animFactor = 0.5f * speed/TOP_SPEED ;
 		fl_airKick = true;
 

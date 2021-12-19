@@ -4,6 +4,7 @@ using UnityEngine;
 public interface IEntity {
 	int types { get; set; }
 	int uniqId { get; set; }
+	int scriptId { get; set; }
     int cx { get; set; }
     int cy { get; set; }
 	GameMechanics world { get; set; }
@@ -14,12 +15,14 @@ public interface IEntity {
 	void RemoveMovieClip();
 	void Show();
 	bool IsType(int t);
+	void Update();
+	void EndUpdate();
 }
 
 public class Entity : MovieClip, IEntity
 {
     public GameMode game;
-	protected MovieClip sticker;
+	public MovieClip sticker;
 
 	public float x { get; set; } // real coords
 	public float y { get; set; }
@@ -36,8 +39,8 @@ public class Entity : MovieClip, IEntity
 	protected int fcx; // under feet case coords
 	protected int fcy;
 
-	float _xOffset; // graphical offset of mc (for shoots)
-	float _yOffset;
+	protected float _xOffset; // graphical offset of mc (for shoots)
+	public float _yOffset;
 
 	protected  float rotation;
 	public float alpha;
@@ -46,16 +49,16 @@ public class Entity : MovieClip, IEntity
 
 	public int types { get; set; }
 
-	public int scriptId;
+	public int scriptId { get; set; }
 
-	protected float lifeTimer;
-	protected float totalLife;
+	public float? lifeTimer { get; set; }
+	protected float? totalLife;
 
 	public bool fl_kill { get; set; }
 	public bool fl_destroy;
 
 	public int uniqId { get; set; }
-	protected IEntity parent;
+	public IEntity parent;
 	Color color;
 
 	//MovieClip sticker;
@@ -138,7 +141,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	DéFINI L'ENTITé PARENTE
 	------------------------------------------------------------------------*/
-	void SetParent(Entity e) {
+	public void SetParent(IEntity e) {
 		parent = e;
 	}
 
@@ -146,7 +149,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	DéFINI LE TEMPS DE VIE
 	------------------------------------------------------------------------*/
-	public void SetLifeTimer(float t) {
+	public void SetLifeTimer(float? t) {
 		lifeTimer = t;
 		totalLife = t;
 	}
@@ -203,7 +206,10 @@ public class Entity : MovieClip, IEntity
 		Unstick();
 		for(int i=0 ; i<32 ; i++) {
 			if ((types&(1<<i)) > 0) {
-				game.unregList[Mathf.RoundToInt(Mathf.Pow(2,i))] = this;
+				GameMode.killedEntity k = new GameMode.killedEntity();
+				k.ent = this;
+				k.type = types;
+				game.unregList[Mathf.RoundToInt(Mathf.Pow(2,i))] = k;
 			}
 		}
 		game.killList.Add(this);
@@ -213,7 +219,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	COLLE UN MC à L'ENTITé // TODO manage that through Unity editor
 	------------------------------------------------------------------------*/
-	protected void Stick(MovieClip mc, float ox, float oy) { //MovieClip mc, 
+	public void Stick(MovieClip mc, float ox, float oy) { //MovieClip mc, 
 		if (sticker._name!=null) {
 			Unstick();
 		}
@@ -230,7 +236,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	ACTIVE L'ELASTICITé DU STICKER (algo du cameraman bourré) // TODO probably obsolete
 	------------------------------------------------------------------------*/
-	protected void SetElaStick(float f) {
+	public void SetElaStick(float f) {
 		if ( fl_elastick ) {
 			return;
 		}
@@ -318,7 +324,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	RE-SCALE DE L'ENTITé
 	------------------------------------------------------------------------*/
-	public void Scale(float n) {
+	public virtual void Scale(float n) {
 		scaleFactor = n/100 ;
 		_xscale = n;
 		_yscale = _xscale;
@@ -378,7 +384,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	MISE à JOUR DES COORDONNéES DE CASE
 	------------------------------------------------------------------------*/
-	protected void UpdateCoords() {
+	public void UpdateCoords() {
 		cx = Entity.x_rtc(x);
 		cy = Entity.y_rtc(y);
 		fcx = Entity.x_rtc(x);
@@ -485,7 +491,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	CLOTURE DES UPDATES
 	------------------------------------------------------------------------*/
-	protected virtual void EndUpdate() {
+	public virtual void EndUpdate() {
 		UpdateCoords();
 		if ( fl_softRecal ) {
 			var tx = x+_xOffset;
@@ -503,12 +509,12 @@ public class Entity : MovieClip, IEntity
 		}
 		_rotation = rotation ;
 		_alpha = Mathf.Max(minAlpha, alpha) ;
-		if ( alpha!=100 & blendId<=2 ) {
+/* 		if ( alpha!=100 & blendId<=2 ) { // TODO Blend
 			blendMode = BlendMode.LAYER;
 		}
 		else {
 			blendMode = defaultBlend;
-		}
+		} */
 		oldX = x ;
 		oldY = y ;
 		if ( fl_stick ) {
@@ -531,7 +537,7 @@ public class Entity : MovieClip, IEntity
 	}
 
 	// Update is called once per frame
-    protected void Update()
+    public virtual void Update()
     {
 		// Durée de vie
 		if (lifeTimer>0) {

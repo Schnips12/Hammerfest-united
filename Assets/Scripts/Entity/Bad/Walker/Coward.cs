@@ -201,7 +201,7 @@ public class Coward : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 		if ( IsHealthy() & fleeTimer>0 ) {
 			if ( !fl_stick ) {

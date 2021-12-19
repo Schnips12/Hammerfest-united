@@ -115,7 +115,7 @@ public class Flyer : Bad
 	//  }
 
 
-	protected override void PlayAnim(Data.animParam a) {
+	public override void PlayAnim(Data.animParam a) {
 		if ( a.id!=Data.ANIM_BAD_JUMP.id ) {
 			base.PlayAnim(a);
 		}
@@ -233,7 +233,7 @@ public class Flyer : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 
 		// Collisions haut du niveau
@@ -246,7 +246,7 @@ public class Flyer : Bad
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate() ;
 		_xscale = dir*Mathf.Abs(_xscale) ;
 	}

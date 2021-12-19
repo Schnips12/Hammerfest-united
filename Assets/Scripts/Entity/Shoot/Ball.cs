@@ -4,18 +4,15 @@ using UnityEngine;
 
 public class Ball : Shoot
 {
-
-	var targetCatcher : Entity;
-
+	public IEntity targetCatcher;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	function new() {
-		super();
-		shootSpeed = 8.5;
+	Ball(MovieClip mc) : base(mc) {
+		shootSpeed = 8.5f;
 		_yOffset = 0;
-		setLifeTimer(Data.BALL_TIMEOUT);
+		SetLifeTimer(Data.BALL_TIMEOUT);
 		fl_alphaBlink = false;
 		fl_borderBounce = true;
 	}
@@ -24,9 +21,9 @@ public class Ball : Shoot
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	function init(g) {
-		super.init(g);
-		register(Data.BALL);
+	protected override void Init(GameMode g) {
+		base.Init(g);
+		Register(Data.BALL);
 	}
 
 
@@ -34,10 +31,10 @@ public class Ball : Shoot
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static function attach( g:mode.GameMode, x,y ) {
+	public static Ball Attach(GameMode g, float x, float y ) {
 		var linkage = "hammer_shoot_ball";
-		var s : entity.shoot.Ball = downcast( g.depthMan.attach(linkage,Data.DP_SHOTS) );
-		s.initShoot(g, x, y);
+		Ball s = new Ball(g.depthMan.Attach(linkage,Data.DP_SHOTS));
+		s.InitShoot(g, x, y);
 		return s;
 	}
 
@@ -45,27 +42,29 @@ public class Ball : Shoot
 	/*------------------------------------------------------------------------
 	EVENT: TIMER DE VIE ATTEINT (et pas catch�, � priori)
 	------------------------------------------------------------------------*/
-	function onLifeTimer() {
+	protected override void OnLifeTimer() {
 		// R�-attribution d'une balle perdue
-		game.fxMan.attachFx(x,y-Data.CASE_HEIGHT/2, "hammer_fx_pop");
+		game.fxMan.AttachFx(x, y-Data.CASE_HEIGHT/2, "hammer_fx_pop");
 
-		var bad : entity.bad.walker.Fraise = downcast(game.getOne(Data.CATCHER));
-		bad.assignBall();
+		Fraise bad = game.GetOne(Data.CATCHER) as Fraise;
+		bad.AssignBall();
 
-		super.onLifeTimer();
+		base.OnLifeTimer();
 	}
 
 
 	/*------------------------------------------------------------------------
 	EVENT: HIT
 	------------------------------------------------------------------------*/
-	function hit(e:Entity) {
+	public override void Hit(IEntity e) {
 		if ( (e.types & Data.PLAYER) > 0 ) {
-			var et : entity.Player = downcast(e);
-			et.killHit(dx);
+			Player et = e as Player;
+			et.KillHit(dx);
 		}
-		if ( (e.types & Data.CATCHER) > 0 && targetCatcher==downcast(e) ) {
-			downcast(e).catchBall(this);
+		if ( (e.types & Data.CATCHER) > 0 ) {
+            if (targetCatcher==(e as Fraise)) {
+				(e as Fraise).CatchBall(this);
+			}
 		}
 	}
 }

@@ -1,14 +1,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bomb : Mover
+public interface IBomb {
+	float x { get; set; }
+	float y { get; set; }
+	bool fl_explode { get; set; }
+	bool fl_airKick { get; set; }
+	bool fl_stable  { get; set; }
+	bool fl_bounce  { get; set; }
+	float? dx { get; set; }
+	float? dy { get; set; }
+	int uniqId { get; set; }
+	float? lifeTimer { get; set; }
+	Mover.movement next { get; set; }
+	bool IsType(int types);
+	void MoveTo(float x, float y);
+	void OnKick(Player p);
+	IBomb Duplicate();
+}
+public class Bomb : Mover, IBomb
 {
 	protected float radius;
 	protected float power;
 	protected float duration;
 
-	public bool fl_explode;
-	protected bool fl_airKick;
+	public bool fl_explode { get; set; }
+	public bool fl_airKick { get; set; }
 	protected bool fl_bumped;
 
 	protected string explodeSound;
@@ -16,7 +33,7 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	protected Bomb() : base() {
+	protected Bomb(MovieClip mc) : base(mc) {
 		explodeSound	 = "sound_bomb";
 
 		radius		= Data.CASE_WIDTH*3;
@@ -54,7 +71,7 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	AUTORISE L'APPLICATION DU PATCH COLLISION AU SOL (ESCALIERS)
 	------------------------------------------------------------------------*/
-	bool NeedsPatch() {
+	protected override bool NeedsPatch() {
 		return true;
 	}
 
@@ -62,7 +79,7 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	RENVOIE LES ENTIT�S AFFECT�ES PAR LA BOMBE
 	------------------------------------------------------------------------*/
-	protected List<Entity> BombGetClose(int type) {
+	protected List<IEntity> BombGetClose(int type) {
 		return game.GetClose(type, x, y, radius, fl_stable);
 	}
 
@@ -73,7 +90,7 @@ public class Bomb : Mover
 	public virtual void OnExplode() {
 		PlayAnim(Data.ANIM_BOMB_EXPLODE);
 		if (explodeSound!=null) {
-			game.soundMan.playSound(explodeSound,Data.CHAN_BOMB);
+			game.soundMan.PlaySound(explodeSound,Data.CHAN_BOMB);
 		}
 		rotation = 0;
 		fl_physics = false;
@@ -98,7 +115,7 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		if (!fl_stable) {
 			var ang = 30;
 			if (dx>0) {
@@ -116,7 +133,7 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	EVENT: TIMER DE VIE
 	------------------------------------------------------------------------*/
-	protected virtual void OnLifeTimer() {
+	protected override void OnLifeTimer() {
 		StopBlink();
 		OnExplode();
 	}
@@ -130,7 +147,7 @@ public class Bomb : Mover
 		DestroyThis();
 	}
 
-	protected virtual void OnKick(Player p) {
+	public virtual void OnKick(Player p) {
 		// do nothing
 	}
 
@@ -151,9 +168,9 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	EVENT: PORTAL
 	------------------------------------------------------------------------*/
-	protected override void OnPortal(int pid) {
-		base.OnPortal(int pid);
-		game.fxMan.attachFx(x,y-Data.CASE_HEIGHT*0.5,"hammer_fx_shine");
+	protected override void OnPortal(int? pid) {
+		base.OnPortal(pid);
+		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT*0.5f,"hammer_fx_shine");
 		DestroyThis();
 	}
 
@@ -171,7 +188,7 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	EVENT: BUMPER
 	------------------------------------------------------------------------*/
-	void OnBump() {
+	protected override void OnBump() {
 		fl_bumped = true;
 	}
 
@@ -179,7 +196,7 @@ public class Bomb : Mover
 	/*------------------------------------------------------------------------
 	DUPLIQUE LA BOMBE EN COURS
 	------------------------------------------------------------------------*/
-	Bomb Duplicate() {
+	public virtual IBomb Duplicate() {
 		return null; // do nothing
 	}
 }

@@ -84,7 +84,7 @@ public class Litchi : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 		if ( !fl_kill & fl_knock & child==null & dy<=-Data.BAD_VJUMP_Y*0.6 ) {
 			dy = -Data.BAD_VJUMP_Y*0.6f;
@@ -95,7 +95,7 @@ public class Litchi : Jumper
 	/*------------------------------------------------------------------------
 	HACK POUR UTILISER LE DX/DY APRES SHOCKWAVE DU LITCHI GEL�
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		if ( child!=null ) {
 //			child.dx = dx*0.5;
 			child.dy = -7; // -13

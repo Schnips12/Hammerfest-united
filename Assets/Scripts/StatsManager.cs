@@ -103,9 +103,7 @@ public class StatsManager
 		if (game.fl_clear) {
 			return null;
 		}
-		int tempx = Random.Range(0, Data.LEVEL_WIDTH);
-		int tempy = Random.Range(0, Data.LEVEL_HEIGHT);
-		var pt = game.world.GetGround(ref tempx, ref tempy);
+		var pt = game.world.GetGround(Random.Range(0, Data.LEVEL_WIDTH), Random.Range(0, Data.LEVEL_HEIGHT));
 		float x = Entity.x_ctr(pt[0]);
 		float y = Entity.y_ctr(pt[1]);
 		int id = extendList[Random.Range(0, extendList.Count)];

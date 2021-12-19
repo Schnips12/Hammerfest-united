@@ -39,10 +39,10 @@ public class Pomme : Shooter
 	protected override void OnShoot() {
 		var s = Pepin.Attach(game, x, y) ;
 		if ( dir<0 ) {
-			s.moveLeft(s.shootSpeed) ;
+			s.MoveLeft(s.shootSpeed) ;
 		}
 		else {
-			s.moveRight(s.shootSpeed) ;
+			s.MoveRight(s.shootSpeed) ;
 		}
 	}
 }

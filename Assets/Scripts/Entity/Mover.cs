@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Mover : Physics
 {
-    protected class movement {
+    public class movement {
         public float? dx;
         public float? dy;
         public float? delay;
@@ -14,8 +14,8 @@ public class Mover : Physics
             this.action = action; 
         }
     }
-	protected movement next;
-	protected bool fl_bounce;
+	public movement next { get; set; }
+	public bool fl_bounce { get; set; }
 	protected float bounceFactor;
 
 	/*------------------------------------------------------------------------
@@ -36,7 +36,7 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	D�FINI LA D�CISION SUIVANTE
 	------------------------------------------------------------------------*/
-	protected void SetNext(float? dx, float? dy, float? delay, int action) {
+	public void SetNext(float? dx, float? dy, float? delay, int action) {
 		next = new movement(dx, dy, delay, action);
 	}
 
@@ -91,7 +91,7 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		// On agit comme on a pr�vu
 		if (next!=null) {
 			next.delay -= Time.fixedDeltaTime;

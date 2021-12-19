@@ -14,7 +14,7 @@ public class FireBall : Bad
 
 	float angerTimer;
 	float summonTimer;
-	bool fl_summon;
+	public bool fl_summon;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -70,7 +70,7 @@ public class FireBall : Bad
 	/*------------------------------------------------------------------------
 	ANNULATION D'EVENT
 	------------------------------------------------------------------------*/
-	protected override void PlayAnim(Data.animParam o) {
+	public override void PlayAnim(Data.animParam o) {
 		// do nothing
 	}
 	public override void Freeze(float d) {
@@ -102,7 +102,7 @@ public class FireBall : Bad
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate() ;
 		body._rotation = ang ;
 		eyes.GotoAndStop(Mathf.RoundToInt(ang/360*eyes.TotalFrames())+1);
@@ -157,7 +157,7 @@ public class FireBall : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		// Mal d'invocation
 		if ( fl_summon ) {
 			summonTimer-=Time.fixedDeltaTime;

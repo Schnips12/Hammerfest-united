@@ -242,7 +242,7 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	BEHAVIOURS D�SACTIV�S
 	------------------------------------------------------------------------*/
-	public override void Knock(float d) {	}
+	public void Knock(float d) {	}
 	public override void KillHit(float? dx) { }
 
 
@@ -323,7 +323,7 @@ public class Bat : Mover
 		if ( fl_death ) {
 			return;
 		}
-		blinkColor		= 0xff0000;
+		blinkColor		= Data.ToColor(0xff0000);
 		blinkColorAlpha	= 100;
 		Blink(Data.BLINK_DURATION);
 		PlayAnim(Data.ANIM_BAT_KNOCK);
@@ -367,9 +367,9 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	ATTACHE UNE FIREBALL FLOTTANTE
 	------------------------------------------------------------------------*/
-	void AttachFireBall(float ang, float distFactor) {
+	BossFireBall AttachFireBall(float ang, float distFactor) {
 		var s = BossFireBall.Attach(game,x,y);
-		s.initBossShoot( this, ang);
+		s.InitBossShoot( this, ang);
 		fbList.Add(s);
 		s.maxDist	*= distFactor;
 		s.distSpeed	*= distFactor;
@@ -424,7 +424,7 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 
 		// flottement sur place
@@ -459,7 +459,7 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		// Hurry up d�sactiv�
 		if ( !fl_death ) {
 			game.huTimer = 0;

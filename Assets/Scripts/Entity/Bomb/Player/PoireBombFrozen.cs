@@ -4,11 +4,10 @@ using UnityEngine;
 
 public class PoireBombFrozen : PlayerBomb
 {
-
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public PoireBombFrozen() : base() {
+	public PoireBombFrozen(MovieClip mc) : base(mc) {
 		duration = Random.Range(0, 20)+15;
 		power = 30;
 	}
@@ -17,9 +16,9 @@ public class PoireBombFrozen : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static PoireBombFrozen Attach(Modes.GameMode g, float x, float y) {
+	static PoireBombFrozen Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_poire_frozen";
-		PoireBombFrozen mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
+		PoireBombFrozen mc = new PoireBombFrozen(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
 	}
@@ -28,7 +27,7 @@ public class PoireBombFrozen : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	PoireBombFrozen Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y);
 	}
 
@@ -43,7 +42,7 @@ public class PoireBombFrozen : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		base.OnExplode();
 
 		game.fxMan.AttachExplodeZone(x,y,radius);
@@ -51,21 +50,20 @@ public class PoireBombFrozen : PlayerBomb
 		var l = BombGetClose(Data.BAD);
 
 		for (var i=0;i<l.Count;i++) {
-			Bad e = l[i];
+			Bad e = l[i] as Bad;
 			e.SetCombo(uniqId);
 			e.Freeze(Data.FREEZE_DURATION);
 			ShockWave(e, radius, power);
 		}
 
-
 		l = BombGetClose(Data.BAD_BOMB);
 		for (var i=0;i<l.Count;i++) {
-			Bad b = l[i];
+			BadBomb b = l[i] as BadBomb; // TODO Interface IBadBomb
 			if (!b.fl_explode) {
 				var bf = b.GetFrozen(uniqId);
 				if ( bf!=null ) {
 					ShockWave( bf, radius, power );
-					b.Destroy();
+					b.DestroyThis();
 				}
 			}
 		}

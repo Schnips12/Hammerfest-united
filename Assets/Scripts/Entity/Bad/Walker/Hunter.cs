@@ -114,7 +114,7 @@ public class Hunter : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		if ( fl_hunt ) {
 			if ( IsReady() & !Close() ) {
 				UpdateSpeed();

@@ -8,7 +8,7 @@ public class Green : PlayerBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Green() : base() {
+	public Green(MovieClip mc) : base(mc) {
 		duration		= 200;
 		power			= 25;
 		fl_blink		= true;
@@ -21,10 +21,10 @@ public class Green : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	public static MovieClip Attach(GameMode g, float x, float y) {
+	public static Green Attach(GameMode g, float x, float y) {
 		string linkage = "hammer_bomb_green";
-		MovieClip mc = g.depthMan.Attach(linkage, Data.DP_BOMBS);
-		InitBomb(g, x, y);
+		Green mc = new Green(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+		mc.InitBomb(g, x, y);
 		return mc;
 	}
 
@@ -32,7 +32,7 @@ public class Green : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	Green Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y) ;
 	}
 
@@ -41,7 +41,7 @@ public class Green : PlayerBomb
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate() ;
 		rotation = 0 ;
 		_rotation = rotation ;
@@ -51,10 +51,10 @@ public class Green : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		if (fl_explode) return;
 
-		game.soundMan.playSound("sound_bomb", Data.CHAN_BOMB);
+		game.soundMan.PlaySound("sound_bomb", Data.CHAN_BOMB);
 
 		base.OnExplode() ;
 
@@ -62,7 +62,7 @@ public class Green : PlayerBomb
 		var l = BombGetClose(Data.BAD) ;
 
 		for (var i=0;i<l.Count;i++) {
-			Bad e = l[i];
+			Bad e = l[i] as Bad;
 			e.SetCombo(uniqId) ;
 			e.Freeze(Data.FREEZE_DURATION) ;
 			ShockWave(e, radius, power) ;
@@ -71,7 +71,7 @@ public class Green : PlayerBomb
 
 		l = BombGetClose(Data.BAD_BOMB);
 		for (var i=0;i<l.Count;i++) {
-			BadBomb b = l[i];
+			BadBomb b = l[i] as BadBomb;
 			if (!b.fl_explode) {
 				var bf = b.GetFrozen(uniqId);
 				if ( bf!=null ) {

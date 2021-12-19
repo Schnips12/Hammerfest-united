@@ -105,7 +105,7 @@ public class Shooter : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		if ( shootCD>0 ) {
 			shootCD-=Time.fixedDeltaTime;
 		}

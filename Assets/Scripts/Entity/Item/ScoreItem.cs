@@ -37,12 +37,19 @@ public class ScoreItem : Item
 		mc.InitItem(g, x, y, id, subId);
 		return mc;
 	}
+	public static void AttachAndDump(GameMode g, float x, float y, int id, int? subId) {
+		ScoreItem mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
+		if (id>=1000) {
+			id -= 1000;
+		}
+		mc.InitItem(g, x, y, id, subId);
+	}
 
 
 	/*------------------------------------------------------------------------
 	ACTIVE L'ITEM AU PROFIT DE "E"
 	------------------------------------------------------------------------*/
-	protected override void Execute(Player p) {
+	public override void Execute(Player p) {
 		int? value = Data.ITEM_VALUES[id+1000];
 
 		game.soundMan.PlaySound("sound_item_score", Data.CHAN_ITEM);

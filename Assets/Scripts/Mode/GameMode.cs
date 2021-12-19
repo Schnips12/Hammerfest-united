@@ -7,6 +7,7 @@ using System.Linq;
 
 public class GameMode : Mode
 {
+    public MovieClip mc;
     static int WATER_COLOR		= 0x0000ff;
 
     [SerializeField] GameObject popupPrefab;
@@ -31,7 +32,7 @@ public class GameMode : Mode
     protected bool fl_map;
     public bool fl_mirror;
     public bool fl_nightmare;
-    protected bool fl_bombControl;
+    public bool fl_bombControl;
     public bool fl_ninja;
     public bool fl_bombExpert;
     public bool fl_ice;
@@ -79,7 +80,7 @@ public class GameMode : Mode
 
     /* var mapIcons		: Array<MovieClip>; */
     float dfactor;
-    float targetDark;
+    float? targetDark;
     /* var extraHoles		: Array< {x:float, y:float, d:float, mc:MovieClip} >; */
 
     float lagCpt;
@@ -94,9 +95,9 @@ public class GameMode : Mode
     protected int currentDim;
     protected int portalId;
     List<Player> latePlayers;		// liste de players arrivant en retard d'un portal
-    List<PortalLink> portalMcList;
+    List<LabelledPortalMC> portalMcList;
 
-    /* var gi				: gui.GameInterface; */
+    public GameInterface gi;
     public Chrono gameChrono;
 
     struct eventAndTravel {
@@ -113,8 +114,17 @@ public class GameMode : Mode
     List<bool> worldKeys;
     public int? forcedDarkness;
     PortalLink nextLink;
-    public int fakeLevelId;
+    public int? fakeLevelId;
     public int perfectItemCpt;
+
+    public List<Action> endLevelStack;
+
+    class LabelledPortalMC {
+        public float x;
+        public float y;
+        public float cpt;
+        public MovieClip mc;
+    }
 
 
     /*------------------------------------------------------------------------
@@ -165,7 +175,7 @@ public class GameMode : Mode
 
         globalActives	= new List<bool>();
         /* endLevelStack	= new Array(); */
-        portalMcList	= new List<PortalLink>();
+        portalMcList	= new List<LabelledPortalMC>();
         /* extraHoles		= new Array(); */
         dfactor			= 0;
 
@@ -229,7 +239,7 @@ public class GameMode : Mode
     INITIALISE L'INTERFACE DE JEU (non appelé dans la classe gamemode)
     ------------------------------------------------------------------------*/
     protected virtual void InitInterface() {
-        gi.Destroy();
+        gi.DestroyThis();
         gi = new GameInterface(this);
     }
 
@@ -1082,8 +1092,8 @@ public class GameMode : Mode
         if (e==null) {
             List<Player> pl = GetPlayerList();
             foreach (Player p in pl) {
-                p.dx = (portalMcList[pid].x-p.x)*0.018;
-                p.dy = (portalMcList[pid].y-p.y)*0.018;
+                p.dx = (portalMcList[pid].x-p.x)*0.018f;
+                p.dy = (portalMcList[pid].y-p.y)*0.018f;
                 p.fl_hitWall = false;
                 p.fl_hitGround = false;
                 p.fl_gravity = false;
@@ -1119,7 +1129,11 @@ public class GameMode : Mode
             fxMan.AttachExplosion(x, y, 40);
             fxMan.InGameParticles(Data.PARTICLE_PORTAL, x, y, 5);
             fxMan.AttachShine(x, y);
-            portalMcList[pid] = {x:x, y:y, mc:p, cpt:0}; //TODO Not PortalLinks, fix that.
+            portalMcList[pid] = new LabelledPortalMC();
+            portalMcList[pid].x=x;
+            portalMcList[pid].y=y;
+            portalMcList[pid].mc=p;
+            portalMcList[pid].cpt=0; //TODO Not PortalLinks, fix that.
             return true;
         }
     }
@@ -1375,7 +1389,7 @@ public class GameMode : Mode
             case Data.BAD_BALEINE		 : bad = Baleine.Attach(this,x,y) ; break;
             case Data.BAD_SPEAR			 : bad = Spear.Attach(this,x,y) ; break;
             case Data.BAD_CRAWLER		 : bad = Crawler.Attach(this,x,y) ; break;
-            case Data.BAD_TZONGRE		 : bad = Flyer.Tzongre.Attach(this,x,y) ; break;
+            case Data.BAD_TZONGRE		 : bad = Tzongre.Attach(this,x,y) ; break;
             case Data.BAD_SAW			 : bad = Saw.Attach(this,x,y) ; break;
             case Data.BAD_LITCHI		 : bad = Litchi.Attach(this,x,y) ; break;
             case Data.BAD_KIWI			 : bad = Kiwi.Attach(this,x,y) ; break;
@@ -1463,22 +1477,22 @@ public class GameMode : Mode
         if (s!="" && s!=null) {
             // Affichage
             KillItemName();
-            itemNameMC = depthMan.attach("hammer_interf_item_name", Data.DP_TOP);
-            itemNameMC._x = Data.GAME_WIDTH*0.5 + 20; // icon width
+            itemNameMC = depthMan.Attach("hammer_interf_item_name", Data.DP_TOP);
+            itemNameMC._x = Data.GAME_WIDTH*0.5f + 20; // icon width
             itemNameMC._y = 15;//Data.GAME_HEIGHT-20; // 15;
             itemNameMC.field.text = s;
 
             // Item icon
             var icon;
             if ( id<1000 ) {
-                icon = Std.attachMC( itemNameMC, "hammer_item_special",manager.uniq++);
+                icon = new MovieClip(itemNameMC, "hammer_item_special",manager.uniq++);
                 icon.gotoAndStop(""+(id+1));
             }
             else {
-                icon = Std.attachMC( itemNameMC, "hammer_item_score",manager.uniq++);
+                icon = new MovieClip(itemNameMC, "hammer_item_score",manager.uniq++);
                 icon.gotoAndStop(""+(id-1000+1));
             }
-            icon._x -= itemNameMC.field.textWidth*0.5 + 20;
+            icon._x -= itemNameMC.field.textWidth*0.5f + 20;
             icon._y = 10;
             icon._xscale = 75;
             icon._yscale = icon._xscale;
@@ -1508,33 +1522,33 @@ public class GameMode : Mode
 
 
     public void KillPortals() { // TODO Change portalMCList type to List of GameObject?
-        foreach (PortalLink ptl in portalMcList) {
-            GameObject.Destroy(ptl.mc);
+        foreach (LabelledPortalMC ptmc in portalMcList) {
+            ptmc.mc.RemoveMovieClip();
         }
-        portalMcList = new List<PortalLink>();
+        portalMcList = new List<LabelledPortalMC>();
     }
 
 
     /*------------------------------------------------------------------------
     ATTACH: ICON SUR LA CARTE
     ------------------------------------------------------------------------*/
-    void AttachMapIcon(int eid, int lid, string txt, int offset, int offsetTotal) {
-        var x = Data.GAME_WIDTH*0.5;
+    void AttachMapIcon(int eid, int lid, string txt, int? offset, int offsetTotal) {
+        var x = Data.GAME_WIDTH*0.5f;
         var y = GetMapY(lid);
-        if ( offset!=null ) {
+        if (offset!=null) {
             var wid = 8;
-            x += offset*wid - 0.5*(offsetTotal-1)*wid;
+            x += offset??0*wid - 0.5f*(offsetTotal-1)*wid;
         }
 
-        if ( eid==Data.EVENT_EXIT_LEFT || eid==Data.EVENT_BACK_LEFT ) {
-            x = Data.GAME_WIDTH*0.5 - 5;
+        if ( eid==Data.EVENT_EXIT_LEFT | eid==Data.EVENT_BACK_LEFT ) {
+            x = Data.GAME_WIDTH*0.5f - 5;
         }
-        if ( eid==Data.EVENT_EXIT_RIGHT || eid==Data.EVENT_BACK_RIGHT ) {
-            x = Data.GAME_WIDTH*0.5 + 5;
+        if ( eid==Data.EVENT_EXIT_RIGHT | eid==Data.EVENT_BACK_RIGHT ) {
+            x = Data.GAME_WIDTH*0.5f + 5;
         }
 
-        var mc = depthMan.attach("hammer_interf_mapIcon", Data.DP_INTERF);
-        mc.gotoAndStop(""+eid);
+        var mc = depthMan.Attach("hammer_interf_mapIcon", Data.DP_INTERF);
+        mc.GotoAndStop(eid);
         mc._x = Mathf.Floor(x);
         mc._y = Mathf.Floor(y);
 
@@ -1553,13 +1567,13 @@ public class GameMode : Mode
         var lp = GetPlayerList();
         for (var i=0;i<lp.Count;i++) {
             if ( !lp[i].fl_kill ) {
-                var mc = Entity.Bad.FireBall.Attach(this, lp[i]);
+                var mc = FireBall.Attach(this, lp[i]);
                 mc.anger = baseAnger-1;
                 if ( baseAnger>0 ) {
                     mc.fl_summon = false;
-                    mc.stopBlink();
+                    mc.StopBlink();
                 }
-                mc.angerMore();
+                mc.AngerMore();
             }
         }
     }
@@ -1603,7 +1617,7 @@ public class GameMode : Mode
             }
             friendsLimit = Mathf.Min(GetBadClearList().Count-1, friendsLimit);
             while(friendsLimit>0) {
-                Bad b = GetAnotherOne(Data.BAD_CLEAR, foe);
+                Bad b = GetAnotherOne(Data.BAD_CLEAR, foe) as Bad;
                 if (!b.fl_ninFriend) {
                     b.fl_ninFriend = true;
                     friendsLimit--;
@@ -1688,17 +1702,17 @@ public class GameMode : Mode
         fxMan.AttachExit();
 
         // Pile d'appel post-clear
-        for (var i=0;i<endLevelStack.length;i++) {
+        for (var i=0;i<endLevelStack.Count;i++) {
             endLevelStack[i]();
         }
-        endLevelStack = new Array();
+        endLevelStack = new List<Action>();
     }
 
 
     /*------------------------------------------------------------------------
     EVENT: HURRY UP!
     ------------------------------------------------------------------------*/
-    public virtual GameObject OnHurryUp() {
+    public virtual MovieClip OnHurryUp() {
         huState++;
         huTimer = 0;
 
@@ -1709,10 +1723,10 @@ public class GameMode : Mode
         }
 
         // Annonce
-        var mc = fxMan.AttachHurryUp();
+        mc = fxMan.AttachHurryUp();
 
         if ( huState==1 ) {
-            soundMan.playSound("sound_hurry", Data.CHAN_INTERF);
+            soundMan.PlaySound("sound_hurry", Data.CHAN_INTERF);
         }
         if ( huState==2 ) {
             CallEvilOne(0);
@@ -1748,11 +1762,11 @@ public class GameMode : Mode
         Lock();
         world.Lock();
 
-        pauseMC.removeMovieClip();
-        pauseMC = downcast(  depthMan.attach("hammer_interf_instructions", Data.DP_INTERF)  );
-        pauseMC.gotoAndStop("1");
-        pauseMC._x = Data.GAME_WIDTH*0.5;
-        pauseMC._y = Data.GAME_HEIGHT*0.5;
+        pauseMC.RemoveMovieClip();
+        pauseMC = new MovieClip(depthMan.Attach("hammer_interf_instructions", Data.DP_INTERF));
+        pauseMC.GotoAndStop("1");
+        pauseMC._x = Data.GAME_WIDTH*0.5f;
+        pauseMC._y = Data.GAME_HEIGHT*0.5f;
         pauseMC.click.text	= "";
         pauseMC.title.text	= Lang.Get(5);
         pauseMC.move.text	= Lang.Get(7);
@@ -1762,7 +1776,7 @@ public class GameMode : Mode
         pauseMC.sector.text	= Lang.Get(14)+"«"+Lang.GetSectorName(currentDim, world.currentId)+"»";
 
         if ( !fl_mute ) {
-            SetMusicVolume(0.5);
+            SetMusicVolume(0.5f);
         }
 
         // Tool tip
@@ -1786,11 +1800,11 @@ public class GameMode : Mode
         Lock();
         world.Lock();
         if ( !fl_mute ) {
-            SetMusicVolume(0.5);
+            SetMusicVolume(0.5f);
         }
 
-        mapMC.removeMovieClip();
-        mapMC = downcast( depthMan.attach("hammer_map", Data.DP_INTERF) );
+        mapMC.RemoveMovieClip();
+        mapMC = new MovieClip(depthMan.Attach("hammer_map", Data.DP_INTERF));
         mapMC.field.text = Lang.GetSectorName(currentDim, world.currentId);
         mapMC._x = -xOffset;
 
@@ -1849,13 +1863,13 @@ public class GameMode : Mode
         fl_pause = false;
         Unlock();
         world.Unlock();
-        pauseMC.removeMovieClip();
-        mapMC.removeMovieClip();
+        pauseMC.RemoveMovieClip();
+        mapMC.RemoveMovieClip();
         if (!fl_mute) {
             SetMusicVolume(1);
         }
         for (var i=0;i<mapIcons.Count;i++) {
-            mapIcons[i].removeMovieClip();
+            mapIcons[i].RemoveMovieClip();
         }
         mapIcons = new Array();
     }
@@ -1920,8 +1934,8 @@ public class GameMode : Mode
         }
         else {
             if ( world.fl_mainWorld ) {
-                if ( world.currentId<Data.MIN_DARKNESS_LEVEL || world.currentId>101 ) {
-                    darknessMC.removeMovieClip();
+                if ( world.currentId<Data.MIN_DARKNESS_LEVEL | world.currentId>101 ) {
+                    darknessMC.RemoveMovieClip();
                     world.darknessFactor = 0;
                     dfactor = 0;
                     return;
@@ -1940,12 +1954,12 @@ public class GameMode : Mode
         // Attachement
 //		dfactor = (forcedDarkness==null) ? world.currentId*1.0 : forcedDarkness*1.0;
         if ( darknessMC._name==null ) {
-            darknessMC = Std.cast( depthMan.attach("hammer_fx_darkness",Data.DP_BORDERS) );
+            darknessMC = new MovieClip(depthMan.Attach("hammer_fx_darkness",Data.DP_BORDERS));
             darknessMC._x -= xOffset;
             darknessMC.blendMode = BlendMode.LAYER;
             darknessMC.holes = new Array();
-            darknessMC.holes.push( Std.cast(darknessMC).hole1 );
-            darknessMC.holes.push( Std.cast(darknessMC).hole2 );
+            darknessMC.holes.Add(darknessMC.FindSub("hole1"));
+            darknessMC.holes.Add(darknessMC.FindSub("hole2"));
             for (var i=0;i<2;i++) {
                 darknessMC.holes[i].blendMode = BlendMode.ERASE;
                 darknessMC.holes[i]._y = -500;
@@ -1960,30 +1974,30 @@ public class GameMode : Mode
 
         // Spots de lumière supplémentaires
         DetachExtraHoles();
-        for (var i=0;i<extraHoles.length;i++) {
-            var hole = Std.attachMC(darknessMC, "hammer_fx_darknessHole", manager.uniq++);
+        for (var i=0;i<extraHoles.Count;i++) {
+            var hole = new MovieClip(darknessMC, "hammer_fx_darknessHole", manager.uniq++);
             hole._x = extraHoles[i].x;
             hole._y = extraHoles[i].y;
             hole._width = extraHoles[i].d;
             hole._height = extraHoles[i].d;
             hole.blendMode = BlendMode.ERASE;
-            darknessMC.holes.push(hole);
+            darknessMC.holes.Add(hole);
             extraHoles[i].mc = hole;
         }
 
         // Effets des évolutions des joueurs
         var l = GetPlayerList();
-        for (var i=0;i<l.length;i++) {
-            if ( l[i].fl_candle || l[i].specialMan.actives[68] ) { // bougie
+        for (var i=0;i<l.Count;i++) {
+            if ( l[i].fl_candle | l[i].specialMan.actives[68] ) { // bougie
                 darknessMC.holes[i]._xscale = 150;
                 darknessMC.holes[i]._yscale = darknessMC.holes[i]._xscale;
             }
-            if ( l[i].fl_torch || l[i].specialMan.actives[26] ) { // ampoule
+            if ( l[i].fl_torch | l[i].specialMan.actives[26] ) { // ampoule
                 if ( forcedDarkness==null ) {
-                    targetDark*=0.5;
+                    targetDark*=0.5f;
                 }
                 else {
-                    targetDark*=0.75; // l'obscurité forcée est plus "opaque"
+                    targetDark*=0.75f; // l'obscurité forcée est plus "opaque"
                 }
             }
         }
@@ -2108,8 +2122,8 @@ public class GameMode : Mode
 
         // Variables
         UpdateGroundFrictions();
-        fl_ice = (GetDynamicVar("$ICE")!="");
-        fl_aqua = (GetDynamicVar("$AQUA")!="");
+        fl_ice = (GetDynamicVar("ICE")!="");
+        fl_aqua = (GetDynamicVar("AQUA")!="");
 //		if ( fl_aqua ) {
 //			if ( GameManager.CONFIG.fl_detail && colorHex!=WATER_COLOR ) {
 //				setColorHex(20, WATER_COLOR);
@@ -2204,7 +2218,7 @@ public class GameMode : Mode
             var pl = GetPlayerList();
             for (var i=0;i<pl.Count;i++) {
                 var p = pl[i];
-                p._xscale*=0.85;
+                p._xscale*=0.85f;
                 p._yscale=Mathf.Abs(p._xscale);
                 if (Mathf.Abs(p._xscale)<=2) {
                     SwitchDimensionById( nextLink.to_did, nextLink.to_lid, nextLink.to_pid );
@@ -2221,25 +2235,25 @@ public class GameMode : Mode
                 shakeTimer = 0;
                 shakePower = 0;
             }
-/*             if (fl_flipX) {
-                mc._x = Data.GAME_WIDTH+xOffset - Math.round( (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
+            if (fl_flipX) {
+                mc._x = Data.GAME_WIDTH+xOffset - Mathf.RoundToInt( (UnityEngine.Random.Range(0, 2)*2-1) * (UnityEngine.Random.Range(0, Mathf.RoundToInt(shakePower*10))/10) * shakeTimer/shakeTotal );
             }
             else {
-                mc._x = Math.round( xOffset + (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
+                mc._x = Mathf.RoundToInt( xOffset + (UnityEngine.Random.Range(0, 2)*2-1) * (UnityEngine.Random.Range(0, Mathf.RoundToInt(shakePower*10))/10) * shakeTimer/shakeTotal );
             }
             if (fl_flipY) {
-                mc._y = Data.GAME_HEIGHT + 20 + Math.round( yOffset + (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
+                mc._y = Data.GAME_HEIGHT + 20 + Mathf.RoundToInt( yOffset + (UnityEngine.Random.Range(0, 2)*2-1) * (UnityEngine.Random.Range(0, Mathf.RoundToInt(shakePower*10))/10) * shakeTimer/shakeTotal );
             }
             else {
-                mc._y = Math.round( yOffset + (Std.random(2)*2-1) * (Std.random(Math.round(shakePower*10))/10) * shakeTimer/shakeTotal );
-            } */ // TODO Move the camera ?
+                mc._y = Mathf.RoundToInt( yOffset + (UnityEngine.Random.Range(0, 2)*2-1) * (UnityEngine.Random.Range(0, Mathf.RoundToInt(shakePower*10))/10) * shakeTimer/shakeTotal );
+            }
         }
 
         if (fl_aqua) {
             aquaTimer += 0.03f*Time.fixedDeltaTime;
             if (!fl_flipY) {
-/*                 mc._y = -7 + 7*Mathf.Cos(aquaTimer);
-                mc._yscale = 102 - 2*Mathf.Cos(aquaTimer); */ // TODO Move the camera ?
+                mc._y = -7 + 7*Mathf.Cos(aquaTimer);
+                mc._yscale = 102 - 2*Mathf.Cos(aquaTimer);
             }
         }
         else {
@@ -2277,8 +2291,8 @@ public class GameMode : Mode
         if (fl_nightmare) {
             var bl = GetBadList();
             foreach (Bad b in bl) {
-                if (b.IsType(Data.BAD_CLEAR) & b.anger) {
-                    b.Angermore();
+                if (b.IsType(Data.BAD_CLEAR) & b.anger==0) {
+                    b.AngerMore();
                 }
             }
         }

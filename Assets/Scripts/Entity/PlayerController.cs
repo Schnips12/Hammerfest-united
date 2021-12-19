@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class PlayerController
 {
@@ -52,16 +53,6 @@ public class PlayerController
 	/*------------------------------------------------------------------------
 	TESTE SI UNE TOUCHE VERROUILLABLE EST ENFONC�E
 	------------------------------------------------------------------------*/
-	void KeyIsDown(int id) {
-		var fl =
-			( Key.isDown(id) & !keyLocks[id] ) ||
-			( Key.isDown(alts[id]) & !keyLocks[alts[id]] );
-		if ( fl ) {
-			LockKey(id);
-		}
-		return fl;
-	}
-
 	void LockKey(int id) {
 		keyLocks[id] = true;
 		keyLocks[alts[id]] = true;
@@ -74,179 +65,163 @@ public class PlayerController
 	SAISIE DES CONTR�LES CLAVIER
 	------------------------------------------------------------------------*/
 	void GetControls() {
-
-		// Derni�res touches enfonc�es
-		for (var i=0;i<lastKeys.Count;i++)
-		if ( !Key.isDown(lastKeys[i]) ) {
-			keyLocks[lastKeys[i]] = false;
-			lastKeys.splice(i,1);
-			i--;
-		}
-
 		if ( player.fl_stable ) {
 			waterJump = 3;
 		}
 
 		// *** Gauche
-		if ( Key.isDown(left) ) {
-			if ( game.fl_ice || game.fl_aqua ) {
-				var frict;
-				if ( !player.fl_stable && game.fl_ice ) {
-					frict = 0.35;
+		if ( Input.GetKeyDown(KeyCode.LeftArrow) ) {
+			if ( game.fl_ice | game.fl_aqua ) {
+				float frict;
+				if ( !player.fl_stable & game.fl_ice ) {
+					frict = 0.35f;
 				}
 				else {
-					frict = 0.1;
+					frict = 0.1f;
 				}
 				player.dx -= frict* Data.PLAYER_SPEED * player.speedFactor;
-				player.dx = Math.max(player.dx, -Data.PLAYER_SPEED * player.speedFactor);
+				player.dx = Mathf.Max(player.dx??0, -Data.PLAYER_SPEED * player.speedFactor);
 			}
 			else {
 				player.dx=-Data.PLAYER_SPEED * player.speedFactor;
 			}
 			player.dir = -1;
 			if ( player.fl_stable ) {
-				player.playAnim(player.baseWalkAnim);
+				player.PlayAnim(player.baseWalkAnim);
 			}
 		}
 
 		// *** Droite
-		if ( Key.isDown(right) ) {
+		if ( Input.GetKeyDown(KeyCode.RightArrow) ) {
 			if ( game.fl_ice || game.fl_aqua ) {
-				var frict;
+				float frict;
 				if ( !player.fl_stable && game.fl_ice ) {
-					frict = 0.35;
+					frict = 0.35f;
 				}
 				else {
-					frict = 0.1;
+					frict = 0.1f;
 				}
 				player.dx += frict* Data.PLAYER_SPEED * player.speedFactor;
-				player.dx = Math.min(player.dx, Data.PLAYER_SPEED * player.speedFactor);
+				player.dx = Mathf.Min(player.dx??0, Data.PLAYER_SPEED * player.speedFactor);
 			}
 			else {
 				player.dx = Data.PLAYER_SPEED * player.speedFactor;
 			}
 			player.dir = 1;
 			if ( player.fl_stable ) {
-				player.playAnim(player.baseWalkAnim);
+				player.PlayAnim(player.baseWalkAnim);
 			}
 		}
 
 		if ( player.specialMan.actives[73] ) { // effet feuille arbre
-			if ( player.fl_stable && player.dx!=0 ) {
-				walkTimer-=Timer.tmod;
+			if ( player.fl_stable & player.dx!=0 ) {
+				walkTimer-=Time.fixedDeltaTime;
 				if ( walkTimer<=0 ) {
 					walkTimer = Data.SECOND;
-					player.getScore(player, 10);
+					player.GetScore(player, 10);
 				}
 			}
 		}
 
 
 		// *** Freinage horizontal
-		if ( !Key.isDown(left) && !Key.isDown(right) ) {
+		if ( !Input.GetKeyDown(KeyCode.LeftArrow) & !Input.GetKeyDown(KeyCode.RightArrow) ) {
 			if ( !game.fl_ice ) {
-				player.dx*=game.gFriction*0.8;
+				player.dx*=game.gFriction*0.8f;
 			}
-			if ( player.animId == player.baseWalkAnim.id || player.animId == Data.ANIM_PLAYER_RUN.id ) { // || player.animId == Data.ANIM_PLAYER_EDGE.id ) {
+			if ( player.animId == player.baseWalkAnim.id | player.animId == Data.ANIM_PLAYER_RUN.id ) { // || player.animId == Data.ANIM_PLAYER_EDGE.id ) {
 //				if ( game.fl_ice && Math.abs(player.dx)>=0.2 ) {
 //					player.playAnim( Data.ANIM_PLAYER_EDGE );
 //				}
 //				else {
-					player.playAnim( player.baseStopAnim );
+					player.PlayAnim( player.baseStopAnim );
 //				}
 			}
 		}
 
 		// *** WaterJump
-		if ( game.fl_aqua && waterJump>0 ) {
-			if ( !player.fl_stable && keyIsDown(jump) ) {
-				player.airJump();
+		if ( game.fl_aqua & waterJump>0 ) {
+			if ( !player.fl_stable & Input.GetKeyDown(KeyCode.UpArrow) ) {
+				player.AirJump();
 				waterJump--;
 			}
 		}
 
 		// *** Saut
-		if ( player.fl_stable && Key.isDown(jump) ) {
+		if ( player.fl_stable & Input.GetKeyDown(KeyCode.UpArrow) ) {
 			if ( player.specialMan.actives[88] ) { // effet pokute shrink
-				player.dy = -Data.PLAYER_JUMP*0.5;
+				player.dy = -Data.PLAYER_JUMP*0.5f;
 			}
 			else {
 				player.dy = -Data.PLAYER_JUMP;
 			}
 
-			game.soundMan.playSound("sound_jump", Data.CHAN_PLAYER);
-			player.playAnim(Data.ANIM_PLAYER_JUMP_UP);
-			var fx = game.fxMan.attachFx(player.x,player.y,"hammer_fx_jump");
+			game.soundMan.PlaySound("sound_jump", Data.CHAN_PLAYER);
+			player.PlayAnim(Data.ANIM_PLAYER_JUMP_UP);
+			var fx = game.fxMan.AttachFx(player.x,player.y,"hammer_fx_jump");
 			fx.mc._alpha = 50;
 			if ( player.specialMan.actives[66] ) { // effet cactus
-				player.getScore(player, 10);
+				player.GetScore(player, 10);
 			}
-			game.statsMan.inc(Data.STAT_JUMP,1);
-			lockKey(jump);
+			game.statsMan.Inc(Data.STAT_JUMP,1);
+			LockKey(jump);
 		}
 
 		// *** Attaque
 //		if ( player.fl_stable && keyIsDown(attack) && player.coolDown==0 ) {
-		if ( keyIsDown(attack) && player.coolDown==0 ) {
-			var dist = Data.KICK_DISTANCE;
+		if ( Input.GetKeyDown(KeyCode.Space) & player.coolDown==0 ) {
+			float dist = Data.KICK_DISTANCE;
 			if ( !player.fl_stable ) {
 				dist = Data.AIR_KICK_DISTANCE;
 			}
 			if ( player.specialMan.actives[115] ) {
-				dist*=1.2;
+				dist*=1.2f;
 			}
-			var bombList : Array<entity.Bomb> = Std.cast(
-				game.getClose( Data.BOMB, player.x,player.y, dist, false )
-			);
-			if ( bombList.length==0 ) {
+			List<IBomb> bombList = game.GetClose( Data.BOMB, player.x, player.y, dist, false).OfType<IBomb>().ToList<IBomb>();
+			if ( bombList.Count==0 ) {
 				// Pose de bombe
-				if ( player.currentWeapon>0 && player.countBombs() < player.maxBombs ) {
-					var e = player.attack();
-					if ( game.fl_bombControl && e.isType(Data.BOMB) ) {
-						var b : entity.bomb.PlayerBomb = downcast(e);
-						var wb = entity.WalkingBomb.attach(game,b);
+				if ( player.currentWeapon>0 & player.CountBombs() < player.maxBombs ) {
+					var e = player.Attack();
+					if ( game.fl_bombControl & e.IsType(Data.BOMB) ) {
+						PlayerBomb b = e as PlayerBomb;
+						var wb = WalkingBomb.Attach(game,b);
 					}
 
 					if (e!=null) {
-						e.setParent( upcast(player) );
+						e.SetParent(player);
 					}
 					if ( player.fl_stable ) {
-						player.playAnim(Data.ANIM_PLAYER_ATTACK);
+						player.PlayAnim(Data.ANIM_PLAYER_ATTACK);
 					}
 				}
 			}
 			else {
 				// Kick de bombe
-				if ( fl_powerControl && player.fl_stable ) {
-					var power = Math.min(1.2, 0.5 + Math.abs(player.dx)/4);
-					player.kickBomb(bombList, power);
+				if ( fl_powerControl & player.fl_stable ) {
+					var power = Mathf.Min(1.2f, 0.5f + Mathf.Abs(player.dx??0)/4);
+					player.KickBomb(bombList, power);
 				}
 				else {
-					player.kickBomb(bombList, 1.0);
+					player.KickBomb(bombList, 1.0f);
 				}
 			}
 		}
 		else {
 			// *** Up kick
-			if ( keyIsDown(down) && fl_upKick ) {
-				var dist = Data.KICK_DISTANCE;
+			if ( Input.GetKeyDown(KeyCode.DownArrow) & fl_upKick ) {
+				float dist = Data.KICK_DISTANCE;
 				if ( !player.fl_stable ) {
 					dist = Data.AIR_KICK_DISTANCE;
 				}
 				if ( player.specialMan.actives[115] ) {
-					dist*=1.2;
+					dist*=1.2f;
 				}
-				var bombList : Array<entity.Bomb> = Std.cast(
-					game.getClose( Data.BOMB, player.x,player.y, dist, false )
-				);
-				if ( bombList.length>0 ) {
-					player.upKickBomb(bombList);
+				List<IBomb> bombList = game.GetClose( Data.BOMB, player.x,player.y, dist, false).OfType<IBomb>().ToList<IBomb>();
+				if ( bombList.Count>0 ) {
+					player.UpKickBomb(bombList);
 				}
 			}
 		}
-
-
-
 	}
 
 

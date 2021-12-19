@@ -1,18 +1,32 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Pepin : MonoBehaviour
+public class Pepin : Shoot
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Pepin(MovieClip mc) : base(mc) {
+		shootSpeed = 5 ;
+		_yOffset = -2 ;
+	}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+	/*------------------------------------------------------------------------
+	ATTACH
+	------------------------------------------------------------------------*/
+	public static Pepin Attach(GameMode g, float x, float y) {
+		var linkage = "hammer_shoot_pepin" ;
+		Pepin s = new Pepin(g.depthMan.Attach(linkage,Data.DP_SHOTS));
+		s.InitShoot(g, x, y) ;
+		return s ;
+	}
+
+
+	/*------------------------------------------------------------------------
+	EVENT: HIT
+	------------------------------------------------------------------------*/
+	public override void Hit(IEntity e) {
+		if ( (e.types & Data.PLAYER) > 0 ) {
+			Player et = e as Player;
+			et.KillHit(dx) ;
+		}
+	}
 }

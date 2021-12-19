@@ -83,7 +83,7 @@ public class Trigger : Entity
 	/*------------------------------------------------------------------------
 	T�L�PORTE L'ENTIT� � UN AUTRE POINT (PAR CASE)
 	------------------------------------------------------------------------*/
-	protected void MoveToCase(int cx, int cy) {
+	public void MoveToCase(int cx, int cy) {
 		MoveTo(Trigger.x_ctr(cx), Trigger.y_ctr(cy));
 	}
 
@@ -103,7 +103,7 @@ public class Trigger : Entity
 		return res ;
 	}
 
-	protected virtual void Update() {
+	public override void Update() {
 
 	}
 }

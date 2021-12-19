@@ -62,7 +62,7 @@ public class Fraise : Shooter
 	/*------------------------------------------------------------------------
 	R�CEPTION D'UNE BALLE
 	------------------------------------------------------------------------*/
-	void CatchBall(Ball b) {
+	public void CatchBall(Ball b) {
 		if ( !IsHealthy() ) {
 			return;
 		}
@@ -77,7 +77,7 @@ public class Fraise : Shooter
 	/*------------------------------------------------------------------------
 	ASSIGNE LA BALLE � CE BAD
 	------------------------------------------------------------------------*/
-	void AssignBall() {
+	public void AssignBall() {
 		fl_ball = true;
 		catchCD = Data.SECOND*1.5f;
 	}
@@ -102,7 +102,7 @@ public class Fraise : Shooter
 
 		// Balle
 		var s = Ball.Attach(game, x, y);
-		s.moveToTarget( ballTarget, s.shootSpeed );
+		s.MoveToTarget( ballTarget, s.shootSpeed );
 		s.targetCatcher = ballTarget;
 
 	}
@@ -173,7 +173,7 @@ public class Fraise : Shooter
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 
 		// Balle en main
@@ -199,7 +199,7 @@ public class Fraise : Shooter
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 
 		if ( catchCD > 0 ) {

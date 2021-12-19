@@ -10,7 +10,7 @@ public class Red : PlayerBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Red() : base() {
+	public Red(MovieClip mc) : base(mc) {
 		duration = 38;
 		power = 30;
 		JUMP_POWER = 32;
@@ -20,9 +20,9 @@ public class Red : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static Red Attach(Mode.GameModes g, float x, float y) {
+	public static Red Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_red";
-		Red mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
+		Red mc = new Red(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
 	}
@@ -31,7 +31,7 @@ public class Red : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	Red Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y);
 	}
 
@@ -39,13 +39,13 @@ public class Red : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		base.OnExplode();
 
 		// freeze bads
 		var list = BombGetClose(Data.BAD);
 		for (var i=0;i<list.Count;i++) {
-			Bad e = list[i];
+			Bad e = list[i] as Bad;
 			e.SetCombo(uniqId);
 			e.Freeze(Data.FREEZE_DURATION);
 			ShockWave(e, radius, power);

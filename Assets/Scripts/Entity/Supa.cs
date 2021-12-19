@@ -1,50 +1,61 @@
-public class ShootFireBall : Shoot
+public class Supa : Mover
 {
+	protected float radius;
+	protected float speed;
+
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	ShootFireBall(MovieClip mc) : base(mc) {
-		fl_largeTrigger		= true;
-		shootSpeed			= 7 ;
+	protected Supa(MovieClip mc) : base(mc) {
+		fl_hitGround	= false;
+		fl_hitWall		= false;
+		fl_gravity		= false;
+		fl_friction		= false;
+		fl_hitBorder	= false;
+		fl_alphaBlink	= false;
+		blinkColorAlpha	= 80;
+
+		minAlpha = 0;
+
+		speed = 0;
+		radius = 0;
 	}
+
 
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
 	protected override void Init(GameMode g) {
-		base.Init(g) ;
-		PlayAnim(Data.ANIM_SHOOT_LOOP) ;
+		base.Init(g);
+		Register(Data.SUPA);
+
+		DisableAnimator();
 	}
 
 	/*------------------------------------------------------------------------
-	ATTACH
+	INITIALISATION SUPA POWA
 	------------------------------------------------------------------------*/
-	public static ShootFireBall Attach(GameMode g, float x, float y) {
-		var linkage = "hammer_shoot_fireball" ;
-		ShootFireBall s = new ShootFireBall(g.depthMan.Attach(linkage,Data.DP_SHOTS));
-		s.InitShoot(g, x, y-10) ;
-		return s ;
+	protected virtual void InitSupa(GameMode g, float x, float y) {
+		Init(g);
+		MoveTo(x,y);
+		EndUpdate();
 	}
 
 	/*------------------------------------------------------------------------
-	DESTRUCTION
+	INFIXE
 	------------------------------------------------------------------------*/
-	public override void DestroyThis() {
-		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT/2, "hammer_fx_pop") ;
-		base.DestroyThis() ;
+	protected override void Infix() {
+		// no super
 	}
 
+
 	/*------------------------------------------------------------------------
-	EVENT: HIT
+	D�SACTIVATION DE LA GESTION PAR TRIGGER
 	------------------------------------------------------------------------*/
-	public override void Hit(IEntity e) {
-		if ( (e.types & Data.PLAYER) > 0 ) {
-			Player p = e as Player;
-			var dist = Distance(p.x, p.y);
-			if ( dist<=Data.CASE_WIDTH*1.2f ) {
-				game.fxMan.AttachExplosion(x, y, 25);
-				p.KillHit(dx) ;
-			}
-		}
+	protected override void TAdd(int cx,int cy) {
+		// do nothing
+	}
+	protected override void TRem(int cx, int cy) {
+		// do nothing
 	}
 }

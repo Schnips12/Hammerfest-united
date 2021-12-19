@@ -4,17 +4,48 @@ using UnityEngine;
 
 namespace GUI;
 
-public class Extendbox : MonoBehaviour
+public class Extendbox
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	GameMode game;
+	List<MovieClip> list; /* : Array< {>MovieClip, letter:MovieClip } >; */
+	float x;
+	float y;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Extendbox(GameMode g) {
+		game = g;
+		list = new List<MovieClip>();
+		x = Data.DOC_WIDTH-20;
+		y = 250;
+	}
+
+
+	/*------------------------------------------------------------------------
+	AJOUTE UNE LETTRE
+	------------------------------------------------------------------------*/
+	void Collect(int id) {
+		MovieClip mc;
+		mc = new MovieClip(game.depthMan.Attach("hammer_interf_extend", Data.DP_INTERF));
+        mc.sub = new MovieClip();
+        mc.sub._name = "letter"+id.ToString();
+		mc.FindSub("letter"+id.ToString()).GotoAndStop(id+1);
+		mc._x = x;
+		mc._y = y+id*16;
+		mc._xscale = 75;
+		mc._yscale = mc._xscale;
+		list.Add(mc);
+	}
+
+
+	/*------------------------------------------------------------------------
+	DESTRUCTION
+	------------------------------------------------------------------------*/
+	void Clear() {
+		for (var i=0;i<list.Count;i++) {
+			list[i].RemoveMovieClip();
+		}
+		list = new List<MovieClip>();
+	}
 }

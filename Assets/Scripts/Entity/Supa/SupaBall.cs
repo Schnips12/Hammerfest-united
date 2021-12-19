@@ -1,23 +1,24 @@
 using UnityEngine;
 
-public class Tons : Supa
+public class SupaBall : Supa
 {
+
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Tons(MovieClip mc) : base(mc) {
-		fl_gravity = true;
+	SupaBall(MovieClip mc) : base(mc) {
+		fl_gravity = true ;
 	}
 
 
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	public static Tons Attach(GameMode g) {
-		var linkage = "hammer_supa_tons";
-		Tons mc = new Tons(g.depthMan.Attach(linkage,Data.DP_SUPA));
-		mc.InitSupa(g, Data.GAME_WIDTH,0);
-		return mc;
+	public static SupaBall Attach(GameMode g) {
+		var linkage = "hammer_supa_ball" ;
+		SupaBall mc = new SupaBall(g.depthMan.Attach(linkage,Data.DP_SUPA));
+		mc.InitSupa(g, Data.GAME_WIDTH, 0) ;
+		return mc ;
 	}
 
 
@@ -25,11 +26,14 @@ public class Tons : Supa
 	INITIALISATION
 	------------------------------------------------------------------------*/
 	protected override void InitSupa(GameMode g, float x, float y) {
-		base.InitSupa(g, x, y);
-		speed = 0;
+		base.InitSupa(g, x, y) ;
+		speed = 2;
 		radius = 40;
-		MoveTo(Random.Range(0, Data.GAME_WIDTH),-40);
-		fallFactor = 0.3f;
+		fallFactor = 0.8f;
+		gravityFactor = 0.8f;
+		dx = speed;
+		MoveTo(0,-50);
+		Scale(220);
 	}
 
 
@@ -37,25 +41,14 @@ public class Tons : Supa
 	INFIXE
 	------------------------------------------------------------------------*/
 	protected override void Prefix() {
-		base.Prefix();
-
-		// Bads
-		var l = game.GetClose(Data.BAD, x,y, radius, false);
+		base.Prefix() ;
+		var l = game.GetClose(Data.BAD, x, y, radius, false) ;
 		for (var i=0;i<l.Count;i++) {
 			Bad e = l[i] as Bad;
-			if (!e.fl_kill) {
-				e.KillHit( (Random.Range(0, 2)*2-1)*Random.Range(0, 5) );
-				e.dy=-25;
-			}
-		}
-
-		// Player
-		l = game.GetClose(Data.PLAYER, x,y, radius, false);
-		for (var i=0;i<l.Count;i++) {
-			Player e = l[i] as Player;
-			if ( !e.fl_kill ) {
-				e.KillHit((Random.Range(0, 2)*2-1)*Random.Range(0, 5));
-				e.dy=-25;
+			if ( !e.fl_knock ) {
+				e.Knock(Data.KNOCK_DURATION*3);
+				e.dx = dx*2;
+				e.dy = -5;
 			}
 		}
 	}
@@ -65,10 +58,13 @@ public class Tons : Supa
 	POSTFIXE
 	------------------------------------------------------------------------*/
 	protected override void Postfix() {
-		base.Postfix();
-		if (y>=Data.GAME_HEIGHT*2) {
-			MoveTo(Random.Range(0, Data.GAME_WIDTH),-40);
-			dy = 0;
+		base.Postfix() ;
+		if ( dy>0 & y>=Data.GAME_HEIGHT ) {
+			dy = dy==null ? null : -Mathf.Abs(dy.Value) ;
+			game.Shake(Data.SECOND*0.5f,3);
+		}
+		if ( x>=Data.GAME_WIDTH+50 ) {
+			DestroyThis() ;
 		}
 	}
 }

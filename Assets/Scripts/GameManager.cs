@@ -14,7 +14,7 @@ public class GameManager : MonoBehaviour
 	public Mode current;
 	public Mode child;	
 
-	int uniq;
+	public int uniq;
 	int csKey;
 
 	public bool fl_cookie;

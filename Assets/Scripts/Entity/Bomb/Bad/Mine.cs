@@ -98,7 +98,7 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	EVENT: KICK (CES BOMBES SONT FACILEMENT REPOUSSABLES)
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Player p) {
+	public override void OnKick(Player p) {
 		base.OnKick(p);
 		TriggerMine();
 
@@ -130,7 +130,7 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	LANCE UNE ANIM
 	------------------------------------------------------------------------*/
-	protected override void PlayAnim(Data.animParam a) {
+	public override void PlayAnim(Data.animParam a) {
 		base.PlayAnim(a);
 		if (a.id==Data.ANIM_BOMB_DROP.id) {
 			fl_loop = true;
@@ -154,7 +154,7 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 
 		// Activation � l'atterrissage

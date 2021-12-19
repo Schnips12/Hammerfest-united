@@ -103,7 +103,7 @@ public class ScriptEngine
 		fl_onAttach		= false;
 		fl_firstTorch	= false;
 		recentExp		= new List<Vector3>();
-		/* mcList			= new List(); */
+		mcList			= new List<ClipWithId>();
 		history			= new List<string>();
 		entries			= new List<Vector2Int>();
 	}
@@ -577,11 +577,11 @@ public class ScriptEngine
 				var lid = GetInt (e, "lid");
 				if (lid == -1) {
 					game.fakeLevelId = -1;
-					game.gi.hideLevel();
+					game.gi.HideLevel();
 				}
 				else {
 					game.fakeLevelId = lid;
-					game.gi.setLevel(lid);
+					game.gi.SetLevel(lid);
 				}
 			}break;
 
@@ -980,7 +980,7 @@ public class ScriptEngine
 	/*------------------------------------------------------------------------
 	JOUE UNE ENTIT� CR��E PAR UN SCRIPT
 	------------------------------------------------------------------------*/
-	void PlayById(int id) {
+	public void PlayById(int id) {
 		if (id== -1) {
 			return;
 		}
@@ -1032,7 +1032,7 @@ public class ScriptEngine
 
 					for (var i=0;i<mcList.Count;i++) {
 						if ( mcList[i].sid == 101 ) {
-							mcList[i].mc.head = game.GetPlayerList()[0].head;
+							mcList[i].mc.extraValues["head"] = game.GetPlayerList()[0].head;
 						}
 					}
 					PlayById(101);
@@ -1042,7 +1042,7 @@ public class ScriptEngine
 			}break;
 
 			case 5: {// sortie apr�s tuberculoz
-				if (game.GetOne(Data.BOSS).fl_defeated) {
+				if ((game.GetOne(Data.BOSS) as Tuberculoz).fl_defeated) {
 					bossDoorTimer-=Time.fixedDeltaTime;
 					if ( bossDoorTimer<=0 ) {
 						game.DestroyList(Data.BOSS);
@@ -1084,7 +1084,7 @@ public class ScriptEngine
 			case 10: {// d�sactive les jump down sur les monstres !
 				var l = game.GetBadList();
 				for (var i=0;i<l.Count;i++) {
-					l[i].SetJumpDown(null);
+					(l[i] as Jumper).SetJumpDown(null); // TODO Interface IJumper
 				}
 			}break;
 

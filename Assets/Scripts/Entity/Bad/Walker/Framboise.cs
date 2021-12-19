@@ -6,8 +6,8 @@ public class Framboise : Shooter
 {
 	static int FRAGS = 6;
 	static int MAX_TRIES = 1000;
-	float tx;
-	float ty;
+	public float tx;
+	public float ty;
 	bool fl_phased;
 	int arrived;
 	float white;
@@ -42,7 +42,7 @@ public class Framboise : Shooter
 	/*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-	public static Framboise attach(GameMode g, float x, float y) {
+	public static Framboise Attach(GameMode g, float x, float y) {
 		var linkage = Data.LINKAGES[Data.BAD_FRAMBOISE];
 		Framboise mc = new Framboise(g.depthMan.Attach(linkage,Data.DP_BADS));
 		mc.InitBad(g,x,y) ;
@@ -101,12 +101,12 @@ public class Framboise : Shooter
 	/*------------------------------------------------------------------------
 	A FRAGMENT HAS ARRIVED
 	------------------------------------------------------------------------*/
-	void OnArrived(float fb) {
+	public void OnArrived(FramBall fb) {
 		Show();
 		MoveTo( tx, ty );
 		fb.DestroyThis();
-		if ( fb._currentframe>=5 ) {
-			if ( fb._currentframe==5 ) {
+		if ( fb.CurrentFrame()>=5 ) {
+			if ( fb.CurrentFrame()==5 ) {
 				FindSub("o1")._visible = true;
 			}
 			else {
@@ -210,10 +210,10 @@ public class Framboise : Shooter
 	/*------------------------------------------------------------------------
 	GRAPHICAL UPDATE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 		if ( white>0 ) {
-			SetColorHex(Mathf.Round(100*white), 0xffffff);
+			/* SetColorHex(Mathf.Round(100*white), 0xffffff); */ // TODO Understand
 	    	var f = new MovieClip.Filter();
 			f.color = Data.ToColor(0xffffff);
 	    	f.strength	= white*2;
@@ -231,7 +231,7 @@ public class Framboise : Shooter
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		if ( !_visible ) {
 			MoveTo(100,-200);
 			if ( !IsHealthy() ) {

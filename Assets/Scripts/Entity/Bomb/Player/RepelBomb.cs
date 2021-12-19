@@ -7,7 +7,7 @@ public class RepelBomb : PlayerBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public RepelBomb() : base() {
+	public RepelBomb(MovieClip mc) : base(mc) {
 		duration	= 38;
 		power		= 20;
 		radius		= Data.CASE_WIDTH*3;
@@ -17,9 +17,9 @@ public class RepelBomb : PlayerBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static RepelBomb Attach(Modes.GameMode g, float x, float y) {
+	public static RepelBomb Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_repel";
-		RepelBomb mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
+		RepelBomb mc = new RepelBomb(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
 	}
@@ -28,12 +28,12 @@ public class RepelBomb : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	RepelBomb Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y);
 	}
 
 
-	protected override void OnKick(Player p) {
+	public override void OnKick(Player p) {
 		base.OnKick(p);
 		dx*=2.5f;
 	}
@@ -42,7 +42,7 @@ public class RepelBomb : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		base.OnExplode();
 
 		// fx
@@ -68,7 +68,7 @@ public class RepelBomb : PlayerBomb
 		// Ballon
 		var l = game.GetList(Data.SOCCERBALL);
 		for (var i=0;i<l.Count;i++) {
-			SoccerBall ball = l[i];
+			SoccerBall ball = l[i] as SoccerBall;
 			var dist = Distance(ball.x, ball.y);
 			if ( dist<=radius ) {
 				ball.lastPlayer = owner;

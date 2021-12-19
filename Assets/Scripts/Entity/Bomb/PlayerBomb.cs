@@ -7,9 +7,9 @@ public class PlayerBomb : Bomb
     static float UPGRADE_FACTOR	= 1.5f;
 	static int MAX_UPGRADES	= 1;
 
-	Player owner;
+	public Player owner;
 	int upgrades;
-	protected bool fl_unstable;
+	public bool fl_unstable;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -63,7 +63,7 @@ public class PlayerBomb : Bomb
 	/*------------------------------------------------------------------------
 	EVENT: BOMBE KICK�E
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Player p) {
+	public override void OnKick(Player p) {
 		if (upgrades<MAX_UPGRADES) {
 			if (p.pid!=owner.pid) {
 				UpgradeBomb(p);
@@ -88,7 +88,7 @@ public class PlayerBomb : Bomb
 		dx*=1.5f;
 		fl_blink = true;
 		fl_alphaBlink = false;
-		blinkColor = 0xff0000;
+		blinkColor = Data.ToColor(0xff0000);
 		Scale(scaleFactor*UPGRADE_FACTOR*100);
 		owner = p;
 		upgrades++;
@@ -152,7 +152,7 @@ public class PlayerBomb : Bomb
 	}
 
 
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 		if (!fl_blinking & upgrades>0) {
 			Blink(Data.BLINK_DURATION_FAST);

@@ -1,20 +1,52 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 namespace GUI;
 
-public class Iterm : MonoBehaviour
+public class Item : MovieClip
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	public MovieClip field;
+	public Container container;
+	public float width;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	protected Item(MovieClip mc) : base(mc) {
+	}
+
+	/*------------------------------------------------------------------------
+	D�FINI LE LABEL
+	------------------------------------------------------------------------*/
+	public virtual void SetLabel(string l) {
+		field.text = l ;
+		width = field._width+5 ; // TODO check actionscript textfield width
+	}
+
+	/*------------------------------------------------------------------------
+	RESIZE
+	------------------------------------------------------------------------*/
+	public void Scale(float ratio) {
+		_xscale = ratio*100;
+		_yscale = _xscale;
+	}
+
+
+	/*------------------------------------------------------------------------
+	INITIALISATION
+	------------------------------------------------------------------------*/
+	protected void Init(Container c, string l) {
+		container = c ;
+		SetLabel(l) ;
+		var p = container.Insert(this) ;
+		_x = p.x ;
+		_y = p.y ;
+	}
+
+
+	public virtual void Update() {
+	}
 }

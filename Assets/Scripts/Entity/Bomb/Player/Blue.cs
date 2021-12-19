@@ -8,7 +8,7 @@ public class Blue : PlayerBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Blue() : base() {
+	public Blue(MovieClip mc) : base(mc) {
 		duration = 45;
 		power = 20;
 		explodeSound="sound_bomb_blue";
@@ -20,7 +20,7 @@ public class Blue : PlayerBomb
 	------------------------------------------------------------------------*/
 	public static Blue Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_blue";
-		Blue mc = g.depthMan.Attach(linkage,Data.DP_BOMBS);
+		Blue mc = new Blue(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
 	}
@@ -29,7 +29,7 @@ public class Blue : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	Blue Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y);
 	}
 
@@ -37,13 +37,13 @@ public class Blue : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		base.OnExplode();
 
 		var l = BombGetClose(Data.BAD);
 
 		for (var i=0;i<l.Count;i++) {
-			Bad e = l[i];
+			Bad e = l[i] as Bad;
 			e.SetCombo(uniqId);
 			e.Knock(Data.KNOCK_DURATION*0.75f);
 			ShockWave(e, radius, power);

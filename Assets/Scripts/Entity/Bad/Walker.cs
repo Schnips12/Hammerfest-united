@@ -6,7 +6,7 @@ public abstract class Walker : Bad
 {
 
 	protected float speed;
-	protected float dir;
+	public float dir;
 
 	protected bool fl_fall;
 	protected bool fl_willFallDown;
@@ -48,7 +48,7 @@ public abstract class Walker : Bad
 	/*------------------------------------------------------------------------
 	STOPPE LE MOUVEMENT DU BAD
 	------------------------------------------------------------------------*/
-	protected void Halt() {
+	public void Halt() {
 		if ( !fl_freeze & !fl_knock ) {
 			dx=0;
 		}
@@ -354,7 +354,7 @@ public abstract class Walker : Bad
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 
 		// Flip gauche/droite du movie
@@ -373,7 +373,7 @@ public abstract class Walker : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		fl_willFallDown = false;
 		if ( recentParticles>0 ) {
 			recentParticles-=Time.fixedDeltaTime;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BossBomb : BadBomb
+public class BossBomb : BadBomb, IBomb
 {
 /*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -19,7 +19,7 @@ public class BossBomb : BadBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static BossBomb Attach(GameMode g, float x, float y) {
+	public static BossBomb Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_boss";
 		BossBomb mc = new BossBomb(g.depthMan.Attach(linkage, Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
@@ -40,7 +40,7 @@ public class BossBomb : BadBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	BossBomb Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y);
 	}
 
@@ -50,17 +50,17 @@ public class BossBomb : BadBomb
 	------------------------------------------------------------------------*/
 	public override void OnExplode() {
 		base.OnExplode();
-		Orange.Attach(game,x-Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f);
+		Orange b = Orange.Attach(game,x-Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f);
 		Tuberculoz boss = game.GetOne(Data.BOSS) as Tuberculoz;
 		if (boss.lives<=70) {
-			boss.AngerMore();
+			b.AngerMore();
 		}
 		if ( boss.lives<=50 ) {
-			boss.AngerMore();
+			b.AngerMore();
 		}
-		boss.MoveUp(10);
-		boss.Knock(Data.SECOND);
-		boss.dropReward = null;
+		b.MoveUp(10);
+		b.Knock(Data.SECOND);
+		b.fl_noreward = true;
 		PlayAnim(Data.ANIM_BOMB_EXPLODE);
 	}
 
@@ -68,8 +68,8 @@ public class BossBomb : BadBomb
 	/*------------------------------------------------------------------------
 	EVENT: KICK (CES BOMBES SONT FACILEMENT REPOUSSABLES)
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Player p) {
-		base.OnKick(Player p);
+	public override void OnKick(Player p) {
+		base.OnKick(p);
 		SetLifeTimer(lifeTimer + Data.SECOND*0.5f);
 	}
 }

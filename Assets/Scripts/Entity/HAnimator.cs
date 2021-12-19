@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class HAnimator : Trigger
 {
-    protected MovieClip sub;
 	Animator animator;
 	public int? animId;
 
@@ -10,7 +9,7 @@ public class HAnimator : Trigger
 	public float animFactor;
 	float blinkTimer;
 
-	protected int blinkColor;
+	protected Color blinkColor;
 	protected int blinkColorAlpha;
 	protected int blinkAlpha;
 
@@ -41,7 +40,7 @@ public class HAnimator : Trigger
 		fl_alphaBlink	= true;
 		fl_blink		= true;
 		blinkTimer		= 0;
-		blinkColor		= 0xffffff;
+		blinkColor		= Data.ToColor(0xffffff);
 		blinkAlpha		= 20;
 		blinkColorAlpha	= 30;
 		EnableAnimator();
@@ -81,7 +80,7 @@ public class HAnimator : Trigger
 		fl_blinking = true;
 		blinkTimer = duration;
 	}
-	protected void StopBlink() {
+	public void StopBlink() {
 		fl_blinking = false;
 		if (fl_alphaBlink) {
 			alpha = 100;
@@ -107,7 +106,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	RED�FINI LE PATH VERS L'ANIMATION
 	------------------------------------------------------------------------*/
-	void SetSub(MovieClip mc) {
+	protected void SetSub(MovieClip mc) {
 		sub = mc;
 	}
 
@@ -132,7 +131,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	MET L'ENTIT� DANS UNE PHASE D'ANIM DONN�E (1 � N)
 	------------------------------------------------------------------------*/
-	protected virtual void PlayAnim(Data.animParam a) {
+	public virtual void PlayAnim(Data.animParam a) {
 		if (fl_stickyAnim | fl_kill | !fl_anim) {
 			return;
 		}
@@ -150,7 +149,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	FORCE LA VALEUR DU FLAG DE LOOP
 	------------------------------------------------------------------------*/
-	void ForceLoop(bool flag) {
+	protected void ForceLoop(bool flag) {
 		fl_loop = flag;
 	}
 
@@ -169,7 +168,7 @@ public class HAnimator : Trigger
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 
 		// Clignotement

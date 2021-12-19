@@ -12,9 +12,9 @@ public class FxManager
 
     struct bg {
         public int id;
-        public int subId;
+        public int? subId;
         public float timer;
-		public bg(int id, int subId, float timer) {
+		public bg(int id, int? subId, float timer) {
 			this.id = id;
 			this.subId = subId;
 			this.timer = timer;
@@ -25,7 +25,7 @@ public class FxManager
 	float nameTimer;
 	MovieClip igMsg;
 
-	MovieClip mc_exitArrow;
+	public MovieClip mc_exitArrow;
 	bool fl_bg;
 
     class stackable {
@@ -104,8 +104,8 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH: INDICATEUR DE LEVEL
 	------------------------------------------------------------------------*/
-	void AttachHurryUp() {
-		AttachAlert(Lang.Get(4));
+	public MovieClip AttachHurryUp() {
+		return AttachAlert(Lang.Get(4));
 	}
 
 
@@ -327,10 +327,10 @@ public class FxManager
 			fl_left = (dir!=null) ? dir<0 : fl_left;
 
 			if (fl_left) {
-				mc.next.dx = -Mathf.Abs(mc.next.dx);
+				mc.next.dx = -Mathf.Abs(mc.next.dx??0);
 			}
 			else {
-				mc.next.dx = Mathf.Abs(mc.next.dx);
+				mc.next.dx = Mathf.Abs(mc.next.dx??0);
 			}
 			fl_left = !fl_left;
 		}
@@ -340,11 +340,11 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	ATTACH UN FOND TEMPORAIRE SP�CIAL
 	------------------------------------------------------------------------*/
-	void AttachBg(int id, int subId, float? timer) {
+	public void AttachBg(int id, int? subId, float? timer) {
 		bgList.Add(new bg(id, subId, timer??15));
 	}
 
-	void DetachBg() {
+	public void DetachBg() {
 		fl_bg = false;
 		game.world.view.DetachSpecialBg();
 	}
@@ -353,7 +353,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	D�TRUIT LES FONDS TEMPORAIRES
 	------------------------------------------------------------------------*/
-	void ClearBg() {
+	public void ClearBg() {
 		bgList = new List<bg>();
 		DetachBg();
 	}
@@ -397,7 +397,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	STATIC: AFFICHE UN CONTOUR SUR UN MC
 	------------------------------------------------------------------------*/
-	static void AddGlow(MovieClip mc, Color color, int length) {
+	public static void AddGlow(MovieClip mc, Color color, int length) {
     	var f = new MovieClip.Filter();
 		f.color = color;
     	f.quality	= 1;
@@ -412,7 +412,7 @@ public class FxManager
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	void Main() {
+	public void Main() {
 		// Gestion des BGs
 		if (bgList.Count>0) {
 			var b = bgList[0];

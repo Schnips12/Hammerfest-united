@@ -4,17 +4,20 @@ using UnityEngine;
 
 namespace GUI;
 
-public class Label : MonoBehaviour
+public class Label : Item
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Label(MovieClip mc) : base(mc) {        
+	}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	ATTACHEMENT
+	------------------------------------------------------------------------*/
+	public static Label Attach(Container c, string l) {
+		Label b = new Label(c.depthMan.Attach("hammer_editor_label", Data.DP_INTERF));
+		b.Init(c,l);
+		return b;
+	}
 }

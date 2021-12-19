@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 using TMPro;
 
 public class MovieClip
@@ -8,10 +9,8 @@ public class MovieClip
     GameObject united;
     Animator animator;
     TMP_Text tmpText;
-    public MovieClip self;
 
     public string value;
-
     public string _name;
     public bool _visible;
     public float _x;
@@ -19,12 +18,19 @@ public class MovieClip
     public float _xscale;
     public float _yscale;
     public float _rotation;
-
     public float _width;
     public float _height;  
-    public float _alpha; 
+    public float _alpha;
 
     public string text;
+    public Hashtable extraValues;
+    public MovieClip sub;
+    public MovieClip label;
+
+    public Action onRelease;
+    public Action onRollOut;
+    public Action onRollOver;
+
 
     private void Update() { // TODO use manual updates instead of monobehaviour to reduce load
         united.name = _name;
@@ -55,11 +61,7 @@ public class MovieClip
         public float alpha;
     }
     public Filter filter;
-
     public Color textColor;
-    public MovieClip label;
-    public MovieClip field;
-    public MovieClip sub;
     public bool isTile;
     public bool cacheAsBitmap;
 
@@ -70,19 +72,26 @@ public class MovieClip
     // TODO Instantiate prefabs and empty holders.
     public MovieClip(MovieClip mc) {
         
-    }    
+    }
+    public MovieClip() {
+        
+    }      
     public MovieClip(MovieClip mc, string reference, int depth) {
-        self = this;
-        animator = united.GetComponent<Animator>();
-        tmpText = united.GetComponentInChildren<TMP_Text>();
+
     }
     public MovieClip(MovieClip mc, int depth) {
-        self = this;
-        animator = united.GetComponent<Animator>();
-        tmpText = united.GetComponentInChildren<TMP_Text>();
+
     }
+
     public void RemoveMovieClip() {
         GameObject.Destroy(united);
+    }
+    public MovieClip FindSub(string name) {
+        MovieClip s = sub;
+        while(s!=null & s._name!=name) {
+            s = s.sub;
+        }
+        return s;
     }
 
 
@@ -92,6 +101,12 @@ public class MovieClip
     public void GotoAndStop(int frame) {
         AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
         animator.Play(clip.name, 0, frame/(clip.length*clip.frameRate));
+        Stop();
+    }
+    public void GotoAndPlay(int frame) {
+        AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
+        animator.Play(clip.name, 0, frame/(clip.length*clip.frameRate));
+        Play();
     }
     public void Stop() {
         animator.speed = 0;

@@ -5,21 +5,20 @@ using System;
 public class Player : Physics, IEntity
 {
 	string name;
-
 	PlayerController ctrl;
 	public SpecialManager specialMan;
 
 	Color baseColor; // hexa
 	Color darkColor; // hexa
 
-	Data.animParam baseWalkAnim;
-	Data.animParam baseStopAnim;
+	public Data.animParam baseWalkAnim;
+	public Data.animParam baseStopAnim;
 
 	public float speedFactor;
 	public bool fl_lockControls;
 	bool fl_entering;
 
-	int score;
+	public int score;
 	int scoreCS;
 
 	int dbg_lastKey;
@@ -28,8 +27,8 @@ public class Player : Physics, IEntity
 	public int currentWeapon;
 	public int maxBombs;
 	public int initialMaxBombs;
-	int dir;
-	float coolDown;
+	public int dir;
+	public float coolDown;
 	int lastBomb;
 
 	public int lives;
@@ -37,7 +36,7 @@ public class Player : Physics, IEntity
 	float shieldTimer;
 	float oxygen;
 
-	bool fl_knock;
+	public bool fl_knock;
 	float knockTimer;
 
 	List<bool> extendList;
@@ -47,7 +46,7 @@ public class Player : Physics, IEntity
 
 	string debugInput;
 
-	HAnimator shieldMC;
+	Animation shieldMC;
 
 	float startX;
 	int extraLifeCurrent;
@@ -55,10 +54,10 @@ public class Player : Physics, IEntity
 	float edgeTimer;
 	float waitTimer;
 
-	bool fl_chourou;
-	bool fl_carot;
-	bool fl_candle;
-	bool fl_torch;
+	public bool fl_chourou;
+	public bool fl_carot;
+	public bool fl_candle;
+	public bool fl_torch;
 	public int head;
 	public int defaultHead;
 	int bounceLimit;
@@ -81,7 +80,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Player() : base(null) {
+	Player(MovieClip mc) : base(mc) {
 		name			= "Igor";
 
 		baseWalkAnim	= Data.ANIM_PLAYER_WALK;
@@ -128,8 +127,8 @@ public class Player : Physics, IEntity
 		if ( GameManager.CONFIG.HasFamily(107) ) {	fl_torch = true; }
 		if ( GameManager.CONFIG.HasFamily(108) ) {	fl_carot = true; }
 
-		baseColor		= Data.BASE_COLORS[0];
-		darkColor		= Data.DARK_COLORS[0];
+		baseColor		= Data.ToColor(Data.BASE_COLORS[0]);
+		darkColor		= Data.ToColor(Data.DARK_COLORS[0]);
 		fl_lockControls	= false;
 		fl_entering		= false;
 		extendList		= new List<bool>();
@@ -298,8 +297,8 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-	static Player Attach(GameMode g, float x, float y) {
-		Player mc = g.depthMan.attach("hammer_player",Data.DP_PLAYER);
+	public static Player Attach(GameMode g, float x, float y) {
+		Player mc = new Player(g.depthMan.Attach("hammer_player",Data.DP_PLAYER));
 		mc.InitPlayer(g, x, y);
 		return mc;
 	}
@@ -310,8 +309,8 @@ public class Player : Physics, IEntity
 	------------------------------------------------------------------------*/
 	void Hit(Entity e) {
 		if ((e.types & Data.ITEM) > 0) {
-			Item et = e;
-			et.execute(this);
+			Item et = e as Item;
+			et.Execute(this);
 			if (et.id==Data.CONVERT_DIAMANT) { // perle
 //				if ( specialMan.actives[81] || specialMan.actives[96] || specialMan.actives[97] || specialMan.actives[98] ) {
 					specialMan.OnPickPerfectItem();
@@ -340,7 +339,7 @@ public class Player : Physics, IEntity
 
 		fl_knock = false;
 //		game.fxMan.attachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_shine");
-		game.soundMan.playSound("sound_player_death", Data.CHAN_PLAYER);
+		game.soundMan.PlaySound("sound_player_death", Data.CHAN_PLAYER);
 
 		// recup�re le signe de dx
 		var sign = Mathf.Sign(dx??0);
@@ -388,7 +387,7 @@ public class Player : Physics, IEntity
 		int? step = (extraLifeCurrent<Data.EXTRA_LIFE_STEPS.Length) ? Data.EXTRA_LIFE_STEPS[extraLifeCurrent] : null;
 		if (step!=null & score<step & score+value>=step) {
 			lives++;
-			game.gi.setLives( pid, lives );
+			game.gi.SetLives( pid, lives );
 			game.manager.LogAction("EL"+extraLifeCurrent);
 			extraLifeCurrent++;
 		}
@@ -397,7 +396,7 @@ public class Player : Physics, IEntity
 		}
 		score+=value??0;
 		scoreCS = score^GameManager.KEY;
-		game.gi.setScore(pid,score);
+		game.gi.SetScore(pid,score);
 	}
 
 
@@ -406,7 +405,7 @@ public class Player : Physics, IEntity
 	------------------------------------------------------------------------*/
 	public void GetExtend(int id) {
 		if (extendList[id]!=true) {
-			game.gi.getExtend(pid,id);
+			game.gi.GetExtend(pid,id);
 		}
 
 		// Perfect extend
@@ -455,18 +454,18 @@ public class Player : Physics, IEntity
 		// Changement d'arme
 		var id = world.GetCase(cx, cy) ;
 		if ( id>Data.FIELD_TELEPORT & id < 0 ) {
-			if (currentWeapon!=Mathf.Abs(id)) {
-				var fx = game.fxMan.AttachShine(x,y-Data.CASE_HEIGHT*0.5) ;
+			if (currentWeapon!=Mathf.Abs(id??0)) {
+				var fx = game.fxMan.AttachShine(x,y-Data.CASE_HEIGHT*0.5f) ;
 				fx.mc._xscale = 65 ;
 				fx.mc._yscale = fx.mc._xscale ;
-				game.soundMan.playSound("sound_field", Data.CHAN_FIELD);
+				game.soundMan.PlaySound("sound_field", Data.CHAN_FIELD);
 			}
-			ChangeWeapon(Mathf.Abs(id)) ;
+			ChangeWeapon(Mathf.Abs(id??0)) ;
 		}
 
 		// Champ d�sarmement
 		if ( id==Data.FIELD_PEACE ) {
-			if (currentWeapon!=Mathf.Abs(id)) {
+			if (currentWeapon!=Mathf.Abs(id??0)) {
 				var fx = game.fxMan.AttachShine(x,y-Data.CASE_HEIGHT*0.5f) ;
 				fx.mc._xscale = 65 ;
 				fx.mc._yscale = fx.mc._xscale ;
@@ -564,9 +563,7 @@ public class Player : Physics, IEntity
 				speedFactor = 1.6f;
 			}
 		}
-
 		game.OnResurrect();
-
 	}
 
 
@@ -575,7 +572,7 @@ public class Player : Physics, IEntity
 	------------------------------------------------------------------------*/
 	public void Shield(float? duration) {
 		shieldMC.DestroyThis();
-		shieldMC = game.fxMan.AttachFx(x,y,"hammer_player_shield");
+		shieldMC = game.fxMan.AttachFx(x, y, "hammer_player_shield");
 		shieldMC.fl_loop = true;
 		shieldMC.StopBlink();
 
@@ -702,7 +699,7 @@ public class Player : Physics, IEntity
 
 		if (a_walk!=null) {
 			baseWalkAnim = a_walk ?? new Data.animParam();
-
+		}
 		if (a_stop!=null) {
 			baseStopAnim = a_stop ?? new Data.animParam();
 		}
@@ -719,7 +716,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	AUTORISE L'APPLICATION DU PATCH COLLISION AU SOL (ESCALIERS)
 	------------------------------------------------------------------------*/
-	bool NeedsPatch() {
+	protected override bool NeedsPatch() {
 		return true;
 	}
 
@@ -753,9 +750,10 @@ public class Player : Physics, IEntity
 
 			if (fl_close) {
 				world.ShowField(td);
-				var next = world.GetNextTeleporter(td);
-				if (next!=null & !next.fl_rand) {
-					world.ShowField(next.td);
+				bool rand = false;
+				var next = world.GetNextTeleporter(td, ref rand);
+				if (next!=null & !rand) {
+					world.ShowField(next);
 				}
 			}
 		}
@@ -765,7 +763,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	VERROUILLAGE DES CONTROLES POUR UNE DUR�E FIXE
 	------------------------------------------------------------------------*/
-	void LockControls(float d) {
+	public void LockControls(float d) {
 		lockTimer = d;
 		PlayAnim(baseStopAnim);
 		fl_lockControls = true;
@@ -775,7 +773,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LA BOMBE A �T� R�CEMMENT KICK�E PAR CE JOUEUR
 	------------------------------------------------------------------------*/
-	bool IsRecentKick(Bomb b) {
+	bool IsRecentKick(IBomb b) {
 		var fl_recent = false;
 		for (var i=0;i<recentKicks.Count;i++) {
 			if ( b.uniqId == recentKicks[i].bid ) {
@@ -792,7 +790,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	POSE UNE BOMBE
 	------------------------------------------------------------------------*/
-	Entity Attack() {
+	public Entity Attack() {
 		if (specialMan.actives[91] | specialMan.actives[85]) { // curse chapeau luffy
 			return null;
 		}
@@ -846,9 +844,11 @@ public class Player : Physics, IEntity
 		}
 		game.statsMan.Inc(Data.STAT_BOMB,1) ;
 		b.SetOwner(this);
-		game.soundMan.playSound("sound_bomb_drop",Data.CHAN_PLAYER);
+		game.soundMan.PlaySound("sound_bomb_drop",Data.CHAN_PLAYER);
 		if (!fl_stable) {
-			KickBomb(b, 1.0f);
+			List<IBomb> l = new List<IBomb>();
+			l.Add(b);
+			KickBomb(l, 1.0f);
 		}
 
 		return b;
@@ -858,13 +858,13 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	SAUT SECONDAIRE EN L'AIR
 	------------------------------------------------------------------------*/
-	void AirJump() {
+	public void AirJump() {
 		PlayAnim(Data.ANIM_PLAYER_JUMP_UP);
 		if ( dy > 0) { // descendant
 			dy=-Data.PLAYER_AIR_JUMP;
 		}
 		else { // ascendant
-			if ( Mathf.Abs(dy) < Data.PLAYER_AIR_JUMP ) {
+			if ( Mathf.Abs(dy??0) < Data.PLAYER_AIR_JUMP ) {
 				dy=-Data.PLAYER_AIR_JUMP;
 			}
 		}
@@ -889,7 +889,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	D�FINI L'ARME DU JOUEUR
 	------------------------------------------------------------------------*/
-	void ChangeWeapon(int id) {
+	public void ChangeWeapon(int id) {
 		if (id==-1) {
 			id = lastBomb;
 		}
@@ -917,13 +917,13 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	KICK UNE OU PLUSIEURS BOMBES
 	------------------------------------------------------------------------*/
-	void KickBomb(List<Bomb> l, float powerFactor) {
+	public void KickBomb(List<IBomb> l, float powerFactor) {
 		var i=0 ;
 		while (i<l.Count) {
 			var b = l[i] ;
 			if (!IsRecentKick(b)) {
 				if ((b.fl_airKick | (!b.fl_airKick & b.fl_stable)) & !b.fl_explode) {
-					if (!b.isType(Data.SOCCERBALL)) {
+					if (!b.IsType(Data.SOCCERBALL)) {
 						b.dx = dir * Data.PLAYER_HKICK_X;
 					}
 					else {
@@ -934,7 +934,7 @@ public class Player : Physics, IEntity
 					if (dir<0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_LEFT)) {
 						var h = world.GetWallHeight( cx-1,cy, Data.IA_CLIMB );
 						if (h<=1) {
-							b.MoveTo( b.x, b.y-Data.CASE_HEIGHT*0.5 );
+							b.MoveTo(b.x, b.y-Data.CASE_HEIGHT*0.5f );
 						}
 					}
 
@@ -942,7 +942,7 @@ public class Player : Physics, IEntity
 					if (dir>0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT)) {
 						var h = world.GetWallHeight(cx+1, cy, Data.IA_CLIMB );
 						if (h<=1) {
-							b.MoveTo( b.x, b.y-Data.CASE_HEIGHT*0.5 );
+							b.MoveTo( b.x, b.y-Data.CASE_HEIGHT*0.5f );
 						}
 					}
 
@@ -972,7 +972,7 @@ public class Player : Physics, IEntity
 						if (b.lifeTimer>0) {
 							var b2 = b.Duplicate();
 							if (b2.IsType(Data.PLAYER_BOMB)) {
-								b2.owner = this;
+								(b2 as PlayerBomb).owner = this;
 							}
 							b2.lifeTimer = b.lifeTimer ;
 							b2.dx = -b.dx ;
@@ -985,7 +985,7 @@ public class Player : Physics, IEntity
 					}
 				}
 			}
-			i++ ;
+			i++;
 		}
 	}
 
@@ -994,15 +994,15 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	UP KICK
 	------------------------------------------------------------------------*/
-	void UpKickBomb(List<Bomb> l) {
+	public void UpKickBomb(List<IBomb> l) {
 		var i=0 ;
 		while (i<l.Count) {
 			var b = l[i] ;
 			if (!IsRecentKick(b)) {
 				if ((b.fl_airKick | (!b.fl_airKick & b.fl_stable) ) & !b.fl_explode) {
 					b.dx *= 2;
-					if (Mathf.Abs(b.dx)<= 1.5) {
-						b.dx = 0.5*dir;
+					if (Mathf.Abs(b.dx??0)<= 1.5) {
+						b.dx = 0.5f*dir;
 					}
 					b.dy = -Data.PLAYER_VKICK;
 					if (specialMan.actives[13]) {
@@ -1013,7 +1013,7 @@ public class Player : Physics, IEntity
 						b.dx*=1.3f;
 					}
 					b.next = null;
-					b.onKick(this);
+					b.OnKick(this);
 					b.fl_stable = false;
 					b.fl_bounce = true;
 					recentKicks.Add(new bombTracker(game.cycle, b.uniqId));
@@ -1034,15 +1034,16 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	COMPTE LE NOMBRE DE BOMBES POS�ES
 	------------------------------------------------------------------------*/
-	int CountBombs() {
+	public int CountBombs() {
 		var n = 0 ;
 		var l = game.GetList(Data.PLAYER_BOMB) ;
 		for (var i=0;i<l.Count;i++) {
-			if (!l[i].fl_explode & l[i].parent == this) {
-				n++ ;
+			PlayerBomb pb = l[i] as PlayerBomb;
+			if (!pb.fl_explode & pb.parent == this) {
+				n++;
 			}
 		}
-		return n ;
+		return n;
 	}
 
 
@@ -1143,8 +1144,6 @@ public class Player : Physics, IEntity
 		}
 	}
 
-
-
 	/*------------------------------------------------------------------------
 	EVENT: T�L�PORTATION
 	------------------------------------------------------------------------*/
@@ -1158,7 +1157,6 @@ public class Player : Physics, IEntity
 		}
 	}
 
-
 	/*------------------------------------------------------------------------
 	EVENT: CHANGEMENT DE LEVEL
 	------------------------------------------------------------------------*/
@@ -1171,11 +1169,10 @@ public class Player : Physics, IEntity
 		specialMan.ClearRec();
 	}
 
-
 	/*------------------------------------------------------------------------
 	EVENT: TOUCHE LE SOL
 	------------------------------------------------------------------------*/
-	void OnHitGround(float h) {
+	protected override void OnHitGround(float h) {
 		// Effet goldorak
 		if (specialMan.actives[90]) {
 			if (!fl_knock & h>=Data.CASE_HEIGHT*2) {
@@ -1183,7 +1180,7 @@ public class Player : Physics, IEntity
 			}
 		}
 
-		base.onHitGround(h) ;
+		base.OnHitGround(h) ;
 
 		// Hauteur de chute
 		if ( h >= Data.DUST_FALL_HEIGHT ) {
@@ -1191,7 +1188,7 @@ public class Player : Physics, IEntity
 		}
 		game.fxMan.AttachFx(x,y,"hammer_fx_fall");
 
-		game.soundMan.playSound("sound_land",Data.CHAN_PLAYER);
+		game.soundMan.PlaySound("sound_land",Data.CHAN_PLAYER);
 
 		// Effet stonehead
 		if ( specialMan.actives[39] ) {
@@ -1201,10 +1198,8 @@ public class Player : Physics, IEntity
 				l[i].Knock(Data.SECOND) ;
 			}
 		}
-
 		ShowTeleporters();
 	}
-
 
 	/*------------------------------------------------------------------------
 	EVENT: TOUCHE UN MUR
@@ -1213,7 +1208,7 @@ public class Player : Physics, IEntity
 		if (fl_knock) {
 			dx = -dx*0.5f;
 			// Gros choc
-			if (Mathf.Abs(dx)>=10 & world.GetCase(cx, cy)<=0) {
+			if (Mathf.Abs(dx??0)>=10 & world.GetCase(cx, cy)<=0) {
 				game.Shake(Data.SECOND*0.7f, 5);
 				game.fxMan.InGameParticlesDir(Data.PARTICLE_STONE, x,y, 1+UnityEngine.Random.Range(0, 3), dx);
 				game.fxMan.InGameParticlesDir(Data.PARTICLE_CLASSIC_BOMB, x,y, 3+UnityEngine.Random.Range(0, 5), dx);
@@ -1224,7 +1219,6 @@ public class Player : Physics, IEntity
 		}
 	}
 
-
 	/*------------------------------------------------------------------------
 	EVENT: D�BUT DE NIVEAU
 	------------------------------------------------------------------------*/
@@ -1232,7 +1226,7 @@ public class Player : Physics, IEntity
 		this.Show() ;
 		game.manager.LogAction(world.currentId+","+Mathf.Floor(score/1000));
 		if ( game.world.fl_mainWorld ) {
-			game.gi.setLevel(game.world.currentId);
+			game.gi.SetLevel(game.world.currentId);
 		}
 		else {
 			if (game.fakeLevelId==-1) {
@@ -1249,14 +1243,13 @@ public class Player : Physics, IEntity
 		fl_entering = true;
 	}
 
-
 	/*------------------------------------------------------------------------
 	EVENT: PORTAL WARP
 	------------------------------------------------------------------------*/
-	protected override void OnPortal(int pid) {
+	protected override void OnPortal(int? pid) {
 		base.OnPortal(pid);
 
-		if (!game.UsePortal(pid, this)) {
+		if (!game.UsePortal(pid??0, this)) {
 			OnPortalRefusal();
 		}
 	}
@@ -1290,15 +1283,15 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate() ;
 
 		if ( shieldMC!=null ) {
 			if ( shieldTimer<=Data.SECOND*3 ) {
 				shieldMC.Blink();
 			}
-			shieldMC.mc._x	= shieldMC.mc._x + (this.x - shieldMC.mc._x)*0.75;
-			shieldMC.mc._y	= shieldMC.mc._y + (this.y-20 - shieldMC.mc._y)*0.75;
+			shieldMC.mc._x	= shieldMC.mc._x + (this.x - shieldMC.mc._x)*0.75f;
+			shieldMC.mc._y	= shieldMC.mc._y + (this.y-20 - shieldMC.mc._y)*0.75f;
 		}
 
 		this._xscale = dir*Mathf.Abs(this._xscale) ;
@@ -1308,7 +1301,7 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		// Gestion des kicks
 		for (var i=0;i<recentKicks.Count;i++) {
 
@@ -1334,7 +1327,7 @@ public class Player : Physics, IEntity
 		// Oxyg�ne
 		if (!fl_kill & game.fl_aqua) {
 			oxygen -= Time.fixedDeltaTime*0.1f;
-			game.manager.Progress(oxygen/100);
+			/* game.manager.Progress(oxygen/100); */ // TODO Progress
 			if (oxygen<=0) {
 				KillHit(0);
 			}

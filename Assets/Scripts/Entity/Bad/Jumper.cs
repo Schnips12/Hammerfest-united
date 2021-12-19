@@ -43,7 +43,7 @@ public class Jumper : Walker
 	D�FINI LES SAUTS AUTORIS�S
 	------------------------------------------------------------------------*/
 	// Haut
-	protected void SetJumpUp(float? chance) {
+	public void SetJumpUp(float? chance) {
 		if ( chance==null ) {
 			fl_jUp = false;
 		}
@@ -55,7 +55,7 @@ public class Jumper : Walker
 	}
 
 	// Bas
-	protected void SetJumpDown(float? chance) {
+	public void SetJumpDown(float? chance) {
 		if ( chance==null ) {
 			fl_jDown = false;
 		}
@@ -67,7 +67,7 @@ public class Jumper : Walker
 	}
 
 	// Horizontal
-	protected void SetJumpH(float? chance) {
+	public void SetJumpH(float? chance) {
 		if ( chance==null ) {
 			fl_jH = false;
 		}
@@ -79,7 +79,7 @@ public class Jumper : Walker
 	}
 
 	// Escalade
-	protected void SetClimb(float? chance, float? max) {
+	public void SetClimb(float? chance, float? max) {
 		if ( chance==null ) {
 			fl_climb = false;
 			maxClimb = 0;

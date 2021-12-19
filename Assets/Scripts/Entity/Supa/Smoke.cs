@@ -2,17 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Smoke : MonoBehaviour
+public class Smoke : Supa
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+	/*------------------------------------------------------------------------
+	CONSTRUCTEUR
+	------------------------------------------------------------------------*/
+	Smoke(MovieClip mc) : base(mc) {
+		fl_blink = false;
+	}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+
+	/*------------------------------------------------------------------------
+	INIT
+	------------------------------------------------------------------------*/
+	protected override void InitSupa(GameMode g, float x, float y) {
+		base.InitSupa(g,x,y);
+		Scale(265);
+		SetLifeTimer(Data.SECOND*3);
+	}
+
+
+	/*------------------------------------------------------------------------
+	ATTACH
+	------------------------------------------------------------------------*/
+	public static Smoke Attach(GameMode g) {
+		var linkage = "hammer_supa_smoke";
+		Smoke mc = new Smoke(g.depthMan.Attach(linkage,Data.DP_SUPA));
+		mc.InitSupa(g, Data.GAME_WIDTH/2,Data.GAME_HEIGHT/2);
+		return mc;
+	}
 }

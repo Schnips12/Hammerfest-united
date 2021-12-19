@@ -9,8 +9,8 @@ public class Mode
 	public GameMechanics world;
 	protected Cookie root;
 	protected AudioSource audio;
-	//DepthManager depthMan; //TODO replace with unity object
-	//SoundManager soundMan; //TODO replace with unity object
+	public DepthManager depthMan;
+	public SoundManager soundMan;
 
 	protected bool fl_music;
 	protected int currentTrack;

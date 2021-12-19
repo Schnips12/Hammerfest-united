@@ -94,7 +94,7 @@ public class Crawler : WallWalker
 	------------------------------------------------------------------------*/
 	void Attack() {
 		// Fireball
-		var s = FireBall.Attach(game, x, y);
+		var s = ShootFireBall.Attach(game, x, y);
 		s.MoveTo(x,y);
 		s.dx = -cp.x*SHOOT_SPEED;
 		s.dy = -cp.y*SHOOT_SPEED;
@@ -111,8 +111,8 @@ public class Crawler : WallWalker
 		sub._xscale = 150 + Mathf.Abs(cp.x)*150;
 		sub._yscale = 150 + Mathf.Abs(cp.y)*150;
 		colorAlpha = COLOR_ALPHA;
-		SetColorHex( Mathf.Round(colorAlpha), COLOR );
-
+		/* SetColorHex( Mathf.Round(colorAlpha), COLOR ); // TODO Understand
+ */
 		// Bomb
 //		var b = entity.bomb.bad.PoireBomb.attach(game,x,y);
 //		var bdx = (xSpeed!=0) ? -xSpeed/Math.abs(xSpeed)*5 : -cp.x*15;
@@ -218,7 +218,7 @@ public class Crawler : WallWalker
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		base.EndUpdate();
 		if ( fl_attack ) {
 			// Vibration attaque
@@ -256,10 +256,10 @@ public class Crawler : WallWalker
 		if ( colorAlpha>0 ) {
 			colorAlpha-=Time.fixedDeltaTime*3;
 			if ( colorAlpha<=0 ) {
-				ResetColor();
+				/* ResetColor(); */
 			}
 			else {
-				SetColorHex( Mathf.Round(colorAlpha), COLOR );
+				/* SetColorHex( Mathf.Round(colorAlpha), COLOR ); */ // TODO Understand
 			}
 		}
 
@@ -271,7 +271,7 @@ public class Crawler : WallWalker
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		if ( fl_attack ) {
 			dx = 0;
 			dy = 0;

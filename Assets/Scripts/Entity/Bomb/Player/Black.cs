@@ -7,7 +7,7 @@ public class Black : PlayerBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Black() : base() {
+	public Black(MovieClip mc) : base(mc) {
 		duration = 100 ;
 		power = 20 ;
 		explodeSound="sound_bomb_black";
@@ -19,7 +19,7 @@ public class Black : PlayerBomb
 	------------------------------------------------------------------------*/
 	public static Black Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_black" ;
-		Black mc = g.depthMan.Attach(linkage,Data.DP_BOMBS);
+		Black mc = new Black(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y) ;
 		return mc ;
 	}
@@ -28,7 +28,7 @@ public class Black : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	Black Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x,y) ;
 	}
 
@@ -36,7 +36,7 @@ public class Black : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		base.OnExplode();
 
 		var l = BombGetClose(Data.BAD) ;
@@ -44,10 +44,11 @@ public class Black : PlayerBomb
 		game.fxMan.AttachExplodeZone(x,y,radius);
 
 		for (var i=0;i<l.Count;i++) {
-			Bad e = l[i];
+			Bad e = l[i] as Bad;
 			e.SetCombo(uniqId);
 			e.KillHit(0);
 			ShockWave(e, radius, power);
 			e.dy = -10-Random.Range(0, 20);
 		}
 	}
+}

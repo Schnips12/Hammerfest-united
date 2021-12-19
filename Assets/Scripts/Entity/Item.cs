@@ -5,7 +5,7 @@ using UnityEngine;
 public class Item : Physics
 {
 	public int id;
-	protected int? subId;
+	public int? subId;
 
 
 	/*------------------------------------------------------------------------
@@ -53,7 +53,7 @@ public class Item : Physics
 	/*------------------------------------------------------------------------
 	ACTIVE L'ITEM AU PROFIT DE "E"
 	------------------------------------------------------------------------*/
-	protected virtual void Execute(Player p) {
+	public virtual void Execute(Player p) {
 		DestroyThis();
 	}
 
@@ -74,14 +74,14 @@ public class Item : Physics
 	protected override void OnLifeTimer() {
 		base.OnLifeTimer() ;
 		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT/2,"hammer_fx_pop") ;
-		game.soundMan.playSound("sound_pop",Data.CHAN_ITEM);
+		game.soundMan.PlaySound("sound_pop",Data.CHAN_ITEM);
 	}
 
 
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update() ;
 	}
 

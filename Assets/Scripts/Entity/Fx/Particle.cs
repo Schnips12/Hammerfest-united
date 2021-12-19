@@ -218,7 +218,7 @@ public class Particle : Mover
 	/*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected override void EndUpdate() {
+	public override void EndUpdate() {
 		if ( pid==Data.PARTICLE_RAIN ) {
 			_yscale = Mathf.Min( 100, _yscale+Time.fixedDeltaTime*4 );
 			rotation *= 0.93f;
@@ -230,11 +230,11 @@ public class Particle : Mover
 		base.EndUpdate() ;
 
 		if ( pid==Data.PARTICLE_BUBBLE & totalLife>0 ) {
-			_alpha = Mathf.Min(100, 150 * lifeTimer / totalLife);
+			_alpha = Mathf.Min(100, 150 * lifeTimer / totalLife??1);
 		}
 
 		if ( pid==Data.PARTICLE_BLOB & totalLife>0 ) {
-			_xscale = 100 * scaleFactor * Mathf.Min(1, 1.5f * lifeTimer / totalLife);
+			_xscale = 100 * scaleFactor * Mathf.Min(1, 1.5f * lifeTimer / totalLife??1);
 			_yscale = _xscale;
 		}
 	}
@@ -244,7 +244,7 @@ public class Particle : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		if ( Mathf.Abs(dx??0)<=0.5 & pid!=Data.PARTICLE_BLOB ) {
 			lifeTimer-=Time.fixedDeltaTime;
 			if ( lifeTimer<=0 ) {

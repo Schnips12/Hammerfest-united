@@ -37,7 +37,7 @@ public class SpecialItem : Item
 	/*------------------------------------------------------------------------
 	ACTIVE L'ITEM AU PROFIT DE "P"
 	------------------------------------------------------------------------*/
-	protected override void Execute(Player p) {
+	public override void Execute(Player p) {
 		if ( id>0 ) {
 			game.manager.LogAction("S"+id);
 		}
@@ -55,7 +55,7 @@ public class SpecialItem : Item
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected override void Update() {
+	public override void Update() {
 		base.Update();
 		if ( id!=0 ) {
 			if ( Random.Range(0, 4)==0 ) {

@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public class Tzongre : Flyer
 {
 
@@ -53,7 +49,7 @@ public class Tzongre : Flyer
 	/*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-	static Tzongre Attach(GameMode g, float x, float y) {
+	public static Tzongre Attach(GameMode g, float x, float y) {
 		var linkage = Data.LINKAGES[Data.BAD_TZONGRE];
 		Tzongre mc = new Tzongre(g.depthMan.Attach(linkage,Data.DP_BADS));
 		mc.InitBad(g,x,y) ;

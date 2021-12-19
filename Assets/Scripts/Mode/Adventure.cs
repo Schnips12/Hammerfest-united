@@ -91,7 +91,7 @@ public class Adventure : GameMode
 			if ( globalActives[94] ) {
 				var cx = Random.Range(0, Data.LEVEL_WIDTH);
 				var cy = Random.Range(0, Data.LEVEL_HEIGHT-5);
-				var ptC = world.GetGround(ref cx, ref cy);
+				var ptC = world.GetGround(cx, cy);
 				world.scriptEngine.InsertScoreItem(
 					Random.Range(0, Data.RAND_SCORES_ID),
 					null,
@@ -283,12 +283,12 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: MORT D'UN BAD
 	------------------------------------------------------------------------*/
-	protected override void OnKillBad(Entity.Bad b) {
+	public override void OnKillBad(Bad b) {
 		base.OnKillBad(b);
 
 		// Boss Tuberculoz
 		if (world.fl_mainWorld & world.currentId==Data.TUBERCULOZ_LEVEL) {
-			GetOne(Data.BOSS).OnKillBad();
+			(GetOne(Data.BOSS) as Tuberculoz).OnKillBad();
 		}
 
 		// Perfect order
@@ -305,7 +305,7 @@ public class Adventure : GameMode
 		base.OnExplode(x,y,radius);
 
 		if ( world.fl_mainWorld & world.currentId==Data.TUBERCULOZ_LEVEL ) {
-			GetOne(Data.BOSS).OnExplode(x,y,radius);
+			(GetOne(Data.BOSS) as Tuberculoz).OnExplode(x,y,radius);
 		}
 
 	}
@@ -346,8 +346,8 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	EVENT: HURRY UP !
 	------------------------------------------------------------------------*/
-	public override GameObject OnHurryUp() {
-		GameObject mc = base.OnHurryUp();
+	public override MovieClip OnHurryUp() {
+		MovieClip mc = base.OnHurryUp();
 		if ( GameManager.CONFIG.HasMusic() & currentTrack==0 ) {
 			trackPos = audio.time;
 			PlayMusic(2);

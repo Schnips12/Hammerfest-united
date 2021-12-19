@@ -7,7 +7,7 @@ public class Classic : PlayerBomb
 /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Classic() : base() {
+	public Classic(MovieClip mc) : base(mc) {
 		duration = 45;
 		power = 30;
 	}
@@ -18,7 +18,7 @@ public class Classic : PlayerBomb
 	------------------------------------------------------------------------*/
 	public static Classic Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_classic";
-		Classic mc = g.depthMan.attach(linkage,Data.DP_BOMBS);
+		Classic mc = new Classic(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
 	}
@@ -27,7 +27,7 @@ public class Classic : PlayerBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	Classic Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y);
 	}
 
@@ -35,7 +35,7 @@ public class Classic : PlayerBomb
 	/*------------------------------------------------------------------------
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
-	protected override void OnExplode() {
+	public override void OnExplode() {
 		base.OnExplode();
 
 		if ( GameManager.CONFIG.fl_shaky ) {
@@ -45,7 +45,7 @@ public class Classic : PlayerBomb
 		var l = BombGetClose(Data.BAD);
 
 		for (var i=0;i<l.Count;i++) {
-			Bad e = l[i];
+			Bad e = l[i] as Bad;
 			e.SetCombo(uniqId);
 			e.Freeze(Data.FREEZE_DURATION);
 			ShockWave( e, radius, power);
@@ -54,7 +54,7 @@ public class Classic : PlayerBomb
 
 		l = BombGetClose(Data.BAD_BOMB);
 		for (var i=0;i<l.Count;i++) {
-			BadBomb b = l[i];
+			BadBomb b = l[i] as BadBomb;
 			if (!b.fl_explode) {
 				var bf = b.GetFrozen(uniqId);
 				if (bf!=null) {

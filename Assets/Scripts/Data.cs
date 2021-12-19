@@ -294,7 +294,7 @@ public class Data : MonoBehaviour
 	public static float DEATH_LINE = GAME_HEIGHT+50;
 
 	// *** FX
-	public const int MAX_FX					= 16;
+	public static int MAX_FX				= 16;
 	public const int DUST_FALL_HEIGHT		= 80; // CASE_HEIGHT * 4
 	public const int PARTICLE_ICE			= 1;
 	public const int PARTICLE_CLASSIC_BOMB	= 2;

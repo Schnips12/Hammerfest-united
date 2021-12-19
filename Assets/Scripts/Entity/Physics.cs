@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class Physics : HAnimator
 {
-	public float? dx;
-	public float? dy;
+	public float? dx { get; set; }
+	public float? dy { get; set; }
 
 	protected float? fallStart; // use for fall height
 
@@ -12,7 +12,7 @@ public class Physics : HAnimator
 	public float? slideFriction; // default world value if "null"
 	public float shockResistance; // resistance to shockwaves
 
-	public bool fl_stable;
+	public bool fl_stable { get; set; }
 	public bool fl_physics;
 	public bool fl_friction;
 	public bool fl_gravity;
@@ -71,7 +71,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	INIT
 	------------------------------------------------------------------------*/
-	protected virtual void Init(GameMode g) {
+	protected override void Init(GameMode g) {
 		base.Init(g);
 		this.Register(Data.PHYSICS);
 	}
@@ -106,7 +106,7 @@ public class Physics : HAnimator
 		}
 		else {
 			e.dy += Mathf.Sin(ang) * ratio * power;
-			e.dy = Mathf.Max(e.dy, -10);
+			e.dy = Mathf.Max(e.dy??0, -10);
 		}
 		e.fl_stable = false;
 	}
@@ -174,16 +174,16 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	D�PLACEMENT DANS UNE DIRECTION AU CHOIX
 	------------------------------------------------------------------------*/
-	protected void MoveUp(float speed) {
+	public virtual void MoveUp(float speed) {
 		MoveToAng( -90, speed );
 	}
-	protected void MoveDown(float speed) {
+	public virtual void MoveDown(float speed) {
 		MoveToAng( 90, speed );
 	}
-	protected void MoveLeft(float speed) {
+	public virtual void MoveLeft(float speed) {
 		MoveToAng( 180, speed );
 	}
-	protected void MoveRight(float speed) {
+	public virtual void MoveRight(float speed) {
 		MoveToAng( 0, speed );
 	}
 
@@ -191,7 +191,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	D�PLACEMENT EN PARTANT D'UNE ENTIT�
 	------------------------------------------------------------------------*/
-	void MoveFrom(Entity e, float speed) {
+	public void MoveFrom(Entity e, float speed) {
 		x = e.x;
 		y = e.y;
 		var ang = -Random.Range(0, Mathf.Round(100*Mathf.PI))/100;
@@ -210,7 +210,7 @@ public class Physics : HAnimator
 		if ( fl_stable ) {
 			return;
 		}
-		var pt = world.GetGround(ref cx, ref cy);
+		var pt = world.GetGround(cx, cy);
 		MoveToCase(pt.x, pt.y);
 	}
 
@@ -318,12 +318,12 @@ public class Physics : HAnimator
 			}
 
 			// Projection verticale
-			if (fdir==Data.HORIZONTAL & Mathf.Abs(dy)<20) {
+			if (fdir==Data.HORIZONTAL & Mathf.Abs(dy??0)<20) {
 				dx = 0;
 				dy *= 5;
 			}
 			// Projection horizontale
-			if (fdir==Data.VERTICAL & Mathf.Abs(dx)<20) {
+			if (fdir==Data.VERTICAL & Mathf.Abs(dx??0)<20) {
 				dx *= 7;
 				dy = 0;
 			}
@@ -377,7 +377,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	AUTORISE L'APPLICATION DU PATCH COLLISION AU SOL (ESCALIERS)
 	------------------------------------------------------------------------*/
-	bool NeedsPatch() {
+	protected virtual bool NeedsPatch() {
 		return false;
 	}
 
@@ -459,7 +459,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
-	protected virtual void EndUpdate() {
+	public override void EndUpdate() {
 		if (fl_hitBorder) { // patch contre les sorties d'�cran lat�rales
 			if ( x<Data.BORDER_MARGIN ) x=Data.BORDER_MARGIN;
 			if ( x>=Data.GAME_WIDTH-Data.BORDER_MARGIN ) x=Data.GAME_WIDTH-Data.BORDER_MARGIN-1;
@@ -484,7 +484,7 @@ public class Physics : HAnimator
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	protected virtual void Update() {
+	public override void Update() {
 		base.Update();
 
 		if (!fl_physics) {
@@ -538,7 +538,7 @@ public class Physics : HAnimator
 
 			Prefix();
 
-			var stepInfos = CalcSteps(dx,dy);
+			var stepInfos = CalcSteps(dx??0, dy??0);
 			step=0;
 
 			// D�but du stepping
@@ -678,10 +678,10 @@ public class Physics : HAnimator
 				dy *= game.yFriction;
 			}
 		}
-		if (Mathf.Abs(dx)<=0.2) {
+		if (Mathf.Abs(dx??0)<=0.2) {
 			dx = 0;
 		}
-		if (Mathf.Abs(dy)<=0.2) {
+		if (Mathf.Abs(dy??0)<=0.2) {
 			dy = 0;
 		}
 

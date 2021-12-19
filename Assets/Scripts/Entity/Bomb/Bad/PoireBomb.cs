@@ -17,7 +17,7 @@ public class PoireBomb : BadBomb
 	/*------------------------------------------------------------------------
 	ATTACH
 	------------------------------------------------------------------------*/
-	static PoireBomb Attach(GameMode g, float x, float y) {
+	public static PoireBomb Attach(GameMode g, float x, float y) {
 		var linkage = "hammer_bomb_poire";
 		PoireBomb mc = new PoireBomb(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x,y );
@@ -67,7 +67,7 @@ public class PoireBomb : BadBomb
 	/*------------------------------------------------------------------------
 	EVENT: KICK (CES BOMBES SONT FACILEMENT REPOUSSABLES)
 	------------------------------------------------------------------------*/
-	protected override void OnKick(Player p) {
+	public override void OnKick(Player p) {
 		base.OnKick(p);
 		SetLifeTimer(lifeTimer + Data.SECOND*0.5f);
 	}

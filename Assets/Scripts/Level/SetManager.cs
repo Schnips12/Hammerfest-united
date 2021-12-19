@@ -97,7 +97,7 @@ public class SetManager
 	/*------------------------------------------------------------------------
 	ALLUME / �TEINT UN FIELD DE T�L�PORTATION
 	------------------------------------------------------------------------*/
-	void ShowField(TeleporterData td) {
+	public void ShowField(TeleporterData td) {
 		if (td.fl_on) {
 			return;
 		}
@@ -107,7 +107,7 @@ public class SetManager
 		td.podB.GotoAndStop(2);
 	}
 
-	void HideField(TeleporterData td) {
+	public void HideField(TeleporterData td) {
 		if (!td.fl_on) {
 			return;
 		}
@@ -384,7 +384,7 @@ public class SetManager
 	/*------------------------------------------------------------------------
 	RENVOIE TRUE SI LA BOUNDING BOX EST DANS L'AIRE DE JEU
 	------------------------------------------------------------------------*/
-	bool ShapeInBound(Entity e) {
+	public bool ShapeInBound(Entity e) {
 		return (
 			e.x >= -e.width 			&
 			e.x < current.mapWidth() 	&
@@ -396,7 +396,7 @@ public class SetManager
 	/*------------------------------------------------------------------------
 	RENVOIE LE PREMIER SOL RENCONTRé A PARTIR D'UNE CASE DONNéE
 	------------------------------------------------------------------------*/
-	public Vector2Int GetGround(ref int cx, ref int cy) {
+	public Vector2Int GetGround(int cx, int cy) {
 		int ty, n;
 		for (n=0, ty=cy ; n <= current.mapHeight() ; n++, ty--) {
 			if (ty > 0 & GetCase(cx, ty) == Data.GROUND) {
