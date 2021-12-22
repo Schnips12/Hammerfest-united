@@ -238,7 +238,9 @@ public class Flyer : Bad
 
 		// Collisions haut du niveau
 		if ( fl_fly & dy<0 & y<=Data.CASE_HEIGHT ) {
-			dy = dy==null ? null : Mathf.Abs(dy.Value);
+			if(dy!=null) {
+				dy = Mathf.Abs(dy.Value);
+			}
 		}
 	}
 

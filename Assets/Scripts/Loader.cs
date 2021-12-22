@@ -1,45 +1,43 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Xml;
-using System;
 using System.IO;
-using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class Loader : MonoBehaviour
 {
-    Cookie root;
+	public static Loader Instance;
+	[SerializeField] public List<AudioClip> musics;
+	[SerializeField] public List<AudioClip> effects;
+	[SerializeField] public GameObject popupPrefab;
+    [SerializeField] public GameObject pointerPrefab;
+    [SerializeField] public GameObject itemNamePrefab;
+    [SerializeField] public GameObject radiusPrefab;
+    [SerializeField] public GameObject darknessPrefab;
 
-	const float TIMEOUT = 8000;
-	const float MUSIC_TIMEOUT = 32*10;
-	const float MUSIC_NEAR_END = 32*2.5f;
-
-	string _gid;
-	string _key;
-	string _qid;
-	string _mid;
-	string _families;
-	string _options;
-	string _mode;
-
-	int uniqueItems;
-	string exitParams;
-
-	Slider progressBar;
-	[SerializeField] Slider progressBarPrefab;
-
-	[SerializeField] List<AudioClip> musics;
-	int musicId;
-
-	bool fl_gameOver;
-	bool fl_exit;
-	bool fl_fade;
-	bool fl_saveAgain;
-	string rawLang;
-	XmlNode xmlLang;
+    public Cookie root;
+	public XmlNode xmlLang;	
+	public List<string> families;
+	public List<string> options;
+	
+	public bool fl_gameOver;
+	public bool fl_exit;
+	public bool fl_fade;
 
 
-	public Loader() {
-		root = new Cookie();
+	// Awake is called when the script instance is being loaded.
+	void Awake() {
+		// Singleton
+		if(Instance==null) {
+			Instance = this;
+			DontDestroyOnLoad(gameObject);
+		} else {
+			Destroy(gameObject);
+		}
+
+		// Hardcoded loading parameters.
+		// TODO Default parameters should be loaded from a stored cookie item.
+		root = new Cookie(null);
 		root.SetVar("mode", "solo");
 		root.SetVar("options", "");
 		root.SetVar("lang", "fr");
@@ -48,141 +46,40 @@ public class Loader : MonoBehaviour
 		root.SetVar("sound", "0");
 		root.SetVar("music", "0");
 		root.SetVar("volume", "100");
+		options 	= new List<string>(root.ReadVar("options").Split(';'));
+		families 	= new List<string>();
 
-        XmlDocument doc = new XmlDocument();
-		rawLang = File.ReadAllText(Application.dataPath+"/xml/lang/"+root.ReadVar("lang"));
+		// Loading the default language before displaying the next scene.
+		LoadLang();
+
+		Debug.Log("Loader initialized. Moving to _main scene.");
+		SceneManager.LoadScene("_main", LoadSceneMode.Single);
+	}
+
+
+	// TODO Allow the player to change language in game and invoke this to refresh all texts.
+	public void LoadLang() {
+		XmlDocument doc = new XmlDocument();
+		string rawLang = File.ReadAllText(Application.dataPath+"/xml/lang/"+root.ReadVar("lang")+".xml");
+		Lang.Init(rawLang);
         doc.LoadXml(rawLang);
 		xmlLang = doc.FirstChild.FirstChild;
 		while (xmlLang != null & xmlLang.Name!="statics") {
 			xmlLang = xmlLang.NextSibling;
 		}
-
-		_options	= root.ReadVar("options");
-		_mode		= root.ReadVar("mode");
-		musicId	= 0;
-	}
-
-	void InitLoader() {
-		AttachLoading(1);
-		GameLoadDone();
-	}
-
-	void GameLoadDone() {
-		GameReady();
-	}
-
-	void GameReady() {
-        AttachLoading(2);
-	}
-
-	int GetRunId() {
-		int id = 0;
-		var pos = _options.IndexOf("set_", 0);
-		if (pos >= 0) {
-			pos = _options.IndexOf("_", pos+4);
-			id = Int32.Parse(_options.Substring(pos+1, 1));
-		}
-		return id;
-	}
-
-	int CountUniques(List<int?> a) {
-		int n=0;
-		foreach (int? id in a) {
-			if (id == null) {
-				n++;
-			}
-		}
-		return n;
-	}
-
-	void GameOver(int score, int? runId, Stat stats) {
-		if(fl_gameOver)
-			return;
-
-		fl_gameOver = true;
-
-		fl_fade = true;
-		AttachLoading(5);
-		// TODO Save run achievements and score
-	}
-
-	void ExitGame() {
-		if (fl_exit) {
-			return;
-		}
-		fl_exit		= true;
-
-		fl_fade		= true;		
-		AttachLoading(6);
-	}
-
-	void Error(string msg) {
-		AttachLoading(4);
-		Debug.Log("msg="+msg);
 	}
 
 
-	bool IsMode(string modeName) {
-		return _mode == modeName;
+	public bool IsMode(string modeName) {
+		return root.ReadVar("mode") == modeName;
 	}
 
-	string GetLangStr(int id) {
+
+	public string GetLangStr(int id) {
 		XmlNode node = xmlLang.FirstChild;
 		while (node != null & node.Attributes["id"].Value != id.ToString()) {
 			node = node.NextSibling;
 		}
 		return node.Attributes["v"].Value;
-	}
-
-	string GetStupidTrackName() {
-		string[] prefix = {
-			"Battle for ",
-			"The great ",
-			"Lost ",
-			"An almighty ",
-			"Spirits of ",
-			"Desperate ",
-			"Beyond ",
-			"Everlasting ",
-			"Prepare for ",
-			"The legend of ",
-			"Blades of ",
-			"Hammerfest, quest for ",
-			"Wings of ",
-			"Song for ",
-			"Unblessed ",
-			"Searching for ",
-			"No pain, no ",
-		};
-
-		string[] suffix = {
-			"Igor ",
-			"Wanda ",
-			"hope ",
-			"sadness ",
-			"death ",
-			"souls ",
-			"glory ",
-			"redemption ",
-			"destruction ",
-			"flames ",
-			"love ",
-			"forgiveness ",
-			"darkness ",
-			"carrot !",
-		};
-
-		string stupidName = (musicId<10) ? "0"+(musicId+1) : ""+(musicId+1);
-		stupidName += ". �";
-		stupidName += prefix[UnityEngine.Random.Range(0, prefix.Length)];
-		stupidName += suffix[UnityEngine.Random.Range(0, prefix.Length)];
-		stupidName += "�";
-
-		return stupidName;
-	}
-
-
-	void AttachLoading(int frame) {
-		// TODO Display the different loading screens
 	}
 }

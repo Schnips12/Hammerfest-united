@@ -34,7 +34,7 @@ public class ViewManager : SetManager
 		fl_restoring	= false;
 		fl_fading		= false;
 
-		darknessFactor	= 0;
+		darknessFactor	= 0;		
 	}
 
 	/*------------------------------------------------------------------------
@@ -161,7 +161,9 @@ public class ViewManager : SetManager
 	------------------------------------------------------------------------*/
 	public override void Suspend() {
 		base.Suspend();
-		view.Detach();
+		if (view!=null) {
+			view.Detach();
+		}
 	}
 
 	public override void Restore(int lid) {

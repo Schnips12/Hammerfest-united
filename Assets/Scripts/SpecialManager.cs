@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using TMPro;
 
 public class SpecialManager
 {
@@ -42,7 +43,13 @@ public class SpecialManager
 		actives = new List<bool>();
 
 		recurring = new List<recurringEvent>();
-		/* clouds = new Array(); */
+		phoneMC = new MovieClip(game.mc);
+		phoneMC.subs = new List<MovieClip>();
+		phoneMC.subs.Add(new MovieClip(phoneMC, "lines"));
+		MovieClip screenMC = new MovieClip(phoneMC, "screen");
+		screenMC.AddTextField("field");
+		phoneMC.subs.Add(screenMC);
+		clouds = new List<MovieClip>();
 	}
 
 
@@ -113,8 +120,9 @@ public class SpecialManager
 	/*------------------------------------------------------------------------
 	AJOUTE UN �V�NEMENT R�CURRENT
 	------------------------------------------------------------------------*/
-	void RegisterRecurring(float t, bool fl_repeat) {
+	void RegisterRecurring(Action function, float t, bool fl_repeat) {
         recurringEvent rec = new recurringEvent();
+		rec.func = function;
         rec.timer = t;
         rec.baseTimer = t;
         rec.fl_repeat = fl_repeat;
@@ -240,15 +248,15 @@ public class SpecialManager
 		game.gi.SetLives(player.pid, player.lives);
 		if (fl_perfect) {
 			MovieClip mc;
-			mc = game.depthMan.Attach("hammer_fx_perfect",Data.DP_INTERF);
+			mc = game.depthMan.Attach("hammer_fx_perfect", Data.DP_INTERF);
 			mc._x = Data.GAME_WIDTH*0.5f;
 			mc._y = Data.GAME_HEIGHT*0.2f;
-			mc.label.text = Lang.Get(11);
+			mc.FindTextfield("label").text = Lang.Get(11);
 			if (actives[95]) { // effet sac � thunes
-				mc.value = "300000";
+				mc.FindTextfield("field").text = "300000";
 			}
 			else {
-				mc.value = "150000";
+				mc.FindTextfield("label").text = "150000";
 			}
 			player.GetScoreHidden(150000);
 		}
@@ -794,7 +802,7 @@ public class SpecialManager
 			// *** 83. pyramide noire: suite de strikes
 			case 83: {
 				Temporary(id, null);
-				RegisterRecurring( Callback(this, onStrike), Data.SECOND, true );
+				RegisterRecurring( ()=>OnStrike(), Data.SECOND, true );
 				OnStrike();
 				game.fxMan.AttachBg(Data.BG_PYRAMID,null,9999);
 			}break;
@@ -802,7 +810,7 @@ public class SpecialManager
 			// *** 84. talisman pluie de feu
 			case 84: {
 				MovieClip c;
-				c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER));
+				c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER), "rain of fire");
 				c.extraValues["speed"] = 0.5f;
 				c = game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_BACK_LAYER);
 				c._y		+= 9;
@@ -811,11 +819,11 @@ public class SpecialManager
 				f.blurX		= 4;
 				f.blurY		= f.blurX;
 				c.filter = f;
-				c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER));
+				c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER), "rain of fire clouds");
 				c.extraValues["speed"]	= 1;
 				clouds.Add(c);
 				Temporary(id,null);
-				RegisterRecurring( Callback(this, onFireRain), Data.SECOND*0.8f, true );
+				RegisterRecurring( ()=>OnFireRain(), Data.SECOND*0.8f, true );
 				OnFireRain();
 				game.fxMan.AttachBg(Data.BG_STORM,null,9999);
 			}break;
@@ -957,7 +965,7 @@ public class SpecialManager
 
 			// *** 99. Touffe Chourou: scores r�guliers jusqu'a la fin du lvl
 			case 99: {
-				RegisterRecurring( callback(this, onPoT), Data.SECOND*2, true );
+				RegisterRecurring( ()=>OnPoT(), Data.SECOND*2, true );
 				player.fl_chourou = true;
 
 				Temporary(id,null);
@@ -1362,7 +1370,7 @@ public class SpecialManager
 			else {
 				str = str+d.Minute;
 			}
-			phoneMC.screen.field.text = str;
+			phoneMC.FindSub("screen").FindTextfield("field").text = str;
 		}
 
 

@@ -5,16 +5,24 @@ using UnityEngine;
 public class SoundManager
 {
     AudioSource audioSource;
-    List<AudioClip> musics;
-    List<AudioClip> soundEffects;
 
-    public SoundManager(AudioSource audioSource, List<AudioClip> musics, List<AudioClip> soundEffects) {
+    public SoundManager(AudioSource audioSource) {
         this.audioSource = audioSource;
-        this.musics = musics;
-        this.soundEffects = soundEffects;
     }
 
     public void PlaySound(string reference, int channel) {
-        audioSource.PlayOneShot(soundEffects.Find(x => x.name== reference));
+        audioSource.PlayOneShot(Loader.Instance.effects.Find(x => x.name== reference));
+    }
+    public void SetMusic(int musicId) {
+        audioSource.clip = Loader.Instance.musics[musicId];
+    }
+    public void SetVolume(float volume) {
+        audioSource.volume = volume;
+    }
+    public void Play() {
+        audioSource.Play();
+    }
+    public void Stop() {
+        audioSource.Stop();
     }
 }

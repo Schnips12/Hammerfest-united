@@ -471,7 +471,7 @@ public class Physics : HAnimator
 					game.fxMan.InGameParticles(
 						Data.PARTICLE_BUBBLE,
 						x+Random.Range(0, Data.CASE_WIDTH) * (Random.Range(0, 2)*2-1),
-						y-Random.Range(0, Data.CASE_HEIGHT),
+						y+Random.Range(0, Data.CASE_HEIGHT),
 						1
 					);
 				}

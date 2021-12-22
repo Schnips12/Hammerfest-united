@@ -95,14 +95,14 @@ public class SoccerBall : PlayerBomb
 	protected override void Infix() {
 		base.Infix();
 		var id = world.GetCase(cx, cy);
-		if (id==Data.FIELD_GOAL_1) {
-			game.Goal(1);
+/* 		if (id==Data.FIELD_GOAL_1) { // TODO SoccerBall
+			(game as Soccer).Goal(1);
 			DestroyThis();
 		}
 		if ( id==Data.FIELD_GOAL_2 ) {
-			game.Goal(0);
+			(game as Soccer).Goal(0);
 			DestroyThis();
-		}
+		} */
 	}
 
 
@@ -111,12 +111,12 @@ public class SoccerBall : PlayerBomb
 	------------------------------------------------------------------------*/
 	public override void EndUpdate() {
 		base.EndUpdate();
-		sub._rotation += dx??0*5;
+		subs[0]._rotation += dx??0*5;
 		if ( dx>0 ) {
-			sub._xscale = -Mathf.Abs(sub._xscale);
+			subs[0]._xscale = -Mathf.Abs(subs[0]._xscale);
 		}
 		if ( dx<0 ) {
-			sub._xscale = Mathf.Abs(sub._xscale);
+			subs[0]._xscale = Mathf.Abs(subs[0]._xscale);
 		}
 
 	}

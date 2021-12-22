@@ -44,7 +44,7 @@ public class Item : Physics
 		else {
 			this.GotoAndStop(id+1) ;
 		}
-		this.sub.GotoAndStop(subId??0 + 1) ;
+		this.subs[0].GotoAndStop(subId??0 + 1) ;
 		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_shine") ;
 		EndUpdate() ;
 	}

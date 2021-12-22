@@ -52,7 +52,7 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	Mine Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y) ;
 	}
 

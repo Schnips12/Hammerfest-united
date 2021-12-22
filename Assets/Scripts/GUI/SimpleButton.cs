@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-namespace GUI;
+namespace GUI{
 
 public class SimpleButton : Item
 {
@@ -93,8 +93,8 @@ public class SimpleButton : Item
 	D�FINI LE LABEL
 	------------------------------------------------------------------------*/
 	public override void SetLabel(string l) {
-		field.text = l;
-		body._width = field._width+5;
+		FindTextfield("field").text = l;
+		body._width = field.rectTransform.sizeDelta.x + 5;
 		right._x = body._width;
 		width = left._width + body._width + right._width;
 	}
@@ -125,4 +125,6 @@ public class SimpleButton : Item
 			fl_keyLock = true;
 		}
 	}
+}
+
 }

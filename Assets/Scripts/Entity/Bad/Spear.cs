@@ -52,10 +52,10 @@ public class Spear : Bad
 
 		var ss = game.GetDynamicVar("SPEAR_SKIN");
 		if ( ss==null ) {
-			sub.GotoAndStop(1);
+			subs[0].GotoAndStop(1);
 		}
 		else {
-			sub.GotoAndStop( Int32.Parse(ss) );
+			subs[0].GotoAndStop( Int32.Parse(ss) );
 		}
 
 		if ( game.world.scriptEngine.cycle>Data.SECOND ) {

@@ -67,16 +67,24 @@ public class Bubble : Supa
 
 		// Rebonds
 		if ( y<=0 ) {
-			dy = dy==null? null : Mathf.Abs(dy.Value);
+			if(dy!=null) {
+				Mathf.Abs(dy.Value);
+			}
 		}
 		if ( y>=Data.GAME_HEIGHT ) {
-			dy = dy==null? null : -Mathf.Abs(dy.Value);
+			if(dy!=null) {
+				dy = -Mathf.Abs(dy.Value);
+			}
 		}
 		if ( x<=0 ) {
-			dx = dx==null? null : Mathf.Abs(dx.Value);
+			if(dx!=null) {
+				dx = Mathf.Abs(dx.Value);
+			}
 		}
 		if ( x>=Data.GAME_WIDTH ) {
-			dx = dx==null? null : -Mathf.Abs(dx.Value);
+			if(dx!=null) {
+				dx = -Mathf.Abs(dx.Value);
+			}
 		}
 	}
 }

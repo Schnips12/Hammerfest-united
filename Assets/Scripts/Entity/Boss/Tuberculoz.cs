@@ -904,7 +904,7 @@ public class Tuberculoz : Mover
 	/*------------------------------------------------------------------------
 	MORT DU JOUEUR
 	------------------------------------------------------------------------*/
-	void OnPlayerDeath() {
+	public override void OnPlayerDeath() {
 		// do nothing
 	}
 

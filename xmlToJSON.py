@@ -4,8 +4,11 @@ from os.path import abspath
 from pathlib import Path
 
 currentPath = Path(abspath(getsourcefile(lambda:0)))
-targetPath = currentPath.parent.parent / "hammerfest" / "xml" / "levels" / "adventure.xml"
-SavingPath = currentPath.parent / "Assets" / "json" / "levels" / "adventure.json"
+name = "adventure"
+xmlName = name+".xml"
+jsonName = name+".json"
+targetPath = currentPath.parent.parent / "hammerfest" / "xml" / "levels" / xmlName
+SavingPath = currentPath.parent / "Assets" / "json" / "levels" / jsonName
 
 adventure = targetPath.open()
 adventureThingy = adventure.read().split(":")
@@ -362,24 +365,21 @@ def JSONSerializer(obj):
         return obj
 
 
-worldmap = []
-
 index = 0
+toJson = ""
 for level in adventureThingy:
-    worldmap.append(unserialize(index))
-    worldmap[index]["ID"] = index #just in case we want to adress levels through an ID instead of their position in the worlmap
+    level = unserialize(index)
 
     nestedColumn = dict()
     columnIndex = 0
-    for column in worldmap[index]["map"]:
-        nestedColumn["column"] = column
-        worldmap[index]["map"][columnIndex] = nestedColumn.copy()
+    for column in level["map"]:
+        reversedColumn = column[::-1]
+        nestedColumn["column"] = reversedColumn
+        level["map"][columnIndex] = nestedColumn.copy()
         columnIndex += 1
+    levelString = json.dumps(level, default=JSONSerializer)
+    toJson += levelString + ";"
 
-    index += 1
-
-
-toJson = json.dumps(worldmap, default=JSONSerializer)
 
 adventureJson = SavingPath.open("w+")
 adventureJson.write(toJson)

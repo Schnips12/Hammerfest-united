@@ -23,8 +23,8 @@ public class RandomManager
 	AJOUTE UN TABLEAU
 	------------------------------------------------------------------------*/
 	public void Register(int id, int[] bulk) {
-        while(bulks.Count < id) {
-            bulks.Add(null);
+        while(bulks.Count <= id) {
+            bulks.Add(new List<int>());
         }
 		bulks[id] = new List<int>(bulk);
 		ComputeSum(id);
@@ -36,7 +36,7 @@ public class RandomManager
 	COMPUTE SUM OF ALL ELEMENTS IN A BULK ARRAY
 	------------------------------------------------------------------------*/
 	void ComputeSum(int id) {
-        while(sums.Count < id) {
+        while(sums.Count <= id) {
             sums.Add(0);
         }
 		sums[id]=0;

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class FxManager
 {
@@ -53,6 +54,11 @@ public class FxManager
 		mcList = new List<MovieClip>();
 		stack = new List<stackable>();
 		fl_bg = false;
+
+		igMsg = new MovieClip(game.mc, "message");
+		igMsg.AddTextField("field");
+		igMsg.AddTextField("label");
+		igMsg.extraValues["timer"] = 0.0f;
 	}
 
 
@@ -65,13 +71,13 @@ public class FxManager
 			levelName = game.depthMan.Attach("hammer_interf_zone",Data.DP_INTERF);
 			levelName._x = -10;
 			levelName._y = Data.GAME_HEIGHT-1;
-			levelName.field.text = name;
+			levelName.FindTextfield("field").text = name;
 			AddGlow(levelName, Data.ToColor(0x0), 2);
 			if ( fl_label ) {
-				levelName.label.text = Lang.Get(13);
+				levelName.FindTextfield("label").text = Lang.Get(13);
 			}
 			else {
-				levelName.label.text = "";
+				levelName.FindTextfield("label").text = "";
 			}
 			nameTimer = Data.SECOND * 5;
 		}
@@ -85,7 +91,7 @@ public class FxManager
 		MovieClip mc = game.depthMan.Attach("hurryUp",Data.DP_INTERF);
 		mc._x = Data.GAME_WIDTH/2;
 		mc._y = Data.GAME_HEIGHT/2;
-		mc.label.text = str;
+		mc.FindTextfield("label").text = str;
 		mcList.Add(mc);
 		lastAlert = mc;
 		return mc;
@@ -126,7 +132,7 @@ public class FxManager
 		MovieClip mc = game.depthMan.Attach("hammer_fx_exit",Data.DP_INTERF);
 		mc._x = Data.GAME_WIDTH/2;
 		mc._y = Data.GAME_HEIGHT;
-		mc.label.text = Lang.Get(3);
+		mc.FindTextfield("label").text = Lang.Get(3);
 		mc_exitArrow = mc;
 	}
 
@@ -143,13 +149,12 @@ public class FxManager
 		var mc = game.depthMan.Attach("hammer_fx_enter",Data.DP_INTERF);
 		mc._x = x;
 		mc._y = 0;
-		MovieClip field = mc.field;
 		if (pid==0) {
-			field.text = "";
+			mc.FindTextfield("field").text = "";
 		}
 		else {
-			field.text = "Player "+pid;
-			field.textColor = Data.ToColor(Data.BASE_COLORS[pid-1]);
+			mc.FindTextfield("field").text = "Player "+pid;
+			mc.FindTextfield("field").color = Data.ToColor(Data.BASE_COLORS[pid-1]);
 		}
 		mcList.Add(mc);
 	}
@@ -166,8 +171,8 @@ public class FxManager
 
 		AddGlow(anim.mc, glowColor, 2);
 
-		anim.mc.label.field.textColor = color;
-		anim.mc.value = txt;
+		anim.mc.FindTextfield("label").color = color;
+		anim.mc.FindTextfield("label").text = txt;
 	}
 
 
@@ -217,8 +222,8 @@ public class FxManager
 	public void KeyRequired(int kid) {
 		igMsg.RemoveMovieClip();
 		igMsg = game.depthMan.Attach("hammer_interf_inGameMsg", Data.DP_TOP);
-		igMsg.label.text = Lang.Get(40);
-		igMsg.field.text = Lang.GetKeyName(kid);
+		igMsg.FindTextfield("label").text = Lang.Get(40);
+		igMsg.FindTextfield("field").text = Lang.GetKeyName(kid);
 		AddGlow(igMsg, Data.ToColor(0x0), 2);
 		igMsg.timer = Data.SECOND*2;
 	}
@@ -230,8 +235,8 @@ public class FxManager
 	public void keyUsed(int kid) {
 		igMsg.RemoveMovieClip();
 		igMsg = game.depthMan.Attach("hammer_interf_inGameMsg", Data.DP_TOP);
-		igMsg.label.text = Lang.Get(41);
-		igMsg.field.text = Lang.GetKeyName(kid);
+		igMsg.FindTextfield("label").text = Lang.Get(41);
+		igMsg.FindTextfield("field").text = Lang.GetKeyName(kid);
 		AddGlow(igMsg, Data.ToColor(0x0), 2);
 		igMsg.timer = Data.SECOND*3;
 	}

@@ -425,12 +425,12 @@ public class ScriptEngine
 				else {
 					mc.Stop();
 				}
-				mc.sub.Stop();
+				mc.subs[0].Stop();
 				if ( name=="torch" ) {
 					if ( !fl_firstTorch ) {
-						game.ClearExtraHoles();
+						/* game.ClearExtraHoles(); */ // TODO
 					}
-					game.AddHole(x+Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f,180);
+					/* game.AddHole(x+Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f,180); */ // TODO
 					game.UpdateDarkness();
 					fl_firstTorch = true;
 				}
@@ -987,7 +987,7 @@ public class ScriptEngine
 		for (var i=0;i<mcList.Count;i++) {
 			if ( mcList[i].sid == id ) {
 				mcList[i].mc.Play();
-				mcList[i].mc.sub.Play();
+				mcList[i].mc.subs[0].Play();
 			}
 		}
 	}
@@ -1116,7 +1116,7 @@ public class ScriptEngine
 			}break;
 
 			case 14: {// efface les lumi�res de torches
-				game.ClearExtraHoles();
+				/* game.ClearExtraHoles(); */ // TODO
 			}break;
 
 			case 15: {// reset hurry (dangeureux !)

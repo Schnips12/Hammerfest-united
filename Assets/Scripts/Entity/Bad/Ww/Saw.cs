@@ -186,33 +186,33 @@ public class Saw : WallWalker
 		if ( fl_wallWalk | fl_stop ) {
 			var ang = Mathf.Atan2( cp.y,cp.x );
 			var angDeg = 180 * ang/Mathf.PI - 90;
-			var delta = angDeg-sub._rotation;
+			var delta = angDeg-subs[0]._rotation;
 			if ( delta<-180 ) {
 				delta+=360;
 			}
 			if ( delta>180 ) {
 				delta-=360;
 			}
-			sub._rotation += (delta)*ROTATION_RECAL;
+			subs[0]._rotation += (delta)*ROTATION_RECAL;
 		}
 		else {
 			if ( fl_kill ) {
-				sub._rotation += Time.fixedDeltaTime*14.5f;
+				subs[0]._rotation += Time.fixedDeltaTime*14.5f;
 			}
 			else {
 				if ( IsHealthy() ) {
-					sub._rotation += (0-sub._rotation)*(ROTATION_RECAL*0.25f);
+					subs[0]._rotation += (0-subs[0]._rotation)*(ROTATION_RECAL*0.25f);
 				}
 			}
 		}
 
-		if ( fl_stop || fl_stun ) {
+		if ( fl_stop | fl_stun ) {
 			rotSpeed *= 0.9f;
 		}
 		else {
 			rotSpeed = Mathf.Min(ROTATION_SPEED, rotSpeed+Time.fixedDeltaTime);
 		}
-		sub._rotation += rotSpeed;
+		subs[0]._rotation += rotSpeed;
 	}
 
 

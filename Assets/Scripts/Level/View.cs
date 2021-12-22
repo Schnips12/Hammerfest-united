@@ -290,7 +290,7 @@ public class View : MonoBehaviour
 
 		// skin
 		mc.SetSkin(Mathf.Abs(id));
-		mc.sub.Stop();
+		mc.subs[0].Stop();
 		if (fl_flip) {
 			mc.FlipTile();
 		}
@@ -354,7 +354,7 @@ public class View : MonoBehaviour
 		_specialBg.GotoAndStop(id+1);
 
 		if (subId!=null) {
-			_specialBg.sub.GotoAndStop(1);
+			_specialBg.subs[0].GotoAndStop(1);
 		}
 		_bg._visible = false;
 

@@ -541,7 +541,7 @@ public class Data : MonoBehaviour
 	------------------------------------------------------------------------*/
 	static int[] InitItemsRaw() {
 		List<int> tab = new List<int>();
-		string raw = manager.root.ReadFile("xml_items");
+		string raw = Loader.Instance.root.ReadFile("xml_items");
 		XDocument doc = XDocument.Parse(raw);
         XElement node = doc.FirstNode as XElement;
 		if (node.Name != "items") {
@@ -584,7 +584,7 @@ public class Data : MonoBehaviour
 	------------------------------------------------------------------------*/
 	static List<List<ItemFamilySet>> Xml_readFamily(string xmlName) { // note: append leading "$" for obfuscator
 		var tab = new List<List<ItemFamilySet>>();
-		string raw = manager.root.ReadFile(xmlName);
+		string raw = Loader.Instance.root.ReadFile(xmlName);
 
         XDocument doc = XDocument.Parse(raw);
 		XElement node = doc.FirstNode as XElement;
@@ -734,7 +734,7 @@ public class Data : MonoBehaviour
 	------------------------------------------------------------------------*/
 	static List<PortalLink> Xml_readPortalLinks() {
 		List<PortalLink> list = new List<PortalLink>();
-		string raw = manager.root.ReadFile("xml_portalLinks");
+		string raw = Loader.Instance.root.ReadFile("xml_portalLinks");
 
 		XDocument doc = XDocument.Parse(raw);
 		//doc.ignoreWhite = true;

@@ -17,6 +17,7 @@ public interface IEntity {
 	bool IsType(int t);
 	void Update();
 	void EndUpdate();
+	void OnPlayerDeath();
 }
 
 public class Entity : MovieClip, IEntity
@@ -79,9 +80,31 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Entity(MovieClip mc) : base(mc) {
-		types = 0; //new Array() ;
+	public Entity(MovieClip mc) : base() {
+		// The MovieClip is created through an attach function.
+		// TODO Consider giving all the parameters for attaching an entity through the chain of constructors.
+		// (it would avoid the mess below)
+    	united = mc.united;
+    	_name = mc._name;
+    	_visible = mc._visible;
+		_x = mc._x;
+		_y = mc._y;
+		_xscale = mc._xscale;
+		_yscale = mc._yscale;
+		_rotation = mc._rotation;
+		_alpha = mc._alpha;
+		extraValues = mc.extraValues;
+		subs = mc.subs;
+		onRelease = mc.onRelease;
+		onRollOut = mc.onRollOut;
+		onRollOver = mc.onRollOver;
+		timer = mc.timer;
+		filter = mc.filter;
+		isTile = mc.isTile;
+		cacheAsBitmap = mc.cacheAsBitmap;
+		// End of mess.
 
+		types = 0; //new Array() ;
 		x = 0 ;
 		y = 0 ;
 		alpha = 100 ;
@@ -299,6 +322,9 @@ public class Entity : MovieClip, IEntity
 		}
 	}
     */
+	public virtual void OnPlayerDeath() {
+		
+	}
 
 
 

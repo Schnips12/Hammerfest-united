@@ -60,7 +60,9 @@ public class SupaBall : Supa
 	protected override void Postfix() {
 		base.Postfix() ;
 		if ( dy>0 & y>=Data.GAME_HEIGHT ) {
-			dy = dy==null ? null : -Mathf.Abs(dy.Value) ;
+			if(dy!=null) {
+				dy = -Mathf.Abs(dy.Value);
+			}
 			game.Shake(Data.SECOND*0.5f,3);
 		}
 		if ( x>=Data.GAME_WIDTH+50 ) {

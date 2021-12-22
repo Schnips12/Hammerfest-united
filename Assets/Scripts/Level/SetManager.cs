@@ -35,19 +35,24 @@ public class SetManager
 		portalList		= new List<PortalData>();
 
 		// Lecture niveaux
-		string data = manager.root.ReadFile(Cookie.NAME);
-		json = new List<string>(data.Split(':'));
-		if (manager.root.ReadFile(setName+"_back_xml") == null ) {
-			manager.root.SaveFile(setName+"_back_xml", String.Join(":", json));
+		string data = Loader.Instance.root.ReadLevel(setName); // TODO get name from cookie
+		json = new List<string>(data.Split(new string[] {";"}, StringSplitOptions.RemoveEmptyEntries));
+		if (Loader.Instance.root.ReadFile(setName+"_back_xml") == null ) {
+			Loader.Instance.root.SaveFile(setName+"_back_xml", String.Join(";", json));
 		}
 
 		ImportCookie();
+
 		
 		if (json.Count == 0) {
 			Debug.Log("Error reading "+setName+" (null value)");
 			return;
 		}
 		worldmap = new List<LevelData>();
+		foreach(string thing in json) {
+			worldmap.Add(new LevelData());
+			fl_read.Add(false);
+		}
 	}
 
 
@@ -65,21 +70,21 @@ public class SetManager
 	éCRASE LE CONTENU DU XML EN MéMOIRE
 	------------------------------------------------------------------------*/
 	void Overwrite(string sdata) {
-        if (manager.root.ReadFile(setName+"_back") == null ) {
-			manager.root.SaveFile(setName+"_back", String.Join(":", json));
+        if (Loader.Instance.root.ReadFile(setName+"_back") == null ) {
+			Loader.Instance.root.SaveFile(setName+"_back", String.Join(";", json));
 		}
-		json = new List<string>(sdata.Split(':'));
-		manager.root.SaveFile(setName, sdata);
+		json = new List<string>(sdata.Split(';'));
+		Loader.Instance.root.SaveFile(setName, sdata);
 	}
 
 	/*------------------------------------------------------------------------
 	RELIS LA DERNIèRE VERSION SAUVEGARDéE
 	------------------------------------------------------------------------*/
 	void Rollback() {
-		string rawStr = manager.root.ReadFile(setName+"_back");
+		string rawStr = Loader.Instance.root.ReadFile(setName+"_back");
 		if (rawStr != null ) {
-            manager.root.SaveFile(setName, rawStr);
-			json = new List<string>(rawStr.Split(':'));
+            Loader.Instance.root.SaveFile(setName, rawStr);
+			json = new List<string>(rawStr.Split(';'));
 		}
 	}
 
@@ -88,9 +93,9 @@ public class SetManager
 	RELIS LA VERSION XML COMPILéE
 	------------------------------------------------------------------------*/
 	void Rollback_xml() {
-		string rawStr = manager.root.ReadFile(setName+"_back_xml");
-		manager.root.SaveFile(setName, rawStr);
-		json = new List<string>(rawStr.Split(':'));
+		string rawStr = Loader.Instance.root.ReadFile(setName+"_back_xml");
+		Loader.Instance.root.SaveFile(setName, rawStr);
+		json = new List<string>(rawStr.Split(';'));
 	}
 
 
@@ -102,7 +107,7 @@ public class SetManager
 			return;
 		}
 		td.fl_on = true;
-		td.mc.sub.GotoAndStop(2);
+		td.mc.subs[0].GotoAndStop(2);
 		td.podA.GotoAndStop(2);
 		td.podB.GotoAndStop(2);
 	}
@@ -112,7 +117,7 @@ public class SetManager
 			return;
 		}
 		td.fl_on = false;
-		td.mc.sub.GotoAndStop(1);
+		td.mc.subs[0].GotoAndStop(1);
 		td.podA.GotoAndStop(1);
 		td.podB.GotoAndStop(1);
 	}
@@ -158,13 +163,13 @@ public class SetManager
 	------------------------------------------------------------------------*/
 	public virtual void Goto(int id) {
 		teleporterList = new List<TeleporterData>();
-		if (id>=worldmap.Count) {
+		if (id>=json.Count) {
 			OnEndOfSet();
 			id = currentId;
 			return;
 		}
 		if (!fl_read[id]) {
-			worldmap[id] = JsonUtility.FromJson<LevelData.LevelsArray>("{\"thisArray\":"+json+"}").thisArray[id];
+			worldmap[id] = JsonUtility.FromJson<LevelData>(json[id]);
 		}
 		SetCurrent(id);
 		OnReadComplete();
@@ -495,16 +500,16 @@ public class SetManager
 	EXPORT
 	------------------------------------------------------------------------*/
 	void ExportCookie() {
-		manager.cookie.SaveFile(setName, String.Join(":", json.ToArray()));
+		Loader.Instance.root.SaveFile(setName, String.Join(";", json.ToArray()));
 	}
 
 	/*------------------------------------------------------------------------
 	IMPORT
 	------------------------------------------------------------------------*/
 	void ImportCookie() {
-		string rawStr = manager.cookie.ReadFile(setName);
-		if (rawStr != "") {
-			json = new List<string>(rawStr.Split(':'));
+		string rawStr = Loader.Instance.root.ReadFile(setName);
+		if (rawStr != null) {
+			json = new List<string>(rawStr.Split(';'));
 		}
 		else {
 			ExportCookie();

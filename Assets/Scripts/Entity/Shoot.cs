@@ -89,20 +89,28 @@ public class Shoot : Physics
 				// Rebonds aux bords du jeu
 				if ( x<0 ) {
 					OnSideBorderBounce();
-					dx = dx==null ? null : Mathf.Abs(dx.Value);
+					if (dx!=null) {
+						dx = Mathf.Abs(dx.Value);
+					}
 				}
 				if ( x>=Data.GAME_WIDTH ) {
 					OnSideBorderBounce();
-					dx = dx==null ? null : -Mathf.Abs(dx.Value);
+					if (dx!=null) {
+						dx = -Mathf.Abs(dx.Value);
+					}
 				}
 
 				if ( y<0 ) {
 					OnHorizontalBorderBounce();
-					dy = dy==null ? null : Mathf.Abs(dy.Value);
+					if (dy!=null) {
+						dy = Mathf.Abs(dy.Value);
+					}
 				}
 				if ( y>=Data.GAME_HEIGHT ) {
 					OnHorizontalBorderBounce();
-					dy = dy==null ? null : -Mathf.Abs(dy.Value);
+					if (dy!=null) {
+						dy = -Mathf.Abs(dy.Value);
+					}
 				}
 			}
 			else {

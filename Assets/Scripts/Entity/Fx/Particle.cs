@@ -44,8 +44,8 @@ public class Particle : Mover
 		}
 
 		this.GotoAndStop(pid);
-		subFrame = Random.Range(0, sub.TotalFrames())+1;
-		sub.GotoAndStop(subFrame);
+		subFrame = Random.Range(0, subs[0].TotalFrames())+1;
+		subs[0].GotoAndStop(subFrame);
 
 		Scale(Random.Range(0, 50)+50);
 		rotation = Random.Range(0, 360);
@@ -87,7 +87,9 @@ public class Particle : Mover
 			case Data.PARTICLE_ICE_BAD:
 				bounceFactor = 0.5f;
 				next.dx *= 0.3f;
-				next.dy = dy==null? null : -Mathf.Abs(next.dy??0);
+				if(dy!=null) {
+					next.dy = -Mathf.Abs(next.dy??0);
+				}
 			break;
 			case Data.PARTICLE_BLOB:
 				gravityFactor	= 0.6f;

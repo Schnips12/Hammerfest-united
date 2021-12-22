@@ -17,7 +17,7 @@ public class GameInterface
 	GameMode game;
 	List<int> currentLives;
 	MovieClip level;
-	List<MovieClip> scores;
+	List<TextMeshPro> scores;
 
 	List<int> realScores;
 	List<int> fakeScores;
@@ -52,7 +52,7 @@ public class GameInterface
 			}
 		}
 
-		FxManager.AddGlow(level, GLOW_COLOR, 2);
+		/* FxManager.AddGlow(level, GLOW_COLOR, 2); */ // TODO New AddGlow function ?
 
 		SetLevel(game.world.currentId);
 		fl_light		= false;
@@ -72,24 +72,25 @@ public class GameInterface
 		// skin
 		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
 		mc._x = -game.xOffset;
-		mc._y = Data.DOC_HEIGHT;
+		mc._y = 0;
 		mc.GotoAndStop(1);
 		mc.cacheAsBitmap = true;
-		scores	= new List<MovieClip>();
-        scores.Add(mc);
-		level	= mc.FindSub("level");
-
+		scores	= new List<TextMeshPro>();
+		level	= new MovieClip(mc, "level");
+		level.AddTextField("field");
+		level.AddTextField("score0");
+		scores.Add(level.FindTextfield("score0"));
 
 		// Lettres Extend
 		letters = new List<List<MovieClip>>();
-		letters[0] = new List<MovieClip>();
-		letters[0].Add(mc.FindSub("letter0_0"));
-		letters[0].Add(mc.FindSub("letter0_1"));
-		letters[0].Add(mc.FindSub("letter0_2"));
-		letters[0].Add(mc.FindSub("letter0_3"));
-		letters[0].Add(mc.FindSub("letter0_4"));
-		letters[0].Add(mc.FindSub("letter0_5"));
-		letters[0].Add(mc.FindSub("letter0_6"));
+		letters.Add(new List<MovieClip>());
+		letters[0].Add(new MovieClip(mc, "letter0_0"));
+		letters[0].Add(new MovieClip(mc, "letter0_1"));
+		letters[0].Add(new MovieClip(mc, "letter0_2"));
+		letters[0].Add(new MovieClip(mc, "letter0_3"));
+		letters[0].Add(new MovieClip(mc, "letter0_4"));
+		letters[0].Add(new MovieClip(mc, "letter0_5"));
+		letters[0].Add(new MovieClip(mc, "letter0_6"));
 
 		fakeScores		= new List<int>();
         fakeScores.Add(0);
@@ -98,14 +99,15 @@ public class GameInterface
         currentLives    = new List<int>();
 		currentLives.Add(0);
         lives           = new List<List<MovieClip>>();
+		lives.Add(new List<MovieClip>());
 
 		var p = game.GetPlayerList()[0];
 		SetScore(0, p.score);
 		SetLives(0, p.lives);
 		ClearExtends(0);
 
-		scores[0].textColor = Data.ToColor(Data.BASE_COLORS[0]);
-		FxManager.AddGlow(scores[0], GLOW_COLOR, 2);
+		scores[0].color = Data.ToColor(Data.BASE_COLORS[0]);
+		/* FxManager.AddGlow(scores[0], GLOW_COLOR, 2); */ // TODO scores should be movieclips...
 	}
 
 
@@ -118,13 +120,15 @@ public class GameInterface
 		// skin
 		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
 		mc._x = -game.xOffset;
-		mc._y = Data.DOC_HEIGHT;
+		mc._y = 0;
 		mc.GotoAndStop(2);
 		mc.cacheAsBitmap = true;
-		scores	= new List<MovieClip>();
-        scores.Add(mc.FindSub("score0"));
-        scores.Add(mc.FindSub("score1"));
+		scores	= new List<TextMeshPro>();
 		level	= mc.FindSub("level");
+		level	= mc.FindSub("score0");
+		level	= mc.FindSub("score1");
+		scores.Add(mc.FindTextfield("score0"));
+        scores.Add(mc.FindTextfield("score1"));
 
 		// Lettres Extend
 		letters = new List<List<MovieClip>>();
@@ -166,8 +170,8 @@ public class GameInterface
 			SetLives(pid, p.lives);
 
 			ClearExtends(pid);
-			scores[pid].textColor = Data.ToColor(Data.BASE_COLORS[0]);
-			FxManager.AddGlow(scores[pid], GLOW_COLOR, 2);
+			scores[pid].color = Data.ToColor(Data.BASE_COLORS[0]);
+			/* FxManager.AddGlow(scores[pid], GLOW_COLOR, 2); */ // TODO See InitSingle
 		}
 
 	}
@@ -184,12 +188,13 @@ public class GameInterface
 		// skin
 		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
 		mc._x = -game.xOffset;
-		mc._y = Data.DOC_HEIGHT;
+		mc._y = 0;
 		mc.GotoAndStop(3);
 		mc.cacheAsBitmap = true;
-		scores	= new List<MovieClip>();
-        scores.Add(mc.FindSub("time"));
+		scores	= new List<TextMeshPro>();
 		level	= mc.FindSub("level");
+		level	= mc.FindSub("time");
+		scores.Add(mc.FindTextfield("time"));
 
 
 		// Lettres Extend
@@ -223,8 +228,8 @@ public class GameInterface
 			SetLives(pid, p.lives);
 		}
 		ClearExtends(0);
-		scores[0].textColor = Data.ToColor(Data.BASE_COLORS[0]);
-		FxManager.AddGlow(scores[0], GLOW_COLOR, 2);
+		scores[0].color = Data.ToColor(Data.BASE_COLORS[0]);
+		/* FxManager.AddGlow(scores[0], GLOW_COLOR, 2); */ // TODO See InitSingle
 	}
 
 
@@ -232,7 +237,7 @@ public class GameInterface
 	MODE MINIMALISTE
 	------------------------------------------------------------------------*/
 	void LightMode() {
-		scores[0]._visible = false;
+		/* scores[0]._visible = false; */ // TODO Hide TextMeshPro element
 		SetLives(0,0);
 		more[0].RemoveMovieClip();
 		more[1].RemoveMovieClip();
@@ -255,13 +260,15 @@ public class GameInterface
 	MODIFIE LE LEVEL COURANT
 	------------------------------------------------------------------------*/
 	public void SetLevel(int? id) {
-		level.text = id.ToString();
-		level.textColor = baseColor;
+		if(id.HasValue) {
+			level.FirstTextfield().text = id.ToString();
+		}
+		level.FirstTextfield().color = baseColor;
 	}
 
 	public void HideLevel() {
-		level.text = "?";
-		level.textColor = baseColor;
+		level.FirstTextfield().text = "?";
+		level.FirstTextfield().color = baseColor;
 	}
 
 	/*------------------------------------------------------------------------
@@ -291,21 +298,24 @@ public class GameInterface
 		}
 		else {
 			while ( currentLives[pid]<v & currentLives[pid]<MAX_LIVES ) {
-				var newmc = new MovieClip(mc, "hammer_interf_life", game.manager.uniq++);
+				var newmc = new MovieClip(mc, "hammer_interf_life", Data.DP_TOP+1);
 				newmc._x = baseX+currentLives[pid]*baseWid;
-				newmc._y = -19;
-				plives[currentLives[pid]]=newmc;
+				newmc._y = 19;
+				plives.Add(newmc);
 				currentLives[pid]++;
 			}
-			if ( v>MAX_LIVES & more[pid]._name==null ) {
-				more[pid] = new MovieClip(mc,"hammer_interf_more", game.manager.uniq++);
+			while(more.Count <= pid) {
+				more.Add(null);
+			}
+			if ( v>MAX_LIVES & more[pid]==null ) {
+				more[pid] = new MovieClip(mc,"hammer_interf_more", Data.DP_TOP+1);
 				more[pid]._x = baseX + baseWid*MAX_LIVES - 4;
 				if ( pid>0 ) {
 					more[pid]._x-=baseWid;
 				}
 				more[pid]._y = -25;
 			}
-			if ( v<=MAX_LIVES & more[pid]._name!=null ) {
+			if ( v<=MAX_LIVES & more[pid]!=null ) {
 				more[pid].RemoveMovieClip();
 			}
 		}

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GUI;
+namespace GUI {
 
 public class Extendbox
 {
@@ -27,10 +27,9 @@ public class Extendbox
 	------------------------------------------------------------------------*/
 	void Collect(int id) {
 		MovieClip mc;
-		mc = new MovieClip(game.depthMan.Attach("hammer_interf_extend", Data.DP_INTERF));
-        mc.sub = new MovieClip();
-        mc.sub._name = "letter"+id.ToString();
-		mc.FindSub("letter"+id.ToString()).GotoAndStop(id+1);
+		mc = new MovieClip(game.depthMan.Attach("hammer_interf_extend", Data.DP_INTERF), "letter");
+		mc._name = "letter"+id.ToString();
+		mc.GotoAndStop(id+1);
 		mc._x = x;
 		mc._y = y+id*16;
 		mc._xscale = 75;
@@ -48,4 +47,6 @@ public class Extendbox
 		}
 		list = new List<MovieClip>();
 	}
+}
+
 }

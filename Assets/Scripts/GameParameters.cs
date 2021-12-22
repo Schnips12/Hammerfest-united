@@ -114,7 +114,10 @@ public class GameParameters
 	RENVOIE TRUE SI L'OPTION DEMANDéE EST ACTIVéE
 	------------------------------------------------------------------------*/
 	public bool HasOption(string oid) {
-		return options[oid] == true;
+		if (options.ContainsKey(oid)) {
+			return options[oid] == true;
+		}
+		return false;
 	}
 
 
@@ -134,6 +137,6 @@ public class GameParameters
 
 
 	public bool HasMusic() {
-		return manager.musics.Count > 0;
+		return Loader.Instance.musics.Count > 0;
 	}
 }

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GUI;
+namespace GUI{
 
 public class Container
 {
@@ -102,4 +102,6 @@ public class Container
 			list[i].Update();
 		}
 	}
+}
+
 }

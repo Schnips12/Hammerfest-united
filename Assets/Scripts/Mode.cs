@@ -1,46 +1,52 @@
 using UnityEngine;
 
-public class Mode
+public interface IMode {
+	string _name {get; set;}
+	bool fl_lock {get; set;}
+	bool fl_hide {get; set;}
+	bool fl_runAsChild  {get; set;}
+	GameMechanics world {get; set;}
+	void Init();
+	void DestroyThis();
+	void Lock();
+	void Unlock();
+	void OnSleep();
+	void OnWakeUp(string modeName, string data);
+	void Show();
+	void Hide();
+	void Main();
+}
+public abstract class Mode : IMode
 {
-	public float xFriction;
-	public float yFriction;
-
-	public GameManager manager;
-	public GameMechanics world;
-	protected Cookie root;
-	protected AudioSource audio;
+	int uniqId;
+	public GameMechanics world	{get; set;}
+	public string _name			{get; set;}
+	public bool fl_lock			{get; set;}
+	public bool fl_hide 		{get; set;}
+	public bool fl_runAsChild	{get; set;}
+	
+	public GameManager manager;	
 	public DepthManager depthMan;
 	public SoundManager soundMan;
 
 	protected bool fl_music;
-	protected int currentTrack;
 	protected bool fl_mute;
-
-	public bool fl_lock;
-	protected bool fl_switch;
-	bool fl_hide;
-	public bool fl_runAsChild;
+	protected int currentTrack;
 
 	public float cycle;
-	int uniqId;
 
 	public float xOffset; // décalage du mc du jeu
-	protected float yOffset;
-
-	public string _name;
-
+	public float yOffset;
+	public float xFriction;
+	public float yFriction;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	public Mode(GameManager m) {
 		manager = m ;
-		root = manager.root;
-		audio = manager.GetComponent<AudioSource>();
+		soundMan = new SoundManager(manager.GetComponent<AudioSource>());
 
-		Lock();
-
-		fl_switch		= false;
 		fl_music		= false;
 		fl_mute			= false;
 		fl_runAsChild	= false;
@@ -51,7 +57,6 @@ public class Mode
 		cycle			= 0;
 
 		_name = "abstractMode";
-		Show();
 	}
 
 
@@ -106,8 +111,7 @@ public class Mode
 	/*------------------------------------------------------------------------
 	DESTRUCTEUR
 	------------------------------------------------------------------------*/
-	public void DestroyThis() {
-		// TODO
+	public virtual void DestroyThis() {
 		Lock();
 	}
 
@@ -115,7 +119,7 @@ public class Mode
 	/*------------------------------------------------------------------------
 	update des valeurs constantes diverses
 	------------------------------------------------------------------------*/
-	void UpdateConstants() { //TODO move to update
+	void UpdateConstants() {
 		if (fl_lock) {
 			return;
 		}
@@ -134,33 +138,27 @@ public class Mode
 		// do nothing
 	}
 
-	public void OnWakeUp(string modeName, string data) //TODO delete this if unused
-	{
+	public void OnWakeUp(string modeName, string data) {
 		// do nothing
 	}
 
 	/*------------------------------------------------------------------------
-	MUSICS MANAGEMENT //TODO update this to use unity tools
+	MUSICS MANAGEMENT
 	------------------------------------------------------------------------*/
 	public void PlayMusic(int id) {
-		if (!GameManager.CONFIG.HasMusic()) {
-			return;
-		}
 		PlayMusicAt(id, 0);
 	}
 
-	void PlayMusicAt(int id, int pos) {
+	private void PlayMusicAt(int id, int pos) {
 		if (!GameManager.CONFIG.HasMusic()) {
 			return;
 		}
 		if (fl_music) {
 			StopMusic();
 		}
-
 		currentTrack = id;
-		audio.clip = manager.musics[currentTrack];
-		audio.Play();
-
+		soundMan.SetMusic(currentTrack);
+		soundMan.Play();
 		fl_music = true;
 		if (fl_mute) {
 			SetMusicVolume(0);
@@ -174,8 +172,7 @@ public class Mode
 		if (!GameManager.CONFIG.HasMusic()) {
 			return;
 		}
-
-		audio.Stop();
+		soundMan.Stop();
 		fl_music = false;
 	}
 
@@ -184,7 +181,7 @@ public class Mode
 			return;
 		}
 		n *= GameManager.CONFIG.musicVolume*100;
-		audio.volume = n;
+		soundMan.SetVolume(n);
 	}
 
 
@@ -195,4 +192,16 @@ public class Mode
 		StopMusic();
 	}
 
+	public virtual void GetControls(){
+		
+	}
+
+
+	/*------------------------------------------------------------------------
+	MAIN
+	------------------------------------------------------------------------*/
+	public virtual void Main() {
+		GetControls();
+		UpdateConstants() ;
+	}
 }

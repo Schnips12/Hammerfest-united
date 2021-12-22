@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+///<sumary>The GameMechanics represent a game dimension. It draws the level, 
+///handles the IA elements and the ScriptEngine. </sumary>
 public class GameMechanics : ViewManager
 {
     protected GameMode game;
 
 	bool fl_parsing;
-	bool flcurrentIA;
-	bool fl_compile;
+	bool fl_currentIA;
 	public bool fl_lock;
 	List<bool> fl_visited;
 	public bool fl_mainWorld;
@@ -30,6 +31,14 @@ public class GameMechanics : ViewManager
 		fl_mainWorld	= true;
 
 		ResetIA();
+
+		triggers = new List<List<List<Entity>>>();
+		for (int i=0 ; i<30 ; i++) {
+			triggers.Add(new List<List<Entity>>());
+			for (int j=0 ; j<30 ; j++) {
+				triggers[i].Add(new List<Entity>());
+			}
+		}
 
 		//triggers = Entity[LEVEL_WIDTH, LEVEL_HEIGHT, 1]; // TODO fix length
 	}
@@ -73,7 +82,7 @@ public class GameMechanics : ViewManager
 	RENVOIE TRUE SI LES DONN�ES SONT PRETES
 	------------------------------------------------------------------------*/
 	public override bool IsDataReady() {
-		return base.IsDataReady() & flcurrentIA;
+		return base.IsDataReady() & fl_currentIA;
 	}
 
 
@@ -92,7 +101,10 @@ public class GameMechanics : ViewManager
 	public override void Suspend() {
 		base.Suspend();
 		Lock();
-		var s = Data.CleanString(scriptEngine.script.ToString());
+		string s = null;
+		if (scriptEngine!=null) {
+			s = Data.CleanString(scriptEngine.script.ToString());
+		}
 		if (s != null) {
 			current.script = s;
 		}
@@ -108,6 +120,9 @@ public class GameMechanics : ViewManager
 	FLAG LE LEVEL COURANT COMME DéJà PARCOURU
 	------------------------------------------------------------------------*/
 	void SetVisited() {
+		while(fl_visited.Count <= currentId) {
+			fl_visited.Add(false);
+		}
 		fl_visited[currentId]=true;
 	}
 
@@ -127,7 +142,7 @@ public class GameMechanics : ViewManager
 	RELANCE LE PROCESSUS DE PARSING IA
 	------------------------------------------------------------------------*/
 	void ResetIA() {
-		flcurrentIA = false;
+		fl_currentIA = false;
 		//_iteration = new _iteration();
 		flagMap = new List<List<int>>();
 		fallMap = new List<List<int>>();
@@ -136,8 +151,8 @@ public class GameMechanics : ViewManager
 			flagMap.Add(new List<int>());
 			fallMap.Add(new List<int>());
 			for (int j=0 ; j<Data.LEVEL_HEIGHT ; j++) {
-				flagMap[i][j] = 0 ;
-				fallMap[i][j] = -1 ;
+				flagMap[i].Add(0);
+				fallMap[i].Add(-1);
 			}
 		}
 	}
@@ -352,7 +367,9 @@ public class GameMechanics : ViewManager
 		// Optimisations
 		if (current.GetCase(cx, cy)==Data.GROUND)			return -1 ;
 		if (current.GetCase(cx, cy)==Data.WALL)				return -1 ;
-		if ((flagMap[cx][cy-1] & Data.IA_ALLOW_FALL)>0)		return fallMap[cx][cy-1]-1;
+		if(cy>0) {
+			if ((flagMap[cx][cy-1] & Data.IA_ALLOW_FALL)>0)		return fallMap[cx][cy-1]-1;
+		}	
 
 		secure = false;
 		i = cy+1;
@@ -421,7 +438,7 @@ public class GameMechanics : ViewManager
 	------------------------------------------------------------------------*/
 	void OnParseIAComplete() {
 		fl_parsing = false;
-		flcurrentIA = true;
+		fl_currentIA = true;
 		CheckDataReady();
 	}
 

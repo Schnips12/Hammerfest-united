@@ -384,18 +384,21 @@ public class Player : Physics, IEntity
 		if (specialMan.actives[95]) {
 			value*=2;
 		}
-		int? step = (extraLifeCurrent<Data.EXTRA_LIFE_STEPS.Length) ? Data.EXTRA_LIFE_STEPS[extraLifeCurrent] : null;
+		int? step = null;
+		if (extraLifeCurrent<Data.EXTRA_LIFE_STEPS.Length) {
+			step =  Data.EXTRA_LIFE_STEPS[extraLifeCurrent];
+		}
 		if (step!=null & score<step & score+value>=step) {
 			lives++;
 			game.gi.SetLives( pid, lives );
 			game.manager.LogAction("EL"+extraLifeCurrent);
 			extraLifeCurrent++;
 		}
-		if (score!=0 & (scoreCS^GameManager.KEY) != score) {
+		if (score!=0 & (scoreCS^0) != score) { // TODO 0 replacing int key
 			game.manager.LogIllegal("SCS");
 		}
 		score+=value??0;
-		scoreCS = score^GameManager.KEY;
+		scoreCS = score^0;
 		game.gi.SetScore(pid,score);
 	}
 
@@ -611,11 +614,11 @@ public class Player : Physics, IEntity
 	------------------------------------------------------------------------*/
 	public override void Hide() {
 		base.Hide() ;
-		shieldMC.mc._visible = false ;
+		/* shieldMC.mc._visible = false ; */ // TODO Fix
 	}
 	public override void Show() {
 		base.Show() ;
-		shieldMC.mc._visible = true ;
+		/* shieldMC.mc._visible = true ; */ // TODO Fix
 	}
 
 

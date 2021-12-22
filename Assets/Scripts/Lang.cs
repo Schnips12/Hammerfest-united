@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Xml;
+using System.Xml.Linq;
 using System;
 
 public class Lang
@@ -15,119 +15,80 @@ public class Lang
 	static List<string> keyNames;
 	static string lang			= "ERR ";
 	static bool fl_debug		= false;
-	static XmlNode doc;
 
 	/*------------------------------------------------------------------------
 	INITIALISATION
 	------------------------------------------------------------------------*/
-	static void Init(string raw) {
-		XmlDocument docXml = new XmlDocument();
-        docXml.Load(raw);
+	public static void Init(string raw) {
+		XDocument docXml = XDocument.Parse(raw);
 //		doc = new Xml( raw ).firstChild;
 		//docXml.ignoreWhite = true;
 		//docXml.parseXML( raw );
 		
-        XmlNode firstnode = docXml.FirstChild;
-		lang		= firstnode.Attributes["$id".Substring(1)].Value;
-		fl_debug	= firstnode.Attributes["$debug".Substring(1)].Value == "1";
+        XElement firstnode = docXml.FirstNode as XElement;
+		lang		= firstnode.Attribute("id").Value;
+		fl_debug	= firstnode.Attribute("debug").Value == "1";
 
         strList = new List<string>();
-        XmlNodeList hold = firstnode.SelectNodes("statics");
-        foreach (XmlNode tempnode in hold) {
-            strList.Add(tempnode.Attributes["v"].Value);
+		strList.Add("id = 0");
+        XElement hold = firstnode.Element("statics");
+        foreach (XElement tempnode in hold.Descendants()) {
+            strList.Add(tempnode.Attribute("v").Value);
         }
 
         itemNames = new List<string>();
-        hold = firstnode.SelectNodes("items");
-        foreach (XmlNode tempnode in hold) {
-            itemNames.Add(tempnode.Attributes["name"].Value);
+        hold = firstnode.Element("items");
+        foreach (XElement tempnode in hold.Descendants()) {
+            itemNames.Add(tempnode.Attribute("name").Value);
         }
 
         familyNames = new List<string>();
-        hold = firstnode.SelectNodes("families");
-        foreach (XmlNode tempnode in hold) {
-            familyNames.Add(tempnode.Attributes["name"].Value);
+        hold = firstnode.Element("families");
+        foreach (XElement tempnode in hold.Descendants()) {
+            familyNames.Add(tempnode.Attribute("name").Value);
         }
 
         questNames = new List<string>();
-        hold = firstnode.SelectNodes("quests");
-        foreach (XmlNode tempnode in hold) {
-            questNames.Add(tempnode.Attributes["title"].Value);
+        hold = firstnode.Element("quests");
+        foreach (XElement tempnode in hold.Descendants()) {
+            questNames.Add(tempnode.Attribute("title").Value);
         }
 
         keyNames = new List<string>();
-        hold = firstnode.SelectNodes("keys");
-        foreach (XmlNode tempnode in hold) {
-            keyNames.Add(tempnode.Attributes["name"].Value);
+        hold = firstnode.Element("keys");
+        foreach (XElement tempnode in hold.Descendants()) {
+            keyNames.Add(tempnode.Attribute("name").Value);
         }
 
 		// Quest descriptions
         questDesc = new List<string>();
-		XmlNode node = doc.SelectSingleNode("$quests".Substring(1));
+		XElement node = docXml.Element("quests");
 		while (node != null) {
-			int id	= Int32.Parse(node.Attributes["$id".Substring(1)].Value);
+			int id	= Int32.Parse(node.Attribute("id").Value);
             while(questDesc.Count < id) {
                 questDesc.Add("");
             }
-			questDesc[id] = Data.CleanString(node.FirstChild.Value);
-			node = node.NextSibling;
+			questDesc[id] = Data.CleanString((node.FirstNode as XElement).Value);
+			node = node.NextNode as XElement;
 		}
 
 		// Level names
         levelNames = new List<List<string>>();
-        hold = firstnode.SelectNodes("levels");
-        foreach (XmlNode tempnode in hold) {
-            int did = Int32.Parse(tempnode.ParentNode.Attributes["$id".Substring(1)].Value);
-            while (levelNames.Count < did) {
+        hold = firstnode.Element("dimensions");
+        foreach (XElement tempnode in hold.Descendants()) {
+            int did = Int32.Parse(tempnode.Attribute("id").Value);
+            while (levelNames.Count <= did) {
                 levelNames.Add(new List<string>());
             }
-            int lid = Int32.Parse(tempnode.Attributes["$id".Substring(1)].Value);
-            while (levelNames[did].Count < lid) {
-                levelNames[did].Add("");
-            }
-            levelNames[did][lid] = tempnode.Attributes["$name".Substring(1)].Value;
+			foreach (XElement tempchild in tempnode.Descendants()) {
+				int lid = Int32.Parse(tempchild.Attribute("id").Value);
+				while (levelNames[did].Count <= lid) {
+                	levelNames[did].Add("");
+            	}
+            	levelNames[did][lid] = tempchild.Attribute("name").Value;
+			}
         }
 	}
-
-
-	/*------------------------------------------------------------------------
-	RENVOIE LA LISTE DE STRINGS DEMAND�E DEPUIS LE XML LANG
-	------------------------------------------------------------------------*/
-	static List<string> GetStringData(string parentNode, string attrName) {
-		List<string> tab = new List<string>();
-		XmlNode node = doc.SelectSingleNode(parentNode.Substring(1));
-		while (node != null) {
-			int id	= Int32.Parse(node.Attributes["$id".Substring(1)].Value);
-			string txt	= node.Attributes[attrName.Substring(1)].Value;
-			if (fl_debug) {
-				txt= "["+lang.ToLower()+"]"+txt;
-			}
-            while(tab.Count < id) {
-                tab.Add("");
-            }
-			tab[id] = txt;
-			node = node.NextSibling;
-		}
-		return tab;
-	}
-
-
-	/*------------------------------------------------------------------------
-	RENVOIE LE CONTENU D'UNE NODE INDIQUéE
-	------------------------------------------------------------------------*/
-	static private XmlNode Find(XmlDocument doc, string name) {
-		XmlNode node = doc.FirstChild;
-		while (node.Name != name) {
-			node = node.NextSibling;
-			if (node == null) {
-				GameManager.Fatal("node '"+name+"' not found !");
-				return null;
-			}
-		}
-		return node.FirstChild;
-	}
-
-
 
 	/*------------------------------------------------------------------------
 	RENVOIE UNE STRING LOCALISéE
@@ -145,7 +106,7 @@ public class Lang
 	RENVOIE UN NOM D'ITEM
 	------------------------------------------------------------------------*/
 	public static string GetItemName(int id) {
-		if (itemNames.Count < id-1) {
+		if (itemNames.Count < id) {
 			GameManager.Warning("name not found for item #"+id);
 		}
 

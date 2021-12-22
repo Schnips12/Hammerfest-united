@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-namespace GUI;
+namespace GUI{
 
 public class Field : Item
 {
-	TMP_Text field;
 	MovieClip bg;
 
 	/*------------------------------------------------------------------------
@@ -54,4 +53,6 @@ public class Field : Item
 	public override void SetLabel(string s) {
 		SetField(s);
 	}
+}
+
 }

@@ -58,8 +58,8 @@ public class WallWalker : Bad
 	------------------------------------------------------------------------*/
 	protected override void InitBad(GameMode g, float x, float y) {
 		base.InitBad(g,x,y);
-		xSub = sub._x;
-		ySub = sub._y;
+		xSub = subs[0]._x;
+		ySub = subs[0]._y;
 		xSubBase = xSub;
 		ySubBase = ySub;
 		WallWalk();
@@ -377,8 +377,8 @@ public class WallWalker : Bad
 				ySub = ySubBase + subOffset*0.5f;
 			}
 		}
-		sub._x += SUB_RECAL * (xSub - sub._x) * speedFactor;
-		sub._y += SUB_RECAL * (ySub - sub._y) * speedFactor;
+		subs[0]._x += SUB_RECAL * (xSub - subs[0]._x) * speedFactor;
+		subs[0]._y += SUB_RECAL * (ySub - subs[0]._y) * speedFactor;
 	}
 
 

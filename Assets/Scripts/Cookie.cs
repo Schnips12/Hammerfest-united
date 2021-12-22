@@ -4,37 +4,28 @@ using System.IO;
 using System;
 
 [Serializable]
-public struct Cookie
+public class Cookie
 {
 	public static string NAME = "hammerfest_united_data";
 	public static int VERSION = 1;
 
 	public GameManager manager;
-
 	public int version;
 	public DateTime lastModified;
 	private Hashtable data;
 
-
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Cookie() {
-		string raw = File.ReadAllText(Application.persistentDataPath+NAME);
-		this = JsonUtility.FromJson<Cookie>(raw);
-		CheckVersion();
-	}
-
-	public Cookie(string name) {
-		string raw = File.ReadAllText(Application.persistentDataPath+name);
-		this = JsonUtility.FromJson<Cookie>(raw);
-		CheckVersion();
-	}
-
 	public Cookie(GameManager m) {
-		this = new Cookie();
 		this.manager = m;
 		CheckVersion();
+	}
+	private void Copy(Cookie c) {
+		manager = c.manager;
+		version = c.version;
+		lastModified = c.lastModified;
+		data = c.data;
 	}
 
 
@@ -65,8 +56,10 @@ public struct Cookie
 	void CheckVersion() {
 		if (version != VERSION | Input.GetKey(KeyCode.LeftControl)) {
 			if (version == 0 | Input.GetKey(KeyCode.LeftControl)) {
-				if (manager.fl_debug) {
-					Debug.Log("Cookie initialized to version "+VERSION);
+				if(manager!=null) {
+					if (manager.fl_debug) {
+						Debug.Log("Cookie initialized to version "+VERSION);
+					}
 				}
 				Reset();
 			}
@@ -92,7 +85,17 @@ public struct Cookie
 	COOKIE => RUNTIME
 	------------------------------------------------------------------------*/
 	public string ReadFile(string name) {
-		string raw = File.ReadAllText(Application.dataPath+"/xml/"+name);
+		string raw = null;
+		if (File.Exists(Application.dataPath+"/xml/"+name)) {
+			raw = File.ReadAllText(Application.dataPath+"/xml/"+name);
+		}
+		return raw;
+	}
+	public string ReadLevel(string name) {
+		string raw = null;
+		if (File.Exists(Application.dataPath+"/json/levels/"+name)) {
+			raw = File.ReadAllText(Application.dataPath+"/json/levels/"+name);
+		}
 		return raw;
 	}
 
@@ -104,16 +107,23 @@ public struct Cookie
 	}
 
 	public string ReadVar(string varName) {
+		if(data == null) {
+			return "";
+		}
 		if (data.ContainsKey(varName)) {
 			return data[varName].ToString();
 		} else {
-			Debug.Log("Reading non existant variable in cookie.");
+			Debug.Log("Reading non existant variable in cookie : " + varName);
 			return "";
 		}
 	}
 	
-	public Mode GetMode() {
-		return manager.current;
+	public IMode GetMode() {
+		if (manager==null) {
+			return null;
+		} else {
+			return manager.current;
+		}		
 	}
 }
 

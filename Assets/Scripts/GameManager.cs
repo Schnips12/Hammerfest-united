@@ -2,68 +2,43 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+///<sumary> The Game Manager is the class calling the update function.
+/// It holds the GameParameters and the GameMode. Behaves as a GameMode launcher.</sumary>
 public class GameManager : MonoBehaviour
 {
-	public static int BASE_VOLUME		= 50;
 	public static GameParameters CONFIG	= null;
-	public static int KEY			    = Random.Range(0, 999999)*Random.Range(0, 999999);
 	public static Hashtable HH			= new Hashtable();
 
-	public Cookie cookie;
-	public Cookie root;
-	public Mode current;
-	public Mode child;	
-
 	public int uniq;
-	int csKey;
 
-	public bool fl_cookie;
+	public IMode current;
+	public IMode child;
+
 	public bool fl_debug;
-	public bool fl_local;
-	public bool fl_tutorial;
-	public bool fl_soccer;
-	public bool fl_multiCoop;
-	public bool fl_ta;
-	public bool fl_taMulti;
-	public bool fl_bossRush;
-
-	[SerializeField] public List<AudioClip> musics;
-
-	[SerializeField] public List<GameObject> items;
-	[SerializeField] public List<GameObject> bads;
-	[SerializeField] public List<GameObject> shoots;
-	[SerializeField] public List<GameObject> bombs;
-	[SerializeField] public List<GameObject> supa;
-	[SerializeField] public List<GameObject> misc;
-	[SerializeField] public List<GameObject> gui;
 
 	public List<string> history;
-	List<string> families;
-	List<string> options;
 
     // Start is called before the first frame update
     void Awake() {
-		uniq			= 666;
-
-		history			= new List<string>();
-		Debug.Log("B"+Time.time);
+		Debug.Log("B"+Time.time);		
+		Loader.Instance.root.manager = this;
+		history	= new List<string>();
 
 		// Dev mode
 		if (IsDev()) {
 			fl_debug = true;
 		}
-
 		if (IsTutorial()) {
 			LogAction("using sysfam");
-			families= new List<string> {"0", "7", "1000", "18"};
+			Loader.Instance.families= new List<string>(new string[4] {"0", "7", "1000", "18"});
 			if (IsDev()) {
-				families= new List<string> 	{"0", "7", "1000", "1001", "1002", "1", "2", "3", "4", "5", "6", "7",
-											"8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"};
+				Loader.Instance.families= new List<string>(new string[24] {"0", "7", "1000", "1001", "1002", "1",
+					"2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17",
+					"18", "19"});
 			}
 		}
 
-		CONFIG = new GameParameters(root, this, families, options);
-		cookie = new Cookie(this);
+		CONFIG = new GameParameters(Loader.Instance.root, this, Loader.Instance.families, Loader.Instance.options);
 
 		HH.Add("$8d6fff6186db2e4f436852f16dcfbba8","$4768dc07c5f8a02389dd5bc1ab2e8cf4");
 		HH.Add("$3bb529b9fb9f62833d42c0c1a7b36a43","$53d55e84334a88faa7699ef49647028d");
@@ -85,8 +60,8 @@ public class GameManager : MonoBehaviour
 	RENVOIE TRUE SI UN SET XML DE LEVEL EXISTE
 	------------------------------------------------------------------------*/
 	bool SetExists(string n) {
-		string data = root.ReadVar(n);
-		return (data != "");
+		string data = Loader.Instance.root.ReadFile(n);
+		return (data != null);
 	}
 
 
@@ -128,7 +103,7 @@ public class GameManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	LANCE UN MODE
 	------------------------------------------------------------------------*/
-	void Transition(Mode prev, Mode next) {
+	void Transition(IMode prev, IMode next) {
 		next.Init();
 
 		if (prev == null) {
@@ -144,7 +119,7 @@ public class GameManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	LANCE UN MODE "ENFANT"
 	------------------------------------------------------------------------*/
-	Mode StartChild(Mode c) {
+	IMode StartChild(Mode c) {
 		if (child != null) {
 			Fatal("another child process is running!");
 		}
@@ -177,17 +152,9 @@ public class GameManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	LANCE UN MODE
 	------------------------------------------------------------------------*/
-	void StartMode(Mode m) {
+	void StartMode(IMode m) {
 		Transition(current, m);
 	}
-
-	/*------------------------------------------------------------------------
-	LANCE UN MODE DE JEU
-	------------------------------------------------------------------------*/
-	void StartGameMode(GameMode m) {
-		Transition(current, m);
-	}
-
 
 	/*------------------------------------------------------------------------
 	MODES DE JEU
@@ -195,82 +162,90 @@ public class GameManager : MonoBehaviour
 	public bool IsAdventure() {
 		return IsMode("solo");
 	}
-
 	public bool IsTutorial() {
 		return IsMode("tutorial");
 	}
-
 	public bool IsSoccer() {
-		return IsMode("soccer");;
+		return IsMode("soccer");
 	}
-
 	public bool IsMultiCoop() {
-		return IsMode("multicoop");;
+		return IsMode("multicoop");
 	}
-
 	public bool IsTimeAttack() {
-		return IsMode("timeattack");;
+		return IsMode("timeattack");
 	}
-
 	public bool IsMultiTime() {
-		return IsMode("multitime");;
+		return IsMode("multitime");
 	}
-
 	public bool IsBossRush() {
-		return IsMode("bossrush");;
+		return IsMode("bossrush");
 	}
-
 	public bool IsDev() {
 		return SetExists("xml_dev") & !IsFjv();
 	}
-
 	public bool IsFjv() {
 		return SetExists("xml_fjv");
 	}
-
 	public bool IsMode(string modeName) {
-		return root.GetMode()._name == modeName;
+		return Loader.Instance.IsMode(modeName);
 	}
-
 
 
 	/*------------------------------------------------------------------------
 	LANCE LE MODE DE JEU PAR DéFAUT, SELON LES SETS DISPONIBLES
 	------------------------------------------------------------------------*/
 	void StartDefaultGame() {
-		/* if (IsTutorial()) {
-			StartGameMode(new GameMode.Tutorial(this));
+		if (IsTutorial()) {
+			/* StartMode(new Tutorial(this)); */
 			return;
 		}
 		if (IsSoccer()) {
-			StartMode(new GameMode.Soccer(this,0));
+			/* StartMode(new Soccer(this,0)); */
 			return;
 		}
 		if (IsMultiCoop()) {
-			StartGameMode(new GameMode.MultiCoop(this,0));
+			/* StartMode(new MultiCoop(this,0)); */
 			return;
 		}
 		if (IsTimeAttack()) {
-			StartGameMode(new GameMode.TimeAttack(this,0));
+			/* StartMode(new TimeAttack(this,0)); */
 			return;
 		}
 		if (IsMultiTime()) {
-			StartGameMode(new GameMode.TimeAttackMulti(this,0));
+			/* StartMode(new TimeAttackMulti(this,0)); */
 			return;
 		}
 		if (IsBossRush()) {
-			StartGameMode(new GameMode.BossRush(this,0));
+			/* StartMode(new BossRush(this,0)); */
 			return;
 		}
 		if (IsFjv()) {
-			StartMode(new GameMode.FjvEnd(this,false));
+			/* StartMode(new FjvEnd(this,false)); */
 			return;
-		} */
+		}
 		if (IsAdventure()) {
-			StartGameMode(new Adventure(this, 0));
+			StartMode(new Adventure(this, 0));
 			return;
 		}
 
-		Fatal("Invalid mode '"+root.GetMode()+"' found.");
+		Fatal("Invalid mode '"+Loader.Instance.root.GetMode()+"' found.");
+	}
+
+
+	
+	/*------------------------------------------------------------------------
+	MAIN
+	------------------------------------------------------------------------*/
+	private void FixedUpdate() {
+		// Timer
+		Time.fixedDeltaTime = 0.033f; // TODO Variable fps
+
+		// Modes
+		if (current!=null) {
+			current.Main();
+		}
+		if (child!=null) {
+			child.Main();
+		}
 	}
 }

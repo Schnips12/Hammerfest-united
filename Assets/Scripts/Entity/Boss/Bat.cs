@@ -249,7 +249,7 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	APPEL� SUR LA MORT DU JOUEUR
 	------------------------------------------------------------------------*/
-	void OnPlayerDeath() {
+	public override void OnPlayerDeath() {
 		BossCalmDown();
 		Shield();
 	}

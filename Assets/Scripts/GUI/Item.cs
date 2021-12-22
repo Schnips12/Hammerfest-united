@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-namespace GUI;
+namespace GUI {
 
 public class Item : MovieClip
 {
-	public MovieClip field;
+	public TextMeshPro field;
 	public Container container;
 	public float width;
 
@@ -22,8 +22,8 @@ public class Item : MovieClip
 	D�FINI LE LABEL
 	------------------------------------------------------------------------*/
 	public virtual void SetLabel(string l) {
-		field.text = l ;
-		width = field._width+5 ; // TODO check actionscript textfield width
+		FindTextfield("field").text = l ;
+		field.rectTransform.sizeDelta += new Vector2(5, 0); // TODO check actionscript textfield width
 	}
 
 	/*------------------------------------------------------------------------
@@ -49,4 +49,6 @@ public class Item : MovieClip
 
 	public virtual void Update() {
 	}
+}
+
 }

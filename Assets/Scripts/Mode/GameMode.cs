@@ -5,27 +5,24 @@ using System;
 using TMPro;
 using System.Linq;
 
-public class GameMode : Mode
+public interface IGameMode {
+
+}
+public class GameMode : Mode, IGameMode
 {
     public MovieClip mc;
-    static int WATER_COLOR		= 0x0000ff;
+    static Color WATER_COLOR	= Data.ToColor(0x0000ff);
 
-    [SerializeField] GameObject popupPrefab;
     private GameObject popup;
-    [SerializeField] GameObject pointerPrefab;
     private GameObject pointer;
-    [SerializeField] GameObject itemNamePrefab;
     private GameObject itemName;
-    [SerializeField] GameObject radiusPrefab;
     private GameObject radius;
-    [SerializeField] GameObject darknessPrefab;
     private GameObject darkness;
 
     public FxManager fxMan;
     public StatsManager statsMan;
     public RandomManager randMan;
-    public DepthManager depthMan;
-    public SoundManager soundMan;
+
     public bool fl_static; // si true, le comportement initial des monstres sera prévisible (random sinon)
     protected bool fl_bullet;
     protected bool fl_disguise;
@@ -78,10 +75,13 @@ public class GameMode : Mode
 
     public List<bool> globalActives;
 
-    /* var mapIcons		: Array<MovieClip>; */
     float dfactor;
     float? targetDark;
-    /* var extraHoles		: Array< {x:float, y:float, d:float, mc:MovieClip} >; */
+    List<MovieClip> mapIcons;
+    List<MovieClip> extraHoles;		/*: Array< {x:float, y:float, d:float, mc:MovieClip} >; */
+    MovieClip itemNameMC;
+    MovieClip pauseMC;
+    MovieClip mapMC;
 
     float lagCpt;
     int tipId;
@@ -110,7 +110,7 @@ public class GameMode : Mode
 
     Hashtable dvars;
     Color color;
-    int colorHex;
+    int? colorHex;
     List<bool> worldKeys;
     public int? forcedDarkness;
     PortalLink nextLink;
@@ -131,6 +131,8 @@ public class GameMode : Mode
     CONSTRUCTEUR
     ------------------------------------------------------------------------*/
     public GameMode(GameManager m) : base(m) {
+        mc = new MovieClip(manager.gameObject);
+        depthMan = new DepthManager(mc);
         duration		= 0;
         lagCpt			= 0;
         fl_static		= false;
@@ -143,6 +145,30 @@ public class GameMode : Mode
         fl_bombExpert	= GameManager.CONFIG.HasOption(Data.OPT_BOMB_EXPERT);
         fl_bombControl	= false;
         savedScores		= new List<int>();
+
+        // TODO Map, Pause, Score, etc should be added to the main scene instead of being loaded via script.
+        pauseMC = new MovieClip(mc, "hammer_interf_instructions", 50);
+		pauseMC._x = Data.GAME_WIDTH*0.5f;
+		pauseMC._y = Data.GAME_HEIGHT*0.5f;
+		pauseMC.FindTextfield("click").text	= "";
+		pauseMC.FindTextfield("title").text	= Lang.Get(5);
+		pauseMC.FindTextfield("move").text	= Lang.Get(7);
+		pauseMC.FindTextfield("attack").text= Lang.Get(8);
+		pauseMC.FindTextfield("pause").text	= Lang.Get(9);
+		pauseMC.FindTextfield("space").text	= Lang.Get(10);
+		pauseMC.FindTextfield("sector").text= Lang.Get(14);
+        pauseMC._visible = false;
+
+        mapMC = new MovieClip(mc, "hammer_map", 50);
+        mapMC._x = Data.GAME_WIDTH*0.5f;
+		mapMC._y = Data.GAME_HEIGHT*0.5f;
+        mapMC.subs = new List<MovieClip>();
+        mapMC.subs.Add(new MovieClip(mapMC, "ptr"));
+        mapMC.subs.Add(new MovieClip(mapMC, "pit"));
+        mapMC._visible = false;
+
+        itemNameMC = new MovieClip(mc, "itemNameMC");
+        itemNameMC.AddTextField("field");
 
         xOffset			= 10;
 
@@ -170,13 +196,11 @@ public class GameMode : Mode
         unregList = new List<killedEntity>();
         lists = new List<List<IEntity>>();
         for(int i=0 ; i < 200 ; i++) {
-            lists[i] = new List<IEntity>();
+            lists.Add(new List<IEntity>());
         }
 
         globalActives	= new List<bool>();
-        /* endLevelStack	= new Array(); */
         portalMcList	= new List<LabelledPortalMC>();
-        /* extraHoles		= new Array(); */
         dfactor			= 0;
 
         Shake(0, 0);
@@ -201,7 +225,6 @@ public class GameMode : Mode
         currentDim	= 0;
         dimensions	= new List<GameMechanics>();
         latePlayers	= new List<Player>();
-        /* mapIcons	= new Array(); */
         mapEvents	= new List<eventAndTravel>();
         mapTravels	= new List<eventAndTravel>();
 
@@ -216,7 +239,8 @@ public class GameMode : Mode
                 GiveKey(i-5000);
             }
         }
-
+        Lock();
+        Show();
     }
 
 
@@ -239,7 +263,9 @@ public class GameMode : Mode
     INITIALISE L'INTERFACE DE JEU (non appelé dans la classe gamemode)
     ------------------------------------------------------------------------*/
     protected virtual void InitInterface() {
-        gi.DestroyThis();
+        if(gi!=null) {
+            gi.DestroyThis();
+        }
         gi = new GameInterface(this);
     }
 
@@ -374,7 +400,7 @@ public class GameMode : Mode
         // Boss
         var b = GetOne(Data.BOSS);
         if (b != null) {
-            OnPlayerDeath();
+            b.OnPlayerDeath();
         }
     }
 
@@ -407,9 +433,11 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     CONTROLES DE BASE
     ------------------------------------------------------------------------*/
-    void GetControls() {
+    public override void GetControls() {
+        base.GetControls();
         // Pause
         if (Input.GetKeyDown(KeyCode.P)) {
+            Debug.Log("PAUSE KEY PRESSED");
             if (fl_lock) {
                 OnUnpause();
             }
@@ -444,7 +472,7 @@ public class GameMode : Mode
 
         // Suicide
         if (Input.GetKey(KeyCode.LeftShift) & Input.GetKey(KeyCode.LeftControl) & Input.GetKeyDown(KeyCode.K)) {
-            if (!fl_switch && !fl_lock && CountList(Data.PLAYER)>0 ) {
+            if (!fl_lock && CountList(Data.PLAYER)>0 ) {
                 DestroyList(Data.PLAYER);
                 OnGameOver();
             }
@@ -452,8 +480,8 @@ public class GameMode : Mode
 
 
         // Pause / quitter
-        if (!fl_switch & Input.GetKeyDown(KeyCode.Escape) & !fl_gameOver) {
-            if (manager.fl_local & !fl_lock) {
+        if (Input.GetKeyDown(KeyCode.Escape) & !fl_gameOver) {
+            if (!fl_lock) {
                 EndMode();
             }
             else {
@@ -604,7 +632,7 @@ public class GameMode : Mode
         List<IEntity> l;
         List<Player> lp;
 
-        ClearExtraHoles();
+    /*     ClearExtraHoles(); */ // TODO
         world.Lock();
         KillPortals();
         ClearLevel();
@@ -831,14 +859,22 @@ public class GameMode : Mode
     DÉFINI UNE VARIABLE DYNAMIQUE
     ------------------------------------------------------------------------*/
     public void SetDynamicVar(string name, string value) {
-        dvars[name.ToLower()] = value;
+        if (dvars.ContainsKey(name.ToLower())) {
+            dvars[name.ToLower()] = value;
+        } else {
+            dvars.Add(name.ToLower(), value);
+        }        
     }
 
     /*------------------------------------------------------------------------
     LIT UNE VARIABLE DYNAMIQUE
     ------------------------------------------------------------------------*/
     public string GetDynamicVar(string name) {
-        return dvars[name.ToLower()].ToString();
+        if (dvars.ContainsKey(name.ToLower())) {
+            return dvars[name.ToLower()].ToString();
+        } else {
+            return null;
+        }
     }
 
     public int GetDynamicInt(string name) {
@@ -903,8 +939,7 @@ public class GameMode : Mode
     void ResetCol() {
         if (color != null) {
             colorHex = null;
-            color.Reset();
-            color = null;
+            color = new Color();
         }
     }
 
@@ -928,10 +963,6 @@ public class GameMode : Mode
     CHANGEMENT DE DIMENSION
     ------------------------------------------------------------------------*/
     void SwitchDimensionById(int id,int lid,int pid) {
-//		if ( currentDim==id ) {
-//			return;
-//		}
-
         if (!fl_clear) {
             return;
         }
@@ -960,16 +991,15 @@ public class GameMode : Mode
             p.Hide();
         }
 
-        HoleUpdate();
+/*         HoleUpdate(); // TODO
 
 
-        ClearExtraHoles();
+        ClearExtraHoles(); */
         ClearLevel();
         KillPortals();
         fxMan.Clear();
         CleanKills();
         currentDim = id;
-        var ss = world.GetSnapShot();
         world.Suspend();
         world = dimensions[currentDim];
         world.darknessFactor = dfactor;
@@ -978,7 +1008,6 @@ public class GameMode : Mode
         if (pid<0) {
             world.fl_fadeNextTransition = true;
         }
-        world.RestoreFrom(ss,lid);
         UpdateEntitiesWorld();
         if (!world.fl_mainWorld) {
             fakeLevelId = 0;
@@ -996,8 +1025,7 @@ public class GameMode : Mode
     INITIALISE ET AJOUTE UNE DIMENSION
     ------------------------------------------------------------------------*/
     protected GameMechanics AddWorld(string name) {
-        GameMechanics dim;
-        dim = new GameMechanics(manager, name);
+        GameMechanics dim = new GameMechanics(manager, name);
         dim.fl_mirror = fl_mirror;
         dim.SetGame(this);
         if (dimensions.Count>0) {
@@ -1340,7 +1368,7 @@ public class GameMode : Mode
     /*------------------------------------------------------------------------
     DESTRUCTION
     ------------------------------------------------------------------------*/
-    void DestroyThis() {
+    public override void DestroyThis() {
         ResetCol();
         KillPortals();
         base.DestroyThis();
@@ -1416,7 +1444,7 @@ public class GameMode : Mode
     ------------------------------------------------------------------------*/
     public void AttachPop(string msg, bool fl_tuto) {
         KillPop();
-        popup = GameObject.Instantiate(popupPrefab, Vector3.zero, Quaternion.identity);
+        popup = GameObject.Instantiate(Loader.Instance.popupPrefab, Vector3.zero, Quaternion.identity);
         popup.GetComponent<TMP_Text>().text = msg;
 
         if (fl_tuto) {
@@ -1439,7 +1467,7 @@ public class GameMode : Mode
         var oy = Entity.y_ctr(ocy);
         Vector3 pos = new Vector3(x, y, 0);
         Quaternion rot = Quaternion.Euler(0, 0, Mathf.Rad2Deg*Mathf.Atan2(oy-y, ox-x)-90);
-        pointer = GameObject.Instantiate(pointerPrefab, pos, rot);
+        pointer = GameObject.Instantiate(Loader.Instance.pointerPrefab, pos, rot);
     }
 
 
@@ -1480,23 +1508,23 @@ public class GameMode : Mode
             itemNameMC = depthMan.Attach("hammer_interf_item_name", Data.DP_TOP);
             itemNameMC._x = Data.GAME_WIDTH*0.5f + 20; // icon width
             itemNameMC._y = 15;//Data.GAME_HEIGHT-20; // 15;
-            itemNameMC.field.text = s;
+            itemNameMC.FirstTextfield().text = s;
 
             // Item icon
-            var icon;
+            MovieClip icon;
             if ( id<1000 ) {
                 icon = new MovieClip(itemNameMC, "hammer_item_special",manager.uniq++);
-                icon.gotoAndStop(""+(id+1));
+                icon.GotoAndStop(id+1);
             }
             else {
                 icon = new MovieClip(itemNameMC, "hammer_item_score",manager.uniq++);
-                icon.gotoAndStop(""+(id-1000+1));
+                icon.GotoAndStop(id-1000+1);
             }
-            icon._x -= itemNameMC.field.textWidth*0.5f + 20;
+            icon._x -= itemNameMC.FirstTextfield().fontSize*0.5f + 20;
             icon._y = 10;
             icon._xscale = 75;
             icon._yscale = icon._xscale;
-            icon.sub.stop();
+            icon.subs[0].Stop();
         }
     }
 
@@ -1555,7 +1583,7 @@ public class GameMode : Mode
         if ( txt==null ) {
             txt = "?";
         }
-        mc.field.text = txt;
+        mc.FirstTextfield().text = txt;
         mapIcons.Add(mc);
     }
 
@@ -1762,18 +1790,8 @@ public class GameMode : Mode
         Lock();
         world.Lock();
 
-        pauseMC.RemoveMovieClip();
-        pauseMC = new MovieClip(depthMan.Attach("hammer_interf_instructions", Data.DP_INTERF));
-        pauseMC.GotoAndStop("1");
-        pauseMC._x = Data.GAME_WIDTH*0.5f;
-        pauseMC._y = Data.GAME_HEIGHT*0.5f;
-        pauseMC.click.text	= "";
-        pauseMC.title.text	= Lang.Get(5);
-        pauseMC.move.text	= Lang.Get(7);
-        pauseMC.attack.text	= Lang.Get(8);
-        pauseMC.pause.text	= Lang.Get(9);
-        pauseMC.space.text	= Lang.Get(10);
-        pauseMC.sector.text	= Lang.Get(14)+"«"+Lang.GetSectorName(currentDim, world.currentId)+"»";
+        pauseMC._visible = true;
+        pauseMC.FindTextfield("sector").text= Lang.Get(14)+"«"+Lang.GetSectorName(currentDim, world.currentId)+"»";
 
         if ( !fl_mute ) {
             SetMusicVolume(0.5f);
@@ -1786,9 +1804,7 @@ public class GameMode : Mode
             tip	= Lang.Get(301 + tipId++);
         }
 
-        pauseMC.tip.html = true;
-        pauseMC.tip.htmlText = "<b>" + Lang.Get(300) +"</b>"+ tip;
-
+        pauseMC.FindTextfield("tip").text = "<b>" + Lang.Get(300) +"</b>"+ tip;
     }
 
 
@@ -1803,22 +1819,21 @@ public class GameMode : Mode
             SetMusicVolume(0.5f);
         }
 
-        mapMC.RemoveMovieClip();
-        mapMC = new MovieClip(depthMan.Attach("hammer_map", Data.DP_INTERF));
-        mapMC.field.text = Lang.GetSectorName(currentDim, world.currentId);
+        mapMC._visible = true;
+        mapMC.FindTextfield("field").text = Lang.GetSectorName(currentDim, world.currentId);
         mapMC._x = -xOffset;
 
         var lid = dimensions[0].currentId;
-        if ( lid==0 ) {
-            mapMC.ptr._y = 70;
-            mapMC.pit._visible = false;
+/*         if ( lid==0 ) { // TODO fix
+            mapMC.FindTextfield("ptr")._y = 70;
+            mapMC.FindTextfield("pit")._visible = false;
         }
         else {
-            mapMC.ptr._y = GetMapY(lid);
-            mapMC.pit.blendMode	= BlendMode.OVERLAY;
-            mapMC.pit._alpha	= 75;
-            mapMC.pit._yscale	= Mathf.Min(100, 100 * (lid/100) );
-        }
+            mapMC.FindTextfield("ptr")._y = GetMapY(lid);
+            mapMC.FindTextfield("pit").blendMode	= BlendMode.OVERLAY;
+            mapMC.FindTextfield("pit")._alpha	= 75;
+            mapMC.FindTextfield("pit")._yscale	= Mathf.Min(100, 100 * (lid/100) );
+        } */
 
 
         // Traversées de portails
@@ -1863,15 +1878,15 @@ public class GameMode : Mode
         fl_pause = false;
         Unlock();
         world.Unlock();
-        pauseMC.RemoveMovieClip();
-        mapMC.RemoveMovieClip();
+        pauseMC._visible = false;
+        mapMC._visible = false;
         if (!fl_mute) {
             SetMusicVolume(1);
         }
         for (var i=0;i<mapIcons.Count;i++) {
             mapIcons[i].RemoveMovieClip();
         }
-        mapIcons = new Array();
+        mapIcons = new List<MovieClip>();
     }
 
 
@@ -1928,7 +1943,7 @@ public class GameMode : Mode
 ////			}
 //		}
 
-        // Calcul darkness
+/*         // Calcul darkness  // TODO Fix
         if ( forcedDarkness!=null ) {
             targetDark = forcedDarkness;
         }
@@ -2002,14 +2017,14 @@ public class GameMode : Mode
             }
         }
 
-        HoleUpdate();
+        HoleUpdate();*/
     }
 
 
     /*------------------------------------------------------------------------
-    AJOUTE UN SPOT DE LUMIÈRE
+    AJOUTE UN SPOT DE LUMIÈRE // TODO Fix
     ------------------------------------------------------------------------*/
-    public void AddHole(float x, float y, float diameter) {
+/*     public void AddHole(float x, float y, float diameter) {
         extraHoles.Add(x, y, diameter);
     }
 
@@ -2025,13 +2040,13 @@ public class GameMode : Mode
     public void ClearExtraHoles() {
         DetachExtraHoles();
         extraHoles = new Array();
-    }
+    } */
 
 
     /*------------------------------------------------------------------------
-    MAIN: DARKNESS HALO
+    MAIN: DARKNESS HALO // TODO Fix
     ------------------------------------------------------------------------*/
-    void HoleUpdate() {
+/*     void HoleUpdate() {
         if (darknessMC == null) {
             return;
         }
@@ -2073,13 +2088,13 @@ public class GameMode : Mode
 
         world.darknessFactor = dfactor;
         darknessMC._alpha = dfactor;
-    }
+    } */
 
 
     /*------------------------------------------------------------------------
     MAIN
     ------------------------------------------------------------------------*/
-    void Main() {
+    public override void Main() {
         // FPS
         if (GameManager.CONFIG.fl_detail) {
             if (1/Time.deltaTime <= 16) { // lag manager
@@ -2095,12 +2110,12 @@ public class GameMode : Mode
         }
 
         // Chrono
-        gameChrono.Update();
+        /* gameChrono.Update(); */ // TODO
 
         // Pause
         if (fl_pause) {
             if (manager.fl_debug) {
-                PrintDebugInfos();
+                /* PrintDebugInfos(); */ // TODO
             }
         }
 
@@ -2114,7 +2129,7 @@ public class GameMode : Mode
 
         // Item name
         if (itemName != null) {
-            itemNameMC._alpha -= (105 - itemNameMC._alpha)*0.01;
+            itemNameMC._alpha -= (105 - itemNameMC._alpha)*0.01f;
             if (itemNameMC._alpha<=5) {
                 GameObject.Destroy(itemName);
             }
@@ -2132,6 +2147,9 @@ public class GameMode : Mode
 //		else {
 //			resetCol();
 //		}
+
+        // Super
+		base.Main();
 
         // Level
         world.Update();
@@ -2206,7 +2224,7 @@ public class GameMode : Mode
             l[i].Update();
             l[i].EndUpdate();
         }
-        HoleUpdate();
+        /* HoleUpdate(); */ // TODO
 
         CleanKills();
         if (!world.fl_lock) {

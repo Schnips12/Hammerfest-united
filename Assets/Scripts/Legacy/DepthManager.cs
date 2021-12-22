@@ -21,11 +21,10 @@ public class DepthManager
 		plans = new List<Plan>();
 	}
 
-	public MovieClip GetMC() {
-		return root_mc;
-	}
-
 	private Plan GetPlan(int pnb) {
+		while(plans.Count <= pnb) {
+			plans.Add(new Plan());
+		}
 		Plan plan_data = plans[pnb];
 		if(plan_data == null) {
 			plan_data = new Plan();
@@ -58,7 +57,10 @@ public class DepthManager
 			Compact(plan);
 			return Attach(inst, plan);
 		}
-		MovieClip mc = new MovieClip(root_mc, inst, d+plan*1000);
+		MovieClip mc = new MovieClip(root_mc, inst, plan+d/1000);
+		while(p.Count <= d) {
+			p.Add(null);
+		}
 		p[d] = mc;
 		plan_data.cur++;
 		return mc;
@@ -72,7 +74,7 @@ public class DepthManager
 			Compact(plan);
 			return Empty(plan);
 		}
-		MovieClip mc = new MovieClip(root_mc, d+plan*1000);
+		MovieClip mc = new MovieClip(root_mc, plan+d/1000);
 		p[d] = mc;
 		plan_data.cur++;
 		return mc;
@@ -92,7 +94,7 @@ public class DepthManager
 	}
 
 	public void Swap(MovieClip mc, int plan) {
-		var src_plan = Mathf.FloorToInt(mc.GetDepth() / 1000);
+		var src_plan = Mathf.FloorToInt(mc.GetDepth());
 		if( src_plan == plan )
 			return;
 		var plan_data = GetPlan(src_plan);
@@ -104,15 +106,15 @@ public class DepthManager
 				p[i] = null;
 				break;
 			}
-		mc.SwapDepths(Reserve(mc,plan));
+		mc.SwapDepths(Reserve(mc, plan));
 	}
 
 	void Under(MovieClip mc) {
 		var d = mc.GetDepth();
-		var plan = Mathf.FloorToInt(d / 1000);
+		var plan = Mathf.FloorToInt(d);
 		var plan_data = GetPlan(plan);
 		var p = plan_data.tbl;
-		var pd = d%1000;
+		var pd = (d * 1000) % 1000;
 		if(p[pd] == mc) {
 			p[pd] = null;
 			p.Insert(0, mc);
@@ -123,17 +125,17 @@ public class DepthManager
 
 	void Over(MovieClip mc) {
 		var d = mc.GetDepth();
-		var plan = Mathf.FloorToInt(d / 1000);
+		var plan = Mathf.FloorToInt(d);
 		var plan_data = GetPlan(plan);
 		var p = plan_data.tbl;
-		var pd = d%1000;
+		var pd = (d * 1000) % 1000;
 		if( p[pd] == mc ) {
 			p[pd] = null;
 			if(plan_data.cur == 1000)
 				Compact(plan);
 			d = plan_data.cur;
 			plan_data.cur++;
-			mc.SwapDepths(d + plan * 1000);
+			mc.SwapDepths(plan + d/1000);
 			p[d] = mc;
 		}
 	}

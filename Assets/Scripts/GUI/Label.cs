@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GUI;
+namespace GUI{
 
 public class Label : Item
 {
@@ -20,4 +20,6 @@ public class Label : Item
 		b.Init(c,l);
 		return b;
 	}
+}
+
 }

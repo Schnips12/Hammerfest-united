@@ -114,7 +114,7 @@ public class Framboise : Shooter
 			}
 		}
 		else {
-			this.sub.NextFrame();
+			this.subs[0].NextFrame();
 		}
 
 		arrived++;
@@ -150,7 +150,7 @@ public class Framboise : Shooter
 		DisableShooter();
 		DisableAnimator();
 		this.GotoAndStop(15);
-		this.sub.Stop();
+		this.subs[0].Stop();
 		FindSub("o1")._visible = false;
 		FindSub("o2")._visible = false;
 		Hide();

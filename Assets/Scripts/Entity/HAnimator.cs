@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class HAnimator : Trigger
@@ -52,8 +53,8 @@ public class HAnimator : Trigger
 	------------------------------------------------------------------------*/
 	protected override void Init(GameMode g) {
 		base.Init(g);
-		animator.SetBool("stop", true);
-		animator.SetInteger("frame", 1);
+		//animator.SetBool("stop", true); // TODO Animate
+		//animator.SetInteger("frame", 1); // TODO Animate
 	}
 
 
@@ -62,11 +63,11 @@ public class HAnimator : Trigger
 	------------------------------------------------------------------------*/
 	protected void EnableAnimator() {
 		fl_anim = true;
-		animator.SetBool("stop", true);
+		//animator.SetBool("stop", true); // TODO Animate
 	}
 	protected void DisableAnimator() {
 		fl_anim = false;
-		animator.SetBool("stop", false);
+		//animator.SetBool("stop", false); // TODO Animate
 	}
 
 
@@ -107,7 +108,8 @@ public class HAnimator : Trigger
 	RED�FINI LE PATH VERS L'ANIMATION
 	------------------------------------------------------------------------*/
 	protected void SetSub(MovieClip mc) {
-		sub = mc;
+		subs = new List<MovieClip>();
+		subs.Add(mc);
 	}
 
 
@@ -211,9 +213,9 @@ public class HAnimator : Trigger
 			var fl_break=false;
 			frame += animFactor*Time.fixedDeltaTime;
 			while (!fl_break & frame>=1) {
-				if (sub.CurrentFrame()==sub.TotalFrames() ) {
+				if (subs[0].CurrentFrame()==subs[0].TotalFrames() ) {
 					if ( fl_loop ) {
-						sub.GotoAndStop(1);
+						subs[0].GotoAndStop(1);
 					}
 					else {
 						frame = -1;
@@ -222,7 +224,7 @@ public class HAnimator : Trigger
 					}
 				}
 				if (!fl_break) {
-					sub.NextFrame();
+					subs[0].NextFrame();
 					frame--;
 				}
 			}

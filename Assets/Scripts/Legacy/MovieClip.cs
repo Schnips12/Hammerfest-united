@@ -6,49 +6,85 @@ using TMPro;
 
 public class MovieClip
 {
-    GameObject united;
+    public GameObject united;
     Animator animator;
-    TMP_Text tmpText;
 
-    public string value;
-    public string _name;
-    public bool _visible;
-    public float _x;
-    public float _y;
-    public float _xscale;
-    public float _yscale;
-    public float _rotation;
+    // TODO Move these to the Data  or to the Loader class.
+    string[] prefabsNames = {   "hammer_interf_instructions",
+                                "hammer_interf_game",
+                                "hammer_player",
+                                "hammer_interf_life",
+                                "hammer_map"
+    
+    };
+
+    public string _name {
+        get => united.name;
+        set {
+            united.name = value;
+        }
+    }
+
+    public bool _visible {
+        get => united.activeSelf;
+        set {
+            united.SetActive(value);
+        }
+    }
+
+    public float _x {
+        get => united.transform.position.x;
+        set {
+            united.transform.position = new Vector3(value, united.transform.position.y, united.transform.position.z);
+        }
+    }
+
+    public float _y {
+        get => united.transform.position.y;
+        set {
+            united.transform.position = new Vector3(united.transform.position.x, value, united.transform.position.z);
+        }
+    }
+
+    public float _xscale {
+        get => united.transform.localScale.x;
+        set {
+            united.transform.localScale = new Vector3(value, united.transform.localScale.y, united.transform.localScale.z);
+        }
+    }
+
+    public float _yscale {
+        get => united.transform.localScale.y;
+        set {
+            united.transform.localScale = new Vector3(united.transform.localScale.x, value, united.transform.localScale.z);
+        }
+    }
+
+    public float _rotation {
+        get => united.transform.rotation.eulerAngles.z;
+        set {
+            united.transform.rotation = Quaternion.Euler(0, 0, value);
+        }
+    }
+
     public float _width;
-    public float _height;  
-    public float _alpha;
+    public float _height;
 
-    public string text;
+    public float _alpha {
+        get => united.GetComponent<Renderer>().material.color.a;
+        set {
+            Color c = united.GetComponent<Renderer>().material.color;
+            c.a = value;
+            united.GetComponent<Renderer>().material.SetColor("scripted alpha", c);
+        }
+    }
+
     public Hashtable extraValues;
-    public MovieClip sub;
-    public MovieClip label;
+    public List<MovieClip> subs;
 
     public Action onRelease;
     public Action onRollOut;
     public Action onRollOver;
-
-
-    private void Update() { // TODO use manual updates instead of monobehaviour to reduce load
-        united.name = _name;
-        united.SetActive(_visible);
-        united.transform.position = new Vector2(_x, _y);
-        united.transform.localScale = new Vector2(_xscale, _yscale);
-        united.transform.rotation = Quaternion.Euler(0, 0, _rotation);
-
-        Bounds b = united.GetComponent<Collider2D>().bounds;
-        _width = b.max.x - b.min.x;
-        _height = b.max.y - b.min.y;
-
-        Color c = united.GetComponent<Material>().color;
-        c.a = _alpha;
-        united.GetComponent<Material>().SetColor("scripted alpha", c);
-
-        tmpText.text = text;
-    }
 
     public float timer;
 
@@ -70,49 +106,93 @@ public class MovieClip
 	CONSTRUCTION & DESTRUCTION
 	------------------------------------------------------------------------*/
     // TODO Instantiate prefabs and empty holders.
+    protected MovieClip(){
+        // This constructor is for inheritance only.
+    }
+
+    public MovieClip(GameObject o) {
+        united = o;
+    }
+
     public MovieClip(MovieClip mc) {
-        
+        united = GameObject.Instantiate(Resources.Load<GameObject>("square"), mc.united.transform);
+        united.name = "Default name";
+        extraValues = new Hashtable();
     }
-    public MovieClip() {
-        
+
+    private MovieClip(MovieClip mc, GameObject o) {
+        united = o;
+        united.transform.SetParent(mc.united.transform);
+    }
+
+    public MovieClip(MovieClip mc, string _name) : this(mc) {
+        united.name = _name;
+        this._name = _name;
     }      
-    public MovieClip(MovieClip mc, string reference, int depth) {
 
+    public MovieClip(MovieClip mc, string reference, int depth) : this(mc, reference) {
+        Debug.Log(reference);
+        if(Array.IndexOf(prefabsNames, reference) != -1) {
+            united = GameObject.Instantiate(Resources.Load<GameObject>(reference), mc.united.transform);
+        } else {
+            Debug.Log("The asset you tried to load isn't referenced in the MovieClip class");
+            united = GameObject.Instantiate(Resources.Load<GameObject>("square"), mc.united.transform);
+        }
+        united.transform.position -= new Vector3(0, 0, depth);
     }
-    public MovieClip(MovieClip mc, int depth) {
 
+    public MovieClip(MovieClip mc, int depth) : this(mc) {
+        united.transform.position -= new Vector3(0, 0, depth);
     }
 
     public void RemoveMovieClip() {
         GameObject.Destroy(united);
     }
     public MovieClip FindSub(string name) {
-        MovieClip s = sub;
-        while(s!=null & s._name!=name) {
-            s = s.sub;
+        foreach (MovieClip s in subs) {
+            if (s._name == name) {
+                return s;
+            }
         }
-        return s;
+        return null;
     }
+    public TextMeshPro FirstTextfield() {
+        return united.GetComponentInChildren<TextMeshPro>();
+    }
+    public TextMeshPro FindTextfield(string name) {
+        foreach (Transform child in united.transform) {
+            if (child.name == name) {
+                return child.GetComponent<TextMeshPro>();
+            }
+        }
+        return null;
+    }
+    public void AddTextField(string name) {
+        GameObject field = new GameObject(name);
+        field.AddComponent<TextMeshPro>();
+        field.transform.SetParent(united.transform);
+    }
+
 
 
     /*------------------------------------------------------------------------
-	ANIMATION
+	ANIMATION // TODO Animate
 	------------------------------------------------------------------------*/
     public void GotoAndStop(int frame) {
-        AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
+/*         AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
         animator.Play(clip.name, 0, frame/(clip.length*clip.frameRate));
-        Stop();
+        Stop(); */
     }
     public void GotoAndPlay(int frame) {
-        AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
+/*         AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
         animator.Play(clip.name, 0, frame/(clip.length*clip.frameRate));
-        Play();
+        Play(); */
     }
     public void Stop() {
-        animator.speed = 0;
+/*         animator.speed = 0; */
     }
     public void Play() {
-        animator.speed = 1;
+/*         animator.speed = 1; */
     }
     public void NextFrame(){
 

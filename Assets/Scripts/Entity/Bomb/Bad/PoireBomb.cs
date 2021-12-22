@@ -28,7 +28,7 @@ public class PoireBomb : BadBomb
 	/*------------------------------------------------------------------------
 	DUPLICATION
 	------------------------------------------------------------------------*/
-	PoireBomb Duplicate() {
+	public override IBomb Duplicate() {
 		return Attach(game, x, y);
 	}
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-namespace GUI;
+namespace GUI{
 
 public class SoccerInterface
 {
@@ -30,7 +30,7 @@ public class SoccerInterface
 	void Init() {
 		mc		= game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
 		mc._x	= -game.xOffset;
-		mc._y	= Data.DOC_HEIGHT;
+		mc._y	= 0;
 		mc.GotoAndStop(3);
 		mc.cacheAsBitmap = true;
 
@@ -52,7 +52,7 @@ public class SoccerInterface
 	MET � JOUR UN SCORE
 	------------------------------------------------------------------------*/
 	void SetScore(int pid, int n) {
-		scores[pid].text = n.ToString();
+		scores[pid].field.text = n.ToString();
 	}
 
 
@@ -60,7 +60,7 @@ public class SoccerInterface
 	MET � JOUR LE TEMPS
 	------------------------------------------------------------------------*/
 	void SetTime(string str) {
-		time.text = str;
+		time.field.text = str;
 	}
 
 
@@ -77,4 +77,6 @@ public class SoccerInterface
 	------------------------------------------------------------------------*/
 	void Update() {
 	}
+}
+
 }

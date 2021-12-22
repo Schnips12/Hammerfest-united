@@ -108,8 +108,8 @@ public class Crawler : WallWalker
 		}
 		game.fxMan.AttachExplosion(x, y, 20);
 
-		sub._xscale = 150 + Mathf.Abs(cp.x)*150;
-		sub._yscale = 150 + Mathf.Abs(cp.y)*150;
+		subs[0]._xscale = 150 + Mathf.Abs(cp.x)*150;
+		subs[0]._yscale = 150 + Mathf.Abs(cp.y)*150;
 		colorAlpha = COLOR_ALPHA;
 		/* SetColorHex( Mathf.Round(colorAlpha), COLOR ); // TODO Understand
  */
@@ -205,9 +205,9 @@ public class Crawler : WallWalker
 	protected override void OnHitGround(float h) {
 		base.OnHitGround(h);
 		if ( Mathf.Abs(h)>=Data.CASE_HEIGHT*3 ) {
-			sub._xscale = 2*100*scaleFactor;
-			sub._yscale = 0.2f*100*scaleFactor;
-			sub._y = ySubBase+10;
+			subs[0]._xscale = 2*100*scaleFactor;
+			subs[0]._yscale = 0.2f*100*scaleFactor;
+			subs[0]._y = ySubBase+10;
 			if ( !fl_freeze ) {
 				game.fxMan.InGameParticles( Data.PARTICLE_BLOB, x ,y, Random.Range(0, 3)+2 );
 			}
@@ -250,8 +250,8 @@ public class Crawler : WallWalker
 		}
 
 
-		sub._xscale += SCALE_RECAL * (xscale - sub._xscale);
-		sub._yscale += SCALE_RECAL * (yscale - sub._yscale);
+		subs[0]._xscale += SCALE_RECAL * (xscale - subs[0]._xscale);
+		subs[0]._yscale += SCALE_RECAL * (yscale - subs[0]._yscale);
 
 		if ( colorAlpha>0 ) {
 			colorAlpha-=Time.fixedDeltaTime*3;

@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Adventure : GameMode
 {
-
 	List<int> perfectOrder;
 	int perfectCount;
 
@@ -13,7 +12,6 @@ public class Adventure : GameMode
 
 	static int BUCKET_X			= 11;
 	static int BUCKET_Y			= 19;
-
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -126,13 +124,13 @@ public class Adventure : GameMode
 	protected override void InitWorld() {
 		base.InitWorld();
 
-		AddWorld("xml_adventure");
-		AddWorld("xml_deepnight");
-		AddWorld("xml_hiko");
-		AddWorld("xml_ayame");
-		AddWorld("xml_hk");
+		AddWorld("adventure.json");
+		AddWorld("deepnight.json");
+		AddWorld("hiko.json");
+		AddWorld("ayame.json");
+		AddWorld("hk.json");
 		if (manager.IsDev()) {
-			AddWorld("xml_dev");
+			AddWorld("dev.json");
 		}
 	}
 
@@ -142,9 +140,10 @@ public class Adventure : GameMode
 	------------------------------------------------------------------------*/
 	protected override void InitGame() {
 		base.InitGame();
-		PlayMusic(0);
+		soundMan.SetVolume(GameManager.CONFIG.generalVolume);
+		PlayMusic(0);		
 		world.Goto(firstLevel);
-		InsertPlayer(world.current.playerX, world.current.playerY);
+		InsertPlayer(world.current.playerX, Data.LEVEL_HEIGHT-world.current.playerY);
 	}
 
 
@@ -195,13 +194,12 @@ public class Adventure : GameMode
 	public override void NextLevel() {
 		base.NextLevel();
 
-		if ( fl_warpStart ) {
+		if (fl_warpStart) {
 			world.currentId = 0;
 			Unlock();
 			world.view.Detach();
 			ForcedGoto(10);
 		}
-
 	}
 
 
@@ -237,7 +235,6 @@ public class Adventure : GameMode
 				id==Data.TUBERCULOZ_LEVEL
 			);
 	}
-
 
 
 	/*------------------------------------------------------------------------
@@ -332,7 +329,7 @@ public class Adventure : GameMode
 		var fl_illegal = string.Join("|", manager.history.ToArray()).IndexOf("!", 0) >= 0;
 
 		manager.history = new List<string>();
-		manager.history.Add("F="+root.version);
+		manager.history.Add("F="+Loader.Instance.root.version);
 		manager.history.Add("T="+gameChrono.Get());
 
 		if ( fl_illegal ) {
@@ -349,7 +346,6 @@ public class Adventure : GameMode
 	public override MovieClip OnHurryUp() {
 		MovieClip mc = base.OnHurryUp();
 		if ( GameManager.CONFIG.HasMusic() & currentTrack==0 ) {
-			trackPos = audio.time;
 			PlayMusic(2);
 		}
 		return mc;

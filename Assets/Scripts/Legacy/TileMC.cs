@@ -9,7 +9,7 @@ public class TileMC : MovieClip
     public MovieClip maskTile;
     public MovieClip ombre;
 
-    public TileMC(MovieClip model, string name, float size) {
+    public TileMC(MovieClip mc, string name, float size) : base(mc) {
 
     }
 

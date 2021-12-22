@@ -74,7 +74,7 @@ public class Trigger : Entity
 	public void MoveTo(float x, float y) {
 		TRem(cx, cy);
 		this.x=x;
-		this.y=y-1;
+		this.y=y+1;
 		UpdateCoords() ;
 		TAdd(cx, cy);
 	}
