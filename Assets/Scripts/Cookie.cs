@@ -46,7 +46,7 @@ public class Cookie
 	void Flush() {
 		lastModified = DateTime.UtcNow;
 		string raw	= JsonUtility.ToJson(this);
-		File.WriteAllText(Application.persistentDataPath+NAME, raw); 
+		File.WriteAllText(Application.persistentDataPath+"/"+NAME, raw); 
 	}
 
 

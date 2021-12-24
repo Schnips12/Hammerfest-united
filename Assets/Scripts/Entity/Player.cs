@@ -357,7 +357,7 @@ public class Player : Physics, IEntity
 		PlayAnim(Data.ANIM_PLAYER_DIE) ;
 
 		var power=20;
-		if (Time.fixedDeltaTime<=0.6 ) {
+		if (Loader.Instance.tmod<=0.6 ) {
 			power=40;
 		}
 
@@ -864,11 +864,11 @@ public class Player : Physics, IEntity
 	public void AirJump() {
 		PlayAnim(Data.ANIM_PLAYER_JUMP_UP);
 		if ( dy > 0) { // descendant
-			dy=-Data.PLAYER_AIR_JUMP;
+			dy=Data.PLAYER_AIR_JUMP;
 		}
 		else { // ascendant
 			if ( Mathf.Abs(dy??0) < Data.PLAYER_AIR_JUMP ) {
-				dy=-Data.PLAYER_AIR_JUMP;
+				dy=Data.PLAYER_AIR_JUMP;
 			}
 		}
 	}
@@ -1187,7 +1187,7 @@ public class Player : Physics, IEntity
 
 		// Hauteur de chute
 		if ( h >= Data.DUST_FALL_HEIGHT ) {
-			game.fxMan.Dust(cx, cy+1);
+			game.fxMan.Dust(cx, cy-1);
 		}
 		game.fxMan.AttachFx(x,y,"hammer_fx_fall");
 
@@ -1319,7 +1319,7 @@ public class Player : Physics, IEntity
 			game.fxMan.InGameParticles(Data.PARTICLE_RAIN, x +
 					UnityEngine.Random.Range(0, 20)*(UnityEngine.Random.Range(0, 2)*2-1),
 					y-60-UnityEngine.Random.Range(0, 5), UnityEngine.Random.Range(0, 2)+1 );
-			Scale(Mathf.Min(100, (scaleFactor+0.002f*Time.fixedDeltaTime)*100));
+			Scale(Mathf.Min(100, (scaleFactor+0.002f*Loader.Instance.tmod)*100));
 			if (scaleFactor<=0.60) {
 				KillHit(0);
 				specialMan.Interrupt(100);
@@ -1329,7 +1329,7 @@ public class Player : Physics, IEntity
 
 		// Oxyg�ne
 		if (!fl_kill & game.fl_aqua) {
-			oxygen -= Time.fixedDeltaTime*0.1f;
+			oxygen -= Loader.Instance.tmod*0.1f;
 			/* game.manager.Progress(oxygen/100); */ // TODO Progress
 			if (oxygen<=0) {
 				KillHit(0);
@@ -1357,7 +1357,7 @@ public class Player : Physics, IEntity
 
 		// Refroidissement du tir
 		if (coolDown>0) {
-			coolDown-=Time.fixedDeltaTime;
+			coolDown-=Loader.Instance.tmod;
 			if (coolDown<=0) {
 				coolDown=0 ;
 			}
@@ -1365,7 +1365,7 @@ public class Player : Physics, IEntity
 
 		// Sonn�
 		if (fl_knock) {
-			knockTimer-=Time.fixedDeltaTime;
+			knockTimer-=Time.deltaTime;
 			if (knockTimer<=0) {
 				OnWakeUp();
 			} else {
@@ -1386,7 +1386,7 @@ public class Player : Physics, IEntity
 		}
 
 		if (lockTimer>0) {
-			lockTimer-=Time.fixedDeltaTime;
+			lockTimer-=Time.deltaTime;
 			if (lockTimer<=0) {
 				fl_lockControls = false;
 			}
@@ -1397,7 +1397,7 @@ public class Player : Physics, IEntity
 
 		// Bouclier
 		if (fl_shield) {
-			shieldTimer-=Time.fixedDeltaTime;
+			shieldTimer-=Time.deltaTime;
 			if (shieldTimer<=0) {
 				Unshield();
 			}
@@ -1427,7 +1427,7 @@ public class Player : Physics, IEntity
 				if (waitTimer<=0) {
 					waitTimer = Data.WAIT_TIMER;
 				}
-				waitTimer-=Time.fixedDeltaTime;
+				waitTimer-=Time.deltaTime;
 				if (waitTimer<=0) {
 					if (UnityEngine.Random.Range(0, 20)==0) {
 						PlayAnim(Data.ANIM_PLAYER_WAIT1);
@@ -1446,7 +1446,7 @@ public class Player : Physics, IEntity
 						if (edgeTimer<=0) {
 							edgeTimer = Data.EDGE_TIMER;
 						}
-						edgeTimer-=Time.fixedDeltaTime;
+						edgeTimer-=Time.deltaTime;
 						if (edgeTimer<=0) {
 							PlayAnim(Data.ANIM_PLAYER_EDGE);
 						}

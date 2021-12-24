@@ -125,9 +125,9 @@ public abstract class Mode : IMode
 		}
 
 		// Variables
-		xFriction = Mathf.Pow(Data.FRICTION_X, Time.fixedDeltaTime) ; // x
-		yFriction = Mathf.Pow(Data.FRICTION_Y, Time.fixedDeltaTime) ; // y
-		cycle += Time.fixedDeltaTime;
+		xFriction = Mathf.Pow(Data.FRICTION_X, Loader.Instance.tmod) ; // x
+		yFriction = Mathf.Pow(Data.FRICTION_Y, Loader.Instance.tmod) ; // y
+		cycle += Loader.Instance.tmod;
 	}
 
 

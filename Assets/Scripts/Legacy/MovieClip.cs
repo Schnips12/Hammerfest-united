@@ -12,10 +12,11 @@ public class MovieClip
     // TODO Move these to the Data  or to the Loader class.
     string[] prefabsNames = {   "hammer_interf_instructions",
                                 "hammer_interf_game",
-                                "hammer_player",
+                                "hammer_interf_zone",
                                 "hammer_interf_life",
-                                "hammer_map"
-    
+                                "hammer_player",
+                                "hammer_map",
+                                "hammer_fx_dust"
     };
 
     public string _name {
@@ -116,8 +117,9 @@ public class MovieClip
 
     public MovieClip(MovieClip mc) {
         united = GameObject.Instantiate(Resources.Load<GameObject>("square"), mc.united.transform);
-        united.name = "Default name";
+        this._name = "Default name";
         extraValues = new Hashtable();
+        subs = new List<MovieClip>();
     }
 
     private MovieClip(MovieClip mc, GameObject o) {
@@ -126,22 +128,22 @@ public class MovieClip
     }
 
     public MovieClip(MovieClip mc, string _name) : this(mc) {
-        united.name = _name;
         this._name = _name;
-    }      
+    }
 
     public MovieClip(MovieClip mc, string reference, int depth) : this(mc, reference) {
-        Debug.Log(reference);
         if(Array.IndexOf(prefabsNames, reference) != -1) {
+            Debug.Log("Loading asset: "+reference);
             united = GameObject.Instantiate(Resources.Load<GameObject>(reference), mc.united.transform);
         } else {
-            Debug.Log("The asset you tried to load isn't referenced in the MovieClip class");
+            Debug.Log("The asset you tried to load isn't referenced: "+reference);
             united = GameObject.Instantiate(Resources.Load<GameObject>("square"), mc.united.transform);
         }
+        this._name = reference;
         united.transform.position -= new Vector3(0, 0, depth);
     }
 
-    public MovieClip(MovieClip mc, int depth) : this(mc) {
+    public MovieClip(MovieClip mc, float depth) : this(mc) {
         united.transform.position -= new Vector3(0, 0, depth);
     }
 
@@ -198,14 +200,16 @@ public class MovieClip
 
     }
     public int CurrentFrame() {
-        AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
+/*         AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip; // TODO Animate
         AnimationState state = animator.GetComponents<AnimationState>()[0];
-        return Mathf.FloorToInt(state.normalizedTime*clip.frameRate);
+        return Mathf.FloorToInt(state.normalizedTime*clip.frameRate); */
+        return 1;
 
     }
     public int TotalFrames() {
-        AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
-        return Mathf.FloorToInt(clip.length*clip.frameRate);
+/*         AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip; // TODO Animate
+        return Mathf.FloorToInt(clip.length*clip.frameRate); */
+        return 1;
     }
 
 	/*------------------------------------------------------------------------

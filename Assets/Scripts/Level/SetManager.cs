@@ -37,13 +37,12 @@ public class SetManager
 		// Lecture niveaux
 		string data = Loader.Instance.root.ReadLevel(setName); // TODO get name from cookie
 		json = new List<string>(data.Split(new string[] {";"}, StringSplitOptions.RemoveEmptyEntries));
-		if (Loader.Instance.root.ReadFile(setName+"_back_xml") == null ) {
+/* 		if (Loader.Instance.root.ReadFile(setName+"_back_xml") == null ) {
 			Loader.Instance.root.SaveFile(setName+"_back_xml", String.Join(";", json));
-		}
+		} */
 
-		ImportCookie();
+		/* ImportCookie(); */ // TODO Save system.
 
-		
 		if (json.Count == 0) {
 			Debug.Log("Error reading "+setName+" (null value)");
 			return;
@@ -152,6 +151,7 @@ public class SetManager
 	}
 
 	protected void CheckDataReady() {
+		Debug.Log("Checking Data.");
 		if (IsDataReady()) {
 			OnDataReady();
 		}
@@ -169,7 +169,11 @@ public class SetManager
 			return;
 		}
 		if (!fl_read[id]) {
+			Debug.Log("Reading JSON :" + id);
+			Debug.Log(json[id]);
 			worldmap[id] = JsonUtility.FromJson<LevelData>(json[id]);
+			worldmap[id].script = worldmap[id].script.Replace("\r", "").Replace("$", "");
+			fl_read[id] = true;
 		}
 		SetCurrent(id);
 		OnReadComplete();
@@ -460,7 +464,7 @@ public class SetManager
 			l = Flip(l);
 		}
 		ConvertWalls(ref l);
-		if (l.specialSlots==null || l.scoreSlots==null) {
+		if (l.specialSlots==null | l.scoreSlots==null) {
 			Debug.Log("empty slot array found ! spec="+l.specialSlots.Length+" score="+l.scoreSlots.Length);
 		}
 		fl_read[id]=true;

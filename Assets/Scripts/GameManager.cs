@@ -224,7 +224,7 @@ public class GameManager : MonoBehaviour
 			return;
 		}
 		if (IsAdventure()) {
-			StartMode(new Adventure(this, 0));
+			StartMode(new Adventure(this, 2)); // TODO Start at zéro !
 			return;
 		}
 
@@ -236,9 +236,9 @@ public class GameManager : MonoBehaviour
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	private void FixedUpdate() {
+	private void Update() {
 		// Timer
-		Time.fixedDeltaTime = 0.033f; // TODO Variable fps
+		Loader.Instance.tmod = Mathf.Min(2.8f, Loader.Instance.tmod);
 
 		// Modes
 		if (current!=null) {

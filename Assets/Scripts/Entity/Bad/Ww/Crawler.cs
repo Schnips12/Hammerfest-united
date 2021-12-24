@@ -156,7 +156,7 @@ public class Crawler : WallWalker
 		}
 
 		if ( fl_inSight ) {
-			attackCD -= Time.fixedDeltaTime*4;
+			attackCD -= Loader.Instance.tmod*4;
 			factor = 8;
 		}
 
@@ -246,7 +246,7 @@ public class Crawler : WallWalker
 			// D�formation blob cosinus
 			xscale+= 10*Mathf.Sin(blobCpt);
 			yscale+= 10*Mathf.Cos(blobCpt);
-			blobCpt+=Time.fixedDeltaTime*0.1f;
+			blobCpt+=Loader.Instance.tmod*0.1f;
 		}
 
 
@@ -254,7 +254,7 @@ public class Crawler : WallWalker
 		subs[0]._yscale += SCALE_RECAL * (yscale - subs[0]._yscale);
 
 		if ( colorAlpha>0 ) {
-			colorAlpha-=Time.fixedDeltaTime*3;
+			colorAlpha-=Loader.Instance.tmod*3;
 			if ( colorAlpha<=0 ) {
 				/* ResetColor(); */
 			}
@@ -281,7 +281,7 @@ public class Crawler : WallWalker
 
 		// Cooldown d'attaque
 		if ( attackCD>0 ) {
-			attackCD-=Time.fixedDeltaTime;
+			attackCD-=Loader.Instance.tmod;
 		}
 
 		// Attaque
@@ -292,7 +292,7 @@ public class Crawler : WallWalker
 		}
 
 		if ( fl_attack & attackTimer>0 ) {
-			attackTimer-=Time.fixedDeltaTime;
+			attackTimer-=Time.deltaTime;
 			if ( attackTimer<=0 ) {
 				Attack();
 			}

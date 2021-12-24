@@ -359,8 +359,8 @@ public class Physics : HAnimator
         public float dy;
     }
 	step CalcSteps(float dxStep, float dyStep) {
-		var dxTotal = dxStep*Time.fixedDeltaTime;
-		var dyTotal = dyStep*Time.fixedDeltaTime;
+		var dxTotal = dxStep*Loader.Instance.tmod;
+		var dyTotal = dyStep*Loader.Instance.tmod;
 		var total = Mathf.Ceil(Mathf.Abs(dxTotal)/Data.STEP_MAX);
 		total = Mathf.Max(total, Mathf.Ceil(Mathf.Abs(dyTotal)/Data.STEP_MAX) );
 
@@ -496,7 +496,7 @@ public class Physics : HAnimator
 		// Vent
 		if (fl_wind) {
 			if (fl_stable & game.fl_wind) {
-				dx += game.windSpeed*Time.fixedDeltaTime;
+				dx += game.windSpeed*Loader.Instance.tmod;
 			}
 		}
 
@@ -515,22 +515,22 @@ public class Physics : HAnimator
 
 				// facteur de correction pour les tmods extr�mes
 				float patchFactor = 1.0f;
-				if (Time.fixedDeltaTime>=2) {
+				if (Loader.Instance.tmod>=2) {
 					patchFactor = 1.1f;
 				}
 
 				if (dy<0) {
-					dy += gravityFactor * Data.GRAVITY * Time.fixedDeltaTime * patchFactor;
+					dy -= gravityFactor * Data.GRAVITY * Loader.Instance.tmod * patchFactor;
 				}
 				else {
 					if (fallStart==null) {
 						fallStart = y;
 					}
 					if (game.fl_aqua & !fl_strictGravity) {
-						dy += 0.3f * fallFactor * Data.FALL_SPEED * Time.fixedDeltaTime * patchFactor;
+						dy -= 0.3f * fallFactor * Data.FALL_SPEED * Loader.Instance.tmod * patchFactor;
 					}
 					else {
-						dy += fallFactor * Data.FALL_SPEED * Time.fixedDeltaTime * patchFactor;
+						dy -= fallFactor * Data.FALL_SPEED * Loader.Instance.tmod * patchFactor;
 					}
 				}
 			}
@@ -584,8 +584,8 @@ public class Physics : HAnimator
 
 
 				// Patch travers�e de murs par le haut
-				if (fl_hitWall & stepInfos.dy>0 & !fl_kill) {
-					if (world.GetCase(Entity.rtc(ox,oy+Mathf.Floor(Data.CASE_HEIGHT/2)))!=Data.WALL & world.GetCase(fcx, fcy)==Data.WALL) {
+				if (fl_hitWall & stepInfos.dy<0 & !fl_kill) {
+					if (world.GetCase(Entity.rtc(ox,oy-Mathf.Floor(Data.CASE_HEIGHT/2)))!=Data.WALL & world.GetCase(fcx, fcy)==Data.WALL) {
 						x = ox;
 						stepInfos.dx = 0;
 						UpdateCoords();
@@ -594,15 +594,15 @@ public class Physics : HAnimator
 				}
 
 				// Atterrissage
-				if (fl_hitGround & stepInfos.dy>=0) {
-					if (world.GetCase(Entity.rtc(ox,oy+Mathf.Floor(Data.CASE_HEIGHT/2)))!=Data.GROUND & world.GetCase(fcx, fcy)==Data.GROUND) {
+				if (fl_hitGround & stepInfos.dy<0) {
+					if (world.GetCase(Entity.rtc(ox,oy-Mathf.Floor(Data.CASE_HEIGHT/2)))!=Data.GROUND & world.GetCase(fcx, fcy)==Data.GROUND) {
 						if (world.CheckFlag(new Vector2Int(fcx, fcy), Data.IA_TILE)) {
 							if (fl_skipNextGround) {
 								fl_skipNextGround = false;
 							}
 							else {
 								stepInfos.dy = 0;
-								OnHitGround(y-fallStart??0);
+								OnHitGround(fallStart??0-y);
 								fallStart = null;
 								UpdateCoords();
 							}
@@ -611,8 +611,8 @@ public class Physics : HAnimator
 				}
 
 				// Plafond
-				if (fl_hitCeil & stepInfos.dy<=0) {
-					if (world.GetCase(Entity.rtc(ox,oy-Mathf.Floor(Data.CASE_HEIGHT/2)))<=0 & world.GetCase(Entity.rtc(x,y-Mathf.FloorToInt(Data.CASE_HEIGHT/2)))>0) {
+				if (fl_hitCeil & stepInfos.dy>0) {
+					if (world.GetCase(Entity.rtc(ox,oy+Mathf.Floor(Data.CASE_HEIGHT/2)))<=0 & world.GetCase(Entity.rtc(x,y+Mathf.FloorToInt(Data.CASE_HEIGHT/2)))>0) {
 						stepInfos.dy = 0;
 						OnHitCeil();
 						UpdateCoords();
@@ -624,9 +624,9 @@ public class Physics : HAnimator
 					var fl_patch = false;
 
 					// Patch d'entr�e dans un sol avec air jump
-					if (fl_hitGround & ocy<cy) {
+					if (fl_hitGround & ocy>cy) {
 						if (NeedsPatch()) {
-							if (world.GetCase(ocx, ocy)<=0 & dy>0 & world.GetCase(cx, cy)>0 & cy<Data.LEVEL_HEIGHT) {
+							if (world.GetCase(ocx, ocy)<=0 & dy<0 & world.GetCase(cx, cy)>0 & cy>Data.LEVEL_HEIGHT) {
 								x = Entity.x_ctr(ocx);
 								y = Entity.y_ctr(ocy);
 								stepInfos.dy=0;
@@ -638,7 +638,7 @@ public class Physics : HAnimator
 					}
 
 					// Patch entr�e dans un sol (coins en diagonal)
-					if (fl_hitGround & dy>=0 & ocx!=cx & ocy!=cy) {
+					if (fl_hitGround & dy<=0 & ocx!=cx & ocy!=cy) {
 						if (world.GetCase(ocx, ocy)<=0 & world.GetCase(cx, cy)==Data.GROUND) {
 							x = Entity.x_ctr(ocx);
 							y = Entity.y_ctr(ocy);
@@ -670,7 +670,7 @@ public class Physics : HAnimator
 					dx *= game.sFriction;
 				}
 				else {
-					dx *= Mathf.Pow(slideFriction??1, Time.fixedDeltaTime);
+					dx *= Mathf.Pow(slideFriction??1, Loader.Instance.tmod);
 				}
 			}
 			else {

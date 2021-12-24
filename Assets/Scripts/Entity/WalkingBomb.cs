@@ -282,7 +282,7 @@ public class WalkingBomb : Physics
 		realBomb.lifeTimer = Data.SECOND*10;
 
 		if ( fl_knock & knockTimer>0 ) {
-			knockTimer-=Time.fixedDeltaTime;
+			knockTimer-=Time.deltaTime;
 			if ( knockTimer<=0 ) {
 				fl_knock = false;
 			}

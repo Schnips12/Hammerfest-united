@@ -2,7 +2,6 @@ using System.Collections.Generic;
 
 public class Trigger : Entity
 {
-
 	protected bool fl_largeTrigger;
 
 	/*------------------------------------------------------------------------
@@ -92,6 +91,10 @@ public class Trigger : Entity
 	RENVOIE LA LISTE DES ENTIT�S D'UN TYPE DONN� DANS LA CASE COURANTE
 	------------------------------------------------------------------------*/
 	protected List<Entity> GetByType(int type) {
+		if(cx < 0 | cx>=30 | cy<0 | cy>=30) {
+			UnityEngine.Debug.Log("Tried to check a trigger outside of the map.");
+			return new List<Entity>();
+		}
 		List<Entity> list = world.triggers[cx][cy] ;
 		List<Entity> res = new List<Entity>() ;
 		foreach (Entity e in list) {

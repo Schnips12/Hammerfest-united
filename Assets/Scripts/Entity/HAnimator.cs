@@ -179,7 +179,7 @@ public class HAnimator : Trigger
 				BlinkLife();
 			}
 			if (fl_blinking) {
-				blinkTimer-=Time.fixedDeltaTime;
+				blinkTimer-=Time.deltaTime;
 				if (blinkTimer<=0) {
 					if ( fl_blinked ) {
 						if (fl_alphaBlink) {
@@ -211,8 +211,8 @@ public class HAnimator : Trigger
 		// Lecture du subMovie
 		if (frame>=0) {
 			var fl_break=false;
-			frame += animFactor*Time.fixedDeltaTime;
-			while (!fl_break & frame>=1) {
+			frame += animFactor*Loader.Instance.tmod;
+			while (!fl_break & frame>=1 & subs.Count>0) {
 				if (subs[0].CurrentFrame()==subs[0].TotalFrames() ) {
 					if ( fl_loop ) {
 						subs[0].GotoAndStop(1);

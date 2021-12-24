@@ -220,7 +220,7 @@ public class Framboise : Shooter
 	    	f.blurX		= 4;
 	    	f.blurY		= f.blurX;
 	    	this.filter = f;
-	    	white-=Time.fixedDeltaTime*0.1f;
+	    	white-=Loader.Instance.tmod*0.1f;
 	    	if ( white<=0 ) {
 	    		this.filter = null;
 	    	}

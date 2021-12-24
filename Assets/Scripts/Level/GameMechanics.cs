@@ -131,6 +131,9 @@ public class GameMechanics : ViewManager
 	RENVOIE TRUE SI LE NIVEAU A DéJà éTé PARCOURU
 	------------------------------------------------------------------------*/
 	public bool IsVisited() {
+		while(fl_visited.Count <= currentId) {
+			fl_visited.Add(false);
+		}
 		return fl_visited[currentId]==true;
 	}
 
@@ -429,6 +432,7 @@ public class GameMechanics : ViewManager
 	EVENT: DONNéES LUES, PRêT POUR LE SCROLLING
 	------------------------------------------------------------------------*/
 	protected override void OnDataReady() {
+		Debug.Log("Data ready.");
 		base.OnDataReady();
 		scriptEngine.Compile();
 	}
@@ -666,12 +670,12 @@ public class GameMechanics : ViewManager
 		// Flottement des fields Portal
 		for (var i=0;i<portalList.Count;i++) {
 			var p = portalList[i];
-/* 			p.mc._y = p.y + 3*Mathf.Sin(p.cpt);
-			p.cpt += Time.fixedDeltaTime*0.1f;
-			if ( Random.Range(0, 5)==0 ) {
+			p.mc._y = p.y + 3*Mathf.Sin(p.cpt);
+			p.cpt += Loader.Instance.tmod*0.1f;
+/* 			if ( Random.Range(0, 5)==0 ) {
 				var a = game.fxMan.AttachFx( // TODO FXMan
-					p.x + Data.CASE_WIDTH*0.5 + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
-					p.y + Data.CASE_WIDTH*0.5 + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
+					p.x + Data.CASE_WIDTH*0.5f + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
+					p.y + Data.CASE_WIDTH*0.5f + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
 					"hammer_fx_star"
 				);
 				a.mc._xscale	= Random.Range(0, 70)+30;

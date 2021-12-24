@@ -23,7 +23,6 @@ public class Data : MonoBehaviour
         return new Color(R, G, B, 255);
     }
 
-
     public static GameManager manager = null;
 
 	public static int DOC_WIDTH=420;

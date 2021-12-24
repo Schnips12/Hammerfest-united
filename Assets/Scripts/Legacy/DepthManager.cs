@@ -21,6 +21,10 @@ public class DepthManager
 		plans = new List<Plan>();
 	}
 
+	public void SetName(string name) {
+		root_mc._name = name;
+	}
+
 	private Plan GetPlan(int pnb) {
 		while(plans.Count <= pnb) {
 			plans.Add(new Plan());
@@ -41,8 +45,8 @@ public class DepthManager
 		int cur = 0;
 		int b = plan * 1000;
 		for(i=0 ; i<max ; i++)
-			if( p[i]._name != null ) {
-				p[i].SwapDepths(b+cur);
+			if( p[i].united != null ) {
+				p[i].SwapDepths((b+cur)/1000);
 				p[cur] = p[i];
 				cur++;
 			}
@@ -75,7 +79,7 @@ public class DepthManager
 			return Empty(plan);
 		}
 		MovieClip mc = new MovieClip(root_mc, plan+d/1000);
-		p[d] = mc;
+		p.Add(mc);
 		plan_data.cur++;
 		return mc;
 	}

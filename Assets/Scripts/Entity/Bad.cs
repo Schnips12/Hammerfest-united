@@ -227,8 +227,10 @@ public abstract class Bad : Mover
 	------------------------------------------------------------------------*/
 	protected virtual void CalcSpeed() {
 		speedFactor = 1.0f + angerFactor*anger;
-		if (game.globalActives[69]) speedFactor *= 0.6f; // tortue
-		if (game.globalActives[80]) speedFactor *= 0.3f; // escargot
+		if(game!=null) {
+			if (game.globalActives[69]) speedFactor *= 0.6f; // tortue
+			if (game.globalActives[80]) speedFactor *= 0.3f; // escargot
+		}		
 	}
 
 
@@ -419,7 +421,7 @@ public abstract class Bad : Mover
 		if ( fl_freeze ) {
 			game.fxMan.InGameParticles( Data.PARTICLE_ICE_BAD, x,y, Random.Range(0, 3)+2 );
 			if ( h >= Data.DUST_FALL_HEIGHT ) {
-				game.fxMan.Dust(cx, cy+1);
+				game.fxMan.Dust(cx, cy-1);
 			}
 		}
 	}
@@ -538,7 +540,7 @@ public abstract class Bad : Mover
 		var oldY = _y;
 
 		if (fl_softRecal) {
-			softRecalFactor += 0.1f * Time.fixedDeltaTime * speedFactor;
+			softRecalFactor += 0.1f * Loader.Instance.tmod * speedFactor;
 		}
 
 		base.EndUpdate();
@@ -566,7 +568,7 @@ public abstract class Bad : Mover
 			}
 		}
 
-		if ( iceMc._name!=null ) {
+		if ( iceMc!=null ) {
 			iceMc._x = this._x;
 			iceMc._y = this._y;
 			iceMc._xscale = 0.85f*scaleFactor*100;
@@ -582,7 +584,7 @@ public abstract class Bad : Mover
 	MAIN
 	------------------------------------------------------------------------*/
 	public override void Update() {
-		if ( player._name==null ) {
+		if ( player==null ) {
 			Hate(game.GetOne(Data.PLAYER) as Player);
 		}
 
@@ -603,7 +605,7 @@ public abstract class Bad : Mover
 
 		// Freez�
 		if ( freezeTimer>0 ) {
-			freezeTimer-=Time.fixedDeltaTime;
+			freezeTimer-=Time.deltaTime;
 			if ( freezeTimer<=0 ) {
 				Melt();
 			}
@@ -612,7 +614,7 @@ public abstract class Bad : Mover
 
 		// Fix: mort forc�e (utile ?)
 		if ( deathTimer>0 ) {
-			deathTimer-=Time.fixedDeltaTime;
+			deathTimer-=Time.deltaTime;
 			if ( deathTimer<=0 ) {
 				game.fxMan.AttachExplosion(x,y,80);
 				y = 1000;
@@ -622,7 +624,7 @@ public abstract class Bad : Mover
 
 		// Sonn�
 		if ( knockTimer>0 ) {
-			knockTimer-=Time.fixedDeltaTime;
+			knockTimer-=Time.deltaTime;
 			if ( knockTimer<=0 ) {
 				WakeUp();
 			}

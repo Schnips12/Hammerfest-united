@@ -379,6 +379,7 @@ for level in adventureThingy:
         columnIndex += 1
     levelString = json.dumps(level, default=JSONSerializer)
     toJson += levelString + ";"
+    index += 1
 
 
 adventureJson = SavingPath.open("w+")

@@ -108,8 +108,8 @@ public class BossFireBall : Shoot
 
 		var ocx = cx;
 		var ocy = cy;
-		ang		+= Time.fixedDeltaTime * turnSpeed;
-		dist	+= Time.fixedDeltaTime * distSpeed;
+		ang		+= Loader.Instance.tmod * turnSpeed;
+		dist	+= Loader.Instance.tmod * distSpeed;
 		dist	= Mathf.Min( dist, maxDist );
 		Center();
 		if ( ocx!=cx || ocy!=cy ) {

@@ -45,6 +45,13 @@ public class ViewManager : SetManager
 		view.DestroyThis();
 	}
 
+	/*------------------------------------------------------------------------
+	LINK UN DEPTH-MANAGER EXTERNE
+	------------------------------------------------------------------------*/
+	public void SetDepthMan(DepthManager d) {
+		depthMan = d;
+	}
+
 
 	// *** EVENTS *****
 
@@ -98,7 +105,7 @@ public class ViewManager : SetManager
 	protected override void OnDataReady() {
 		base.OnDataReady();
 
-		if (!view.fl_attach) {
+		if (view==null || !view.fl_attach) {
 			view = CreateView(currentId);
 			if (fl_restoring) {
 				view.MoveTo(Data.GAME_WIDTH, 0);
@@ -189,7 +196,7 @@ public class ViewManager : SetManager
 		base.Update();
 
 		if (fl_scrolling) {
-			scrollCpt += Data.SCROLL_SPEED * Time.fixedDeltaTime;
+			scrollCpt += Data.SCROLL_SPEED * Loader.Instance.tmod;
 			view.MoveTo(0, Mathf.FloorToInt(Data.GAME_HEIGHT+Mathf.Sin(scrollCpt)*(0-Data.GAME_HEIGHT)));
 
 			if ( scrollCpt>=Mathf.PI/2 ) {
@@ -199,7 +206,7 @@ public class ViewManager : SetManager
 		}
 
 		if (fl_hscrolling) {
-			scrollCpt += scrollDir * Data.SCROLL_SPEED * Time.fixedDeltaTime;
+			scrollCpt += scrollDir * Data.SCROLL_SPEED * Loader.Instance.tmod;
 			if (scrollDir>0) {
 				view.MoveTo( Mathf.FloorToInt(20+Data.GAME_WIDTH+Mathf.Sin(scrollCpt)*(0-Data.GAME_WIDTH-20)), 0);
 			}

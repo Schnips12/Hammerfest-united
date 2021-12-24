@@ -108,7 +108,7 @@ public class FramBall : Shoot
 			if ( shootSpeed<=5.8 | owner.anger>0 ) {
 				OnArrived();
 			}
-			white+=0.1f*Time.fixedDeltaTime;
+			white+=0.1f*Loader.Instance.tmod;
 			white = Mathf.Min(1,white);
 		}
 		turnSpeed = Mathf.Min(1,turnSpeed);
@@ -123,14 +123,14 @@ public class FramBall : Shoot
 		// targetting
 		var tang = Mathf.Atan2(owner.ty-y,owner.tx-x);
 		if ( AdjustAngRad(tang-ang)>0 ) {
-			ang+=turnSpeed*Time.fixedDeltaTime;
+			ang+=turnSpeed*Loader.Instance.tmod;
 		}
 		if ( AdjustAngRad(tang-ang)<0 ) {
-			ang-=turnSpeed*Time.fixedDeltaTime;
+			ang-=turnSpeed*Loader.Instance.tmod;
 		}
 
-		dx = Mathf.Cos(ang)*shootSpeed * Time.fixedDeltaTime;
-		dy = Mathf.Sin(ang)*shootSpeed * Time.fixedDeltaTime;
+		dx = Mathf.Cos(ang)*shootSpeed * Loader.Instance.tmod;
+		dy = Mathf.Sin(ang)*shootSpeed * Loader.Instance.tmod;
 		base.Update();
 	}
 }

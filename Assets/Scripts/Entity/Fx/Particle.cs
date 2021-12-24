@@ -44,8 +44,8 @@ public class Particle : Mover
 		}
 
 		this.GotoAndStop(pid);
-		subFrame = Random.Range(0, subs[0].TotalFrames())+1;
-		subs[0].GotoAndStop(subFrame);
+		/* subFrame = Random.Range(0, subs[0].TotalFrames()+1); // TODO +1
+		subs[0].GotoAndStop(subFrame); */
 
 		Scale(Random.Range(0, 50)+50);
 		rotation = Random.Range(0, 360);
@@ -222,7 +222,7 @@ public class Particle : Mover
 	------------------------------------------------------------------------*/
 	public override void EndUpdate() {
 		if ( pid==Data.PARTICLE_RAIN ) {
-			_yscale = Mathf.Min( 100, _yscale+Time.fixedDeltaTime*4 );
+			_yscale = Mathf.Min( 100, _yscale+Loader.Instance.tmod*4 );
 			rotation *= 0.93f;
 		}
 		else {
@@ -248,7 +248,7 @@ public class Particle : Mover
 	------------------------------------------------------------------------*/
 	public override void Update() {
 		if ( Mathf.Abs(dx??0)<=0.5 & pid!=Data.PARTICLE_BLOB ) {
-			lifeTimer-=Time.fixedDeltaTime;
+			lifeTimer-=Time.deltaTime;
 			if ( lifeTimer<=0 ) {
 				OnLifeTimer();
 			}

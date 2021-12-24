@@ -1,6 +1,6 @@
 public class PortalData
 {
-	MovieClip mc;
+	public MovieClip mc;
  	public int cx;
 	public int cy;
 

@@ -52,7 +52,7 @@ public class ScriptEngine
 	};
 
 	GameMode game;
-	public XDocument script;
+	public XElement script;
 	string extraScript;
 	string baseScript;
 	LevelData data;
@@ -122,6 +122,7 @@ public class ScriptEngine
 	AJOUTE UNE LIGNE � L'HISTORIQUE
 	------------------------------------------------------------------------*/
 	void TraceHistory(string str) {
+		Debug.Log("@"+Mathf.Round(cycle*10)/10+"\t: "+str);
 		history.Add("@"+Mathf.Round(cycle*10)/10+"\t: "+str);
 	}
 
@@ -228,28 +229,23 @@ public class ScriptEngine
 	SCRIPT: AJOUTE UN CODE DE SCRIPT
 	------------------------------------------------------------------------*/
 	void AddScript(string str) {
-		XDocument xml;
+		XElement xml;
 		if (fl_compile) {
-			xml = XDocument.Parse(str);
+			xml = XElement.Parse("<root>"+str+"</root>");
 			if (xml==null) {
 				GameManager.Fatal("invalid XML !");
 			}
 			else {
-				script.Add(xml.FirstNode);
+				XElement node = xml.FirstNode as XElement;
+				script.Add(xml.FirstNode as XElement);
+				while (node!=null) {
+					TraceHistory("  +"+node.Name);
+					node = node.NextNode as XElement;
+				}
 			}
 		}
 		else {
-			extraScript+=" "+str;
-		}
-
-		// Debug: trace dans le log
-		xml = XDocument.Parse(str);
-		XElement node;
-		TraceHistory("+"+xml.Root);
-		node = xml.FirstNode as XElement;
-		while (node!=null) {
-			TraceHistory("  +"+node.Name);
-			node = node.NextNode as XElement;
+			extraScript+= str;
 		}
 	}
 
@@ -273,6 +269,7 @@ public class ScriptEngine
 		}
 
 		TraceHistory(" |--"+e.Name);
+		Debug.Log(e.ToString());
 
 		switch (e.Name.ToString()) {
 
@@ -425,15 +422,15 @@ public class ScriptEngine
 				else {
 					mc.Stop();
 				}
-				mc.subs[0].Stop();
+/* 				mc.subs[0].Stop();
 				if ( name=="torch" ) {
 					if ( !fl_firstTorch ) {
-						/* game.ClearExtraHoles(); */ // TODO
+						game.ClearExtraHoles(); // TODO
 					}
-					/* game.AddHole(x+Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f,180); */ // TODO
+					game.AddHole(x+Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f,180); // TODO
 					game.UpdateDarkness();
 					fl_firstTorch = true;
-				}
+				} */
 				mcList.Add(new ClipWithId(sid, mc));
 			}break;
 
@@ -611,11 +608,11 @@ public class ScriptEngine
 	SCRIPT: TESTE SI UN TRIGGER EST ACTIV�
 	------------------------------------------------------------------------*/
 	bool CheckTrigger(XElement trigger) {
-		if ( trigger.Name==null | trigger.Name=="" ) {
+		if ( trigger.Name.LocalName == null | trigger.Name.LocalName == "" ) {
 			return false;
 		}
 
-		switch (trigger.Name.ToString()) {
+		switch (trigger.Name.LocalName) {
 			case T_TIMER: {// timer
 				if ( cycle >= GetInt(trigger,"t") ) {
 					return true;
@@ -770,7 +767,7 @@ public class ScriptEngine
 		var str='<'+T_DO+'>';
 		for (var i=0;i<data.badList.Length;i++) {
 			var b = data.badList[i];
-			str+='<'+E_BAD+"\" i=\""+b.id+"\" x=\""+b.x+"\" y=\""+b.y+"\" sys=\"1\"/>";
+			str+='<'+E_BAD+" i=\""+b.id+"\" x=\""+b.x+"\" y=\""+b.y+"\" sys=\"1\"/>";
 		}
 		str+="</"+T_DO+'>';
 		AddScript(str);
@@ -844,12 +841,12 @@ public class ScriptEngine
 			return;
 		}
 
-		trigger = script.FirstNode as XElement;
+		trigger = script;
 		while (trigger!=null) {
 			if (CheckTrigger(trigger)) {
 				// World keys
 				var kid = GetInt(trigger, "key");
-				if ( !game.HasKey(kid) ) {
+				if ( kid>=0 && !game.HasKey(kid) ) {
 					if ( IsVerbose(trigger.Name.ToString()) ) {
 						/* game.fxMan.KeyRequired( kid ); */
 					}
@@ -879,9 +876,7 @@ public class ScriptEngine
 		history = new List<string>();
 
 		// Debug: log
-		TraceHistory(baseScript);
-		XDocument doc = XDocument.Parse(baseScript);
-		XElement node = doc.FirstNode as XElement;
+		XElement node = XElement.Parse("<root>"+baseScript+"</root>").FirstNode as XElement;
 		while ( node!=null ) {
 			if ( node.Name!=null ) {
 				TraceHistory("b "+node.Name);
@@ -889,8 +884,7 @@ public class ScriptEngine
 			node = node.NextNode as XElement;
 		}
 
-		doc = XDocument.Parse(extraScript);
-		node = doc.FirstNode as XElement;
+		node = XElement.Parse("<root>"+extraScript+"</root>").FirstNode as XElement;
 		while ( node!=null ) {
 			if ( node.Name!=null ) {
 				TraceHistory("b2 "+node.Name);
@@ -899,12 +893,12 @@ public class ScriptEngine
 		}
 
 		// Compilation
-		doc = XDocument.Parse(baseScript + " " + extraScript);	
-		if ( doc==null ) {
+		node = XElement.Parse("<root>"+baseScript + extraScript+"</root>").FirstNode as XElement;	
+		if ( node==null ) {
 			GameManager.Fatal("compile: invalid XML");
 		}
 		else {
-			this.script = doc;
+			this.script = node;
 		}
 
 
@@ -935,7 +929,7 @@ public class ScriptEngine
 		trigger = script.FirstNode as XElement;
 		while (trigger!=null) {
 			XElement next = trigger.NextNode as XElement;
-			if (trigger.Attribute("endClear").Value == "1") {
+			if (trigger.Attribute("endClear")!=null && trigger.Attribute("endClear").Value == "1") {
 				TraceHistory("eX "+trigger.Name);
 				trigger.Remove();
 			}
@@ -1003,7 +997,7 @@ public class ScriptEngine
 			}break;
 
 			case 1: {// long hurry up
-				game.huTimer -= Time.fixedDeltaTime*0.5f;
+				game.huTimer -= Loader.Instance.tmod*0.5f;
 			}break;
 
 			case 2: {// anti fleche de sortie
@@ -1043,7 +1037,7 @@ public class ScriptEngine
 
 			case 5: {// sortie apr�s tuberculoz
 				if ((game.GetOne(Data.BOSS) as Tuberculoz).fl_defeated) {
-					bossDoorTimer-=Time.fixedDeltaTime;
+					bossDoorTimer-=Time.deltaTime;
 					if ( bossDoorTimer<=0 ) {
 						game.DestroyList(Data.BOSS);
 						game.world.view.DestroyThis();
@@ -1135,7 +1129,7 @@ public class ScriptEngine
 	------------------------------------------------------------------------*/
 	public void Update() {
 		if (fl_compile) {
-			cycle+=Time.fixedDeltaTime;
+			cycle+=Loader.Instance.tmod;
 			RunScript();
 		}
 

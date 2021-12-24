@@ -4,7 +4,7 @@ using UnityEngine.Tilemaps;
 using System;
 using System.IO;
 
-public class View : MonoBehaviour
+public class View
 {
 	bool fl_fast; // mode brouillon
 
@@ -53,6 +53,7 @@ public class View : MonoBehaviour
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	public View(SetManager world, DepthManager dm) {
+		Debug.Log("Creating View instance.");
 		this.world = world;
 
 		depthMan	= dm;
@@ -81,6 +82,7 @@ public class View : MonoBehaviour
 	VUE D'UN NIVEAU DU SET INTERNE
 	------------------------------------------------------------------------*/
 	public void Display(int id) {
+		Debug.Log("Displaying level: " + id);
 		this.data = this.world.worldmap[id];
 		levelId = id;
 		if (this.data==null) {
@@ -180,19 +182,23 @@ public class View : MonoBehaviour
 	ATTACHE UN PLATEAU
 	------------------------------------------------------------------------*/
 	void AttachTile(int sx, int sy, int wid, int skin) {
+		Debug.Log("Attaching a floor at x:"+sx+" y:"+sy+" of width:"+wid);
 		skin = GetTileSkinId(skin);
 		if (fl_fast) {
 			skin = 30;
 		}
 		TileMC tile;
-		tile = new TileMC(_tiles, "tile", sy*Data.LEVEL_WIDTH+sx);
+		tile = new TileMC(_tiles, "tile", wid);
 
 		tile._x = sx*Data.CASE_WIDTH;
 		tile._y = sy*Data.CASE_HEIGHT;
-		tile.maskTile._width = wid*Data.CASE_WIDTH;
+		tile._xscale *=Data.CASE_WIDTH;
+		tile._yscale *=Data.CASE_HEIGHT;
+		tile.Align();
+		/* tile.maskTile._width = wid*Data.CASE_WIDTH; */ // TODO TIile MC
 
 		tile.SetSkin(skin);
-		tile.endTile.SetSkin(skin);
+		/* tile.endTile.SetSkin(skin); */
 
 		if (!fl_shadow | fl_fast) {
 			tile.ombre._visible = false;
@@ -205,21 +211,25 @@ public class View : MonoBehaviour
 	ATTACHE UNE COLONNE
 	------------------------------------------------------------------------*/
 	void AttachColumn(int sx, int sy, int wid, int skin) {
+		Debug.Log("Attaching a colum at x:"+sx+" y:"+sy+" of height:"+wid);
 		TileMC tile;
 		skin = GetColumnSkinId(skin);
 		if (fl_fast) {
 			skin = 30;
 		}
-		tile = new TileMC(_tiles, "tile", sy*Data.LEVEL_WIDTH+sx);
+		tile = new TileMC(_tiles, "tile", wid);
 
-		tile._yscale = -100;
 		tile._rotation = 90;
 		tile._x = sx*Data.CASE_WIDTH;
 		tile._y = sy*Data.CASE_HEIGHT;
-		tile.maskTile._width = wid*Data.CASE_WIDTH;
+		tile._xscale *=Data.CASE_HEIGHT;
+		tile._yscale *=Data.CASE_WIDTH;
+		tile.Align();
+		// TODO Flip sprites and subs.
+		/* tile.maskTile._width = wid*Data.CASE_WIDTH; */ // TODO Populate the TILE MC class
 
 		tile.SetSkin(skin);
-		tile.endTile.SetSkin(skin);
+		/* tile.endTile.SetSkin(skin); */
 
 		if (!fl_shadow | fl_fast) {
 			tile.ombre._visible = false;
@@ -290,10 +300,10 @@ public class View : MonoBehaviour
 
 		// skin
 		mc.SetSkin(Mathf.Abs(id));
-		mc.subs[0].Stop();
+/* 		mc.subs[0].Stop(); // Skins and flipping to implement
 		if (fl_flip) {
 			mc.FlipTile();
-		}
+		} */
 
 		// t�l�porteur
 		if ( id == Data.FIELD_TELEPORT ) {
@@ -335,7 +345,8 @@ public class View : MonoBehaviour
 	ATTACHE LE BG DE BASE DU LEVEL
 	------------------------------------------------------------------------*/
 	void AttachBg() {
-		_bg.RemoveMovieClip();
+		if(_bg!=null)
+			_bg.RemoveMovieClip();
 		_bg = _back_dm.Attach("hammer_bg", 0);
 		_bg._x = xOffset;
 		_bg.GotoAndStop(data.skinBg);
@@ -375,6 +386,7 @@ public class View : MonoBehaviour
 	ATTACHE CE LEVEL
 	------------------------------------------------------------------------*/
 	public void Attach() {
+		Debug.Log("Tracing.");
 		int startX = 0;
 		int startY = 0;
 		bool tracing = false;
@@ -387,18 +399,25 @@ public class View : MonoBehaviour
 		_field		= depthMan.Empty(Data.DP_FIELD_LAYER);
 		_back		= depthMan.Empty(Data.DP_BACK_LAYER);
 		_top_dm		= new DepthManager(_top);
+		_top_dm.SetName("View_top");
 		_field_dm	= new DepthManager(_field);
+		_field_dm.SetName("View_field");
 		_back_dm	= new DepthManager(_back);
+		_back_dm.SetName("View_back");
 		_top._x		= xOffset;
 
 		// Container pour les dalles
 		_tiles = _back_dm.Empty(2);
+		_tiles._name = "Tiles holder";
 		_tiles._x = xOffset;
 		_tiles._visible = !fl_hideTiles;
 
 		_fieldMap = new List<List<bool?>>();
 		for( var i=0;i<Data.LEVEL_WIDTH;i++ ) {
-			_fieldMap[i] = new List<bool?>();
+			_fieldMap.Add(new List<bool?>());
+			for( var j=0;j<Data.LEVEL_HEIGHT;j++ ) {
+				_fieldMap[i].Add(null);
+			}
 		}
 
 		// Background
@@ -476,8 +495,7 @@ public class View : MonoBehaviour
 			_rightBorder._visible = !fl_hideBorders;
 		}
 
-
-		if (_specialBg._name!=null) {
+		if (_specialBg!=null) {
 			_back_dm.DestroyThis();
 		}
 
@@ -570,9 +588,12 @@ public class View : MonoBehaviour
 
 		DetachGrid();
 
-		_top.RemoveMovieClip();
-		_back.RemoveMovieClip();
-		_field.RemoveMovieClip();
+		if (_top != null)
+			_top.RemoveMovieClip();
+		if (_back != null)
+			_back.RemoveMovieClip();
+		if (_field != null)
+			_field.RemoveMovieClip();
 	}
 
 

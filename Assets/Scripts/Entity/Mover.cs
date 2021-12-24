@@ -94,7 +94,7 @@ public class Mover : Physics
 	public override void Update() {
 		// On agit comme on a pr�vu
 		if (next!=null) {
-			next.delay -= Time.fixedDeltaTime;
+			next.delay -= Loader.Instance.tmod;
 			if (next.delay<=0) {
 				OnNext() ;
 			}

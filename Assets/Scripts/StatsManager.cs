@@ -83,7 +83,7 @@ public class StatsManager
 				int id;
 				do {
 					id = game.randMan.Draw(Data.RAND_EXTENDS_ID);
-                    while(l.Count < id) {
+                    while(l.Count <= id) {
                         l.Add(false);
                     }
                 }

@@ -67,7 +67,9 @@ public class FxManager
 	------------------------------------------------------------------------*/
 	public void AttachLevelPop(string name, bool fl_label) {
 		if (name != null) {
-			levelName.RemoveMovieClip();
+			if(levelName!=null) {
+				levelName.RemoveMovieClip();
+			}			
 			levelName = game.depthMan.Attach("hammer_interf_zone",Data.DP_INTERF);
 			levelName._x = -10;
 			levelName._y = Data.GAME_HEIGHT-1;
@@ -132,7 +134,7 @@ public class FxManager
 		MovieClip mc = game.depthMan.Attach("hammer_fx_exit",Data.DP_INTERF);
 		mc._x = Data.GAME_WIDTH/2;
 		mc._y = Data.GAME_HEIGHT;
-		mc.FindTextfield("label").text = Lang.Get(3);
+		/* mc.FindTextfield("label").text = Lang.Get(3); */ // TODO hammer_fx_exit prefab
 		mc_exitArrow = mc;
 	}
 
@@ -331,12 +333,12 @@ public class FxManager
 			}
 			fl_left = (dir!=null) ? dir<0 : fl_left;
 
-			if (fl_left) {
+			/* if (fl_left) { // TODO Fix
 				mc.next.dx = -Mathf.Abs(mc.next.dx??0);
 			}
 			else {
 				mc.next.dx = Mathf.Abs(mc.next.dx??0);
-			}
+			} */
 			fl_left = !fl_left;
 		}
 	}
@@ -425,7 +427,7 @@ public class FxManager
 				fl_bg = true;
 				game.world.view.AttachSpecialBg(b.id,b.subId);
 			}
-			b.timer-=Time.fixedDeltaTime;
+			b.timer-=Time.deltaTime;
 			if ( b.timer<=0 ) {
 				bgList.RemoveAt(0);
 				DetachBg();
@@ -433,19 +435,20 @@ public class FxManager
 		}
 
 		// Level name life-timer
-		if ( levelName._name!=null ) {
-			nameTimer-=Time.fixedDeltaTime;
+		if ( levelName!=null ) {
+			nameTimer-=Time.deltaTime;
 			if ( nameTimer<=0 ) {
-				levelName._y+=Time.fixedDeltaTime*0.7f;
+				levelName._y+=Loader.Instance.tmod*0.7f;
 				if ( levelName._y>=Data.GAME_HEIGHT+30 ) {
 					levelName.RemoveMovieClip();
+					levelName = null;
 				}
 			}
 		}
 
 		// FX delay�s
 		for (int i=0 ; i<stack.Count ; i++) {
-			stack[i].t-=Time.fixedDeltaTime;
+			stack[i].t-=Time.deltaTime;
 			if ( stack[i].t<=0 ) {
 				AttachFx( stack[i].x, stack[i].y, stack[i].link );
 				stack.RemoveAt(i);
@@ -466,9 +469,9 @@ public class FxManager
 
 		// In-game message
 		if (igMsg._name!=null) {
-			igMsg.timer-=Time.fixedDeltaTime;
+			igMsg.timer-=Time.deltaTime;
 			if (igMsg.timer<=0) {
-				igMsg._alpha-=Time.fixedDeltaTime*2;
+				igMsg._alpha-=Loader.Instance.tmod*2;
 			}
 			if (igMsg._alpha<=0) {
 				igMsg.RemoveMovieClip();

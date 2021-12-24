@@ -51,17 +51,6 @@ public class PlayerController
 
 
 	/*------------------------------------------------------------------------
-	TESTE SI UNE TOUCHE VERROUILLABLE EST ENFONC�E
-	------------------------------------------------------------------------*/
-	void LockKey(int id) {
-		keyLocks[id] = true;
-		keyLocks[alts[id]] = true;
-		lastKeys.Add(id);
-		lastKeys.Add(alts[id]);
-	}
-
-
-	/*------------------------------------------------------------------------
 	SAISIE DES CONTR�LES CLAVIER
 	------------------------------------------------------------------------*/
 	void GetControls() {
@@ -70,7 +59,7 @@ public class PlayerController
 		}
 
 		// *** Gauche
-		if ( Input.GetKeyDown(KeyCode.LeftArrow) ) {
+		if ( Input.GetKey(KeyCode.LeftArrow) ) {
 			if ( game.fl_ice | game.fl_aqua ) {
 				float frict;
 				if ( !player.fl_stable & game.fl_ice ) {
@@ -92,10 +81,10 @@ public class PlayerController
 		}
 
 		// *** Droite
-		if ( Input.GetKeyDown(KeyCode.RightArrow) ) {
-			if ( game.fl_ice || game.fl_aqua ) {
+		if ( Input.GetKey(KeyCode.RightArrow) ) {
+			if ( game.fl_ice | game.fl_aqua ) {
 				float frict;
-				if ( !player.fl_stable && game.fl_ice ) {
+				if ( !player.fl_stable & game.fl_ice ) {
 					frict = 0.35f;
 				}
 				else {
@@ -115,7 +104,7 @@ public class PlayerController
 
 		if ( player.specialMan.actives[73] ) { // effet feuille arbre
 			if ( player.fl_stable & player.dx!=0 ) {
-				walkTimer-=Time.fixedDeltaTime;
+				walkTimer-=Time.deltaTime;
 				if ( walkTimer<=0 ) {
 					walkTimer = Data.SECOND;
 					player.GetScore(player, 10);
@@ -125,7 +114,7 @@ public class PlayerController
 
 
 		// *** Freinage horizontal
-		if ( !Input.GetKeyDown(KeyCode.LeftArrow) & !Input.GetKeyDown(KeyCode.RightArrow) ) {
+		if ( !Input.GetKey(KeyCode.LeftArrow) & !Input.GetKey(KeyCode.RightArrow) ) {
 			if ( !game.fl_ice ) {
 				player.dx*=game.gFriction*0.8f;
 			}
@@ -150,10 +139,10 @@ public class PlayerController
 		// *** Saut
 		if ( player.fl_stable & Input.GetKeyDown(KeyCode.UpArrow) ) {
 			if ( player.specialMan.actives[88] ) { // effet pokute shrink
-				player.dy = -Data.PLAYER_JUMP*0.5f;
+				player.dy = Data.PLAYER_JUMP*0.5f;
 			}
 			else {
-				player.dy = -Data.PLAYER_JUMP;
+				player.dy = Data.PLAYER_JUMP;
 			}
 
 			game.soundMan.PlaySound("sound_jump", Data.CHAN_PLAYER);
@@ -164,7 +153,6 @@ public class PlayerController
 				player.GetScore(player, 10);
 			}
 			game.statsMan.Inc(Data.STAT_JUMP,1);
-			LockKey(jump);
 		}
 
 		// *** Attaque

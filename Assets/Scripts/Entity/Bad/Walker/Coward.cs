@@ -216,7 +216,7 @@ public class Coward : Jumper
 
 		// Timer de fuite
 		if ( fleeTimer>0 ) {
-			fleeTimer-=Time.fixedDeltaTime;
+			fleeTimer-=Time.deltaTime;
 			if ( fleeTimer<=0 ) {
 				EndFlee();
 			}

@@ -197,7 +197,7 @@ public class Saw : WallWalker
 		}
 		else {
 			if ( fl_kill ) {
-				subs[0]._rotation += Time.fixedDeltaTime*14.5f;
+				subs[0]._rotation += Loader.Instance.tmod*14.5f;
 			}
 			else {
 				if ( IsHealthy() ) {
@@ -210,7 +210,7 @@ public class Saw : WallWalker
 			rotSpeed *= 0.9f;
 		}
 		else {
-			rotSpeed = Mathf.Min(ROTATION_SPEED, rotSpeed+Time.fixedDeltaTime);
+			rotSpeed = Mathf.Min(ROTATION_SPEED, rotSpeed+Loader.Instance.tmod);
 		}
 		subs[0]._rotation += rotSpeed;
 	}
@@ -258,7 +258,7 @@ public class Saw : WallWalker
 			if ( Random.Range(0, 10)==0 ) {
 				game.fxMan.InGameParticles(Data.PARTICLE_SPARK, x,y, 1);
 			}
-			stunTimer-=Time.fixedDeltaTime;
+			stunTimer-=Time.deltaTime;
 			if ( stunTimer<=0 ) {
 				fl_stun = false;
 				OnWakeUp();

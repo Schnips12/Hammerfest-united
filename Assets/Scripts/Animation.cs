@@ -50,7 +50,7 @@ public class Animation
 	DESTRUCTION
 	------------------------------------------------------------------------*/
 	public void DestroyThis() {
-		//mc.removeMovieClip() ;
+		mc.RemoveMovieClip() ;
 		fl_kill = true ;
 	}
 
@@ -77,21 +77,21 @@ public class Animation
 
 	public void Update() {
 		if ( fl_loopDone ) {
-			lifeTimer -= Time.fixedDeltaTime;
+			lifeTimer -= Time.deltaTime;
 			if ( lifeTimer<=0 ) {
 				DestroyThis() ;
 			}
 		}
 
 		if ( fl_blink ) {
-			blinkTimer-=Time.fixedDeltaTime;
+			blinkTimer-=Time.deltaTime;
 			if ( blinkTimer<=0 ) {
 				mc._alpha	= (mc._alpha==100)?30:100;
 				blinkTimer	= Data.BLINK_DURATION_FAST;
 			}
 		}
 
-		frame += Time.fixedDeltaTime;
+		frame += Time.deltaTime;
 		while (frame>=1) {
 			mc.NextFrame();
 			if (mc.CurrentFrame() == mc.TotalFrames()) {

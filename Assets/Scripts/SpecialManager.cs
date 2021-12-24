@@ -40,7 +40,7 @@ public class SpecialManager
 
 		permList = new List<int>();
 		tempList = new List<tempEvent>();
-		actives = new List<bool>();
+		actives = new List<bool>(new bool[150]);
 
 		recurring = new List<recurringEvent>();
 		phoneMC = new MovieClip(game.mc);
@@ -1343,7 +1343,7 @@ public class SpecialManager
 		// Gestion des �v�nements sp�ciaux r�currents du niveau
 		for (var n=0 ; n < recurring.Count ; n++) {
 			var e = recurring[n];
-			e.timer-=Time.fixedDeltaTime;
+			e.timer-=Time.deltaTime;
 			if ( e.timer<=0 ) {
 				e.func();
 				// R�p�tition

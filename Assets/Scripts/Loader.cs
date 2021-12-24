@@ -24,6 +24,8 @@ public class Loader : MonoBehaviour
 	public bool fl_exit;
 	public bool fl_fade;
 
+	public float tmod;
+
 
 	// Awake is called when the script instance is being loaded.
 	void Awake() {
@@ -34,6 +36,8 @@ public class Loader : MonoBehaviour
 		} else {
 			Destroy(gameObject);
 		}
+
+		tmod = 1;
 
 		// Hardcoded loading parameters.
 		// TODO Default parameters should be loaded from a stored cookie item.

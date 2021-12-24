@@ -199,7 +199,7 @@ public class GameMode : Mode, IGameMode
             lists.Add(new List<IEntity>());
         }
 
-        globalActives	= new List<bool>();
+        globalActives	= new List<bool>(new bool[100]);
         portalMcList	= new List<LabelledPortalMC>();
         dfactor			= 0;
 
@@ -356,12 +356,12 @@ public class GameMode : Mode, IGameMode
     public void FlipY(bool fl) {
         fl_flipY = fl;
         if (fl) {
-/*                 mc._yscale = -100;
-            mc._y = Data.GAME_HEIGHT+yOffset+20; */
+            mc._yscale = -100;
+            mc._y = Data.GAME_HEIGHT+yOffset+20;
         }
         else {
-/*                 mc._yscale = 100;
-            mc._y = yOffset; */
+            mc._yscale = 100;
+            mc._y = yOffset;
         }
     }
 
@@ -522,8 +522,8 @@ public class GameMode : Mode, IGameMode
 
         // FPS
         if (Input.GetKeyDown(KeyCode.F)) {
-            Debug.Log( Mathf.Round(1/Time.deltaTime)+" FPS" );
-            Debug.Log("Performances: "+Mathf.Min(100, Mathf.Round(100/Time.deltaTime/30))+"%");
+            Debug.Log( Mathf.Round(1/Loader.Instance.tmod)+" FPS" );
+            Debug.Log("Performances: "+Mathf.Min(100, Mathf.Round(100/Loader.Instance.tmod/30))+"%");
         }
     }
 
@@ -709,8 +709,8 @@ public class GameMode : Mode, IGameMode
     MISE À JOUR DES VARIABLES DE FRICTIONS AU SOL
     ------------------------------------------------------------------------*/
     void UpdateGroundFrictions() {
-        gFriction = Mathf.Pow(Data.FRICTION_GROUND, Time.fixedDeltaTime) ; // x au sol
-        sFriction = Mathf.Pow(Data.FRICTION_SLIDE, Time.fixedDeltaTime) ; // x sur sol glissant
+        gFriction = Mathf.Pow(Data.FRICTION_GROUND, Loader.Instance.tmod) ; // x au sol
+        sFriction = Mathf.Pow(Data.FRICTION_SLIDE, Loader.Instance.tmod) ; // x sur sol glissant
     }
 
 
@@ -1028,6 +1028,7 @@ public class GameMode : Mode, IGameMode
         GameMechanics dim = new GameMechanics(manager, name);
         dim.fl_mirror = fl_mirror;
         dim.SetGame(this);
+        dim.SetDepthMan(depthMan);
         if (dimensions.Count>0) {
             dim.Suspend();
             dim.fl_mainWorld = false;
@@ -1177,11 +1178,16 @@ public class GameMode : Mode, IGameMode
     int GetListId(int type) {
         int i = 0;
         int bin = 1<<i;
-        while (type!=bin) {
+        while (type!=bin & i<=32) {
             i++;
             bin = 1<<i;
         }
-        return i;
+        if(type==bin) {
+            return i;
+        } else {
+            Debug.Log("Unknown type list fetched!");
+            return 0;
+        }        
     }
 
 
@@ -1269,7 +1275,11 @@ public class GameMode : Mode, IGameMode
     ------------------------------------------------------------------------*/
     public IEntity GetOne(int type) {
         List<IEntity> l = GetList(type);
-        return l[UnityEngine.Random.Range(0, l.Count)];
+        if (l.Count > 0){
+            return l[UnityEngine.Random.Range(0, l.Count)];
+        } else {
+            return null;
+        }       
     }
 
 
@@ -1730,8 +1740,10 @@ public class GameMode : Mode, IGameMode
         fxMan.AttachExit();
 
         // Pile d'appel post-clear
-        for (var i=0;i<endLevelStack.Count;i++) {
-            endLevelStack[i]();
+        if(endLevelStack!=null) {
+            for (var i=0;i<endLevelStack.Count;i++) {
+                endLevelStack[i]();
+            }
         }
         endLevelStack = new List<Action>();
     }
@@ -2097,8 +2109,8 @@ public class GameMode : Mode, IGameMode
     public override void Main() {
         // FPS
         if (GameManager.CONFIG.fl_detail) {
-            if (1/Time.deltaTime <= 16) { // lag manager
-                lagCpt+=Time.fixedDeltaTime;
+            if (1/Loader.Instance.tmod <= 16) { // lag manager
+                lagCpt+=Loader.Instance.tmod;
                 if (lagCpt>=Data.SECOND*30) {
                     GameManager.CONFIG.SetLowDetails();
                     GameManager.CONFIG.fl_shaky = false;
@@ -2121,9 +2133,9 @@ public class GameMode : Mode, IGameMode
 
         // Bullet time
         if (fl_bullet & bulletTimer>0) {
-            bulletTimer-=Time.fixedDeltaTime;
+            bulletTimer-=Time.deltaTime;
             if (bulletTimer>0) {
-                Time.fixedDeltaTime = 0.3f;
+                /* Loader.Instance.tmod = 0.3f; */ // FIX
             }
         }
 
@@ -2137,8 +2149,8 @@ public class GameMode : Mode, IGameMode
 
         // Variables
         UpdateGroundFrictions();
-        fl_ice = (GetDynamicVar("ICE")!="");
-        fl_aqua = (GetDynamicVar("AQUA")!="");
+        /* fl_ice = (GetDynamicVar("ICE")!=""); // TODO Fix the dynamic var system
+        fl_aqua = (GetDynamicVar("AQUA")!=""); */
 //		if ( fl_aqua ) {
 //			if ( GameManager.CONFIG.fl_detail && colorHex!=WATER_COLOR ) {
 //				setColorHex(20, WATER_COLOR);
@@ -2172,7 +2184,7 @@ public class GameMode : Mode, IGameMode
             var p = portalMcList[i];
             if (p!=null) {
                 p.mc._y = p.y + 2 * Mathf.Sin(p.cpt);
-                p.cpt+=Time.fixedDeltaTime*0.1f;
+                p.cpt+=Loader.Instance.tmod*0.1f;
                 if (UnityEngine.Random.Range(0, 5)==0) {
                     var a = fxMan.AttachFx(
                         p.x + UnityEngine.Random.Range(0, 25)*(UnityEngine.Random.Range(0, 2)*2-1),
@@ -2186,11 +2198,11 @@ public class GameMode : Mode, IGameMode
         }
 
 
-        duration += Time.fixedDeltaTime;
+        duration += Time.deltaTime;
 
         // Timer de fin de mode auto
         if (endModeTimer>0) {
-            endModeTimer-=Time.fixedDeltaTime;
+            endModeTimer-=Time.deltaTime;
             if ( endModeTimer<=0 ) {
                 var pl = GetPlayerList();
                 for (var i=0;i<pl.Count;i++) {
@@ -2204,9 +2216,9 @@ public class GameMode : Mode, IGameMode
         fxMan.Main();
 
         // Hurry up!
-        huTimer += Time.fixedDeltaTime;
+        huTimer += Time.deltaTime;
         if (Input.GetKeyDown(KeyCode.H) & manager.fl_debug) { // H
-            huTimer += Time.fixedDeltaTime*20;
+            huTimer += Time.deltaTime*20;
         }
         if (huState<Data.HU_STEPS.Length & huTimer>=Data.HU_STEPS[huState]/diffFactor) {
             OnHurryUp();
@@ -2248,7 +2260,7 @@ public class GameMode : Mode, IGameMode
 
         // Tremblement
         if (shakeTimer>0) {
-            shakeTimer-=Time.fixedDeltaTime;
+            shakeTimer-=Time.deltaTime;
             if (shakeTimer <= 0) {
                 shakeTimer = 0;
                 shakePower = 0;
@@ -2267,8 +2279,8 @@ public class GameMode : Mode, IGameMode
             }
         }
 
-        if (fl_aqua) {
-            aquaTimer += 0.03f*Time.fixedDeltaTime;
+/*         if (fl_aqua) { // TODO Find what the aqua effect is because it's fucking up the whole scene.
+            aquaTimer += 0.03f*Loader.Instance.tmod;
             if (!fl_flipY) {
                 mc._y = -7 + 7*Mathf.Cos(aquaTimer);
                 mc._yscale = 102 - 2*Mathf.Cos(aquaTimer);
@@ -2279,12 +2291,12 @@ public class GameMode : Mode, IGameMode
                 aquaTimer = 0;
                 FlipY(fl_flipY);
             }
-        }
+        } */
 
 
         // Vent
         if (windTimer>0) {
-            windTimer -= Time.fixedDeltaTime;
+            windTimer -= Time.deltaTime;
             if (windTimer<=0) {
                 Wind(0, 0);
             }
@@ -2292,18 +2304,18 @@ public class GameMode : Mode, IGameMode
 
         // Indication de sortie fausse
         if (CountList(Data.BAD_CLEAR)>0) {
-            if (fxMan.mc_exitArrow._name!=null) {
+            if (fxMan.mc_exitArrow!=null) {
                 fxMan.DetachExit();
             }
         }
 
-        // Pas d'indicateur de sortie en tuto
+/*         // Pas d'indicateur de sortie en tuto // TODO Fix FxMan
         if (fxMan.mc_exitArrow._name!=null) {
             if (manager.IsTutorial()) {
                 fxMan.DetachExit();
             }
         }
-
+ */
 
         // Enervement minimum
         if (fl_nightmare) {

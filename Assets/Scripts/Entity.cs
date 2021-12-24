@@ -104,9 +104,9 @@ public class Entity : MovieClip, IEntity
 		cacheAsBitmap = mc.cacheAsBitmap;
 		// End of mess.
 
-		types = 0; //new Array() ;
-		x = 0 ;
-		y = 0 ;
+		types = 0;
+		x = 0;
+		y = 0;
 		alpha = 100 ;
 		rotation = 0 ;
 		minAlpha = 35 ;
@@ -191,7 +191,7 @@ public class Entity : MovieClip, IEntity
 
 
 	/*------------------------------------------------------------------------
-	EVENT: FIN DE TIMER DE VIE // TODO manage that through an update function
+	EVENT: FIN DE TIMER DE VIE
 	------------------------------------------------------------------------*/
 	protected virtual void OnLifeTimer() {
 		DestroyThis();
@@ -199,7 +199,7 @@ public class Entity : MovieClip, IEntity
 
 
 	/*------------------------------------------------------------------------
-	HIT TEST DE BOUNDING BOX // TODO use unity colliders instead
+	HIT TEST DE BOUNDING BOX
 	------------------------------------------------------------------------*/
 	protected bool HitBound(Entity e) {
 		bool res = (
@@ -213,7 +213,7 @@ public class Entity : MovieClip, IEntity
 
 
 	/*------------------------------------------------------------------------
-	L'ENTITé EN RENCONTRE UNE AUTRE // TODO use unity colliders instead
+	L'ENTITé EN RENCONTRE UNE AUTRE
 	------------------------------------------------------------------------*/
 	public virtual void Hit(IEntity e) {
 		// do nothing
@@ -231,8 +231,8 @@ public class Entity : MovieClip, IEntity
 			if ((types&(1<<i)) > 0) {
 				GameMode.killedEntity k = new GameMode.killedEntity();
 				k.ent = this;
-				k.type = types;
-				game.unregList[Mathf.RoundToInt(Mathf.Pow(2,i))] = k;
+				k.type = (1<<i);
+				game.unregList.Add(k);
 			}
 		}
 		game.killList.Add(this);
@@ -240,10 +240,10 @@ public class Entity : MovieClip, IEntity
 
 
 	/*------------------------------------------------------------------------
-	COLLE UN MC à L'ENTITé // TODO manage that through Unity editor
+	COLLE UN MC à L'ENTITé
 	------------------------------------------------------------------------*/
-	public void Stick(MovieClip mc, float ox, float oy) { //MovieClip mc, 
-		if (sticker._name!=null) {
+	public void Stick(MovieClip mc, float ox, float oy) {
+		if (sticker!=null) {
 			Unstick();
 		}
 		sticker = mc;
@@ -257,7 +257,7 @@ public class Entity : MovieClip, IEntity
     
 
 	/*------------------------------------------------------------------------
-	ACTIVE L'ELASTICITé DU STICKER (algo du cameraman bourré) // TODO probably obsolete
+	ACTIVE L'ELASTICITé DU STICKER (algo du cameraman bourré)
 	------------------------------------------------------------------------*/
 	public void SetElaStick(float f) {
 		if ( fl_elastick ) {
@@ -275,7 +275,10 @@ public class Entity : MovieClip, IEntity
 	------------------------------------------------------------------------*/
 	public void Unstick() {
 		fl_stick = false;
-		sticker.RemoveMovieClip();
+		if(sticker!=null) {
+			sticker.RemoveMovieClip();
+		}		
+		sticker = null;
 	}
 
 
@@ -304,7 +307,7 @@ public class Entity : MovieClip, IEntity
 		}
 	}
 
-    // TODO obsolete
+    // TODO fix
     /*
 	void RollOver() { 
 		if (Key.isDown(Key.SHIFT)) {
@@ -352,8 +355,8 @@ public class Entity : MovieClip, IEntity
 	------------------------------------------------------------------------*/
 	public virtual void Scale(float n) {
 		scaleFactor = n/100 ;
-		_xscale = n;
-		_yscale = _xscale;
+		_xscale = scaleFactor;
+		_yscale = scaleFactor;
 	}
 
 
@@ -384,7 +387,7 @@ public class Entity : MovieClip, IEntity
 
 
 	/*------------------------------------------------------------------------
-	ANNULE LE FILTRE DE COULEUR // TODO obsolete
+	ANNULE LE FILTRE DE COULEUR
 	------------------------------------------------------------------------
 	function resetColor() {
 		color.reset();
@@ -394,7 +397,7 @@ public class Entity : MovieClip, IEntity
 
 
 	/*------------------------------------------------------------------------
-	MODIFIE LE BLEND MODE // TODO obsolete
+	MODIFIE LE BLEND MODE
 	------------------------------------------------------------------------
 	function setBlend(m:BlendMode) {
 		defaultBlend	= m;
@@ -414,7 +417,7 @@ public class Entity : MovieClip, IEntity
 		cx = Entity.x_rtc(x);
 		cy = Entity.y_rtc(y);
 		fcx = Entity.x_rtc(x);
-		fcy = Entity.y_rtc(y+Mathf.Floor(Data.CASE_HEIGHT/2));
+		fcy = Entity.y_rtc(y-Mathf.Floor(Data.CASE_HEIGHT/2));
 	}
 
 
@@ -431,7 +434,7 @@ public class Entity : MovieClip, IEntity
 		return Mathf.FloorToInt(n/Data.CASE_WIDTH) ;
 	}
 	public static int y_rtc(float n) {
-		return Mathf.FloorToInt((n-Data.CASE_HEIGHT/2)/Data.CASE_HEIGHT) ;
+		return Mathf.FloorToInt(n/Data.CASE_HEIGHT - 0.5f) ;
 	}
 
 
@@ -439,15 +442,15 @@ public class Entity : MovieClip, IEntity
 	CONVERSION CASE -> REAL
 	------------------------------------------------------------------------*/
 	public static float x_ctr(int n) {
-		return n*Data.CASE_WIDTH + Data.CASE_WIDTH*0.5f ;
+		return Data.CASE_WIDTH *(n+0.5f);
 	}
 	public static float y_ctr(int n) {
-		return n*Data.CASE_HEIGHT + Data.CASE_HEIGHT;
+		return Data.CASE_HEIGHT*(n+1);
 	}
 
 
 	/*------------------------------------------------------------------------
-	NORMALISE UN ANGLE (EN DEGRé) DANS L'INTERVAL 0-360 // TODO use unity objects (vector2, Quaternions)
+	NORMALISE UN ANGLE (EN DEGRé) DANS L'INTERVAL 0-360
 	------------------------------------------------------------------------*/
 	protected float AdjustAngle(float a) {
 		while (a<0) {
@@ -480,11 +483,11 @@ public class Entity : MovieClip, IEntity
 	RENVOIE LA DISTANCE DE L'ENTITé à UNE CASE // TODO use unity objects (vector2, Quaternions)
 	------------------------------------------------------------------------*/
 	public float DistanceCase(int cx, int cy) {
-		return Mathf.Sqrt(Mathf.Pow(cy-this.cy, 2) + Mathf.Pow(cx-this.cx, 2));
+		return Mathf.Sqrt(Mathf.Pow(cy-this.cy, 2)+ Mathf.Pow(cx-this.cx, 2));
 	}
 
 	public float Distance(float cx, float cy) {
-		return Mathf.Sqrt(Mathf.Pow(y-this.y, 2) + Mathf.Pow(x-this.x, 2));
+		return Mathf.Sqrt(Mathf.Pow(y-this.y, 2)  + Mathf.Pow(x-this.x, 2));
 	}
 
 
@@ -519,17 +522,17 @@ public class Entity : MovieClip, IEntity
 	------------------------------------------------------------------------*/
 	public virtual void EndUpdate() {
 		UpdateCoords();
-		if ( fl_softRecal ) {
+		if (fl_softRecal) {
 			var tx = x+_xOffset;
 			var ty = y+_yOffset;
 			_x = _x + (tx-_x)*softRecalFactor;
 			_y = _y + (ty-_y)*softRecalFactor;
-			softRecalFactor += 0.02f*Time.fixedDeltaTime;
+			softRecalFactor += 0.02f*Loader.Instance.tmod;
 			if ( softRecalFactor>=1 | ( Mathf.Abs(tx-_x)<=1.5 & Mathf.Abs(ty-_y)<=1.5 ) ) {
 				fl_softRecal = false;
 			}
 		}
-		if ( !fl_softRecal ) {
+		if (!fl_softRecal) {
 			_x = x+_xOffset ;
 			_y = y+_yOffset ;
 		}
@@ -543,8 +546,8 @@ public class Entity : MovieClip, IEntity
 		} */
 		oldX = x ;
 		oldY = y ;
-		if ( fl_stick ) {
-			if ( fl_elastick ) {
+		if (fl_stick) {
+			if (fl_elastick) {
 				sticker._x = sticker._x + (x-sticker._x)*elaStickFactor + stickerX;
 				sticker._y = sticker._y + (y-sticker._y)*elaStickFactor + stickerY;
 			}
@@ -552,10 +555,10 @@ public class Entity : MovieClip, IEntity
 				sticker._x = x + stickerX;
 				sticker._y = y + stickerY;
 			}
-			if ( fl_stickRot ) {
-				sticker._rotation+=8*Time.fixedDeltaTime;
+			if (fl_stickRot) {
+				sticker._rotation+=8*Loader.Instance.tmod;
 			}
-			if ( fl_stickBound ) {
+			if (fl_stickBound) {
 				sticker._x = Mathf.Max( sticker._x, sticker._width*0.5f );
 				sticker._x = Mathf.Min( sticker._x, Data.GAME_WIDTH-sticker._width*0.5f );
 			}
@@ -567,14 +570,14 @@ public class Entity : MovieClip, IEntity
     {
 		// Durée de vie
 		if (lifeTimer>0) {
-			lifeTimer-=Time.fixedDeltaTime;
+			lifeTimer-=Time.deltaTime;
 			if (lifeTimer<=0) {
 				OnLifeTimer();
 			}
 		}
 
 		if (stickTimer>0) {
-			stickTimer-=Time.fixedDeltaTime;
+			stickTimer-=Time.deltaTime;
 			if (stickTimer<=0) {
 				Unstick();
 			}

@@ -160,7 +160,7 @@ public class FireBall : Bad
 	public override void Update() {
 		// Mal d'invocation
 		if ( fl_summon ) {
-			summonTimer-=Time.fixedDeltaTime;
+			summonTimer-=Time.deltaTime;
 			if ( summonTimer<=0 ) {
 				fl_summon = false ;
 				StopBlink() ;
@@ -177,7 +177,7 @@ public class FireBall : Bad
 		}
 
 		// Auto-�nervement
-		angerTimer+=Time.fixedDeltaTime*game.diffFactor;
+		angerTimer+=Time.deltaTime*game.diffFactor;
 		if ( angerTimer>=Data.AUTO_ANGER ) {
 			angerTimer = 0 ;
 			AngerMore() ;
@@ -197,12 +197,12 @@ public class FireBall : Bad
 
 		// Vise le player
 		if ( ang<tang ) {
-			ang+=angSpeed*speedFactor*Time.fixedDeltaTime;
+			ang+=angSpeed*speedFactor*Loader.Instance.tmod;
 			if ( ang>tang )
 			ang = tang ;
 		}
 		if ( ang>tang ) {
-			ang-=angSpeed*speedFactor*Time.fixedDeltaTime;
+			ang-=angSpeed*speedFactor*Loader.Instance.tmod;
 			if ( ang<tang )
 			ang = tang ;
 		}

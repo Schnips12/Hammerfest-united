@@ -465,14 +465,14 @@ public class Bat : Mover
 			game.huTimer = 0;
 		}
 		else {
-			game.huTimer += Time.fixedDeltaTime*3;
+			game.huTimer += Loader.Instance.tmod*3;
 		}
 
 		base.Update();
 
 		// Timer immunit�
 		if ( fl_immune ) {
-			immuneTimer-=Time.fixedDeltaTime;
+			immuneTimer-=Time.deltaTime;
 			if ( immuneTimer<=0 ) {
 				RemoveImmunity();
 			}
@@ -498,7 +498,7 @@ public class Bat : Mover
 
 
 		if ( !fl_shield & !fl_death ) {
-			glowCpt += 0.3f*Time.fixedDeltaTime;
+			glowCpt += 0.3f*Loader.Instance.tmod;
 			glow.blurX	= GLOW_BASE + GLOW_RANGE*Mathf.Sin(glowCpt);
 			glow.blurY	= glow.blurX;
 			filter		= glow;
@@ -543,8 +543,8 @@ public class Bat : Mover
 			}
 
 			if ( !fl_deathUp ) {
-				rotation = Mathf.Min(MAX_FALL_ROTATION, rotation+2.5f*Time.fixedDeltaTime);
-				dy += 0.1f*Time.fixedDeltaTime;
+				rotation = Mathf.Min(MAX_FALL_ROTATION, rotation+2.5f*Loader.Instance.tmod);
+				dy += 0.1f*Loader.Instance.tmod;
 				if ( Random.Range(0, 2)==0 ) {
 					game.fxMan.InGameParticles( Data.PARTICLE_SPARK, x,y, Random.Range(0, 2)+1 );
 				}

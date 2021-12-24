@@ -256,7 +256,7 @@ public abstract class Walker : Bad
 				recentParticles=10;
 			}
 			if ( fl_stable ) {
-				game.fxMan.Dust(cx,cy+1);
+				game.fxMan.Dust(cx,cy-1);
 			}
 		}
 	}
@@ -376,7 +376,7 @@ public abstract class Walker : Bad
 	public override void Update() {
 		fl_willFallDown = false;
 		if ( recentParticles>0 ) {
-			recentParticles-=Time.fixedDeltaTime;
+			recentParticles-=Loader.Instance.tmod;
 		}
 		base.Update();
 	}

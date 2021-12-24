@@ -164,7 +164,7 @@ public class Mine : BadBomb
 
 		// Disparition apr�s la pose
 		if (fl_plant & !fl_trigger & alpha>0) {
-			alpha-=Time.fixedDeltaTime*HIDE_SPEED;
+			alpha-=Loader.Instance.tmod*HIDE_SPEED;
 			if (alpha<=0) {
 				Hide();
 			}

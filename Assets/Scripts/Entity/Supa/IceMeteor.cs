@@ -58,7 +58,7 @@ public class IceMeteor : Supa
 	------------------------------------------------------------------------*/
 	protected override void Postfix() {
 		base.Postfix();
-		rotation-=7*Time.fixedDeltaTime;
+		rotation-=7*Loader.Instance.tmod;
 		if ( !world.ShapeInBound(this) ) {
 			MoveTo(Data.GAME_WIDTH,0);
 		}

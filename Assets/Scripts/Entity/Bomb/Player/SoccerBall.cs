@@ -156,7 +156,7 @@ public class SoccerBall : PlayerBomb
 			var ratio = Mathf.Min(1,speed/TOP_SPEED);
 			fx.mc._xscale = 100 * ratio;
 			fx.mc._yscale = fx.mc._xscale;
-			burnTimer-=Time.fixedDeltaTime;
+			burnTimer-=Time.deltaTime;
 		}
 		base.Update();
 	}

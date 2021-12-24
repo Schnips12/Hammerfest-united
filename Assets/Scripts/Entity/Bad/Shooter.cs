@@ -107,7 +107,7 @@ public class Shooter : Jumper
 	------------------------------------------------------------------------*/
 	public override void Update() {
 		if ( shootCD>0 ) {
-			shootCD-=Time.fixedDeltaTime;
+			shootCD-=Loader.Instance.tmod;
 		}
 		if ( fl_shooter & shootCD<=0 ) {
 			if ( IsReady() & Random.Range(0, 1000)<chanceShoot ) {

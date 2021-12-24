@@ -191,6 +191,7 @@ MonoBehaviour:
   fl_gameOver: 0
   fl_exit: 0
   fl_fade: 0
+  tmod: 0
 --- !u!4 &696298256
 Transform:
   m_ObjectHideFlags: 0

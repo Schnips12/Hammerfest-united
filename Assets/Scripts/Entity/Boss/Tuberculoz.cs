@@ -542,7 +542,7 @@ public class Tuberculoz : Mover
 	------------------------------------------------------------------------*/
 	void IA() {
 		if ( action==WALK ) {
-			seqTimer-=Time.fixedDeltaTime;
+			seqTimer-=Time.deltaTime;
 
 			// Retournement au bord
 			if (  (x>=Data.GAME_WIDTH-RADIUS & dir>0) | (x<=RADIUS & dir<0) ) {
@@ -987,14 +987,14 @@ public class Tuberculoz : Mover
 			game.huTimer = 0;
 		}
 		else {
-			game.huTimer += Time.fixedDeltaTime*3;
+			game.huTimer += Loader.Instance.tmod*3;
 		}
 
 		IA();
 
 		// Immunit�
 		if ( fl_immune ) {
-			immuneTimer-=Time.fixedDeltaTime;
+			immuneTimer-=Time.deltaTime;
 			if (immuneTimer<=0) {
 				fl_immune = false;
 				StopBlink();
@@ -1013,7 +1013,7 @@ public class Tuberculoz : Mover
 
 		// Tir de fireball de dernier recours
 		if ( !fl_death & lives<=50 ) {
-			fbCoolDown-=Time.fixedDeltaTime;
+			fbCoolDown-=Loader.Instance.tmod;
 			if ( action==WALK & fbCoolDown<=0 & game.CountList(Data.SHOOT)<2 & Random.Range(0, 1000)<=CHANCE_FINAL_ANGER ) {
 				fbCoolDown = Data.SECOND*0.5f;
 				var s = BossFireBall.Attach(
@@ -1035,7 +1035,7 @@ public class Tuberculoz : Mover
 
 		// Fix: tuberculoz ne mourrant pas ?
 		if ( defeatTimeOut>0 & !fl_defeated ) {
-			defeatTimeOut-=Time.fixedDeltaTime;
+			defeatTimeOut-=Loader.Instance.tmod;
 			if ( defeatTimeOut<=0 ) {
 				Final();
 			}

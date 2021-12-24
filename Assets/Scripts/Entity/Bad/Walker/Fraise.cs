@@ -203,7 +203,7 @@ public class Fraise : Shooter
 		base.Update();
 
 		if ( catchCD > 0 ) {
-			catchCD -= Time.fixedDeltaTime;
+			catchCD -= Loader.Instance.tmod;
 			if ( catchCD <= 0 ) {
 				catchCD = 0;
 			}
