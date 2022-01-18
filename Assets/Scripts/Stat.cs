@@ -1,28 +1,20 @@
-public class Stat
+public struct Stat
 {
-	public float current;
-	public float total;
+    public float current;
+    public float total;
 
 
-	/*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-	public Stat() {
-		current = 0 ;
-		total = 0 ;
-	}
-
-
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	OP�RATIONS COURANTES
 	------------------------------------------------------------------------*/
-	public void Inc(float n) {
-		current+=n;
-	}
+    public void Inc(float n)
+    {
+        current += n;
+    }
 
-
-	public void Reset() {
-		total+=current;
-		current = 0;
-	}
+    public void Reset()
+    {
+        total += current;
+        current = 0;
+    }
 }

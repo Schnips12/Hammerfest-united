@@ -129,7 +129,7 @@ public class Saw : WallWalker
 				Bomb b = e as Bomb;
 				b.SetLifeTimer(Data.SECOND*0.6f);
 				b.dx = (dx!=0 )		? -dx		: -cp.x*4;
-				b.dy = (cp.y!=0)	? -cp.y*13	: -8;
+				b.dy = (cp.y!=0)	? cp.y*13	: 8;
 				game.fxMan.InGameParticlesDir(Data.PARTICLE_SPARK, b.x,b.y, 2, b.dx);
 			}
 
@@ -220,7 +220,7 @@ public class Saw : WallWalker
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 
 		// Controle par variables dynamiques
 		var dyn_sp = game.GetDynamicInt("SAW_SPEED");
@@ -258,13 +258,13 @@ public class Saw : WallWalker
 			if ( Random.Range(0, 10)==0 ) {
 				game.fxMan.InGameParticles(Data.PARTICLE_SPARK, x,y, 1);
 			}
-			stunTimer-=Time.deltaTime;
+			stunTimer-=Loader.Instance.tmod;
 			if ( stunTimer<=0 ) {
 				fl_stun = false;
 				OnWakeUp();
 			}
 		}
-		base.Update();
+		base.HammerUpdate();
 	}
 
 }

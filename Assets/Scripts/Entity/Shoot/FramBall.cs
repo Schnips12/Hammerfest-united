@@ -118,7 +118,7 @@ public class FramBall : Shoot
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 
 		// targetting
 		var tang = Mathf.Atan2(owner.ty-y,owner.tx-x);
@@ -131,6 +131,6 @@ public class FramBall : Shoot
 
 		dx = Mathf.Cos(ang)*shootSpeed * Loader.Instance.tmod;
 		dy = Mathf.Sin(ang)*shootSpeed * Loader.Instance.tmod;
-		base.Update();
+		base.HammerUpdate();
 	}
 }

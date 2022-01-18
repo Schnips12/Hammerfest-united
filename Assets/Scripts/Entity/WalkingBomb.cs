@@ -187,7 +187,7 @@ public class WalkingBomb : Physics
 	------------------------------------------------------------------------*/
 	void GetControls() {
 		// *** Gauche
-		if ( Input.GetKeyDown(KeyCode.LeftArrow) ) {
+		if ( Input.GetKey(KeyCode.LeftArrow) ) {
 			dx=-Data.WBOMB_SPEED;
 			dir = -1;
 			if ( fl_stable ) {
@@ -196,7 +196,7 @@ public class WalkingBomb : Physics
 		}
 
 		// *** Droite
-		if ( Input.GetKeyDown(KeyCode.RightArrow) ) {
+		if ( Input.GetKey(KeyCode.RightArrow) ) {
 			dx=Data.WBOMB_SPEED;
 			dir = 1;
 			if ( fl_stable ) {
@@ -205,7 +205,7 @@ public class WalkingBomb : Physics
 		}
 
 		// Anim d'arr�t
-		if ( !Input.GetKeyDown(KeyCode.LeftArrow) & !Input.GetKeyDown(KeyCode.RightArrow) ) {
+		if ( !Input.GetKey(KeyCode.LeftArrow) & !Input.GetKey(KeyCode.RightArrow) ) {
 			dx*=game.gFriction*0.9f;
 			if ( animId==Data.ANIM_WBOMB_WALK.id ) {
 				PlayAnim(Data.ANIM_WBOMB_STOP);
@@ -244,12 +244,10 @@ public class WalkingBomb : Physics
 			// gauche
 			if ( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_JUMP_LEFT) & dx<0 ) {
 				Jump(Data.BAD_HJUMP_X, Data.BAD_HJUMP_Y);
-//				adjustToRight();
 			}
 			// droite
 			if ( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_JUMP_RIGHT) & dx>0 ) {
 				Jump(Data.BAD_HJUMP_X, Data.BAD_HJUMP_Y);
-//				adjustToLeft();
 			}
 		}
 
@@ -276,13 +274,13 @@ public class WalkingBomb : Physics
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		// Inhibe la bombe r�elle
 		realBomb.y = -1500;
 		realBomb.lifeTimer = Data.SECOND*10;
 
 		if ( fl_knock & knockTimer>0 ) {
-			knockTimer-=Time.deltaTime;
+			knockTimer-=Loader.Instance.tmod;
 			if ( knockTimer<=0 ) {
 				fl_knock = false;
 			}
@@ -297,7 +295,7 @@ public class WalkingBomb : Physics
 			}
 		}
 
-		base.Update();
+		base.HammerUpdate();
 
 		if ( realBomb._name==null ) {
 			DestroyThis();

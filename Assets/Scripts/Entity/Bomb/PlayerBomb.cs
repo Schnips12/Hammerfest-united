@@ -99,10 +99,6 @@ public class PlayerBomb : Bomb
 	EVENT: DESTRUCTION
 	------------------------------------------------------------------------*/
 	protected override void OnLifeTimer() {
-		Player p = parent as Player;
-//		if ( p!=null && world.currentId<100 ) { // patch anti score infini
-//			p.getScore( null,10 );
-//		}
 		base.OnLifeTimer();
 	}
 
@@ -152,8 +148,8 @@ public class PlayerBomb : Bomb
 	}
 
 
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 		if (!fl_blinking & upgrades>0) {
 			Blink(Data.BLINK_DURATION_FAST);
 		}

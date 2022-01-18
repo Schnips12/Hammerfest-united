@@ -373,8 +373,7 @@ for level in adventureThingy:
     nestedColumn = dict()
     columnIndex = 0
     for column in level["map"]:
-        reversedColumn = column[::-1]
-        nestedColumn["column"] = reversedColumn
+        nestedColumn["column"] = column
         level["map"][columnIndex] = nestedColumn.copy()
         columnIndex += 1
     levelString = json.dumps(level, default=JSONSerializer)

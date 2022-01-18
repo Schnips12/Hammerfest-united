@@ -141,7 +141,7 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		speed = Mathf.Sqrt(Mathf.Pow(dx??0,2) + Mathf.Pow(dy??0,2));
 		animFactor = 0.5f * speed/TOP_SPEED ;
 		fl_airKick = true;
@@ -156,8 +156,8 @@ public class SoccerBall : PlayerBomb
 			var ratio = Mathf.Min(1,speed/TOP_SPEED);
 			fx.mc._xscale = 100 * ratio;
 			fx.mc._yscale = fx.mc._xscale;
-			burnTimer-=Time.deltaTime;
+			burnTimer-=Loader.Instance.tmod;
 		}
-		base.Update();
+		base.HammerUpdate();
 	}
 }

@@ -270,9 +270,9 @@ public class Tuberculoz : Mover
 	MISE � JOUR BARRE DE VIE
 	------------------------------------------------------------------------*/
 	void UpdateBar() {
-		lifeBar.FindSub("barFade")._xscale = lifeBar.FindSub("bar")._xscale;
+/* 		lifeBar.FindSub("barFade")._xscale = lifeBar.FindSub("bar")._xscale; //FIXME
 		lifeBar.FindSub("barFade").GotoAndPlay(1);
-		lifeBar.FindSub("bar")._xscale = lives/LIVES*100;
+		lifeBar.FindSub("bar")._xscale = lives/LIVES*100; */
 	}
 
 
@@ -542,7 +542,7 @@ public class Tuberculoz : Mover
 	------------------------------------------------------------------------*/
 	void IA() {
 		if ( action==WALK ) {
-			seqTimer-=Time.deltaTime;
+			seqTimer-=Loader.Instance.tmod;
 
 			// Retournement au bord
 			if (  (x>=Data.GAME_WIDTH-RADIUS & dir>0) | (x<=RADIUS & dir<0) ) {
@@ -973,7 +973,7 @@ public class Tuberculoz : Mover
 		}
 
 		// Link la barre de vie aux tremblements du jeu
-		lifeBar._x = game.mc._x-game.xOffset;
+		lifeBar._x = game.mc._x-game.mc._x;
 		lifeBar._y	= game.mc._y+Data.GAME_HEIGHT*0.5f;
 	}
 
@@ -981,7 +981,7 @@ public class Tuberculoz : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		// Hurry up d�sactiv�
 		if ( !fl_death ) {
 			game.huTimer = 0;
@@ -994,7 +994,7 @@ public class Tuberculoz : Mover
 
 		// Immunit�
 		if ( fl_immune ) {
-			immuneTimer-=Time.deltaTime;
+			immuneTimer-=Loader.Instance.tmod;
 			if (immuneTimer<=0) {
 				fl_immune = false;
 				StopBlink();
@@ -1046,7 +1046,7 @@ public class Tuberculoz : Mover
 			UpdateDeath();
 		}
 
-		base.Update();
+		base.HammerUpdate();
 
 		// Dash
 		if ( action==DASH ) {

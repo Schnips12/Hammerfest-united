@@ -133,7 +133,7 @@ public abstract class Walker : Bad
 		}
 		else {
 			fl_fall = true;
-			chanceFall = 10*chance??0;
+			chanceFall = 10*chance.Value;
 		}
 	}
 
@@ -187,31 +187,6 @@ public abstract class Walker : Bad
 			return Random.Range(0, 1000)<chanceFall;
 		}
 	}
-
-
-//	function decideFallBack() { // *** NOT USED ! ***
-//		if ( fl_playerClose ) {
-//			// proche en Y
-//			if ( Math.abs(player.cy - cy) < 3 ) {
-//				// aucun obstacle entre le mob et le joueur
-//				var inc = (player.cx<cx)?-1:1;
-//				var fl_obst = false;
-//				for (var i=cx ; i!=player.cx && !fl_obst ; i+=inc) {
-//					if ( world.getCase( {x:i,y:cy} )>0 ) {
-//						fl_obst = true;
-//					}
-//				}
-//				return !fl_obst;
-//			}
-//			else {
-//				return false;
-//			}
-//		}
-//		else {
-//			return false;
-//		}
-//	}
-
 
 
 	// *** EVENTS
@@ -355,6 +330,9 @@ public abstract class Walker : Bad
 	MISE � JOUR GRAPHIQUE
 	------------------------------------------------------------------------*/
 	public override void EndUpdate() {
+		if (united==null) {
+			return;
+		}
 		base.EndUpdate();
 
 		// Flip gauche/droite du movie
@@ -373,12 +351,12 @@ public abstract class Walker : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		fl_willFallDown = false;
 		if ( recentParticles>0 ) {
 			recentParticles-=Loader.Instance.tmod;
 		}
-		base.Update();
+		base.HammerUpdate();
 	}
 
 }

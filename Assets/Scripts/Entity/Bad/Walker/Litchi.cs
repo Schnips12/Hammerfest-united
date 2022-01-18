@@ -84,8 +84,8 @@ public class Litchi : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 		if ( !fl_kill & fl_knock & child==null & dy<=-Data.BAD_VJUMP_Y*0.6 ) {
 			dy = -Data.BAD_VJUMP_Y*0.6f;
 		}

@@ -4,20 +4,23 @@ using UnityEngine;
 public interface IEntity {
 	int types { get; set; }
 	int uniqId { get; set; }
-	int scriptId { get; set; }
+	int? scriptId { get; set; }
     int cx { get; set; }
     int cy { get; set; }
 	GameMechanics world { get; set; }
 	float x { get; set; }
 	float y { get; set; }
+	float width { get; set; }
+	float height { get; set; }
 	bool fl_kill { get; set; }
 	void DestroyThis();
 	void RemoveMovieClip();
 	void Show();
 	bool IsType(int t);
-	void Update();
+	void HammerUpdate();
 	void EndUpdate();
 	void OnPlayerDeath();
+	void Hit(IEntity e);
 }
 
 public class Entity : MovieClip, IEntity
@@ -27,8 +30,8 @@ public class Entity : MovieClip, IEntity
 
 	public float x { get; set; } // real coords
 	public float y { get; set; }
-	public float width;
-	public float height;
+	public float width { get; set; }
+	public float height { get; set; }
 
 	public float oldX; // previous real coords
 	public float oldY;
@@ -50,7 +53,7 @@ public class Entity : MovieClip, IEntity
 
 	public int types { get; set; }
 
-	public int scriptId { get; set; }
+	public int? scriptId { get; set; }
 
 	public float? lifeTimer { get; set; }
 	protected float? totalLife;
@@ -102,6 +105,9 @@ public class Entity : MovieClip, IEntity
 		filter = mc.filter;
 		isTile = mc.isTile;
 		cacheAsBitmap = mc.cacheAsBitmap;
+
+		width = Data.CASE_WIDTH;
+		height  = Data.CASE_HEIGHT; // TODO Set the actual sprite size
 		// End of mess.
 
 		types = 0;
@@ -201,7 +207,7 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	HIT TEST DE BOUNDING BOX
 	------------------------------------------------------------------------*/
-	protected bool HitBound(Entity e) {
+	protected bool HitBound(IEntity e) {
 		bool res = (
 			x+width/2 > e.x-e.width/2 &
 			y > e.y-e.height &
@@ -235,6 +241,7 @@ public class Entity : MovieClip, IEntity
 				game.unregList.Add(k);
 			}
 		}
+		RemoveMovieClip();
 		game.killList.Add(this);
 	}
 
@@ -277,8 +284,8 @@ public class Entity : MovieClip, IEntity
 		fl_stick = false;
 		if(sticker!=null) {
 			sticker.RemoveMovieClip();
-		}		
-		sticker = null;
+			sticker = null;
+		}
 	}
 
 
@@ -417,16 +424,13 @@ public class Entity : MovieClip, IEntity
 		cx = Entity.x_rtc(x);
 		cy = Entity.y_rtc(y);
 		fcx = Entity.x_rtc(x);
-		fcy = Entity.y_rtc(y-Mathf.Floor(Data.CASE_HEIGHT/2));
+		fcy = Entity.y_rtc(y-Data.CASE_HEIGHT/2-1);
 	}
 
 
 	/*------------------------------------------------------------------------
 	CONVERSION REAL -> CASE
 	------------------------------------------------------------------------*/
-	public static Vector2Int rtc(int x, int y) {
-        return new Vector2Int(Entity.x_rtc(x), Entity.y_rtc(y));       
-	}
 	public static Vector2Int rtc(float x, float y) {
         return new Vector2Int(x_rtc(x), y_rtc(y));       
 	}
@@ -434,7 +438,7 @@ public class Entity : MovieClip, IEntity
 		return Mathf.FloorToInt(n/Data.CASE_WIDTH) ;
 	}
 	public static int y_rtc(float n) {
-		return Mathf.FloorToInt(n/Data.CASE_HEIGHT - 0.5f) ;
+		return Mathf.FloorToInt(n/Data.CASE_HEIGHT) ;
 	}
 
 
@@ -445,7 +449,7 @@ public class Entity : MovieClip, IEntity
 		return Data.CASE_WIDTH *(n+0.5f);
 	}
 	public static float y_ctr(int n) {
-		return Data.CASE_HEIGHT*(n+1);
+		return Data.CASE_HEIGHT*(n+0.5f);
 	}
 
 
@@ -521,7 +525,10 @@ public class Entity : MovieClip, IEntity
 	CLOTURE DES UPDATES
 	------------------------------------------------------------------------*/
 	public virtual void EndUpdate() {
-		UpdateCoords();
+		if(united==null) {
+			return;
+		}
+		UpdateCoords();		
 		if (fl_softRecal) {
 			var tx = x+_xOffset;
 			var ty = y+_yOffset;
@@ -565,19 +572,18 @@ public class Entity : MovieClip, IEntity
 		}
 	}
 
-	// Update is called once per frame
-    public virtual void Update()
+    public virtual void HammerUpdate()
     {
 		// Durée de vie
 		if (lifeTimer>0) {
-			lifeTimer-=Time.deltaTime;
+			lifeTimer-=Loader.Instance.tmod;
 			if (lifeTimer<=0) {
 				OnLifeTimer();
 			}
 		}
 
 		if (stickTimer>0) {
-			stickTimer-=Time.deltaTime;
+			stickTimer-=Loader.Instance.tmod;
 			if (stickTimer<=0) {
 				Unstick();
 			}

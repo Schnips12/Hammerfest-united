@@ -97,9 +97,9 @@ public class Container
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public void Update() {
+	public void HammerUpdate() {
 		for ( var i=0;i<list.Count;i++ ) {
-			list[i].Update();
+			list[i].HammerUpdate();
 		}
 	}
 }

@@ -64,7 +64,7 @@ public class Shooter : Jumper
 	------------------------------------------------------------------------*/
 	protected override void OnNext() {
 		base.OnNext();
-		if ( next.action == Data.ACTION_SHOOT ) {
+		if (next!=null && next.action == Data.ACTION_SHOOT ) {
 			SetNext(null,null,shootDuration, Data.ACTION_WALK);
 			Halt();
 			PlayAnim( Data.ANIM_BAD_SHOOT_END );
@@ -105,7 +105,7 @@ public class Shooter : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		if ( shootCD>0 ) {
 			shootCD-=Loader.Instance.tmod;
 		}
@@ -114,6 +114,6 @@ public class Shooter : Jumper
 				StartShoot();
 			}
 		}
-		base.Update();
+		base.HammerUpdate();
 	}
 }

@@ -358,6 +358,9 @@ public class WallWalker : Bad
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
 	public override void EndUpdate() {
+		if (united==null) {
+			return;
+		}
 		base.EndUpdate();
 
 		if ( IsHealthy() ) {
@@ -386,7 +389,7 @@ public class WallWalker : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		// Radius auto (pour d�capiter ^^)
 		if ( game.GetOne(Data.PLAYER).y > y ) {
 			realRadius = Data.CASE_WIDTH*1.4f;
@@ -395,7 +398,7 @@ public class WallWalker : Bad
 			realRadius = Data.CASE_WIDTH;
 		}
 
-		base.Update();
+		base.HammerUpdate();
 
 		// Perte du point de fixation
 		if ( lastSafe!=null & world.GetCase(Entity.x_rtc(lastSafe.x)+lastSafe.cp.x, Entity.y_rtc(lastSafe.y)+lastSafe.cp.y)<=0 ) {

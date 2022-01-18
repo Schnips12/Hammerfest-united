@@ -64,7 +64,8 @@ public class Bomb : Mover, IBomb
 		MoveTo(x,y);
 		SetLifeTimer(duration);
 		UpdateCoords();
-		PlayAnim(Data.ANIM_BOMB_DROP);
+		Play();
+		/* PlayAnim(Data.ANIM_BOMB_DROP); */
 	}
 
 
@@ -88,7 +89,8 @@ public class Bomb : Mover, IBomb
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
 	public virtual void OnExplode() {
-		PlayAnim(Data.ANIM_BOMB_EXPLODE);
+		/* PlayAnim(Data.ANIM_BOMB_EXPLODE); */
+		SetAnimBool("Exploding", true);
 		if (explodeSound!=null) {
 			game.soundMan.PlaySound(explodeSound,Data.CHAN_BOMB);
 		}

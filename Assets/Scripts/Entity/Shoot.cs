@@ -80,8 +80,8 @@ public class Shoot : Physics
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update() ;
+	public override void HammerUpdate() {
+		base.HammerUpdate() ;
 
 		// Hors-jeu
 		if ( fl_checkBounds ) {

@@ -178,10 +178,10 @@ public class Fraise : Shooter
 
 		// Balle en main
 		if ( fl_ball ) {
-			FindSub("balle")._visible = true;
+			FindSub("balle").SetActive(true);
 		}
 		else {
-			FindSub("balle")._visible = false;
+			FindSub("balle").SetActive(false);
 		}
 
 		// Se tourne dans la direction du tir
@@ -199,8 +199,8 @@ public class Fraise : Shooter
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 
 		if ( catchCD > 0 ) {
 			catchCD -= Loader.Instance.tmod;

@@ -33,7 +33,7 @@ public class SupaItem : Supa
 		var linkage = "hammer_supa_item";
 		SupaItem mc = new SupaItem(g.depthMan.Attach(linkage,Data.DP_SUPA));
 		mc.supaId = id;
-		mc.InitSupa(g, Data.GAME_WIDTH/2,-50);
+		mc.InitSupa(g, Data.GAME_WIDTH/2, Data.GAME_HEIGHT+50);
 		return mc;
 	}
 
@@ -78,7 +78,7 @@ public class SupaItem : Supa
 	protected override void Prefix() {
 		base.Prefix();
 
-		var l = game.GetClose( Data.PLAYER, x,y+Data.CASE_HEIGHT*1.5f, radius, false );
+		var l = game.GetClose( Data.PLAYER, x,y, radius, false );
 		var fl_break = false;
 		for (var i=0;i<l.Count & !fl_break;i++) {
 			Player e = l[i] as Player;
@@ -88,7 +88,7 @@ public class SupaItem : Supa
 			}
 		}
 
-		if ( y>=Data.GAME_HEIGHT+50 ) {
+		if ( y<=-50 ) {
 			OnDeathLine();
 		}
 	}

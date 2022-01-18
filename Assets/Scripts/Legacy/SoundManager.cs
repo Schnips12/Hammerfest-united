@@ -20,6 +20,7 @@ public class SoundManager
         audioSource.volume = volume;
     }
     public void Play() {
+        audioSource.loop = true;
         audioSource.Play();
     }
     public void Stop() {

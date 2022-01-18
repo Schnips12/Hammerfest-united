@@ -69,7 +69,7 @@ public class Hammer : Shoot
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		var hx = player.x + player.dir*Data.CASE_WIDTH*0.7f;
 		hx = Mathf.Min(Data.GAME_WIDTH-1,hx);
 		hx = Mathf.Max(1,hx);
@@ -80,7 +80,7 @@ public class Hammer : Shoot
 			hx,
 			hy
 		);
-		base.Update();
+		base.HammerUpdate();
 
 		// Contact
 		var l = game.GetClose(Data.BAD, x,y, Data.CASE_WIDTH*2, false);

@@ -16,7 +16,6 @@ public class GameInterface
 
 	GameMode game;
 	List<int> currentLives;
-	MovieClip level;
 	List<TextMeshPro> scores;
 
 	List<int> realScores;
@@ -27,7 +26,7 @@ public class GameInterface
 	bool fl_multi;
 
 	List<List<MovieClip>> lives;
-	List<List<MovieClip>> letters;
+	List<List<GameObject>> letters;
 	List<MovieClip> more;
 
 	Color baseColor;
@@ -59,7 +58,7 @@ public class GameInterface
 		fl_print		= false;
 		baseColor		= Data.ToColor(Data.BASE_COLORS[0]);
 
-		Update();
+		HammerUpdate();
 	}
 
 
@@ -71,26 +70,22 @@ public class GameInterface
 
 		// skin
 		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
-		mc._x = -game.xOffset;
+		mc._x = game.mc._x-10;
 		mc._y = 0;
-		mc.GotoAndStop(1);
 		mc.cacheAsBitmap = true;
 		scores	= new List<TextMeshPro>();
-		level	= new MovieClip(mc, "level");
-		level.AddTextField("field");
-		level.AddTextField("score0");
-		scores.Add(level.FindTextfield("score0"));
+		scores.Add(mc.FindTextfield("score0"));
 
 		// Lettres Extend
-		letters = new List<List<MovieClip>>();
-		letters.Add(new List<MovieClip>());
-		letters[0].Add(new MovieClip(mc, "letter0_0"));
-		letters[0].Add(new MovieClip(mc, "letter0_1"));
-		letters[0].Add(new MovieClip(mc, "letter0_2"));
-		letters[0].Add(new MovieClip(mc, "letter0_3"));
-		letters[0].Add(new MovieClip(mc, "letter0_4"));
-		letters[0].Add(new MovieClip(mc, "letter0_5"));
-		letters[0].Add(new MovieClip(mc, "letter0_6"));
+		letters = new List<List<GameObject>>();
+		letters.Add(new List<GameObject>());
+		letters[0].Add(mc.FindSub("letter0_0"));
+		letters[0].Add(mc.FindSub("letter0_1"));
+		letters[0].Add(mc.FindSub("letter0_2"));
+		letters[0].Add(mc.FindSub("letter0_3"));
+		letters[0].Add(mc.FindSub("letter0_4"));
+		letters[0].Add(mc.FindSub("letter0_5"));
+		letters[0].Add(mc.FindSub("letter0_6"));
 
 		fakeScores		= new List<int>();
         fakeScores.Add(0);
@@ -118,20 +113,17 @@ public class GameInterface
 		fl_multi = true;
 
 		// skin
-		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
-		mc._x = -game.xOffset;
+		mc = game.depthMan.Attach("hammer_interf_game_multi",Data.DP_TOP);
+		mc._x = -game.mc._x;
 		mc._y = 0;
 		mc.GotoAndStop(2);
 		mc.cacheAsBitmap = true;
 		scores	= new List<TextMeshPro>();
-		level	= mc.FindSub("level");
-		level	= mc.FindSub("score0");
-		level	= mc.FindSub("score1");
 		scores.Add(mc.FindTextfield("score0"));
         scores.Add(mc.FindTextfield("score1"));
 
 		// Lettres Extend
-		letters = new List<List<MovieClip>>();
+/* 		letters = new List<List<MovieClip>>();
 		letters[0] = new List<MovieClip>();
 		letters[0].Add(mc.FindSub("letter0_0"));
 		letters[0].Add(mc.FindSub("letter0_1"));
@@ -148,7 +140,7 @@ public class GameInterface
 		letters[1].Add(mc.FindSub("letter0_3"));
 		letters[1].Add(mc.FindSub("letter0_4"));
 		letters[1].Add(mc.FindSub("letter0_5"));
-		letters[1].Add(mc.FindSub("letter0_6"));
+		letters[1].Add(mc.FindSub("letter0_6")); */
 
 
 		// Init sp�cifiques aux players
@@ -186,19 +178,17 @@ public class GameInterface
 		BASE_WIDTH *= 0.75f;
 
 		// skin
-		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
-		mc._x = -game.xOffset;
+		mc = game.depthMan.Attach("hammer_interf_game", Data.DP_TOP);
+		mc._x = -game.mc._x;
 		mc._y = 0;
 		mc.GotoAndStop(3);
 		mc.cacheAsBitmap = true;
 		scores	= new List<TextMeshPro>();
-		level	= mc.FindSub("level");
-		level	= mc.FindSub("time");
 		scores.Add(mc.FindTextfield("time"));
 
 
 		// Lettres Extend
-		letters = new List<List<MovieClip>>();
+		letters = new List<List<GameObject>>();
 
 		fakeScores		= new List<int>();
         fakeScores.Add(0);
@@ -261,14 +251,14 @@ public class GameInterface
 	------------------------------------------------------------------------*/
 	public void SetLevel(int? id) {
 		if(id.HasValue) {
-			level.FirstTextfield().text = id.ToString();
+			mc.FindTextfield("level").text = id.ToString();
 		}
-		level.FirstTextfield().color = baseColor;
+		mc.FindTextfield("level").color = baseColor;
 	}
 
 	public void HideLevel() {
-		level.FirstTextfield().text = "?";
-		level.FirstTextfield().color = baseColor;
+		mc.FindTextfield("level").text = "?";
+		mc.FindTextfield("level").color = baseColor;
 	}
 
 	/*------------------------------------------------------------------------
@@ -300,7 +290,7 @@ public class GameInterface
 			while ( currentLives[pid]<v & currentLives[pid]<MAX_LIVES ) {
 				var newmc = new MovieClip(mc, "hammer_interf_life", Data.DP_TOP+1);
 				newmc._x = baseX+currentLives[pid]*baseWid;
-				newmc._y = 19;
+				newmc._y = -9;
 				plives.Add(newmc);
 				currentLives[pid]++;
 			}
@@ -313,7 +303,7 @@ public class GameInterface
 				if ( pid>0 ) {
 					more[pid]._x-=baseWid;
 				}
-				more[pid]._y = -25;
+				more[pid]._y = -5;
 			}
 			if ( v<=MAX_LIVES & more[pid]!=null ) {
 				more[pid].RemoveMovieClip();
@@ -340,17 +330,17 @@ public class GameInterface
 	------------------------------------------------------------------------*/
 	public void GetExtend(int pid, int id) {
 		var l = letters[pid][id];
-		if ( !l._visible ) {
+		if (!l.activeSelf) {
 			var fx = new MovieClip(mc, "hammer_fx_letter_pop", game.manager.uniq++);
-			fx._x = l._x+l._width*0.5f;
-			fx._y = l._y;
-			l._visible = true;
+			fx._x = l.transform.position.x;
+			fx._y = l.transform.position.y;
+			l.SetActive(true);
 		}
 	}
 
 	public void ClearExtends(int pid) {
 		for (var i=0;i<letters[pid].Count;i++) {
-			letters[pid][i]._visible = false;
+			letters[pid][i].SetActive(false);
 		}
 	}
 
@@ -360,13 +350,14 @@ public class GameInterface
 	------------------------------------------------------------------------*/
 	public void DestroyThis() {
 		mc.RemoveMovieClip();
+		mc=null;
 	}
 
 
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public void Update() {
+	public void HammerUpdate() {
 		if ( !fl_print ) {
 			for (var pid=0;pid<scores.Count;pid++) {
 				if( scores[pid]!=null ) {

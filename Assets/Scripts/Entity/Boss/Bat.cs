@@ -459,7 +459,7 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		// Hurry up d�sactiv�
 		if ( !fl_death ) {
 			game.huTimer = 0;
@@ -468,11 +468,11 @@ public class Bat : Mover
 			game.huTimer += Loader.Instance.tmod*3;
 		}
 
-		base.Update();
+		base.HammerUpdate();
 
 		// Timer immunit�
 		if ( fl_immune ) {
-			immuneTimer-=Time.deltaTime;
+			immuneTimer-=Loader.Instance.tmod;
 			if ( immuneTimer<=0 ) {
 				RemoveImmunity();
 			}

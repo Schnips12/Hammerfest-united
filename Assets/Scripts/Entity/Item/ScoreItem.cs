@@ -30,19 +30,38 @@ public class ScoreItem : Item
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
 	public static ScoreItem Attach(GameMode g, float x, float y, int id, int? subId) {
-		ScoreItem mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
+		ScoreItem mc;
 		if (id>=1000) {
 			id -= 1000;
+		}
+		switch (id) {
+			case 0: // Crystal
+				mc = new ScoreItem(g.depthMan.Attach("3159", Data.DP_ITEMS));
+				break;
+			case 51: // Coin
+				mc = new ScoreItem(g.depthMan.Attach("3222", Data.DP_ITEMS));
+				mc.fl_anim = true;
+				subId=null;
+				break;
+			case 17: // Pearl reward
+				mc = new ScoreItem(g.depthMan.Attach("3179", Data.DP_ITEMS));
+				break;
+			case 185: // Ring
+				mc = new ScoreItem(g.depthMan.Attach("3401", Data.DP_ITEMS));
+				mc.fl_anim = true;
+				subId=null;
+				break;
+			default:
+				mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
+				subId=null;
+				break;
 		}
 		mc.InitItem(g, x, y, id, subId);
 		return mc;
 	}
+
 	public static void AttachAndDump(GameMode g, float x, float y, int id, int? subId) {
-		ScoreItem mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
-		if (id>=1000) {
-			id -= 1000;
-		}
-		mc.InitItem(g, x, y, id, subId);
+		Attach(g, x, y, id, subId);
 	}
 
 
@@ -50,7 +69,7 @@ public class ScoreItem : Item
 	ACTIVE L'ITEM AU PROFIT DE "E"
 	------------------------------------------------------------------------*/
 	public override void Execute(Player p) {
-		int? value = Data.ITEM_VALUES[id+1000];
+		int? value = Data.Instance.ITEM_VALUES[id+1000];
 
 		game.soundMan.PlaySound("sound_item_score", Data.CHAN_ITEM);
 
@@ -78,7 +97,7 @@ public class ScoreItem : Item
 		// Recherche rarity
 		int? r		= null;
 		var i		= 0;
-		var family	= Data.SCORE_ITEM_FAMILIES;
+		var family	= Data.Instance.SCORE_ITEM_FAMILIES;
 		while (r==null & i<family.Count) {
 			var j=0;
 			while (r==null & j<family[i].Count) {
@@ -91,7 +110,7 @@ public class ScoreItem : Item
 		}
 
 		if ( r>0 ) {
-			game.AttachItemName( Data.SCORE_ITEM_FAMILIES, id+1000 );
+			game.AttachItemName( Data.Instance.SCORE_ITEM_FAMILIES, id+1000 );
 		}
 
 		base.Execute(p);

@@ -8,14 +8,17 @@ public class Chrono
 	bool fl_stop;
 	bool fl_init;
 
+	float prevFrameTimer;
+	float frameTimer;
+
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	public Chrono() {
-		suspendTimer	= 0;
-		haltedTimer		= Get();
-        gameTimer       = Time.time;
+		gameTimer       = Time.time;
+		suspendTimer	= 0;		
+		haltedTimer		= Get();        
 
 		Reset();
 		fl_stop			= true;

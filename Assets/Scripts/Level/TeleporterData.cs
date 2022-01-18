@@ -1,6 +1,5 @@
 public class TeleporterData
 {
-
     public MovieClip mc;
 	public MovieClip podA;
 	public MovieClip podB;

@@ -35,8 +35,6 @@ public abstract class Mode : IMode
 
 	public float cycle;
 
-	public float xOffset; // décalage du mc du jeu
-	public float yOffset;
 	public float xFriction;
 	public float yFriction;
 
@@ -51,8 +49,6 @@ public abstract class Mode : IMode
 		fl_mute			= false;
 		fl_runAsChild	= false;
 		currentTrack	= 0;
-		xOffset			= 0;
-		yOffset			= 0;
 		uniqId			= 1;
 		cycle			= 0;
 
@@ -180,7 +176,7 @@ public abstract class Mode : IMode
 		if (!fl_music | !GameManager.CONFIG.HasMusic()) {
 			return;
 		}
-		n *= GameManager.CONFIG.musicVolume*100;
+		n *= GameManager.CONFIG.musicVolume;
 		soundMan.SetVolume(n);
 	}
 

@@ -70,8 +70,8 @@ public class PlayerArrow : Shoot
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 		fl_livedOneTurn	= true;
 	}
 }

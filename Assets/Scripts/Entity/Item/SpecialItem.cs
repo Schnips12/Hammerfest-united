@@ -28,7 +28,13 @@ public class SpecialItem : Item
 		if (g.fl_clear & id==0) { // pas d'extend si level clear
 			return null;
 		}
-		SpecialItem mc = new SpecialItem(g.depthMan.Attach("hammer_item_special",Data.DP_ITEMS));
+
+		SpecialItem mc;
+		if (id==0) {
+			mc = new SpecialItem(g.depthMan.Attach("2380",Data.DP_ITEMS));
+		} else {
+			mc = new SpecialItem(g.depthMan.Attach("hammer_item_special", Data.DP_ITEMS));
+		}
 		mc.InitItem(g, x, y, id, subId) ;
 		return mc;
 	}
@@ -46,7 +52,7 @@ public class SpecialItem : Item
 		game.soundMan.PlaySound("sound_item_special", Data.CHAN_ITEM);
 
 		if ( id>0 ) {
-			game.AttachItemName( Data.SPECIAL_ITEM_FAMILIES, id );
+			game.AttachItemName( Data.Instance.SPECIAL_ITEM_FAMILIES, id );
 		}
 		base.Execute(p) ;
 	}
@@ -55,8 +61,8 @@ public class SpecialItem : Item
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 		if ( id!=0 ) {
 			if ( Random.Range(0, 4)==0 ) {
 				var a = game.fxMan.AttachFx(

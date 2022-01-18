@@ -10,35 +10,32 @@ public class TileMC : MovieClip
     public MovieClip ombre;
 
     public TileMC(MovieClip mc, string name, float size) : base(mc) {
+        SpriteRenderer renderer = united.GetComponent<SpriteRenderer>();
         _name = name;
-        _xscale = size;
+
         endTile = new MovieClip(this, 0.001f);
         endTile._name = "End";
+        endTile._visible = false;
+
         maskTile = new MovieClip(this, 0.002f);
         maskTile._name = "Mask";
+        maskTile._visible = false;
+
         ombre = new MovieClip(this, 0.001f);
         ombre._name = "Ombre";
-        endTile._visible = false;
-        maskTile._visible = false;
         ombre._visible = false;
 
-        united.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("tile_01");
+        renderer.sprite = Resources.Load<Sprite>("Tiles/tile_01");
+        renderer.drawMode = SpriteDrawMode.Tiled;
+        renderer.size = new Vector2(size, 1);
+		_xscale = Data.CASE_WIDTH;
+		_yscale = Data.CASE_HEIGHT;
     }
 
     public override void SetSkin(int skinId) {
         skin = skinId;
     }
     public override void FlipTile() {
-        _xscale *= -1;
-    }
-    public void Align(){
-/*         if (_rotation == 0) {
-            _x += _xscale/2;
-            _y += _yscale/2;
-        } else {
-            _x += _yscale/2;
-            _y += _xscale/2;
-        } */
-        
+        united.GetComponent<SpriteRenderer>().flipY = true;
     }
 }

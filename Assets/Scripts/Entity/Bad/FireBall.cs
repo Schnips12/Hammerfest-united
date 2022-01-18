@@ -157,10 +157,10 @@ public class FireBall : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		// Mal d'invocation
 		if ( fl_summon ) {
-			summonTimer-=Time.deltaTime;
+			summonTimer-=Loader.Instance.tmod;
 			if ( summonTimer<=0 ) {
 				fl_summon = false ;
 				StopBlink() ;
@@ -177,7 +177,7 @@ public class FireBall : Bad
 		}
 
 		// Auto-�nervement
-		angerTimer+=Time.deltaTime*game.diffFactor;
+		angerTimer+=Loader.Instance.tmod*game.diffFactor;
 		if ( angerTimer>=Data.AUTO_ANGER ) {
 			angerTimer = 0 ;
 			AngerMore() ;
@@ -211,6 +211,6 @@ public class FireBall : Bad
 		ang = AdjustAngle(ang) ;
 		MoveToAng(ang,speed*speedFactor) ;
 
-		base.Update() ;
+		base.HammerUpdate() ;
 	}
 }

@@ -50,13 +50,13 @@ public class Spear : Bad
 			}
 		}
 
-		var ss = game.GetDynamicVar("SPEAR_SKIN");
+		/* var ss = game.GetDynamicVar("SPEAR_SKIN"); // FIXME
 		if ( ss==null ) {
 			subs[0].GotoAndStop(1);
 		}
 		else {
 			subs[0].GotoAndStop( Int32.Parse(ss) );
-		}
+		} */
 
 		if ( game.world.scriptEngine.cycle>Data.SECOND ) {
 			game.fxMan.AttachFx(x+Data.CASE_WIDTH*0.5f,y+Data.CASE_HEIGHT*0.5f, "hammer_fx_pop");
@@ -67,7 +67,7 @@ public class Spear : Bad
 	public override void Knock(float d) {}
 	public override void KillHit(float? dx) {}
 
-	public void Burn() {
+	public override void Burn() {
 		var fx = game.fxMan.AttachFx(x, y, "hammer_fx_pop" );
 	}
 

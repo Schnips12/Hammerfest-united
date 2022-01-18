@@ -29,19 +29,19 @@ public class SoccerInterface
 	------------------------------------------------------------------------*/
 	void Init() {
 		mc		= game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
-		mc._x	= -game.xOffset;
+		mc._x	= -game.mc._x;
 		mc._y	= 0;
 		mc.GotoAndStop(3);
 		mc.cacheAsBitmap = true;
 
-		scores		= new List<Field>();
+		/* scores		= new List<Field>();
         scores.Add(mc.FindSub("score0") as Field);
         scores.Add(mc.FindSub("score1") as Field);
 		time		= mc.FindSub("time") as Field;
 
 		FxManager.AddGlow(mc.FindSub("score0"), GLOW_COLOR, 2);
 		FxManager.AddGlow(mc.FindSub("score1"), GLOW_COLOR, 2);
-		FxManager.AddGlow(mc.FindSub("time"), GLOW_COLOR, 2);
+		FxManager.AddGlow(mc.FindSub("time"), GLOW_COLOR, 2); */
 
 		SetScore(0, 0);
 		SetScore(1, 0);
@@ -69,13 +69,14 @@ public class SoccerInterface
 	------------------------------------------------------------------------*/
 	void DestroyThis() {
 		mc.RemoveMovieClip();
+		mc=null;
 	}
 
 
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	void Update() {
+	void HammerUpdate() {
 	}
 }
 

@@ -54,7 +54,6 @@ public class Mover : Physics
 				fl_stable = false;
 			}
 			next=null;
-			//      fl_skipNextGravity = true ;
 		}
 	}
 
@@ -71,9 +70,9 @@ public class Mover : Physics
 	------------------------------------------------------------------------*/
 	protected override void OnHitGround(float h) {
 		if ( fl_bounce ) {
-			var b = bounceFactor*Mathf.Abs(dy??0) ;
+			var b = bounceFactor*Mathf.Abs(dy==null? 0:dy.Value) ;
 			if (b>=2) {
-				SetNext(dx,-b,0,Data.ACTION_MOVE) ;
+				SetNext(dx, b, 0, Data.ACTION_MOVE) ;
 				fl_skipNextGravity = true ;
 			}
 		}
@@ -91,7 +90,7 @@ public class Mover : Physics
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		// On agit comme on a pr�vu
 		if (next!=null) {
 			next.delay -= Loader.Instance.tmod;
@@ -100,6 +99,6 @@ public class Mover : Physics
 			}
 		}
 
-		base.Update() ;
+		base.HammerUpdate() ;
 	}
 }

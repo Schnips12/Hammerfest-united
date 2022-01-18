@@ -91,8 +91,8 @@ public class FireRain : Shoot
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 		if ( x<0 ) {
 			HitLevel();
 		}

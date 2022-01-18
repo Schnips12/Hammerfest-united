@@ -148,8 +148,10 @@ public class DepthManager
 		var plan_data = GetPlan(plan);
 		int i;
 		var p = plan_data.tbl;
-		for(i=0 ; i<plan_data.cur ; i++)
-			p[i].RemoveMovieClip();
+		for(i=0 ; i<plan_data.cur ; i++) {
+			p[0].RemoveMovieClip();
+			p.RemoveAt(0);
+		}
 		plan_data.cur = 0;
 	}
 

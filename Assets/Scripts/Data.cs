@@ -2,16 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Xml.Linq;
 
-public class Data : MonoBehaviour
+public class Data
 {
     public static Data Instance;
-    private void Awake() {
+    public Data() {
         if (Data.Instance == null) {
             Instance = this;
-        } else {
-            Destroy(this);
         }
     }
 
@@ -108,8 +107,8 @@ public class Data : MonoBehaviour
 	public static int VERTICAL		= 2;
 	public static float SCROLL_SPEED		= 0.04f; //0.05 ; // incr�ment cosinus
 	public static int FADE_SPEED			= 8;
-	public static int FIELD_TELEPORT		= -6; // id dans la map du level
-	public static int FIELD_PORTAL			= -7;
+	public const int FIELD_TELEPORT		= -6; // id dans la map du level
+	public const int FIELD_PORTAL			= -7;
 	public static int FIELD_GOAL_1			= -8;
 	public static int FIELD_GOAL_2			= -9;
 	public static int FIELD_BUMPER			= -10;
@@ -290,7 +289,7 @@ public class Data : MonoBehaviour
 	public static float FALL_FACTOR_DEAD = 1.75f;
 	public static float FALL_SPEED = 0.9f ; // ajout� au dy en descente
 	public static float STEP_MAX = CASE_WIDTH;
-	public static float DEATH_LINE = GAME_HEIGHT+50;
+	public static float DEATH_LINE = -50;
 
 	// *** FX
 	public static int MAX_FX				= 16;
@@ -506,11 +505,11 @@ public class Data : MonoBehaviour
 
 	public static int[] RAND_EXTENDS	= {10,10,6,5,5,10,4};
 
-	public static List<List<ItemFamilySet>> SPECIAL_ITEM_FAMILIES;
-	public static List<List<ItemFamilySet>> SCORE_ITEM_FAMILIES;
-	public static List<int> ITEM_VALUES;
-	public static List<int> FAMILY_CACHE;
-	public static List<PortalLink> LINKS;
+	public List<List<ItemFamilySet>> SPECIAL_ITEM_FAMILIES;
+	public List<List<ItemFamilySet>> SCORE_ITEM_FAMILIES;
+	public List<int> ITEM_VALUES;
+	public List<int> FAMILY_CACHE;
+	public List<PortalLink> LINKS;
     public struct LevelTag {
         public string name;
         public int did;
@@ -523,15 +522,16 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	INITALISATION
 	------------------------------------------------------------------------*/
-	static void Init(GameManager m) {
-		manager = m ;
+	public void Init() {
 		SPECIAL_ITEM_FAMILIES	= Xml_readSpecialItems();
 		SCORE_ITEM_FAMILIES		= Xml_readScoreItems();
 		FAMILY_CACHE			= CacheFamilies();
 		ITEM_VALUES				= GetScoreItemValues();
 		LINKS					= Xml_readPortalLinks();
 	}
-
+	public void SetManager(GameManager m) {
+		manager = m ;
+	}
 
 
 	/*------------------------------------------------------------------------
@@ -581,11 +581,13 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	READS XML ITEMS DATA
 	------------------------------------------------------------------------*/
-	static List<List<ItemFamilySet>> Xml_readFamily(string xmlName) { // note: append leading "$" for obfuscator
+	List<List<ItemFamilySet>> Xml_readFamily(string xmlName) { // note: append leading "$" for obfuscator
 		var tab = new List<List<ItemFamilySet>>();
 		string raw = Loader.Instance.root.ReadFile(xmlName);
 
         XDocument doc = XDocument.Parse(raw);
+		doc.DescendantNodes().OfType<XComment>().Remove();
+
 		XElement node = doc.FirstNode as XElement;
 		if (node.Name != "items") {
 			GameManager.Fatal("XML error ("+xmlName+" @ "+Cookie.NAME+"): invalid node '"+node.Name+"'");
@@ -596,20 +598,23 @@ public class Data : MonoBehaviour
 		while (family != null) {
 			XElement item = family.FirstNode as XElement;
 			int fid = Int32.Parse(family.Attribute("id").Value);
-            while(tab.Count < fid) {
-                tab.Add(null);
+            while(tab.Count <= fid) {
+                tab.Add(new List<ItemFamilySet>());
             }
 			tab[fid] = new List<ItemFamilySet>();
 			while (item != null) {
                 ItemFamilySet temp = new ItemFamilySet();
 				temp.id	= Int32.Parse(item.Attribute("id").Value);
 				temp.r	= Data.RARITY[Int32.Parse(item.Attribute("rarity").Value)];
-				temp.v	= Int32.Parse(item.Attribute("value").Value);
+
+				if (item.Attribute("value")!=null && item.Attribute("value").Value!="--") {
+					temp.v	= Int32.Parse(item.Attribute("value").Value);
+				} else {
+					temp.v = 0;
+				}
+
                 temp.name = Lang.GetItemName(temp.id);
 
-				/* if ( value==null ) {
-					value=0;
-				} */
 				tab[fid].Add(temp);
 				item = item.NextNode as XElement;
 			}
@@ -618,12 +623,12 @@ public class Data : MonoBehaviour
 		return tab;
 	}
 
-	static List<List<ItemFamilySet>> Xml_readSpecialItems() {
-		return Xml_readFamily("xml_specialItems");
+	List<List<ItemFamilySet>> Xml_readSpecialItems() {
+		return Xml_readFamily("specialItems.xml");
 	}
 
-	static List<List<ItemFamilySet>> Xml_readScoreItems() {
-		return Xml_readFamily("xml_scoreItems");
+	List<List<ItemFamilySet>> Xml_readScoreItems() {
+		return Xml_readFamily("scoreItems.xml");
 	}
 
 
@@ -635,7 +640,7 @@ public class Data : MonoBehaviour
 		for (int i=0 ; i < familiesId.Count ; i++) {
 			List<ItemFamilySet> family = familySet[familiesId[i]];
 			for (int n=0 ; n < family.Count ; n++) {
-                while(tab.Count < family[n].id) {
+                while(tab.Count <= family[n].id) {
                     tab.Add(0);
                 }
 				tab[family[n].id] = family[n].r;
@@ -648,12 +653,12 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	EXTRACTS SCORE VALUES FROM FAMILIES
 	------------------------------------------------------------------------*/
-	public static List<int> GetScoreItemValues() {
+	List<int> GetScoreItemValues() {
 		List<int> tab = new List<int>();
-		for (int i=0 ; i < Data.SCORE_ITEM_FAMILIES.Count ; i++) {
-			List<ItemFamilySet> family = Data.SCORE_ITEM_FAMILIES[i];
+		for (int i=0 ; i < SCORE_ITEM_FAMILIES.Count ; i++) {
+			List<ItemFamilySet> family = SCORE_ITEM_FAMILIES[i];
 			for (int n=0 ; n < family.Count ; n++) {
-                while (tab.Count < family[n].id) {
+                while (tab.Count <= family[n].id) {
                     tab.Add(0);
                 }
 				tab[family[n].id] = family[n].v;
@@ -667,13 +672,13 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	G�N�RE LA TABLE DE CORRESPONDANCE ITEM -> FAMILLE
 	------------------------------------------------------------------------*/
-	static List<int> CacheFamilies() {
+	List<int> CacheFamilies() {
 		List<int> tab = new List<int>();
 
 		for (int fid=0 ; fid<SPECIAL_ITEM_FAMILIES.Count ; fid++) {
 			List<ItemFamilySet> f = SPECIAL_ITEM_FAMILIES[fid];
 			for (int i=0 ; i  <f.Count ; i++) {
-                while(tab.Count < f[i].id) {
+                while(tab.Count <= f[i].id) {
                     tab.Add(0);
                 }
 				tab[f[i].id] = fid;
@@ -683,7 +688,7 @@ public class Data : MonoBehaviour
 		for (int fid=0;fid<SCORE_ITEM_FAMILIES.Count;fid++) {
 			List<ItemFamilySet> f = SCORE_ITEM_FAMILIES[fid];
 			for (int i=0 ; i < f.Count ; i++) {
-                while(tab.Count < f[i].id) {
+                while(tab.Count <= f[i].id) {
                     tab.Add(0);
                 }
 				tab[f[i].id] = fid;
@@ -733,10 +738,9 @@ public class Data : MonoBehaviour
 	------------------------------------------------------------------------*/
 	static List<PortalLink> Xml_readPortalLinks() {
 		List<PortalLink> list = new List<PortalLink>();
-		string raw = Loader.Instance.root.ReadFile("xml_portalLinks");
+		string raw = Loader.Instance.root.ReadFile("portalLinks.xml");
 
 		XDocument doc = XDocument.Parse(raw);
-		//doc.ignoreWhite = true;
 		XElement node = doc.FirstNode as XElement;
 		if ( node.Name!="links") {
 			GameManager.Fatal("XML error (xml_portals @ "+Cookie.NAME+"): invalid node '"+node.Name+"'");
@@ -758,8 +762,8 @@ public class Data : MonoBehaviour
             temptag.lid = Int32.Parse(tag.Attribute("lid").Value);
 			tag = tag.NextNode as XElement;
 		}
-		node = node.NextNode as XElement;
-		if (node.Name!="ways") {
+		node = node.NextNode.NextNode as XElement;
+		if (node==null || node.Name!="ways") {
 			GameManager.Fatal("xml_readPortalLinks: unknown node "+node.Name);
 			return null;
 		}
@@ -972,6 +976,7 @@ public class Data : MonoBehaviour
 		return final;
 	}
 
+
 	/*------------------------------------------------------------------------
 	GROUPEMENT PAR 3 CHIFFRES
 	------------------------------------------------------------------------*/
@@ -980,7 +985,7 @@ public class Data : MonoBehaviour
 		// Groupement des chiffres
 		if (txt.IndexOf("-") < 0) {
 			for (int i=txt.Length-3 ; i > 0 ; i-=3) {
-				txt = txt.Substring(0,i)+"."+txt.Substring(i,txt.Length);
+				txt = txt.Substring(0,i)+"."+txt.Substring(i,txt.Length-i);
 			}
 		}
 		return txt;
@@ -994,11 +999,11 @@ public class Data : MonoBehaviour
 	/*------------------------------------------------------------------------
 	RENVOIE LE LINK CORRESPONDANT � UN PORTAL DONN�
 	------------------------------------------------------------------------*/
-	public static PortalLink GetLink(int did, int lid, int pid) {
+	public PortalLink GetLink(int did, int lid, int pid) {
         PortalLink link = null;
         int i=0;
-		while (i < Data.LINKS.Count & link == null) {
-			PortalLink l = Data.LINKS[i];
+		while (i < LINKS.Count & link == null) {
+			PortalLink l = LINKS[i];
 			if (l.from_did == did & l.from_lid == lid & l.from_pid == pid ) {
 				link = l;
 			}

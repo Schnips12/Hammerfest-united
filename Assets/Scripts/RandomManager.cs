@@ -14,7 +14,6 @@ public class RandomManager
 	------------------------------------------------------------------------*/
 	public RandomManager() {
 		bulks		= new List<List<int>>();
-		expanded	= new List<List<int>>();
 		sums 		= new List<int>();
 	}
 
@@ -28,7 +27,6 @@ public class RandomManager
         }
 		bulks[id] = new List<int>(bulk);
 		ComputeSum(id);
-//		expand(id);
 	}
 
 
@@ -41,25 +39,13 @@ public class RandomManager
         }
 		sums[id]=0;
 		for (int i=0 ; i < bulks[id].Count ; i++) {
-			if (bulks[id].Count < i+1) {
+			/* if (bulks[id].Count < i+1) {
 				bulks[id].Add(0);
-			}
+			} */
 			sums[id] += bulks[id][i];
 		}
 	}
 
-
-	/*------------------------------------------------------------------------
-	CR�ATION DU CACHE
-	------------------------------------------------------------------------*/
-	void Expand(int id) {
-		expanded[id] = new List<int>();
-		for (int i=0 ; i < bulks[id].Count ; i++) {
-			for (int j=0 ; j < bulks[id][i] ; j++) {
-				expanded[id].Add(i);
-			}
-		}
-	}
 
 
 	/*------------------------------------------------------------------------
@@ -83,13 +69,10 @@ public class RandomManager
 		}
 
 		if (!isDrawn) {
-			GameManager.Warning("null draw in array "+id);
+			GameManager.Warning("null draw in array ");
 		}
 
 		return result;
-
-		// deprecated expanded system
-//		return expanded[id][ Std.random(expanded[id].length) ];
 	}
 
 
@@ -97,11 +80,6 @@ public class RandomManager
 	RENVOIE LES CHANCES DE TIRER LA VALEUR DONNéE (ratio / 1)
 	------------------------------------------------------------------------*/
 	public float EvaluateChances(int id, int value) {
-//		var chance	= 1;
-//		var tab		= bulks[id];
-//		var i		= 0;
-//		var sum		= 0;
-//		var total	= sums[id];
 		Debug.Log("item="+value);
 		Debug.Log(bulks[id][value]);
 		Debug.Log(sums[id]);
@@ -113,7 +91,6 @@ public class RandomManager
 		bulks[rid][id] = 0;
 		ComputeSum(rid);
 	}
-
 
 
 	void DrawSpecial() {

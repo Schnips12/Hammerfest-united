@@ -110,8 +110,8 @@ public class Coward : Jumper
 	------------------------------------------------------------------------*/
 	bool DecideClimb() {
 		var fl_stairway =
-			( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_LEFT) & world.GetCase(cx-1, cy-1)<=0 ) |
-			( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT) & world.GetCase(cx+1, cy-1)<=0 );
+			( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_LEFT) & world.GetCase(cx-1, cy+1)<=0 ) |
+			( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT) & world.GetCase(cx+1, cy+1)<=0 );
 
 		var fl_danger =
 			fleeTimer>0 & player.cy<cy &
@@ -201,8 +201,8 @@ public class Coward : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 		if ( IsHealthy() & fleeTimer>0 ) {
 			if ( !fl_stick ) {
 				var mc = game.depthMan.Attach("curse", Data.DP_FX) ;
@@ -216,7 +216,7 @@ public class Coward : Jumper
 
 		// Timer de fuite
 		if ( fleeTimer>0 ) {
-			fleeTimer-=Time.deltaTime;
+			fleeTimer-=Loader.Instance.tmod;
 			if ( fleeTimer<=0 ) {
 				EndFlee();
 			}

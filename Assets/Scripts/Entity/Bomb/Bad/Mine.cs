@@ -154,8 +154,8 @@ public class Mine : BadBomb
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 
 		// Activation � l'atterrissage
 		if (fl_stable & !fl_plant) {

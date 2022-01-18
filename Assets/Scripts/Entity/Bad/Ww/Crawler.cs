@@ -271,13 +271,13 @@ public class Crawler : WallWalker
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		if ( fl_attack ) {
 			dx = 0;
 			dy = 0;
 		}
 
-		base.Update();
+		base.HammerUpdate();
 
 		// Cooldown d'attaque
 		if ( attackCD>0 ) {
@@ -292,7 +292,7 @@ public class Crawler : WallWalker
 		}
 
 		if ( fl_attack & attackTimer>0 ) {
-			attackTimer-=Time.deltaTime;
+			attackTimer-=Loader.Instance.tmod;
 			if ( attackTimer<=0 ) {
 				Attack();
 			}

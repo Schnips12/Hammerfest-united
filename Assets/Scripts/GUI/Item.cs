@@ -47,7 +47,7 @@ public class Item : MovieClip
 	}
 
 
-	public virtual void Update() {
+	public virtual void HammerUpdate() {
 	}
 }
 

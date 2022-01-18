@@ -35,17 +35,19 @@ public class Item : Physics
 	------------------------------------------------------------------------*/
 	protected virtual void InitItem(GameMode g, float x, float y, int id, int? subId) {
 		Init(g);
-		MoveTo(x,y);
+		MoveTo(x, y);
 		this.id = id;
-		this.subId = subId ;
-		if ( id>=1000 ) {
-			this.GotoAndStop(id-1000+1) ;
+		this.subId = subId;
+		if(subId==null) {
+			GotoAndStop(id+1) ;
+		} else {
+			GotoAndStop(subId.Value+1);
 		}
-		else {
-			this.GotoAndStop(id+1) ;
+		if (fl_anim) {
+			Play();
 		}
-		this.subs[0].GotoAndStop(subId??0 + 1) ;
-		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT,"hammer_fx_shine") ;
+
+		game.fxMan.AttachFx(x,y+Data.CASE_HEIGHT,"hammer_fx_shine") ;
 		EndUpdate() ;
 	}
 
@@ -63,7 +65,7 @@ public class Item : Physics
 	------------------------------------------------------------------------*/
 	protected override void OnDeathLine() {
 		base.OnDeathLine() ;
-		MoveTo(x, -30) ;
+		MoveTo(x, Data.GAME_HEIGHT+30) ;
 		dy = 0 ;
 	}
 
@@ -73,7 +75,7 @@ public class Item : Physics
 	------------------------------------------------------------------------*/
 	protected override void OnLifeTimer() {
 		base.OnLifeTimer() ;
-		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT/2,"hammer_fx_pop") ;
+		game.fxMan.AttachFx(x,y+Data.CASE_HEIGHT/2,"hammer_fx_pop") ;
 		game.soundMan.PlaySound("sound_pop",Data.CHAN_ITEM);
 	}
 
@@ -81,8 +83,8 @@ public class Item : Physics
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update() ;
+	public override void HammerUpdate() {
+		base.HammerUpdate() ;
 	}
 
 }

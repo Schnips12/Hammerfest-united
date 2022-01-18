@@ -82,7 +82,7 @@ public abstract class Bad : Mover
 	------------------------------------------------------------------------*/
 	protected virtual void InitBad(GameMode g,float x, float y) {
 		Init(g);
-		MoveTo(x+Data.CASE_WIDTH*0.5f, y+Data.CASE_HEIGHT) ; // colle les bads au sol
+		MoveTo(x, y) ; // colle les bads au sol
 		EndUpdate();
 	}
 
@@ -115,7 +115,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	MORT SUR PLACE
 	------------------------------------------------------------------------*/
-	public void Burn() {
+	public virtual void Burn() {
 		var fx = game.fxMan.AttachFx(x, y, "hammer_fx_burning" );
 		DropReward() ;
 		OnKill();
@@ -256,7 +256,7 @@ public abstract class Bad : Mover
 			itY = y;
 		}
 		else {
-			itY = -30;
+			itY = Data.LEVEL_HEIGHT+30;
 		}
 
 		if (comboId!=null) {
@@ -265,7 +265,7 @@ public abstract class Bad : Mover
 			if ( n+1 > game.statsMan.Read(Data.STAT_MAX_COMBO)) {
 				game.statsMan.Write(Data.STAT_MAX_COMBO, n+1);
 			}
-			ScoreItem.Attach(game, x, itY, 0,n);
+			ScoreItem.Attach(game, x, itY, 0, n);
 		}
 		else {
 			// Diamant
@@ -290,7 +290,10 @@ public abstract class Bad : Mover
 //		if ( (types&Data.BAD_CLEAR)>0 ) {
 //			game.checkLevelClear();
 //		}
-		iceMc.RemoveMovieClip();
+		if (iceMc != null) {
+			iceMc.RemoveMovieClip();
+			iceMc = null;
+		}
 	}
 
 
@@ -331,6 +334,7 @@ public abstract class Bad : Mover
 	------------------------------------------------------------------------*/
 	protected virtual void OnMelt() {
 		iceMc.RemoveMovieClip();
+		iceMc=null;
 	}
 
 
@@ -347,7 +351,7 @@ public abstract class Bad : Mover
 	------------------------------------------------------------------------*/
 	protected virtual void OnFreeze() {
 		PlayAnim(Data.ANIM_BAD_FREEZE);
-		if ( iceMc._name==null ) {
+		if (iceMc==null) {
 			iceMc = game.depthMan.Attach("hammer_bad_ice", Data.DP_BADS);
 		}
 	}
@@ -524,6 +528,9 @@ public abstract class Bad : Mover
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
 	public override void EndUpdate() {
+		if (united==null) {
+			return;
+		}
 		if ( fl_ninFriend || fl_ninFoe ) {
 			if( IsHealthy() & sticker._name==null ) {
 				var mc = game.depthMan.Attach("hammer_interf_ninjaIcon", Data.DP_BADS);
@@ -583,7 +590,7 @@ public abstract class Bad : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		if ( player==null ) {
 			Hate(game.GetOne(Data.PLAYER) as Player);
 		}
@@ -605,7 +612,7 @@ public abstract class Bad : Mover
 
 		// Freez�
 		if ( freezeTimer>0 ) {
-			freezeTimer-=Time.deltaTime;
+			freezeTimer-=Loader.Instance.tmod;
 			if ( freezeTimer<=0 ) {
 				Melt();
 			}
@@ -614,7 +621,7 @@ public abstract class Bad : Mover
 
 		// Fix: mort forc�e (utile ?)
 		if ( deathTimer>0 ) {
-			deathTimer-=Time.deltaTime;
+			deathTimer-=Loader.Instance.tmod;
 			if ( deathTimer<=0 ) {
 				game.fxMan.AttachExplosion(x,y,80);
 				y = 1000;
@@ -624,13 +631,13 @@ public abstract class Bad : Mover
 
 		// Sonn�
 		if ( knockTimer>0 ) {
-			knockTimer-=Time.deltaTime;
+			knockTimer-=Loader.Instance.tmod;
 			if ( knockTimer<=0 ) {
 				WakeUp();
 			}
 		}
 
-		base.Update();
+		base.HammerUpdate();
 
 		// R�-active le contact au sol qui avait �t� d�sactiv�
 		if ( yTrigger!=null && !fl_kill ) {

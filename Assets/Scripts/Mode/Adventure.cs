@@ -108,7 +108,7 @@ public class Adventure : GameMode
 	/*------------------------------------------------------------------------
 	ATTACHEMENT BAD: GESTION DU PERFECT ORDER POUR LE SUPA ITEM
 	------------------------------------------------------------------------*/
-	Bad AttachBad(int id, int x, int y) {
+	public override Bad AttachBad(int id, float x, float y) {
 		Bad b = base.AttachBad(id, x, y);
 		if ( (b.types & Data.BAD_CLEAR) > 0 ) {
 			perfectOrder.Add(b.uniqId);
@@ -197,7 +197,7 @@ public class Adventure : GameMode
 		if (fl_warpStart) {
 			world.currentId = 0;
 			Unlock();
-			world.view.Detach();
+			world.view.TimedDetach();
 			ForcedGoto(10);
 		}
 	}
@@ -346,7 +346,7 @@ public class Adventure : GameMode
 	public override MovieClip OnHurryUp() {
 		MovieClip mc = base.OnHurryUp();
 		if ( GameManager.CONFIG.HasMusic() & currentTrack==0 ) {
-			PlayMusic(2);
+			PlayMusic(1);
 		}
 		return mc;
 	}
@@ -357,7 +357,7 @@ public class Adventure : GameMode
 	------------------------------------------------------------------------*/
 	public override void ResetHurry() {
 		base.ResetHurry();
-		if ( currentTrack==2 ) {
+		if ( currentTrack==1 ) {
 			PlayMusic(0);
 		}
 	}

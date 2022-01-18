@@ -103,8 +103,8 @@ public class BossFireBall : Shoot
 	/*------------------------------------------------------------------------
 	PR�FIXE DE STEPPING
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 
 		var ocx = cx;
 		var ocy = cy;

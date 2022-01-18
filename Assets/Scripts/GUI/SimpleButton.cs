@@ -112,7 +112,7 @@ public class SimpleButton : Item
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		if ( container.fl_lock ) {
 			return;
 		}

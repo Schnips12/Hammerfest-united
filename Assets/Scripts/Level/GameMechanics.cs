@@ -40,6 +40,8 @@ public class GameMechanics : ViewManager
 			}
 		}
 
+		_iteration = new Vector2Int(0, Data.LEVEL_HEIGHT-1);
+
 		//triggers = Entity[LEVEL_WIDTH, LEVEL_HEIGHT, 1]; // TODO fix length
 	}
 
@@ -134,7 +136,7 @@ public class GameMechanics : ViewManager
 		while(fl_visited.Count <= currentId) {
 			fl_visited.Add(false);
 		}
-		return fl_visited[currentId]==true;
+		return fl_visited[currentId];
 	}
 
 
@@ -146,7 +148,7 @@ public class GameMechanics : ViewManager
 	------------------------------------------------------------------------*/
 	void ResetIA() {
 		fl_currentIA = false;
-		//_iteration = new _iteration();
+		_iteration = new Vector2Int(0, Data.LEVEL_HEIGHT-1);
 		flagMap = new List<List<int>>();
 		fallMap = new List<List<int>>();
 
@@ -193,23 +195,22 @@ public class GameMechanics : ViewManager
 	------------------------------------------------------------------------*/
 	void ParseCurrentIA(ref Vector2Int it) {
 		var n=0 ;
-		var total = Data.LEVEL_WIDTH*Data.LEVEL_HEIGHT;
 		var cx = it.x;
 		var cy = it.y;
 
-		while (n<Data.MAX_ITERATION & cy<Data.LEVEL_HEIGHT) {
+		while (n<Data.MAX_ITERATION & cy>=0) {
 			var flags = 0 ;
 
 			// Dalle normale
-			if (GetCase(cx,cy+1)==Data.GROUND) {
+			if (GetCase(cx,cy-1)==Data.GROUND) {
 				flags |= Data.IA_TILE_TOP ;
 				// Zone de saut vers le haut
-				if (GetCase(cx,cy-Data.IA_VJUMP)==Data.GROUND & GetCase(cx, cy-Data.IA_VJUMP-1)<=0) {
+				if (GetCase(cx,cy+Data.IA_VJUMP)==Data.GROUND & GetCase(cx, cy+Data.IA_VJUMP+1)<=0) {
 					flags |= Data.IA_JUMP_UP ;
 				}
 			}
 
-			if (GetCase(cx,cy)==Data.GROUND && GetCase(cx,cy-1)<=0) {
+			if (GetCase(cx,cy)==Data.GROUND && GetCase(cx,cy+1)<=0) {
 				flags |= Data.IA_TILE ;
 			}
 
@@ -217,32 +218,32 @@ public class GameMechanics : ViewManager
 			var fallHeight = _checkSecureFall(cx,cy) ;
 			fallMap[cx][cy] = fallHeight;
 			if (fallHeight>=0) {
-				flags |= Data.IA_ALLOW_FALL ;
+				flags |= Data.IA_ALLOW_FALL;
 			}
 
 			// Point de saut vertical, vers le bas (on est sous une dalle)
-			if (GetCase(cx,cy)==0 & GetCase(cx,cy+1)==Data.GROUND) {
-				fallHeight = _checkSecureFall(cx,cy+2) ;
+			if (GetCase(cx,cy)==0 & GetCase(cx,cy-1)==Data.GROUND) {
+				fallHeight = _checkSecureFall(cx,cy-2) ;
 				if (fallHeight>=0) {
 					flags |= Data.IA_JUMP_DOWN ;
 				}
 			}
 
 			// Bord de dalle
-			if (GetCase(cx,cy+1)==Data.GROUND &
-			(GetCase(cx-1,cy+1)<=0 | GetCase(cx+1,cy+1)<=0)) {
-				flags |= Data.IA_BORDER ;
+			if (GetCase(cx,cy-1)==Data.GROUND &
+			(GetCase(cx-1,cy-1)<=0 | GetCase(cx+1,cy-1)<=0)) {
+				flags |= Data.IA_BORDER;
 			}
 
-			// Case en bord de dalle d'o� les bads peuvent se laisser tomber
-			if (GetCase(cx,cy+1)<=0 &
-			(GetCase(cx-1,cy+1)==Data.GROUND | GetCase(cx+1,cy+1)==Data.GROUND)) {
+			// Case en bord de dalle d'où les bads peuvent se laisser tomber
+			if (GetCase(cx,cy-1)<=0 &
+			(GetCase(cx-1,cy-1)==Data.GROUND | GetCase(cx+1,cy-1)==Data.GROUND)) {
 				flags |= Data.IA_FALL_SPOT ;
 			}
 
 			// Petite dalle merdique
 			if ((flags & Data.IA_BORDER)>0) {
-				if (GetCase(cx-1,cy+1)!=Data.GROUND & GetCase(cx+1,cy+1)!=Data.GROUND) {
+				if (GetCase(cx-1,cy-1)!=Data.GROUND & GetCase(cx+1,cy-1)!=Data.GROUND) {
 					flags |= Data.IA_SMALL_SPOT ;
 				}
 			}
@@ -253,7 +254,7 @@ public class GameMechanics : ViewManager
 				var maxHeight=1;
 				var d=1;
 				while (d<=5) {
-					if (GetCase(cx,cy-d)<=0) {
+					if (GetCase(cx,cy+d)<=0) {
 						maxHeight++;
 					}
 					else {
@@ -265,15 +266,15 @@ public class GameMechanics : ViewManager
 				if (maxHeight>0) {
 					// Gauche
 					if (GetCase(cx-1,cy)>0) {
-						var h = GetWallHeight(cx-1,cy, Data.IA_CLIMB);
-						if (h!=-1 & h<maxHeight & cy-h>=0) {
+						var h = GetWallHeight(cx-1, cy, Data.IA_CLIMB);
+						if (h!=-1 & h<maxHeight & cy+h<=Data.LEVEL_HEIGHT) {
 							flags |= Data.IA_CLIMB_LEFT;
 						}
 					}
 					// Droite
 					if (GetCase(cx+1,cy)>0) {
-						var h = GetWallHeight(cx+1,cy, Data.IA_CLIMB);
-						if (h!=-1 & h<maxHeight & cy-h>=0) {
+						var h = GetWallHeight(cx+1, cy, Data.IA_CLIMB);
+						if (h!=-1 & h<maxHeight & cy+h<=Data.LEVEL_HEIGHT) {
 							flags |= Data.IA_CLIMB_RIGHT;
 						}
 					}
@@ -287,7 +288,7 @@ public class GameMechanics : ViewManager
 				var maxHeight=1;
 				var d=1;
 				while (d<=5) {
-					if (GetCase(cx,cy-d)<=0) {
+					if (GetCase(cx,cy+d)<=0) {
 						maxHeight++;
 					}
 					else {
@@ -300,19 +301,19 @@ public class GameMechanics : ViewManager
 
 				if (maxHeight>0) {
 					// Gauche
-					if (GetCase(cx+1,cy+1)==Data.GROUND) {
+					if (GetCase(cx+1,cy-1)==Data.GROUND) {
 						int h = GetStepHeight(cx,cy, Data.IA_CLIMB);
 						if (h!=-1 & h<maxHeight) {
-							if (CheckFlag(new Vector2Int(cx, cy-h), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx+1, cy-h), Data.IA_FALL_SPOT)) {
+							if (CheckFlag(new Vector2Int(cx, cy+h), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx+1, cy+h), Data.IA_FALL_SPOT)) {
 								flags |= Data.IA_CLIMB_LEFT;
 							}
 						}
 					}
 					// Droite
-					if (GetCase(cx-1,cy+1)==Data.GROUND) {
+					if (GetCase(cx-1,cy-1)==Data.GROUND) {
 						int h = GetStepHeight(cx,cy, Data.IA_CLIMB);
 						if (h!=-1 & h<maxHeight) {
-							if (CheckFlag(new Vector2Int(cx, cy-h), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx-1, cy-h), Data.IA_FALL_SPOT)) {
+							if (CheckFlag(new Vector2Int(cx, cy+h), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx-1, cy+h), Data.IA_FALL_SPOT)) {
 								flags |= Data.IA_CLIMB_RIGHT;
 							}
 						}
@@ -324,26 +325,26 @@ public class GameMechanics : ViewManager
 			// Sous-catégories de bords de dalle
 			if ((flags & Data.IA_FALL_SPOT)>0) {
 				// Saut à gauche
-				if (GetCase(cx+1,cy+1)==Data.GROUND & GetCase(cx-Data.IA_HJUMP,cy+1)==Data.GROUND) {
+				if (GetCase(cx+1,cy-1)==Data.GROUND & GetCase(cx-Data.IA_HJUMP,cy-1)==Data.GROUND) {
 					if (GetCase(cx-1,cy)<=0) {
 						flags |= Data.IA_JUMP_LEFT ;
 					}
 				}
 				// Saut à droite
-				if (GetCase(cx-1,cy+1)==Data.GROUND & GetCase(cx+Data.IA_HJUMP,cy+1)==Data.GROUND) {
+				if (GetCase(cx-1,cy-1)==Data.GROUND & GetCase(cx+Data.IA_HJUMP,cy-1)==Data.GROUND) {
 					if (GetCase(cx+1,cy)<=0) {
 						flags |= Data.IA_JUMP_RIGHT ;
 					}
 				}
 			}
 
-			flagMap[cx][cy] = flags ;
+			flagMap[cx][cy] = flags;
 
 			// Case suivante
 			cx++;
 			if (cx>=Data.LEVEL_WIDTH) {
 				cx=0;
-				cy++;
+				cy--;
 			}
 			n++;
 		}
@@ -370,19 +371,19 @@ public class GameMechanics : ViewManager
 		// Optimisations
 		if (current.GetCase(cx, cy)==Data.GROUND)			return -1 ;
 		if (current.GetCase(cx, cy)==Data.WALL)				return -1 ;
-		if(cy>0) {
-			if ((flagMap[cx][cy-1] & Data.IA_ALLOW_FALL)>0)		return fallMap[cx][cy-1]-1;
+		if (cy<Data.LEVEL_HEIGHT-1) {
+			if ((flagMap[cx][cy+1] & Data.IA_ALLOW_FALL)>0)		return fallMap[cx][cy+1]-1;
 		}	
 
 		secure = false;
-		i = cy+1;
+		i = cy-1;
 		h = 0;
-		while (!secure & i<Data.LEVEL_HEIGHT & cx >= 0 & cx<Data.LEVEL_WIDTH) {
+		while (!secure & i>=0 & cx >= 0 & cx<Data.LEVEL_WIDTH) {
 			if (current.GetCase(cx, i) == Data.GROUND) {
 				secure = true;
 			}
 			else {
-				i++;
+				i--;
 				h++;
 			}
 		}
@@ -401,7 +402,7 @@ public class GameMechanics : ViewManager
 	------------------------------------------------------------------------*/
 	public int GetWallHeight(int cx, int cy, int max) {
 		int h=0;
-		while (GetCase(cx,cy-h)>0 & h<max) {
+		while (GetCase(cx,cy+h)>0 & h<max) {
 			h++;
 		}
 		if (h>=max) {
@@ -416,7 +417,7 @@ public class GameMechanics : ViewManager
 	------------------------------------------------------------------------*/
 	public int GetStepHeight(int cx, int cy, int max) {
 		int h=0;
-		while (GetCase(cx,cy-h)<=0  &  h<max) {
+		while (GetCase(cx,cy+h)<=0  &  h<max) {
 			h++;
 		}
 		h++;
@@ -432,15 +433,25 @@ public class GameMechanics : ViewManager
 	EVENT: DONNéES LUES, PRêT POUR LE SCROLLING
 	------------------------------------------------------------------------*/
 	protected override void OnDataReady() {
-		Debug.Log("Data ready.");
 		base.OnDataReady();
 		scriptEngine.Compile();
+		scriptEngine.RunScript();
 	}
 
 	/*------------------------------------------------------------------------
 	EVENT: PARSE MAP IA TERMINé
 	------------------------------------------------------------------------*/
 	void OnParseIAComplete() {
+		string visualFlags = "";
+		for (int i=Data.LEVEL_HEIGHT-1; i>=0 ; i--) {
+			for (int j=0; j<Data.LEVEL_WIDTH ; j++) {
+				visualFlags+=flagMap[j][i]+"\t";
+			}
+			visualFlags+="\n";
+		}
+		Debug.Log(visualFlags);
+
+
 		fl_parsing = false;
 		fl_currentIA = true;
 		CheckDataReady();
@@ -655,8 +666,8 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 
 		// Analyse (IA) niveau en cours si on a la main et que ca n'est pas déjà fait
 		if (fl_parsing) {
@@ -664,7 +675,7 @@ public class GameMechanics : ViewManager
 		}
 
 		if (!fl_lock) {
-			scriptEngine.Update();
+			scriptEngine.HammerUpdate();
 		}
 
 		// Flottement des fields Portal
@@ -672,15 +683,15 @@ public class GameMechanics : ViewManager
 			var p = portalList[i];
 			p.mc._y = p.y + 3*Mathf.Sin(p.cpt);
 			p.cpt += Loader.Instance.tmod*0.1f;
-/* 			if ( Random.Range(0, 5)==0 ) {
-				var a = game.fxMan.AttachFx( // TODO FXMan
+			if ( Random.Range(0, 5)==0 ) {
+				var a = game.fxMan.AttachFx(
 					p.x + Data.CASE_WIDTH*0.5f + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
 					p.y + Data.CASE_WIDTH*0.5f + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
 					"hammer_fx_star"
 				);
 				a.mc._xscale	= Random.Range(0, 70)+30;
 				a.mc._yscale	= a.mc._xscale;
-			} */
+			}
 		}
 	}
 }

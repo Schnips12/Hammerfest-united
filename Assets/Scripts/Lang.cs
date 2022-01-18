@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 using System.Xml.Linq;
 using System;
 
@@ -21,6 +22,7 @@ public class Lang
 	------------------------------------------------------------------------*/
 	public static void Init(string raw) {
 		XDocument docXml = XDocument.Parse(raw);
+		docXml.DescendantNodes().OfType<XComment>().Remove();
 //		doc = new Xml( raw ).firstChild;
 		//docXml.ignoreWhite = true;
 		//docXml.parseXML( raw );
@@ -33,31 +35,51 @@ public class Lang
 		strList.Add("id = 0");
         XElement hold = firstnode.Element("statics");
         foreach (XElement tempnode in hold.Descendants()) {
-            strList.Add(tempnode.Attribute("v").Value);
+			int id = Int32.Parse(tempnode.Attribute("id").Value);
+			while(strList.Count <= id) {
+				strList.Add("");
+			}
+            strList[id] = tempnode.Attribute("v").Value;
         }
 
         itemNames = new List<string>();
         hold = firstnode.Element("items");
         foreach (XElement tempnode in hold.Descendants()) {
-            itemNames.Add(tempnode.Attribute("name").Value);
+			int id = Int32.Parse(tempnode.Attribute("id").Value);
+			while(itemNames.Count <= id) {
+				itemNames.Add("");
+			}
+            itemNames[id] = tempnode.Attribute("name").Value;
         }
 
         familyNames = new List<string>();
         hold = firstnode.Element("families");
         foreach (XElement tempnode in hold.Descendants()) {
-            familyNames.Add(tempnode.Attribute("name").Value);
+			int id = Int32.Parse(tempnode.Attribute("id").Value);
+			while(familyNames.Count <= id) {
+				familyNames.Add("");
+			}
+            familyNames[id] = tempnode.Attribute("name").Value;
         }
 
         questNames = new List<string>();
         hold = firstnode.Element("quests");
         foreach (XElement tempnode in hold.Descendants()) {
-            questNames.Add(tempnode.Attribute("title").Value);
+			int id = Int32.Parse(tempnode.Attribute("id").Value);
+			while(questNames.Count <= id) {
+				questNames.Add("");
+			}
+            questNames[id] = tempnode.Attribute("title").Value;
         }
 
         keyNames = new List<string>();
         hold = firstnode.Element("keys");
         foreach (XElement tempnode in hold.Descendants()) {
-            keyNames.Add(tempnode.Attribute("name").Value);
+			int id = Int32.Parse(tempnode.Attribute("id").Value);
+			while(keyNames.Count <= id) {
+				keyNames.Add("");
+			}
+            keyNames[id] = tempnode.Attribute("name").Value;
         }
 
 		// Quest descriptions
@@ -65,7 +87,7 @@ public class Lang
 		XElement node = docXml.Element("quests");
 		while (node != null) {
 			int id	= Int32.Parse(node.Attribute("id").Value);
-            while(questDesc.Count < id) {
+            while(questDesc.Count <= id) {
                 questDesc.Add("");
             }
 			questDesc[id] = Data.CleanString((node.FirstNode as XElement).Value);
@@ -147,7 +169,7 @@ public class Lang
 
 	public static string GetLevelName(int did, int lid) {
         if (did < levelNames.Count) {
-            if (lid < levelNames.Count) {
+            if (lid < levelNames[did].Count) {
 			    return levelNames[did][lid];
             } else {
                 return "";

@@ -231,8 +231,8 @@ public class Jumper : Walker
 
 				// Descente d'une petite marche (hauteur 1)
 				if ( fl_fall & fl_climb ) {
-					if (	world.CheckFlag(new Vector2Int(cx, cy+1), Data.IA_CLIMB_LEFT ) ||
-							world.CheckFlag(new Vector2Int(cx, cy+1), Data.IA_CLIMB_RIGHT ) ) {
+					if (	world.CheckFlag(new Vector2Int(cx, cy-1), Data.IA_CLIMB_LEFT ) ||
+							world.CheckFlag(new Vector2Int(cx, cy-1), Data.IA_CLIMB_RIGHT ) ) {
 						fl_willFallDown = true;
 					}
 				}
@@ -241,12 +241,12 @@ public class Jumper : Walker
 
 					// Saut gauche
 					if ( dx<0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_JUMP_LEFT ) ) {
-						Jump( -Data.BAD_HJUMP_X, -Data.BAD_HJUMP_Y, 0);
+						Jump( -Data.BAD_HJUMP_X, Data.BAD_HJUMP_Y, 0);
 						AdjustToRight();
 					}
 					// Saut droite
 					if ( dx>0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_JUMP_RIGHT ) ) {
-						Jump( Data.BAD_HJUMP_X, -Data.BAD_HJUMP_Y, 0);
+						Jump( Data.BAD_HJUMP_X, Data.BAD_HJUMP_Y, 0);
 						AdjustToLeft();
 					}
 
@@ -306,7 +306,7 @@ public class Jumper : Walker
 			if ( fl_jUp ) {
 				if ( DecideJumpUp() ) {
 					if ( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_JUMP_UP) ) {
-						Jump( 0, -Data.BAD_VJUMP_Y, Data.SECOND);
+						Jump( 0, Data.BAD_VJUMP_Y, Data.SECOND);
 						fl_stopStepping = true;
 					}
 				}
@@ -316,7 +316,7 @@ public class Jumper : Walker
 			if ( fl_jDown ) {
 				if ( DecideJumpDown() ) {
 					if ( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_JUMP_DOWN) ) {
-						Jump( 0, -Data.BAD_VDJUMP_Y, Data.SECOND);
+						Jump( 0, Data.BAD_VDJUMP_Y, Data.SECOND);
 						fl_skipNextGround = true;
 						fl_stopStepping = true;
 					}

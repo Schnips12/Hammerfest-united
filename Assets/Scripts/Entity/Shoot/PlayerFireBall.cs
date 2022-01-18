@@ -51,8 +51,8 @@ public class PlayerFireBall : Shoot
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 
 		// Train�es
 		if ( Random.Range(0, 3)==0 ) {

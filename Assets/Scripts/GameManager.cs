@@ -8,6 +8,8 @@ public class GameManager : MonoBehaviour
 {
 	public static GameParameters CONFIG	= null;
 	public static Hashtable HH			= new Hashtable();
+	[SerializeField] public GameObject snapshot;
+	[SerializeField] public GameObject darkness;
 
 	public int uniq;
 
@@ -20,15 +22,16 @@ public class GameManager : MonoBehaviour
 
     // Start is called before the first frame update
     void Awake() {
-		Debug.Log("B"+Time.time);		
 		Loader.Instance.root.manager = this;
+		Data.Instance.Init();		
+		Data.Instance.SetManager(this);
 		history	= new List<string>();
 
 		// Dev mode
 		if (IsDev()) {
 			fl_debug = true;
 		}
-		if (IsTutorial()) {
+		if (true) { // TODO IsTutorial()
 			LogAction("using sysfam");
 			Loader.Instance.families= new List<string>(new string[4] {"0", "7", "1000", "18"});
 			if (IsDev()) {
@@ -224,7 +227,7 @@ public class GameManager : MonoBehaviour
 			return;
 		}
 		if (IsAdventure()) {
-			StartMode(new Adventure(this, 2)); // TODO Start at zéro !
+			StartMode(new Adventure(this, 0)); // TODO Start at zéro !
 			return;
 		}
 

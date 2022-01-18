@@ -246,14 +246,14 @@ public class Particle : Mover
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		if ( Mathf.Abs(dx??0)<=0.5 & pid!=Data.PARTICLE_BLOB ) {
-			lifeTimer-=Time.deltaTime;
+			lifeTimer-=Loader.Instance.tmod;
 			if ( lifeTimer<=0 ) {
 				OnLifeTimer();
 			}
 		}
-		base.Update();
+		base.HammerUpdate();
 	}
 
 }

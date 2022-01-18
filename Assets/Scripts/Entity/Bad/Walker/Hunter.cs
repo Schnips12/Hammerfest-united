@@ -114,13 +114,13 @@ public class Hunter : Jumper
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		if ( fl_hunt ) {
 			if ( IsReady() & !Close() ) {
 				UpdateSpeed();
 				fl_hunt = false;
 			}
 		}
-		base.Update();
+		base.HammerUpdate();
 	}
 }

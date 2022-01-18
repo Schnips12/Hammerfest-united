@@ -107,10 +107,10 @@ public class Framboise : Shooter
 		fb.DestroyThis();
 		if ( fb.CurrentFrame()>=5 ) {
 			if ( fb.CurrentFrame()==5 ) {
-				FindSub("o1")._visible = true;
+				FindSub("o1").SetActive(true);
 			}
 			else {
-				FindSub("o2")._visible = true;
+				FindSub("o2").SetActive(true);
 			}
 		}
 		else {
@@ -151,8 +151,8 @@ public class Framboise : Shooter
 		DisableAnimator();
 		this.GotoAndStop(15);
 		this.subs[0].Stop();
-		FindSub("o1")._visible = false;
-		FindSub("o2")._visible = false;
+		FindSub("o1").SetActive(false);
+		FindSub("o2").SetActive(false);
 		Hide();
 	}
 
@@ -231,7 +231,7 @@ public class Framboise : Shooter
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
+	public override void HammerUpdate() {
 		if ( !_visible ) {
 			MoveTo(100,-200);
 			if ( !IsHealthy() ) {
@@ -246,7 +246,7 @@ public class Framboise : Shooter
 			}
 		}
 
-		base.Update();
+		base.HammerUpdate();
 	}
 
 }

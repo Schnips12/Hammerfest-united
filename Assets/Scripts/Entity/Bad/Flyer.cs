@@ -233,8 +233,8 @@ public class Flyer : Bad
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void Update() {
-		base.Update();
+	public override void HammerUpdate() {
+		base.HammerUpdate();
 
 		// Collisions haut du niveau
 		if ( fl_fly & dy<0 & y<=Data.CASE_HEIGHT ) {
@@ -249,6 +249,9 @@ public class Flyer : Bad
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
 	public override void EndUpdate() {
+		if (united==null) {
+			return;
+		}
 		base.EndUpdate() ;
 		_xscale = dir*Mathf.Abs(_xscale) ;
 	}

@@ -151,7 +151,6 @@ public class SetManager
 	}
 
 	protected void CheckDataReady() {
-		Debug.Log("Checking Data.");
 		if (IsDataReady()) {
 			OnDataReady();
 		}
@@ -408,11 +407,11 @@ public class SetManager
 	public Vector2Int GetGround(int cx, int cy) {
 		int ty, n;
 		for (n=0, ty=cy ; n <= current.mapHeight() ; n++, ty--) {
-			if (ty > 0 & GetCase(cx, ty) == Data.GROUND) {
+			if (ty >= 0 & GetCase(cx, ty) == Data.GROUND) {
 				return new Vector2Int(cx, ty+1);
 			}
-			if (ty >= current.mapHeight()) {
-				ty=0;
+			else {
+				ty=current.mapHeight();
 			}
 		}
 
@@ -537,7 +536,7 @@ public class SetManager
 	/*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE
 	------------------------------------------------------------------------*/
-    public virtual void Update()
+    public virtual void HammerUpdate()
     {
         // do nothing
     }

@@ -104,7 +104,7 @@ public class PlayerController
 
 		if ( player.specialMan.actives[73] ) { // effet feuille arbre
 			if ( player.fl_stable & player.dx!=0 ) {
-				walkTimer-=Time.deltaTime;
+				walkTimer-=Loader.Instance.tmod;
 				if ( walkTimer<=0 ) {
 					walkTimer = Data.SECOND;
 					player.GetScore(player, 10);
@@ -130,14 +130,14 @@ public class PlayerController
 
 		// *** WaterJump
 		if ( game.fl_aqua & waterJump>0 ) {
-			if ( !player.fl_stable & Input.GetKeyDown(KeyCode.UpArrow) ) {
+			if ( !player.fl_stable & Input.GetKey(KeyCode.UpArrow) ) {
 				player.AirJump();
 				waterJump--;
 			}
 		}
 
 		// *** Saut
-		if ( player.fl_stable & Input.GetKeyDown(KeyCode.UpArrow) ) {
+		if ( player.fl_stable & Input.GetKey(KeyCode.UpArrow) ) {
 			if ( player.specialMan.actives[88] ) { // effet pokute shrink
 				player.dy = Data.PLAYER_JUMP*0.5f;
 			}
@@ -216,7 +216,7 @@ public class PlayerController
 	/*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public void Update() {
+	public void HammerUpdate() {
 		GetControls();
 	}
 }
