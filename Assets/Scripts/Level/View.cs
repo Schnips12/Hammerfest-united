@@ -714,6 +714,7 @@ public class View : MonoBehaviour
     IEnumerator TimedDetachLevel()
     {
         yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(0.05f);
         DetachLevel();
     }
 
@@ -732,6 +733,7 @@ public class View : MonoBehaviour
     IEnumerator TimedDetachSprites()
     {
         yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(0.05f);
         DetachSprites();
     }
 
