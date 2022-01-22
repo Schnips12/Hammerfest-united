@@ -16,10 +16,10 @@ public class Data
 
 	public static Color ToColor(int HexVal)
     {
-        byte R = (byte)((HexVal >> 16) & 0xFF);
-        byte G = (byte)((HexVal >> 8) & 0xFF);
-        byte B = (byte)((HexVal) & 0xFF);
-        return new Color(R, G, B, 255);
+        float R = (float)((HexVal >> 16) & 0xFF);
+        float G = (float)((HexVal >> 8) & 0xFF);
+        float B = (float)((HexVal) & 0xFF);
+        return new Color(R/255, G/255, B/255, 255/255);
     }
 
     public static GameManager manager = null;
@@ -138,86 +138,86 @@ public class Data
 
 	// *** ANIMATIONS
 	public struct animParam {
-		public int? id;
+		public string id;
 		public bool loop;
-		public animParam(int? id, bool loop) {
+		public animParam(string id, bool loop) {
 			this.id = id;
 			this.loop = loop;
 		}
 	}
 	public static float BLINK_DURATION = 2.5f;
 	public static float BLINK_DURATION_FAST = 1;
-	public static animParam ANIM_PLAYER_STOP		= new animParam(0,true);
-	public static animParam ANIM_PLAYER_WALK		= new animParam(1,true);
-	public static animParam ANIM_PLAYER_JUMP_UP		= new animParam(2,false);
-	public static animParam ANIM_PLAYER_JUMP_DOWN 	= new animParam(3,false);
-	public static animParam ANIM_PLAYER_JUMP_LAND 	= new animParam(4,false);
-	public static animParam ANIM_PLAYER_DIE			= new animParam(5,true);
-	public static animParam ANIM_PLAYER_KICK		= new animParam(6,false);
-	public static animParam ANIM_PLAYER_ATTACK		= new animParam(7,false);
-	public static animParam ANIM_PLAYER_EDGE		= new animParam(8,true);
-	public static animParam ANIM_PLAYER_WAIT1	    = new animParam(9,false);
-	public static animParam ANIM_PLAYER_WAIT2	    = new animParam(10,false);
-	public static animParam ANIM_PLAYER_KNOCK_IN	= new animParam(12,false);
-	public static animParam ANIM_PLAYER_KNOCK_OUT 	= new animParam(13,false);
-	public static animParam ANIM_PLAYER_RESURRECT 	= new animParam(14,false);
-	public static animParam ANIM_PLAYER_CARROT		= new animParam(15,true);
-	public static animParam ANIM_PLAYER_RUN			= new animParam(16,true);
-	public static animParam ANIM_PLAYER_SOCCER		= new animParam(17,true);
-	public static animParam ANIM_PLAYER_AIRKICK		= new animParam(18,false);
-	public static animParam ANIM_PLAYER_STOP_V		= new animParam(19,true);
-	public static animParam ANIM_PLAYER_WALK_V		= new animParam(20,true);
-	public static animParam ANIM_PLAYER_STOP_L		= new animParam(21,true);
-	public static animParam ANIM_PLAYER_WALK_L		= new animParam(22,true);
+	public static animParam ANIM_PLAYER_STOP		= new animParam("Stop",true);
+	public static animParam ANIM_PLAYER_WALK		= new animParam("Walk",true);
+	public static animParam ANIM_PLAYER_JUMP_UP		= new animParam("Jump_up",false);
+	public static animParam ANIM_PLAYER_JUMP_DOWN 	= new animParam("Jump_down",false);
+	public static animParam ANIM_PLAYER_JUMP_LAND 	= new animParam("Jump_land",false);
+	public static animParam ANIM_PLAYER_DIE			= new animParam("Die",true);
+	public static animParam ANIM_PLAYER_KICK		= new animParam("Kick",false);
+	public static animParam ANIM_PLAYER_ATTACK		= new animParam("Attack",false);
+	public static animParam ANIM_PLAYER_EDGE		= new animParam("Edge",true);
+	public static animParam ANIM_PLAYER_WAIT1	    = new animParam("Wait_1",false);
+	public static animParam ANIM_PLAYER_WAIT2	    = new animParam("Wait_2",false);
+	public static animParam ANIM_PLAYER_KNOCK_IN	= new animParam("Knock_in",false);
+	public static animParam ANIM_PLAYER_KNOCK_OUT 	= new animParam("Knock_out",false);
+	public static animParam ANIM_PLAYER_RESURRECT 	= new animParam("Rebirth",false);
+	public static animParam ANIM_PLAYER_CARROT		= new animParam("Carrot",true);
+	public static animParam ANIM_PLAYER_RUN			= new animParam("Run",true);
+	public static animParam ANIM_PLAYER_SOCCER		= new animParam("Soccer",true);
+	public static animParam ANIM_PLAYER_AIRKICK		= new animParam("Airkick",false);
+	public static animParam ANIM_PLAYER_STOP_V		= new animParam("Stop_V",true);
+	public static animParam ANIM_PLAYER_WALK_V		= new animParam("Walk_V",true);
+	public static animParam ANIM_PLAYER_STOP_L		= new animParam("Stop_L",true);
+	public static animParam ANIM_PLAYER_WALK_L		= new animParam("Walk_L",true);
 
-	public static animParam ANIM_BAD_WALK		   	= new animParam(0,true);
-	public static animParam ANIM_BAD_ANGER			= new animParam(1,true);
-	public static animParam ANIM_BAD_FREEZE			= new animParam(2,false);
-	public static animParam ANIM_BAD_KNOCK			= new animParam(3,true);
-	public static animParam ANIM_BAD_DIE			= new animParam(4,true);
-	public static animParam ANIM_BAD_SHOOT_START	= new animParam(5,false);
-	public static animParam ANIM_BAD_SHOOT_END		= new animParam(6,false);
-	public static animParam ANIM_BAD_THINK			= new animParam(7,false);
-	public static animParam ANIM_BAD_JUMP		    = new animParam(8,true);
-	public static animParam ANIM_BAD_SHOOT_LOOP		= new animParam(9,true);
+	public static animParam ANIM_BAD_WALK		   	= new animParam("Walk",true);
+	public static animParam ANIM_BAD_ANGER			= new animParam("Anger",true);
+	public static animParam ANIM_BAD_FREEZE			= new animParam("Freeze",false);
+	public static animParam ANIM_BAD_KNOCK			= new animParam("Knock",true);
+	public static animParam ANIM_BAD_DIE			= new animParam("Die",true);
+	public static animParam ANIM_BAD_SHOOT_START	= new animParam("Shoot_start",false);
+	public static animParam ANIM_BAD_SHOOT_END		= new animParam("Shoot_end",false);
+	public static animParam ANIM_BAD_THINK			= new animParam("Think",false);
+	public static animParam ANIM_BAD_JUMP		    = new animParam("Jump",true);
+	public static animParam ANIM_BAD_SHOOT_LOOP		= new animParam("Shoot_loop",true);
 
-	public static animParam ANIM_BAT_WAIT		    = new animParam(0,true);
-	public static animParam ANIM_BAT_MOVE		    = new animParam(1,true);
-	public static animParam ANIM_BAT_SWITCH			= new animParam(2,false);
-	public static animParam ANIM_BAT_DIVE		    = new animParam(3,false);
-	public static animParam ANIM_BAT_INTRO			= new animParam(4,false);
-	public static animParam ANIM_BAT_KNOCK			= new animParam(5,true);
-	public static animParam ANIM_BAT_FINAL_DIVE		= new animParam(6,true);
-	public static animParam ANIM_BAT_ANGER			= new animParam(7,true);
+	public static animParam ANIM_BAT_WAIT		    = new animParam("Wait",true);
+	public static animParam ANIM_BAT_MOVE		    = new animParam("Move",true);
+	public static animParam ANIM_BAT_SWITCH			= new animParam("Switch",false);
+	public static animParam ANIM_BAT_DIVE		    = new animParam("Dive",false);
+	public static animParam ANIM_BAT_INTRO			= new animParam("Intro",false);
+	public static animParam ANIM_BAT_KNOCK			= new animParam("Knock",true);
+	public static animParam ANIM_BAT_FINAL_DIVE		= new animParam("Final_dive",true);
+	public static animParam ANIM_BAT_ANGER			= new animParam("Anger",true);
 
-	public static animParam ANIM_BOSS_WAIT			= new animParam(0,true);
-	public static animParam ANIM_BOSS_SWITCH		= new animParam(1,false);
-	public static animParam ANIM_BOSS_JUMP_UP		= new animParam(2,false);
-	public static animParam ANIM_BOSS_JUMP_DOWN		= new animParam(3,false);
-	public static animParam ANIM_BOSS_JUMP_LAND		= new animParam(4,false);
-	public static animParam ANIM_BOSS_TORNADO_START	= new animParam(5,false);
-	public static animParam ANIM_BOSS_TORNADO_END	= new animParam(6,false);
-	public static animParam ANIM_BOSS_BAT_FORM		= new animParam(7,false);
-	public static animParam ANIM_BOSS_BURN_START	= new animParam(8,false);
-	public static animParam ANIM_BOSS_DEATH			= new animParam(9,false);
-	public static animParam ANIM_BOSS_DASH_START	= new animParam(10,false);
-	public static animParam ANIM_BOSS_DASH			= new animParam(11,false);
-	public static animParam ANIM_BOSS_BOMB			= new animParam(12,false);
-	public static animParam ANIM_BOSS_HIT			= new animParam(13,false);
-	public static animParam ANIM_BOSS_DASH_BUILD	= new animParam(14,true);
-	public static animParam ANIM_BOSS_BURN_LOOP		= new animParam(15,true);
-	public static animParam ANIM_BOSS_TORNADO_LOOP	= new animParam(16,true);
-	public static animParam ANIM_BOSS_DASH_LOOP		= new animParam(17,true);
+	public static animParam ANIM_BOSS_WAIT			= new animParam("Wait",true);
+	public static animParam ANIM_BOSS_SWITCH		= new animParam("Switch",false);
+	public static animParam ANIM_BOSS_JUMP_UP		= new animParam("Jump_up",false);
+	public static animParam ANIM_BOSS_JUMP_DOWN		= new animParam("Jump_down",false);
+	public static animParam ANIM_BOSS_JUMP_LAND		= new animParam("Jump_land",false);
+	public static animParam ANIM_BOSS_TORNADO_START	= new animParam("Tornado_start",false);
+	public static animParam ANIM_BOSS_TORNADO_END	= new animParam("Tornado_end",false);
+	public static animParam ANIM_BOSS_BAT_FORM		= new animParam("Bat_form",false);
+	public static animParam ANIM_BOSS_BURN_START	= new animParam("Burn_start",false);
+	public static animParam ANIM_BOSS_DEATH			= new animParam("Death",false);
+	public static animParam ANIM_BOSS_DASH_START	= new animParam("Dash_start",false);
+	public static animParam ANIM_BOSS_DASH			= new animParam("Dash",false);
+	public static animParam ANIM_BOSS_BOMB			= new animParam("Bomb",false);
+	public static animParam ANIM_BOSS_HIT			= new animParam("Hit",false);
+	public static animParam ANIM_BOSS_DASH_BUILD	= new animParam("Dash_build",true);
+	public static animParam ANIM_BOSS_BURN_LOOP		= new animParam("Burn_loop",true);
+	public static animParam ANIM_BOSS_TORNADO_LOOP	= new animParam("Tornado_loop",true);
+	public static animParam ANIM_BOSS_DASH_LOOP		= new animParam("Dash_loop",true);
 
-	public static animParam ANIM_BOMB_DROP		    = new animParam(0,false);
-	public static animParam ANIM_BOMB_LOOP		    = new animParam(1,true);
-	public static animParam ANIM_BOMB_EXPLODE	    = new animParam(2,false);
+	public static animParam ANIM_BOMB_DROP		    = new animParam("Drop",false);
+	public static animParam ANIM_BOMB_LOOP		    = new animParam("Loop",true);
+	public static animParam ANIM_BOMB_EXPLODE	    = new animParam("Explode",false);
 
-	public static animParam ANIM_WBOMB_STOP		    = new animParam(0,true);
-	public static animParam ANIM_WBOMB_WALK		    = new animParam(1,true);
+	public static animParam ANIM_WBOMB_STOP		    = new animParam("Stop",true);
+	public static animParam ANIM_WBOMB_WALK		    = new animParam("Walk",true);
 
-	public static animParam ANIM_SHOOT              = new animParam(0,false);
-	public static animParam ANIM_SHOOT_LOOP         = new animParam(0,true);
+	public static animParam ANIM_SHOOT              = new animParam("Shoot",false);
+	public static animParam ANIM_SHOOT_LOOP         = new animParam("Loop",true);
 
 	// *** IA
 	public static int MAX_ITERATION = 30;

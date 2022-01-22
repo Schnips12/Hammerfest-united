@@ -72,7 +72,6 @@ public class GameInterface
 		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
 		mc._x = game.mc._x-10;
 		mc._y = 0;
-		mc.cacheAsBitmap = true;
 		scores	= new List<TextMeshPro>();
 		scores.Add(mc.FindTextfield("score0"));
 
@@ -117,7 +116,6 @@ public class GameInterface
 		mc._x = -game.mc._x;
 		mc._y = 0;
 		mc.GotoAndStop(2);
-		mc.cacheAsBitmap = true;
 		scores	= new List<TextMeshPro>();
 		scores.Add(mc.FindTextfield("score0"));
         scores.Add(mc.FindTextfield("score1"));
@@ -182,7 +180,6 @@ public class GameInterface
 		mc._x = -game.mc._x;
 		mc._y = 0;
 		mc.GotoAndStop(3);
-		mc.cacheAsBitmap = true;
 		scores	= new List<TextMeshPro>();
 		scores.Add(mc.FindTextfield("time"));
 

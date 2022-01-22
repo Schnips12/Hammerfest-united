@@ -132,16 +132,16 @@ public class PlayerBomb : Bomb
 
 		if ( owner!=null ) {
 			if ( owner.specialMan.actives[14] ) { // champi bleu
-				ScoreItem.Attach(game, x,y, 47,0);
+				ScoreItem.Attach(game, x,y, 47, null);
 			}
 			if ( owner.specialMan.actives[15] ) { // champi rouge
-				ScoreItem.Attach(game, x,y, 48,0);
+				ScoreItem.Attach(game, x,y, 48, null);
 			}
 			if ( owner.specialMan.actives[16] ) { // champi vert
-				ScoreItem.Attach(game, x,y, 49,0);
+				ScoreItem.Attach(game, x,y, 49, null);
 			}
 			if ( owner.specialMan.actives[17] ) { // champi or
-				ScoreItem.Attach(game, x,y, 50,0);
+				ScoreItem.Attach(game, x,y, 50, null);
 			}
 
 		}

@@ -32,7 +32,6 @@ public class Shoot : Physics
 	protected override void Init(GameMode g) {
 		base.Init(g) ;
 		Register(Data.SHOOT) ;
-		SetSub(this) ;
 		PlayAnim(Data.ANIM_SHOOT) ;
 	}
 

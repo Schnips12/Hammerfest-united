@@ -22,7 +22,7 @@ public class SupaItem : Supa
 		base.InitSupa(g,x,y);
 		Scale(200);
 		MoveDown(5);
-		this.GotoAndStop(supaId+1);
+		GotoAndStop(supaId+1);
 	}
 
 
@@ -32,6 +32,7 @@ public class SupaItem : Supa
 	public static SupaItem Attach(GameMode g, int id) {
 		var linkage = "hammer_supa_item";
 		SupaItem mc = new SupaItem(g.depthMan.Attach(linkage,Data.DP_SUPA));
+		mc.SetAnim("Frame", 1);
 		mc.supaId = id;
 		mc.InitSupa(g, Data.GAME_WIDTH/2, Data.GAME_HEIGHT+50);
 		return mc;

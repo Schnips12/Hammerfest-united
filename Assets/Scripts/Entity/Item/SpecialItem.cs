@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D.Animation;
 
 public class SpecialItem : Item
 {
@@ -29,12 +30,8 @@ public class SpecialItem : Item
 			return null;
 		}
 
-		SpecialItem mc;
-		if (id==0) {
-			mc = new SpecialItem(g.depthMan.Attach("2380",Data.DP_ITEMS));
-		} else {
-			mc = new SpecialItem(g.depthMan.Attach("hammer_item_special", Data.DP_ITEMS));
-		}
+		SpecialItem mc = new SpecialItem(g.depthMan.Attach("hammer_item_special", Data.DP_ITEMS));
+		mc.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.specialItems.Find(x => x.name.Substring(20)==(id+1).ToString());
 		mc.InitItem(g, x, y, id, subId) ;
 		return mc;
 	}

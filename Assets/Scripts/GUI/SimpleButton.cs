@@ -94,7 +94,7 @@ public class SimpleButton : Item
 	------------------------------------------------------------------------*/
 	public override void SetLabel(string l) {
 		FindTextfield("field").text = l;
-		body._width = field.rectTransform.sizeDelta.x + 5;
+		/* body._width = field.rectTransform.sizeDelta.x + 5; */
 		right._x = body._width;
 		width = left._width + body._width + right._width;
 	}

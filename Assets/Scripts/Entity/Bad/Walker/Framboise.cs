@@ -148,7 +148,7 @@ public class Framboise : Shooter
 		dx = 0;
 		dy = 0;
 		DisableShooter();
-		DisableAnimator();
+		Stop();
 		this.GotoAndStop(15);
 		this.subs[0].Stop();
 		FindSub("o1").SetActive(false);
@@ -163,7 +163,7 @@ public class Framboise : Shooter
 	void PhaseIn() {
 		ClearFrags();
 		fl_phased = false;
-		EnableAnimator();
+		Play();
 		EnableShooter();
 		var a = game.fxMan.AttachExplosion(x,y,40);
 //		a.mc.blendMode = BlendMode.NORMAL;

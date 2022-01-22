@@ -1,6 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D.Animation;
+
 
 public class Item : Physics
 {
@@ -12,7 +14,7 @@ public class Item : Physics
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	protected Item(MovieClip mc) : base(mc) {
-		DisableAnimator() ;
+		Stop();
 		fl_alphaBlink		= true;
 		fl_largeTrigger		= true;
 		fl_strictGravity	= false;
@@ -24,7 +26,7 @@ public class Item : Physics
 	INIT
 	------------------------------------------------------------------------*/
 	protected override void Init(GameMode g) {
-		base.Init(g) ;
+		base.Init(g);
 		SetLifeTimer(Data.ITEM_LIFE_TIME) ;
 		Register(Data.ITEM) ;
 	}
@@ -38,17 +40,14 @@ public class Item : Physics
 		MoveTo(x, y);
 		this.id = id;
 		this.subId = subId;
-		if(subId==null) {
-			GotoAndStop(id+1) ;
+		if(subId!=null) {
+			SetAnim("Frame", subId.Value+1);
 		} else {
-			GotoAndStop(subId.Value+1);
-		}
-		if (fl_anim) {
-			Play();
+			SetAnim("Frame", 1);
 		}
 
 		game.fxMan.AttachFx(x,y+Data.CASE_HEIGHT,"hammer_fx_shine") ;
-		EndUpdate() ;
+		EndUpdate();
 	}
 
 

@@ -19,8 +19,7 @@ public class FramBall : Shoot
 		fl_checkBounds = false;
 		fl_blink = false;
 		fl_arrived = false;
-		fl_anim = false;
-		this.GotoAndStop(1);
+		GotoAndStop(1);
 		ang = Random.Range(0, 314);
 		white = 0;
 	}

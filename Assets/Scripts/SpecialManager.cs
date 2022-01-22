@@ -179,7 +179,7 @@ public class SpecialManager
         List<Bad> l = game.GetBadClearList();
         for (int i = 0; i < l.Count; i++)
         {
-            ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT * 2, 169, 0);
+            ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT * 2, 169, null);
         }
     }
 
@@ -191,7 +191,7 @@ public class SpecialManager
         List<Bad> l = game.GetBadClearList();
         for (int i = 0; i < l.Count; i++)
         {
-            ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT * 2, 169, 0);
+            ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT * 2, 169, null);
         }
     }
 
@@ -991,7 +991,8 @@ public class SpecialManager
             case 84:
                 {
                     MovieClip c;
-                    c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER), "rain of fire");
+                    c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER));
+                    c._name = "rain of fire";
                     c.extraValues["speed"] = 0.5f;
                     c = game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_BACK_LAYER);
                     c._y += 9;
@@ -1000,7 +1001,8 @@ public class SpecialManager
                     f.blurX = 4;
                     f.blurY = f.blurX;
                     c.filter = f;
-                    c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER), "rain of fire clouds");
+                    c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER));
+                    c._name = "rain of fire clouds";
                     c.extraValues["speed"] = 1;
                     clouds.Add(c);
                     Temporary(id, null);

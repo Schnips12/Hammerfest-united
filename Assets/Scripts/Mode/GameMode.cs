@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using TMPro;
 using System.Linq;
+using UnityEngine.U2D.Animation;
 
 public interface IGameMode
 {
@@ -214,8 +215,8 @@ public class GameMode : Mode, IGameMode
         mapMC._x = Data.GAME_WIDTH * 0.5f;
         mapMC._y = Data.GAME_HEIGHT * 0.5f;
         mapMC.subs = new List<MovieClip>();
-        mapMC.subs.Add(new MovieClip(mapMC, "ptr"));
-        mapMC.subs.Add(new MovieClip(mapMC, "pit"));
+        mapMC.subs.Add(new MovieClip(mapMC));
+        mapMC.subs.Add(new MovieClip(mapMC));
         mapMC._visible = false;
 
         randMan.Register(Data.RAND_EXTENDS_ID, Data.RAND_EXTENDS);
@@ -656,7 +657,6 @@ public class GameMode : Mode, IGameMode
             fl_clear = true;
         }
 
-        Debug.Log("Starting - dark");
         UpdateDarkness();
 
         if (!world.IsVisited())
@@ -1814,8 +1814,8 @@ public class GameMode : Mode, IGameMode
         radiusMC = depthMan.Attach("debug_radius", Data.DP_INTERF);
         radiusMC._x = x;
         radiusMC._y = y;
-        radiusMC._width = r * 2;
-        radiusMC._height = radiusMC._width;
+        /* radiusMC._width = r * 2;
+        radiusMC._height = radiusMC._width; */
     }
 
 
@@ -1857,12 +1857,14 @@ public class GameMode : Mode, IGameMode
             if (id < 1000)
             {
                 icon = new MovieClip(itemNameMC, "hammer_item_special", manager.uniq++);
-                icon.GotoAndStop(id + 1);
+                icon.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.specialItems.Find(x => x.name.Substring(20)==(id+1).ToString());
+                icon.SetAnim("Frame", 1);
             }
             else
             {
                 icon = new MovieClip(itemNameMC, "hammer_item_score", manager.uniq++);
-                icon.GotoAndStop(id - 1000 + 1);
+                icon.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scoreItems.Find(x => x.name.Substring(18)==(id-1000+1).ToString());
+                icon.SetAnim("Frame", 1);
             }
             icon._x = itemNameMC._x - itemNameMC.FindTextfield("field").fontSize * 0.5f + 20; // FIXME
             icon._y = 20;
@@ -2525,7 +2527,6 @@ public class GameMode : Mode, IGameMode
         }
         world.darknessFactor = dfactor;
         material.SetColor("Mask_Color", new Color(0, 0, 0, dfactor/255));
-        Debug.Log("dfactor:"+dfactor);
     }
 
 

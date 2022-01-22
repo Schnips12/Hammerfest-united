@@ -2,15 +2,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
 using TMPro;
-using UnityEngine.Experimental.U2D.Animation;
+using UnityEngine.U2D.Animation;
+
 
 public class MovieClip
 {
     public GameObject united;
-    Animator animator;
-    bool animated;
-    bool animInit;
+
+    private SpriteResolver resolver;
+    private bool fl_animated;
+    private string currentAnim;
+    private int currentFrame;
+    private int frameCount;
+    
+    public bool fl_playing;
+    
 
     public string _name
     {
@@ -75,16 +83,23 @@ public class MovieClip
         }
     }
 
-    public float _width;
-    public float _height;
+    public float _width
+    {
+        get => united.GetComponent<Renderer>().bounds.max.x - united.GetComponent<Renderer>().bounds.min.x;
+    }
+
+    public float _height
+    {
+        get => united.GetComponent<Renderer>().bounds.max.y - united.GetComponent<Renderer>().bounds.min.y;
+    }
 
     public float _alpha
     {
-        get => united.GetComponent<Renderer>().material.color.a;
+        get => Mathf.RoundToInt(united.GetComponent<Renderer>().material.color.a * 100);
         set
         {
             Color c = united.GetComponent<Renderer>().material.color;
-            c.a = value;
+            c.a = value/100;
             united.GetComponent<Renderer>().material.SetColor("scripted alpha", c);
         }
     }
@@ -108,9 +123,10 @@ public class MovieClip
         public float alpha;
     }
     public Filter filter;
-    public Color textColor;
-    public bool isTile;
-    public bool cacheAsBitmap;
+
+
+
+
 
 
     /*------------------------------------------------------------------------
@@ -140,14 +156,9 @@ public class MovieClip
         united.transform.SetParent(mc.united.transform);
     }
 
-    public MovieClip(MovieClip mc, string name) : this(mc)
+    public MovieClip(MovieClip mc, string reference, int depth) : this(mc)
     {
-        _name = name;
-    }
-
-    public MovieClip(MovieClip mc, string reference, int depth) : this(mc, reference)
-    {
-        GameObject tempRef = Array.Find(Loader.Instance.prefabs, prefab => prefab.name == reference);
+        GameObject tempRef = Loader.Instance.prefabs.Find(prefab => prefab.name == reference);
         if (tempRef != null)
         {
             UnityEngine.GameObject.Destroy(united);
@@ -157,6 +168,7 @@ public class MovieClip
         {
             Debug.Log("The asset you tried to load isn't referenced: " + reference);
         }
+        _name = reference;
         united.transform.position -= new Vector3(0, 0, depth);
     }
 
@@ -208,31 +220,59 @@ public class MovieClip
     }
 
 
+    public void SetColor(Color baseColor, float alpha)
+    {
+        Color toSet = new Color(baseColor.r, baseColor.g, baseColor.b, alpha/100);
+        united.GetComponent<SpriteRenderer>().color = Color.white;
+    }
+
+    public void ResetColor()
+    {
+        united.GetComponent<SpriteRenderer>().color = Color.white;
+    }
+
+
     /*------------------------------------------------------------------------
 	ANIMATION
 	------------------------------------------------------------------------*/
     public bool IsAnimated()
     {
-        if (!animInit)
+        resolver = united.GetComponent<SpriteResolver>();
+        if (resolver != null)
         {
-            animator = united.GetComponent<Animator>();
-            if (animator != null)
-            {
-                animated = true;
-            }
-            animInit = true;
+            fl_animated = true;
         }
-        return animated;
+        return fl_animated;
     }
 
-    private void GoTo(int frame) {
+    public void Play()
+    {
+        fl_playing = true;
+    }
+
+    public void Stop()
+    {
+        fl_playing = false;
+    }
+
+    public void SetAnim(string movement, int frame)
+    {
         if (!IsAnimated())
         {
-            Debug.Log("Tried to animate an object whithout animator."+_name);
+            Debug.Log("Tried to animate an object whithout sprite resolver: "+_name);
             return;
         }
-        AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
-        animator.Play(clip.name, 0, (frame - 1.0f)  / TotalFrames());
+        if(frameCount==0 | currentAnim!=movement) {
+            currentAnim = movement;
+            frameCount = resolver.spriteLibrary.spriteLibraryAsset.GetCategoryLabelNames(currentAnim).Count<string>();
+        }        
+        currentFrame = frame;
+        resolver.SetCategoryAndLabel(currentAnim, currentFrame.ToString());
+    }
+
+    private void GoTo(int frame)
+    {
+        SetAnim(currentAnim, frame);
     }
 
     public void GotoAndStop(int frame)
@@ -247,57 +287,21 @@ public class MovieClip
         Play();
     }
 
-    public void Stop()
-    {
-        if (IsAnimated())
-        {
-            animator.speed = 0;
-        }
-    }
-
-    public void Play()
-    {
-        if (IsAnimated())
-        {
-            animator.speed = 1;
-        }
-    }
-
     public void NextFrame()
     {
-        GotoAndStop(CurrentFrame() + 1);
+        GoTo(currentFrame+1);
     }
 
     public int CurrentFrame()
     {
-        if (!IsAnimated())
-        {
-            Debug.Log("Tried to animate an object whithout animator.");
-            return 1;
-        }
-        AnimatorStateInfo state = animator.GetCurrentAnimatorStateInfo(0);
-        return Mathf.RoundToInt(state.normalizedTime * TotalFrames())+1;
+        return currentFrame;
     }
 
     public int TotalFrames()
     {
-        if (!IsAnimated())
-        {
-            Debug.Log("Tried to animate an object whithout animator.");
-            return 1;
-        }
-        AnimationClip clip = animator.GetCurrentAnimatorClipInfo(0)[0].clip;
-        return Mathf.RoundToInt(clip.length * clip.frameRate);
+        return frameCount;
     }
 
-
-    public void SetAnimBool(string name, bool value) {
-        if (!IsAnimated())
-        {
-            Debug.Log("Tried to animate an object whithout animator.");
-        }
-        animator.SetBool(name, value);
-    }
 
     /*------------------------------------------------------------------------
 	DEPTHMANAGER UTILITY
@@ -321,9 +325,9 @@ public class MovieClip
     /*------------------------------------------------------------------------
 	COMPATIBILITY WITH TILES
 	------------------------------------------------------------------------*/
-    public virtual void SetSkin(int skinId)
+    public virtual void SetSkin(int skinId, bool vertical)
     {
-        united.GetComponentInChildren<SpriteResolver>().SetCategoryAndLabel("skin", skinId.ToString());
+        /* united.GetComponentInChildren<UnityEngine.U2D.Animation.SpriteResolver>().SetCategoryAndLabel("skin", (skinId+1).ToString()); */
     }
 
     public virtual void FlipTile()

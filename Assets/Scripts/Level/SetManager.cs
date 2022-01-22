@@ -35,7 +35,7 @@ public class SetManager
 		portalList		= new List<PortalData>();
 
 		// Lecture niveaux
-		string data = Loader.Instance.root.ReadLevel(setName); // TODO get name from cookie
+		string data = Loader.Instance.root.ReadLevel(setName);
 		json = new List<string>(data.Split(new string[] {";"}, StringSplitOptions.RemoveEmptyEntries));
 /* 		if (Loader.Instance.root.ReadFile(setName+"_back_xml") == null ) {
 			Loader.Instance.root.SaveFile(setName+"_back_xml", String.Join(";", json));

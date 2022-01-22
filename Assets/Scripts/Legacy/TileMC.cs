@@ -9,12 +9,17 @@ public class TileMC : MovieClip
     public MovieClip maskTile;
     public MovieClip ombre;
 
-    public TileMC(MovieClip mc, string name, float size) : base(mc) {
-        SpriteRenderer renderer = united.GetComponent<SpriteRenderer>();
+    public TileMC(MovieClip mc, string name, float size) : base(mc)
+    {
         _name = name;
+
+        SpriteRenderer renderer = united.GetComponent<SpriteRenderer>();
+        renderer.drawMode = SpriteDrawMode.Tiled;
+        renderer.size = new Vector2(size, 1);
 
         endTile = new MovieClip(this, 0.001f);
         endTile._name = "End";
+        endTile._x = size-0.4f;
         endTile._visible = false;
 
         maskTile = new MovieClip(this, 0.002f);
@@ -25,17 +30,27 @@ public class TileMC : MovieClip
         ombre._name = "Ombre";
         ombre._visible = false;
 
-        renderer.sprite = Resources.Load<Sprite>("Tiles/tile_01");
-        renderer.drawMode = SpriteDrawMode.Tiled;
-        renderer.size = new Vector2(size, 1);
 		_xscale = Data.CASE_WIDTH;
 		_yscale = Data.CASE_HEIGHT;
     }
 
-    public override void SetSkin(int skinId) {
+    public override void SetSkin(int skinId, bool vertical)
+    {
         skin = skinId;
+
+        SpriteRenderer tileRenderer = united.GetComponent<SpriteRenderer>();
+        tileRenderer.sprite = Resources.Load<Sprite>("Tiles/"+skin.ToString());
+
+        SpriteRenderer endRenderer = endTile.united.GetComponent<SpriteRenderer>();
+        endRenderer.sprite = Resources.Load<Sprite>("Tiles_end/"+skin.ToString());
+        endTile._visible = true;
+        if(vertical) {
+            endRenderer.flipY = true;
+        }
     }
-    public override void FlipTile() {
+
+    public override void FlipTile()
+    {
         united.GetComponent<SpriteRenderer>().flipY = true;
     }
 }

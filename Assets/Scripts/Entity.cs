@@ -103,8 +103,6 @@ public class Entity : MovieClip, IEntity
 		onRollOver = mc.onRollOver;
 		timer = mc.timer;
 		filter = mc.filter;
-		isTile = mc.isTile;
-		cacheAsBitmap = mc.cacheAsBitmap;
 
 		width = Data.CASE_WIDTH;
 		height  = Data.CASE_HEIGHT; // TODO Set the actual sprite size

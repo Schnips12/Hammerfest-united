@@ -221,7 +221,7 @@ public class Ananas : Jumper
     /*------------------------------------------------------------------------
 	EVENT: FIN D'ANIM D'ATTAQUE
 	------------------------------------------------------------------------*/
-    protected override void OnEndAnim(int id)
+    protected override void OnEndAnim(string id)
     {
         base.OnEndAnim(id);
         if (id == Data.ANIM_BAD_SHOOT_END.id)

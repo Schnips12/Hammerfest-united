@@ -10,7 +10,7 @@ public class Spear : Bad
 	------------------------------------------------------------------------*/
 	Spear(MovieClip mc) : base(mc) {
 		DisablePhysics();
-		DisableAnimator();
+		Stop();
 		skin = 2;
 		realRadius = Data.CASE_WIDTH * 0.7f;
 	}

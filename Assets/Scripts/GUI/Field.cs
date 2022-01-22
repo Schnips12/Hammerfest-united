@@ -24,7 +24,7 @@ public class Field : Item
 
 	void SetWidth(int w) {
 		field.fontSize = w; // TODO wrong value
-		bg._width = w+5;
+		/* bg._width = w+5; */
 		width = w+10;
 	}
 

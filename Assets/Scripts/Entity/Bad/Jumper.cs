@@ -103,7 +103,7 @@ public class Jumper : Walker
 
 	bool DecideJumpUp() {
 		if ( fl_playerClose ) {
-			return player.cy<cy & Random.Range(0, 1000)<chanceJumpUp*chaseFactor & IsReady();
+			return player.cy>cy & Random.Range(0, 1000)<chanceJumpUp*chaseFactor & IsReady();
 		}
 		else {
 			return Random.Range(0, 1000)<chanceJumpUp & IsReady();
@@ -112,7 +112,7 @@ public class Jumper : Walker
 
 	bool DecideJumpDown() {
 		if ( fl_playerClose ) {
-			return player.cy>cy & Random.Range(0, 1000)<chanceJumpDown*chaseFactor & IsReady();
+			return player.cy<cy & Random.Range(0, 1000)<chanceJumpDown*chaseFactor & IsReady();
 		}
 		else {
 			return Random.Range(0, 1000)<chanceJumpDown & IsReady();
@@ -167,10 +167,10 @@ public class Jumper : Walker
 				if ( h<= maxClimb ) {
 					var wait = (h>1)?Data.SECOND:0;
 					if ( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_TILE_TOP) ) {
-						Jump( -Data.BAD_VJUMP_X_CLIFF, -Data.BAD_VJUMP_Y_LIST[h-1], wait );
+						Jump( -Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[h-1], wait );
 					}
 					else {
-						Jump( -Data.BAD_VJUMP_X, -Data.BAD_VJUMP_Y_LIST[h-1], wait );
+						Jump( -Data.BAD_VJUMP_X, Data.BAD_VJUMP_Y_LIST[h-1], wait );
 						x = oldX;
 					}
 					fl_stopStepping = true;
@@ -189,10 +189,10 @@ public class Jumper : Walker
 				if ( h<= maxClimb ) {
 					var wait = (h>1)?Data.SECOND:0;
 					if ( world.CheckFlag(new Vector2Int(cx, cy), Data.IA_TILE_TOP) ) {
-						Jump( Data.BAD_VJUMP_X_CLIFF, -Data.BAD_VJUMP_Y_LIST[h-1], wait );
+						Jump( Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[h-1], wait );
 					}
 					else {
-						Jump( Data.BAD_VJUMP_X, -Data.BAD_VJUMP_Y_LIST[h-1], wait );
+						Jump( Data.BAD_VJUMP_X, Data.BAD_VJUMP_Y_LIST[h-1], wait );
 						x = oldX;
 					}
 					fl_stopStepping = true;

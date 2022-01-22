@@ -65,7 +65,7 @@ public class Bomb : Mover, IBomb
 		SetLifeTimer(duration);
 		UpdateCoords();
 		Play();
-		/* PlayAnim(Data.ANIM_BOMB_DROP); */
+		PlayAnim(Data.ANIM_BOMB_DROP);
 	}
 
 
@@ -89,8 +89,7 @@ public class Bomb : Mover, IBomb
 	EVENT: EXPLOSION
 	------------------------------------------------------------------------*/
 	public virtual void OnExplode() {
-		/* PlayAnim(Data.ANIM_BOMB_EXPLODE); */
-		SetAnimBool("Exploding", true);
+		PlayAnim(Data.ANIM_BOMB_EXPLODE);
 		if (explodeSound!=null) {
 			game.soundMan.PlaySound(explodeSound,Data.CHAN_BOMB);
 		}
@@ -103,7 +102,7 @@ public class Bomb : Mover, IBomb
 	/*------------------------------------------------------------------------
 	EVENT: FIN D'ANIM
 	------------------------------------------------------------------------*/
-	protected override void OnEndAnim(int id) {
+	protected override void OnEndAnim(string id) {
 		base.OnEndAnim(id);
 		if (id==Data.ANIM_BOMB_DROP.id) {
 			PlayAnim(Data.ANIM_BOMB_LOOP);
@@ -172,7 +171,7 @@ public class Bomb : Mover, IBomb
 	------------------------------------------------------------------------*/
 	protected override void OnPortal(int? pid) {
 		base.OnPortal(pid);
-		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT*0.5f,"hammer_fx_shine");
+		game.fxMan.AttachFx(x,y+Data.CASE_HEIGHT*0.5f,"hammer_fx_shine");
 		DestroyThis();
 	}
 
@@ -182,7 +181,7 @@ public class Bomb : Mover, IBomb
 	protected override void OnPortalRefusal() {
 		base.OnPortalRefusal();
 		dx = -dx*3;
-		dy = -5;
+		dy = 5;
 		game.fxMan.InGameParticles(Data.PARTICLE_PORTAL, x, y,5);
 	}
 

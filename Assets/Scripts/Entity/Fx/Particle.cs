@@ -14,7 +14,7 @@ public class Particle : Mover
 	------------------------------------------------------------------------*/
 	Particle(MovieClip mc) : base(mc) {
 		SetLifeTimer(Data.SECOND*2 + (Data.SECOND*2)*Random.Range(0, 100)/100);
-		DisableAnimator();
+		Stop();
 	}
 
 

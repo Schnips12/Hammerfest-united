@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Xml;
 using System.IO;
 using UnityEngine.SceneManagement;
+using UnityEngine.U2D.Animation;
+
 
 public class Loader : MonoBehaviour
 {
@@ -12,11 +14,13 @@ public class Loader : MonoBehaviour
 	[SerializeField] public List<AudioClip> effects;
 	[SerializeField] public GameObject popupPrefab;
     [SerializeField] public GameObject pointerPrefab;
-    [SerializeField] public GameObject itemNamePrefab;
     [SerializeField] public GameObject radiusPrefab;
-    [SerializeField] public GameObject darknessPrefab;
 	[SerializeField] public GameObject defautAsset;
-    [SerializeField] public GameObject[] prefabs;
+	[SerializeField] public List<GameObject> prefabs;
+	[SerializeField] public List<SpriteLibraryAsset> scoreItems;
+	[SerializeField] public List<SpriteLibraryAsset> specialItems;
+	[SerializeField] public List<SpriteLibraryAsset> specialBg;
+
 
     public Cookie root;
 	public XmlNode xmlLang;	

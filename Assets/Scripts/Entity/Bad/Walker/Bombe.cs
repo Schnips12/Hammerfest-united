@@ -77,7 +77,6 @@ public class Bombe : Jumper
 		PlayAnim(Data.ANIM_BAD_DIE);
 		fl_loop = false;
 		fl_freeze = false;
-//		fl_anim=false;
 
 		var duration = Data.SECOND * ( 0.25 + (Random.Range(0, 10)/100) * (Random.Range(0, 2)*2-1) );
 		SetLifeTimer(Data.SECOND*3);

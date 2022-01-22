@@ -41,8 +41,6 @@ public class GameMechanics : ViewManager
 		}
 
 		_iteration = new Vector2Int(0, Data.LEVEL_HEIGHT-1);
-
-		//triggers = Entity[LEVEL_WIDTH, LEVEL_HEIGHT, 1]; // TODO fix length
 	}
 
 	public override void DestroyThis() {

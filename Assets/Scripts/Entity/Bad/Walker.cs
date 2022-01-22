@@ -177,7 +177,7 @@ public abstract class Walker : Bad
 	// *** IA: D�CISIONS
 
 	protected virtual bool DecideFall() {
-		var d = player.cy - cy;
+		var d = cy - player.cy;
 		var fall = world.fallMap[cx][cy];
 		var fl_good = fall>0 & d>0 & fall<=d+3;
 		if ( fl_playerClose ) {
@@ -231,7 +231,7 @@ public abstract class Walker : Bad
 				recentParticles=10;
 			}
 			if ( fl_stable ) {
-				game.fxMan.Dust(cx,cy-1);
+				game.fxMan.Dust(cx,cy+1);
 			}
 		}
 	}

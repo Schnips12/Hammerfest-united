@@ -152,9 +152,7 @@ public class Player : Physics, IEntity
 		base.Init(g) ;
 		ctrl = new PlayerController(this) ;
 		Register(Data.PLAYER) ;
-
-//		box = downcast(game.depthMan.attach("hammer_interf_player", Data.DP_TOP)) ;
-//		box.init(this) ;
+		Play();
 
 		specialMan = new SpecialManager(game, this) ;
 		game.manager.LogAction("P:"+lives);
@@ -405,7 +403,6 @@ public class Player : Physics, IEntity
 	GAGNE UNE LETTRE EXTEND
 	------------------------------------------------------------------------*/
 	public void GetExtend(int id) {
-		Debug.Log("Getting extend "+id);
 		if (!extendList[id]) {
 			game.gi.GetExtend(pid, id);
 			extendOrder.Add(id); // Perfect extend
@@ -704,10 +701,10 @@ public class Player : Physics, IEntity
 		}
 
 		if (a_walk!=null) {
-			baseWalkAnim = a_walk ?? new Data.animParam();
+			baseWalkAnim = a_walk.Value;
 		}
 		if (a_stop!=null) {
-			baseStopAnim = a_stop ?? new Data.animParam();
+			baseStopAnim = a_stop.Value;
 		}
 
 		if (fl_walk) {
@@ -1054,17 +1051,17 @@ public class Player : Physics, IEntity
 	/*------------------------------------------------------------------------
 	EVENT: FIN D'ANIM
 	------------------------------------------------------------------------*/
-	protected override void OnEndAnim(int id) {
+	protected override void OnEndAnim(string id) {
 		base.OnEndAnim(id) ;
 
-		// Se rel�ve apr�s un knock
+		// Stands up after knock out
 		if (id == Data.ANIM_PLAYER_KNOCK_OUT.id) {
 			fl_lockControls = false;
 			PlayAnim(baseStopAnim);
 		}
 
 		if (id == Data.ANIM_PLAYER_AIRKICK.id) {
-			animId = -1;
+			animId = Data.ANIM_PLAYER_SOCCER.id;
 			PlayAnim(Data.ANIM_PLAYER_JUMP_DOWN);
 		}
 
@@ -1074,19 +1071,19 @@ public class Player : Physics, IEntity
 			PlayAnim(baseStopAnim);
 		}
 
-		// Apr�s un air kick
+		// After air kick
 		if (id == Data.ANIM_PLAYER_KICK.id & !fl_stable) {
-			animId = -1;
+			animId = Data.ANIM_PLAYER_DIE.id;
 			PlayAnim(Data.ANIM_PLAYER_JUMP_DOWN);
 			return;
 		}
 
-		// Carotte!
+		// Carot!
 		if (id == Data.ANIM_PLAYER_CARROT.id) {
 			PlayAnim(baseStopAnim);
 		}
 
-		// Retour en anim normale apr�s kick ou attack
+		// Back to normal animation after kick or attack
 		if (id == Data.ANIM_PLAYER_KICK.id 		|
 			id == Data.ANIM_PLAYER_ATTACK.id 	|
 			id == Data.ANIM_PLAYER_WAIT1.id 	|
@@ -1417,7 +1414,7 @@ public class Player : Physics, IEntity
 
 		if (!fl_kill) {
 			// Animation de saut
-			if (!fl_stable & dy>=0 & animId!=Data.ANIM_PLAYER_JUMP_DOWN.id & !fl_lockControls) {
+			if (!fl_stable & dy<=0 & animId!=Data.ANIM_PLAYER_JUMP_DOWN.id & !fl_lockControls) {
 				PlayAnim(Data.ANIM_PLAYER_JUMP_DOWN);
 			}
 			if (animId == Data.ANIM_PLAYER_JUMP_DOWN.id & fl_stable) {
@@ -1443,7 +1440,7 @@ public class Player : Physics, IEntity
 			// Anim au bord du vide
 			if (fl_stable & dx==0) {
 				if (animId==baseStopAnim.id) {
-					var pt = Entity.rtc(x+dir*Data.CASE_WIDTH*0.3f, y+Data.CASE_HEIGHT);
+					Vector2Int pt = Entity.rtc(x+dir*Data.CASE_WIDTH*0.3f, y-Data.CASE_HEIGHT);
 					if (world.GetCase(pt.x, pt.y)<=0 & world.GetCase(cx+dir, cy)==0) {
 						if (edgeTimer<=0) {
 							edgeTimer = Data.EDGE_TIMER;

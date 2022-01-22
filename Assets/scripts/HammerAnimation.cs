@@ -121,7 +121,7 @@ public class HammerAnimation
             {
                 if (fl_loop)
                 {
-                    mc.GotoAndStop(1);
+                    mc.GotoAndPlay(1);
                 }
                 fl_loopDone = true;
             }

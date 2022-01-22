@@ -28,8 +28,6 @@ public class Supa : Mover
 	protected override void Init(GameMode g) {
 		base.Init(g);
 		Register(Data.SUPA);
-
-		DisableAnimator();
 	}
 
 	/*------------------------------------------------------------------------

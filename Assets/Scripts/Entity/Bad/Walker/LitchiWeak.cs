@@ -15,7 +15,7 @@ public class LitchiWeak : Jumper
 	/*------------------------------------------------------------------------
 	EVENT: FIN D'ANIM
 	------------------------------------------------------------------------*/
-	protected override void OnEndAnim(int id) {
+	protected override void OnEndAnim(string id) {
 		base.OnEndAnim(id);
 		if ( id==Data.ANIM_BAD_SHOOT_START.id ) {
 			PlayAnim(Data.ANIM_BAD_WALK);

@@ -533,7 +533,8 @@ public class ScriptEngine
                         x += Data.CASE_WIDTH;
                         x *= -1;
                     }
-                    MovieClip mc = game.world.view.AttachSprite(name, x, y, (back == 1) ? true : false);
+                    MovieClip mc = game.world.view.AttachSprite("extra_mc", x, y, (back == 1) ? true : false);
+                    mc.SetAnim(name, 1);
                     if (p > 0)
                     {
                         mc.Play();

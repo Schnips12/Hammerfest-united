@@ -74,6 +74,7 @@ public abstract class Bad : Mover
 		base.Init(g);
 		Register(Data.BAD);
 		Register(Data.BAD_CLEAR);
+		Play();
 	}
 
 
@@ -641,7 +642,7 @@ public abstract class Bad : Mover
 
 		// R�-active le contact au sol qui avait �t� d�sactiv�
 		if ( yTrigger!=null && !fl_kill ) {
-			if ( y>=yTrigger ) {
+			if ( y<=yTrigger ) {
 				fl_hitGround = true;
 				yTrigger=null;
 			}

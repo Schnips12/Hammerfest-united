@@ -208,7 +208,7 @@ public class View : MonoBehaviour
 
         /* tile.maskTile._width = wid*Data.CASE_WIDTH; */ // TODO TIile MC
 
-        tile.SetSkin(skin);
+        tile.SetSkin(skin, false);
         /* tile.endTile.SetSkin(skin); */
 
         if (!fl_shadow | fl_fast)
@@ -232,16 +232,16 @@ public class View : MonoBehaviour
         }
         tile = new TileMC(_tiles, "tile", wid);
 
-        tile._rotation = 90;
+        tile._rotation = -90;
         tile.united.GetComponent<SpriteRenderer>().flipY = true;
-        tile._x = sx * Data.CASE_WIDTH;
-        tile._y = sy * Data.CASE_HEIGHT;
+        tile._x = (sx+1) * Data.CASE_WIDTH;
+        tile._y = (sy+wid) * Data.CASE_HEIGHT;
 
 
         // TODO Flip sprites and subs.
         /* tile.maskTile._width = wid*Data.CASE_WIDTH; */ // TODO Populate the TILE MC class
 
-        tile.SetSkin(skin);
+        tile.SetSkin(skin, true);
         /* tile.endTile.SetSkin(skin); */
 
         if (!fl_shadow | fl_fast)
@@ -277,7 +277,7 @@ public class View : MonoBehaviour
 				break;
 			default:
 				mc = _field_dm.Attach("Strechable bombField", 1);
-				mc.SetSkin(Mathf.Abs(id));
+				mc.SetSkin(Mathf.Abs(id), false);
 				break;
 		}
 		mc.ConvertNestedAnimators();
@@ -374,11 +374,13 @@ public class View : MonoBehaviour
 
             if (td.direction == Data.HORIZONTAL)
             {
-                td.podA._y -= Data.CASE_HEIGHT * 0.5f;
-                td.podB._y -= Data.CASE_HEIGHT * 0.5f;
+                /* td.podA._y -= Data.CASE_HEIGHT * 0.5f;
+                td.podB._y -= Data.CASE_HEIGHT * 0.5f; */
             }
             else
             {
+                td.podA._y += Data.CASE_HEIGHT * 0.5f;
+                td.podB._y += Data.CASE_HEIGHT * 0.5f;
                 td.podA._rotation += 90;
                 td.podB._rotation += 90;
             }

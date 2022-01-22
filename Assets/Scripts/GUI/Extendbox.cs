@@ -27,7 +27,7 @@ public class Extendbox
 	------------------------------------------------------------------------*/
 	void Collect(int id) {
 		MovieClip mc;
-		mc = new MovieClip(game.depthMan.Attach("hammer_interf_extend", Data.DP_INTERF), "letter");
+		mc = new MovieClip(game.depthMan.Attach("hammer_interf_extend", Data.DP_INTERF));
 		mc._name = "letter"+id.ToString();
 		mc.GotoAndStop(id+1);
 		mc._x = x;

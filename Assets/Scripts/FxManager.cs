@@ -213,8 +213,8 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        a.mc._width = radius * 2;
-        a.mc._height = a.mc._width;
+        /* a.mc._width = radius * 2;
+        a.mc._height = a.mc._width; */
         return a;
     }
 
@@ -226,8 +226,8 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        a.mc._width = radius * 2;
-        a.mc._height = a.mc._width;
+        /* a.mc._width = radius * 2;
+        a.mc._height = a.mc._width; */
         return a;
     }
 
@@ -241,7 +241,6 @@ public class FxManager
         {
             return null;
         }
-		Debug.Log("SHINE");
         HammerAnimation fx = AttachFx(x, y, "hammer_fx_shine");
         fx.mc._xscale *= 1.5f;
         fx.mc._yscale = fx.mc._xscale;
@@ -295,6 +294,7 @@ public class FxManager
         }
         HammerAnimation a = new HammerAnimation(game);
         a.Attach(x, y, link, Data.DP_FX);
+        a.mc.Play();
         animList.Add(a);
         return a;
     }
@@ -333,7 +333,7 @@ public class FxManager
             fx.mc._xscale = Random.Range(0, 50) + 50 * (Random.Range(0, 2) * 2 - 1);
             fx.mc._yscale = Random.Range(0, 80) + 10;
             fx.mc._alpha = Random.Range(0, 50) + 50;
-            fx.mc.GotoAndStop((Random.Range(0, 5) + 5));
+            fx.mc.GotoAndPlay((Random.Range(0, 5) + 5));
         }
     }
 

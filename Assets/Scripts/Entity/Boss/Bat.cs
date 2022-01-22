@@ -258,7 +258,7 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	EVENT: FIN D'ANIMATION
 	------------------------------------------------------------------------*/
-	protected override void OnEndAnim(int id) {
+	protected override void OnEndAnim(string id) {
 		base.OnEndAnim(id);
 
 		// arriv�e

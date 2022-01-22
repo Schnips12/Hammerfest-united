@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D.Animation;
 
 public class ScoreItem : Item
 {
@@ -26,36 +27,16 @@ public class ScoreItem : Item
 	}
 
 
+
 	/*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
 	public static ScoreItem Attach(GameMode g, float x, float y, int id, int? subId) {
-		ScoreItem mc;
 		if (id>=1000) {
 			id -= 1000;
 		}
-		switch (id) {
-			case 0: // Crystal
-				mc = new ScoreItem(g.depthMan.Attach("3159", Data.DP_ITEMS));
-				break;
-			case 51: // Coin
-				mc = new ScoreItem(g.depthMan.Attach("3222", Data.DP_ITEMS));
-				mc.fl_anim = true;
-				subId=null;
-				break;
-			case 17: // Pearl reward
-				mc = new ScoreItem(g.depthMan.Attach("3179", Data.DP_ITEMS));
-				break;
-			case 185: // Ring
-				mc = new ScoreItem(g.depthMan.Attach("3401", Data.DP_ITEMS));
-				mc.fl_anim = true;
-				subId=null;
-				break;
-			default:
-				mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
-				subId=null;
-				break;
-		}
+		ScoreItem mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
+		mc.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scoreItems.Find(x => x.name.Substring(18)==(id+1).ToString());
 		mc.InitItem(g, x, y, id, subId);
 		return mc;
 	}

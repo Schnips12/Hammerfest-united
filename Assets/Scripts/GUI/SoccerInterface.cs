@@ -32,7 +32,6 @@ public class SoccerInterface
 		mc._x	= -game.mc._x;
 		mc._y	= 0;
 		mc.GotoAndStop(3);
-		mc.cacheAsBitmap = true;
 
 		/* scores		= new List<Field>();
         scores.Add(mc.FindSub("score0") as Field);

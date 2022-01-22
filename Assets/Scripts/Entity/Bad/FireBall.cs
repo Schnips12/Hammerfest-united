@@ -20,7 +20,7 @@ public class FireBall : Bad
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	FireBall(MovieClip mc) : base(mc) {
-		DisableAnimator() ;
+		Stop();
 		fl_hitGround = false ;
 		fl_hitWall = false ;
 		fl_gravity = false ;

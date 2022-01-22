@@ -48,8 +48,8 @@ public class Blue : PlayerBomb
 			e.Knock(Data.KNOCK_DURATION*0.75f);
 			ShockWave(e, radius, power);
 			e.dx *= 0.3f;
-			e.dy = -6;
-			e.yTrigger = e.y+Data.CASE_HEIGHT*1.5f;
+			e.dy = 6;
+			e.yTrigger = e.y-Data.CASE_HEIGHT*1.5f;
 			e.fl_hitGround = false;
 		}
 	}
