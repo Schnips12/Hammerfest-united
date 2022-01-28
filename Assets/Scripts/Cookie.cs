@@ -9,8 +9,8 @@ public class Cookie
 	public static string NAME = "hammerfest_united_data";
 	public static int VERSION = 1;
 
-	public GameManager manager;
 	public int version;
+	public GameManager manager;
 	public DateTime lastModified;
 	private Hashtable data;
 
@@ -18,9 +18,10 @@ public class Cookie
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	public Cookie(GameManager m) {
-		this.manager = m;
+		manager = m;
 		CheckVersion();
 	}
+
 	private void Copy(Cookie c) {
 		manager = c.manager;
 		version = c.version;
@@ -72,29 +73,22 @@ public class Cookie
 
 
 	/*------------------------------------------------------------------------
-	RUNTIME => COOKIE
+	DATA => RUNTIME
 	------------------------------------------------------------------------*/
-	public void SaveFile(string name, string raw) {
-		File.WriteAllText(Application.dataPath+"/xml/"+name, raw);
-		NAME = name;
-		Flush();
-	}
-
-
-	/*------------------------------------------------------------------------
-	COOKIE => RUNTIME
-	------------------------------------------------------------------------*/
-	public string ReadFile(string name) {
+	public string ReadXmlFile(string name) {
 		string raw = null;
-		if (File.Exists(Application.dataPath+"/xml/"+name)) {
-			raw = File.ReadAllText(Application.dataPath+"/xml/"+name);
+		TextAsset file = Loader.Instance.parametersFiles.Find(x => x.name==name);
+		if (file != null) {
+			raw = file.text;
 		}
 		return raw;
 	}
-	public string ReadLevel(string name) {
+
+	public string ReadJsonLevel(string name) {
 		string raw = null;
-		if (File.Exists(Application.dataPath+"/json/levels/"+name)) {
-			raw = File.ReadAllText(Application.dataPath+"/json/levels/"+name);
+		TextAsset file = Loader.Instance.levelFiles.Find(x => x.name==name);
+		if (file != null) {
+			raw = file.text;
 		}
 		return raw;
 	}
@@ -108,6 +102,7 @@ public class Cookie
 
 	public string ReadVar(string varName) {
 		if(data == null) {
+			Debug.Log("No data in cookie");
 			return "";
 		}
 		if (data.ContainsKey(varName)) {

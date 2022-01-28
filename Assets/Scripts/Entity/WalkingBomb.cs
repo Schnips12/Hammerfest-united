@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class WalkingBomb : Physics
@@ -34,7 +32,7 @@ public class WalkingBomb : Physics
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
 	public static WalkingBomb Attach(GameMode g, PlayerBomb b) {
-		var linkage = "hammer_player_wbomb" ;
+		string linkage = "hammer_player_wbomb" ;
 		WalkingBomb mc = new WalkingBomb(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, b) ;
 		return mc ;
@@ -110,7 +108,7 @@ public class WalkingBomb : Physics
 	------------------------------------------------------------------------*/
 	void OnPortal(int pid) {
 		base.OnPortal(pid);
-		game.fxMan.AttachFx(x,y-Data.CASE_HEIGHT*0.5f,"hammer_fx_shine");
+		game.fxMan.AttachFx(x,y+Data.CASE_HEIGHT*0.5f,"hammer_fx_shine");
 		DestroyBoth();
 	}
 
@@ -121,7 +119,7 @@ public class WalkingBomb : Physics
 		base.OnPortalRefusal();
 		Knock(Data.SECOND);
 		dx = -dx*3;
-		dy = -5;
+		dy = 5;
 		game.fxMan.InGameParticles( Data.PARTICLE_PORTAL, x, y, 5);
 	}
 
@@ -164,7 +162,7 @@ public class WalkingBomb : Physics
 		if ( fl_stable ) {
 			// gauche
 			if ( Input.GetKeyDown(KeyCode.LeftArrow) & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_LEFT)) {
-				var h = world.GetWallHeight(cx-1, cy, Data.IA_CLIMB );
+				int h = world.GetWallHeight(cx-1, cy, Data.IA_CLIMB );
 				if ( h<=1 ) {
 					Jump( Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[0] );
 					CenterInCase();
@@ -172,7 +170,7 @@ public class WalkingBomb : Physics
 			}
 			// droite
 			if ( Input.GetKeyDown(KeyCode.RightArrow) & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT) ) {
-				var h = world.GetWallHeight( cx+1,cy, Data.IA_CLIMB );
+				int h = world.GetWallHeight( cx+1,cy, Data.IA_CLIMB );
 				if ( h<=1 ) {
 					Jump( Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[0] );
 					CenterInCase();
@@ -266,7 +264,7 @@ public class WalkingBomb : Physics
 	------------------------------------------------------------------------*/
 	void Jump(float jx, float jy) {
 		dx = dir*jx;
-		dy = -jy;
+		dy = jy;
 		fl_stable = false;
 	}
 
@@ -276,7 +274,7 @@ public class WalkingBomb : Physics
 	------------------------------------------------------------------------*/
 	public override void HammerUpdate() {
 		// Inhibe la bombe r�elle
-		realBomb.y = -1500;
+		realBomb.y = 1500;
 		realBomb.lifeTimer = Data.SECOND*10;
 
 		if ( fl_knock & knockTimer>0 ) {

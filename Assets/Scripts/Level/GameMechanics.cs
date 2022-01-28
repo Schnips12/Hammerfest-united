@@ -434,6 +434,7 @@ public class GameMechanics : ViewManager
 		base.OnDataReady();
 		scriptEngine.Compile();
 		scriptEngine.RunScript();
+		Debug.Log(scriptEngine.script.ToString());
 	}
 
 	/*------------------------------------------------------------------------
@@ -687,7 +688,7 @@ public class GameMechanics : ViewManager
 					p.y + Data.CASE_WIDTH*0.5f + Random.Range(0, 15)*(Random.Range(0, 2)*2-1),
 					"hammer_fx_star"
 				);
-				a.mc._xscale	= Random.Range(0, 70)+30;
+				a.mc._xscale	= (Random.Range(0, 70)+30) / 100;
 				a.mc._yscale	= a.mc._xscale;
 			}
 		}

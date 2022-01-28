@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Ananas : Jumper
@@ -42,7 +43,7 @@ public class Ananas : Jumper
 	------------------------------------------------------------------------*/
     public static Ananas Attach(GameMode g, float x, float y)
     {
-        var linkage = Data.LINKAGES[Data.BAD_ANANAS];
+        string linkage = Data.LINKAGES[Data.BAD_ANANAS];
         Ananas mc = new Ananas(g.depthMan.Attach(linkage, Data.DP_BADS));
         mc.InitBad(g, x, y);
         return mc;
@@ -96,12 +97,12 @@ public class Ananas : Jumper
 	------------------------------------------------------------------------*/
     void Repel(int type, float powerFactor)
     {
-        var l = game.GetClose(type, x, y, dashRadius, false);
-        for (var i = 0; i < l.Count; i++)
+        List<IEntity> l = game.GetClose(type, x, y, dashRadius, false);
+        for (int i = 0; i < l.Count; i++)
         {
             Physics e = l[i] as Physics; // TODO Implement IPhysics cause this is gonna fail
             ShockWave(e, dashRadius, dashPower * powerFactor);
-            e.dy -= 8;
+            e.dy += 8;
             if (e.IsType(Data.PLAYER))
             {
                 (e as Player).Knock(Data.SECOND * 1.5f);
@@ -115,10 +116,10 @@ public class Ananas : Jumper
 	------------------------------------------------------------------------*/
     void Vaporize(int type)
     {
-        var l = game.GetClose(type, x, y, dashRadius, false);
-        for (var i = 0; i < l.Count; i++)
+        List<IEntity> l = game.GetClose(type, x, y, dashRadius, false);
+        for (int i = 0; i < l.Count; i++)
         {
-            var e = l[i];
+            IEntity e = l[i];
             game.fxMan.AttachFx(e.x, e.y + Data.CASE_HEIGHT, "hammer_fx_pop");
             e.DestroyThis();
         }
@@ -130,9 +131,9 @@ public class Ananas : Jumper
 	------------------------------------------------------------------------*/
     void StartAttack()
     {
-        var fl_allOut = true;
-        var pl = game.GetPlayerList();
-        for (var i = 0; i < pl.Count; i++)
+        bool fl_allOut = true;
+        List<Player> pl = game.GetPlayerList();
+        for (int i = 0; i < pl.Count; i++)
         {
             if (!pl[i].fl_knock)
             {
@@ -146,11 +147,11 @@ public class Ananas : Jumper
         Halt();
         PlayAnim(Data.ANIM_BAD_THINK);
         ForceLoop(true);
-        SetNext(0, -10, Data.SECOND * 0.9f, Data.ACTION_MOVE);
+        SetNext(0, 10, Data.SECOND * 0.9f, Data.ACTION_MOVE);
         fl_attack = true;
         MovieClip mc = game.depthMan.Attach("curse", Data.DP_FX);
         mc.GotoAndStop(Data.CURSE_TAUNT);
-        Stick(mc, 0, -Data.CASE_HEIGHT * 2.5f);
+        Stick(mc, 0, Data.CASE_HEIGHT * 2.5f);
     }
 
     /*------------------------------------------------------------------------
@@ -158,19 +159,19 @@ public class Ananas : Jumper
 	------------------------------------------------------------------------*/
     void Attack()
     {
-        var fx = game.fxMan.AttachExplodeZone(x, y, dashRadius);
+        HammerAnimation fx = game.fxMan.AttachExplodeZone(x, y, dashRadius);
         fx.mc._alpha = 20;
         game.Shake(Data.SECOND * 0.5f, 5);
 
-        var l = game.GetPlayerList();
-        for (var i = 0; i < l.Count; i++)
+        List<Player> l = game.GetPlayerList();
+        for (int i = 0; i < l.Count; i++)
         {
-            var p = l[i];
+            Player p = l[i];
             if (p.fl_stable)
             {
                 if (p.fl_shield)
                 {
-                    p.dy = -8;
+                    p.dy = 8;
                 }
                 else
                 {

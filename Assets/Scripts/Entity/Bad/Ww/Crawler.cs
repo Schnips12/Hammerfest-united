@@ -1,302 +1,334 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Crawler : WallWalker
 {
-	static float SCALE_RECAL		= 0.2f;
-	static float CRAWL_STRETCH		= 1.8f;
-	static int COLOR				= 0xFF9146;
-	static float COLOR_ALPHA		= 40;
+    static float SCALE_RECAL = 0.2f;
+    static float CRAWL_STRETCH = 1.8f;
+    static Color COLOR = Data.ToColor(0xFF9146);
+    static float COLOR_ALPHA = 40;
 
-	static float SHOOT_SPEED		= 6;
-	static float CHANCE_ATTACK		= 10;
-	static float COOLDOWN			= Data.SECOND * 2;
-	static float ATTACK_TIMER		= Data.SECOND * 0.5f;
+    static float SHOOT_SPEED = 6;
+    static float CHANCE_ATTACK = 10;
+    static float COOLDOWN = Data.SECOND * 2;
+    static float ATTACK_TIMER = Data.SECOND * 0.5f;
 
-	bool fl_attack;
-	float attackCD;
-	float attackTimer;
-	float colorAlpha;
+    bool fl_attack;
+    float attackCD;
+    float attackTimer;
+    float colorAlpha;
 
-	float xscale;
-	float yscale;
-
-	float blobCpt;
+    float blobCpt;
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Crawler(MovieClip mc) : base(mc) {
-		speed			= 2;
-		angerFactor		= 0.5f;
-		fl_attack		= false;
-		attackCD		= Data.PEACE_COOLDOWN;
-		blobCpt			= 0;
-	}
+    Crawler(MovieClip mc) : base(mc)
+    {
+        speed = 2;
+        angerFactor = 0.5f;
+        fl_attack = false;
+        attackCD = Data.PEACE_COOLDOWN;
+        blobCpt = 0;
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	INITIALISATION BAD
 	------------------------------------------------------------------------*/
-	protected override void InitBad(GameMode g, float x, float y) {
-		base.InitBad(g,x,y);
-		Scale(90);
-	}
+    protected override void InitBad(GameMode g, float x, float y)
+    {
+        base.InitBad(g, x, y);
+        Scale(90);
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-	public static Crawler Attach(GameMode g, float x, float y) {
-		var linkage = Data.LINKAGES[Data.BAD_CRAWLER];
-		Crawler mc = new Crawler(g.depthMan.Attach(linkage,Data.DP_BADS));
-		mc.InitBad(g,x,y) ;
-		return mc ;
-	}
+    public static Crawler Attach(GameMode g, float x, float y)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_CRAWLER];
+        Crawler mc = new Crawler(g.depthMan.Attach(linkage, Data.DP_BADS));
+        mc.InitBad(g, x, y);
+        return mc;
+    }
 
 
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	MORT
 	------------------------------------------------------------------------*/
-	public override void KillHit(float? dx) {
-		base.KillHit(dx);
-		fl_attack = false;
-	}
+    public override void KillHit(float? dx)
+    {
+        base.KillHit(dx);
+        fl_attack = false;
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	RENVOIE TRUE SI DISPONIBLE POUR UNE ACTION
 	------------------------------------------------------------------------*/
-	public override bool IsReady() {
-		return base.IsReady() & !fl_attack;
-	}
+    public override bool IsReady()
+    {
+        return base.IsReady() & !fl_attack;
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	D�MARRAGE ATTAQUE
 	------------------------------------------------------------------------*/
-	void PrepareAttack() {
-		dx			= 0;
-		dy			= 0;
-		fl_attack	= true;
-		fl_wallWalk	= false;
-		attackTimer	= ATTACK_TIMER;
-		PlayAnim(Data.ANIM_BAD_SHOOT_START);
-	}
+    void PrepareAttack()
+    {
+        dx = 0;
+        dy = 0;
+        fl_attack = true;
+        fl_wallWalk = false;
+        attackTimer = ATTACK_TIMER;
+        PlayAnim(Data.ANIM_BAD_SHOOT_START);
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	ATTAQUE
 	------------------------------------------------------------------------*/
-	void Attack() {
-		// Fireball
-		var s = ShootFireBall.Attach(game, x, y);
-		s.MoveTo(x,y);
-		s.dx = -cp.x*SHOOT_SPEED;
-		s.dy = -cp.y*SHOOT_SPEED;
-		s.Scale(70);
-		var n = Random.Range(0, 3)+2;
-		if ( cp.x!=0 ) {
-			game.fxMan.InGameParticlesDir(Data.PARTICLE_BLOB, x, y, n, -cp.x);
-		}
-		else {
-			game.fxMan.InGameParticles(Data.PARTICLE_BLOB, x, y, n );
-		}
-		game.fxMan.AttachExplosion(x, y, 20);
+    void Attack()
+    {
+        // Fireball
+        ShootFireBall s = ShootFireBall.Attach(game, x, y);
+        s.MoveTo(x, y);
+        s.dx = -cp.x * SHOOT_SPEED;
+        s.dy = -cp.y * SHOOT_SPEED;
+        s.Scale(70);
+        int n = Random.Range(0, 3) + 2;
+        if (cp.x != 0)
+        {
+            game.fxMan.InGameParticlesDir(Data.PARTICLE_BLOB, x, y, n, -cp.x);
+        }
+        else
+        {
+            game.fxMan.InGameParticles(Data.PARTICLE_BLOB, x, y, n);
+        }
+        game.fxMan.AttachExplosion(x, y, 20);
 
-		subs[0]._xscale = 150 + Mathf.Abs(cp.x)*150;
-		subs[0]._yscale = 150 + Mathf.Abs(cp.y)*150;
-		colorAlpha = COLOR_ALPHA;
-		/* SetColorHex( Mathf.Round(colorAlpha), COLOR ); // TODO Understand
- */
-		// Bomb
-//		var b = entity.bomb.bad.PoireBomb.attach(game,x,y);
-//		var bdx = (xSpeed!=0) ? -xSpeed/Math.abs(xSpeed)*5 : -cp.x*15;
-//		var bdy = (cp.y==-1) ? 0 : -cp.y*10;
-//		b.setNext(bdx,bdy, 0, Data.ACTION_MOVE);
+        /* subs[0]._xscale = (150 + Mathf.Abs(cp.x) * 150) / 100.0f;
+        subs[0]._yscale = (150 + Mathf.Abs(cp.y) * 150) / 100.0f; */
+        colorAlpha = COLOR_ALPHA;
+        SetColor(COLOR, Mathf.Round(colorAlpha));
 
-		attackCD = COOLDOWN;
-		PlayAnim(Data.ANIM_BAD_SHOOT_END);
-	}
+        attackCD = COOLDOWN;
+        PlayAnim(Data.ANIM_BAD_SHOOT_END);
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	RENVOIE TRUE SI D�CIDE D'ATTAQUER
 	------------------------------------------------------------------------*/
-	bool DecideAttack() {
-		if ( fl_attack ) {
-			return false;
-		}
+    bool DecideAttack()
+    {
+        if (fl_attack)
+        {
+            return false;
+        }
 
-		var fl_inSight = false;
-		var factor = 1.0;
+        bool fl_inSight = false;
+        float factor = 1.0f;
 
-		// Player au dessus/dessous
-		if ( cp.y!=0 & Mathf.Abs(player.x-x)<=Data.CASE_WIDTH*2 ) {
-			if ( cp.y>0 & player.y<y ) {
-				fl_inSight = true;
-			}
-			if ( cp.y<0 & player.y>y ) {
-				fl_inSight = true;
-			}
-		}
+        // Player au dessous/dessus
+        if (cp.y != 0 & Mathf.Abs(player.x - x) <= Data.CASE_WIDTH * 2)
+        {
+            if (cp.y > 0 & player.y < y)
+            {
+                fl_inSight = true;
+            }
+            if (cp.y < 0 & player.y > y)
+            {
+                fl_inSight = true;
+            }
+        }
 
-		// Player � gauche/droite
-		if ( cp.x!=0 & Mathf.Abs(player.y-y)<=Data.CASE_HEIGHT*2 ) {
-			if ( cp.x>0 & player.x<x ) {
-				fl_inSight = true;
-			}
-			if ( cp.x<0 & player.x>x ) {
-				fl_inSight = true;
-			}
-		}
+        // Player � gauche/droite
+        if (cp.x != 0 & Mathf.Abs(player.y - y) <= Data.CASE_HEIGHT * 2)
+        {
+            if (cp.x > 0 & player.x < x)
+            {
+                fl_inSight = true;
+            }
+            if (cp.x < 0 & player.x > x)
+            {
+                fl_inSight = true;
+            }
+        }
 
-		if ( fl_inSight ) {
-			attackCD -= Loader.Instance.tmod*4;
-			factor = 8;
-		}
+        if (fl_inSight)
+        {
+            attackCD -= Loader.Instance.tmod * 4;
+            factor = 8;
+        }
 
-		return IsReady() & IsHealthy() & attackCD<=0 & Random.Range(0, 1000) < CHANCE_ATTACK*factor;
-	}
+        return IsReady() & IsHealthy() & attackCD <= 0 & Random.Range(0, 1000) < CHANCE_ATTACK * factor;
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	EVENT: FIN D'ANIM
 	------------------------------------------------------------------------*/
-	protected override void OnEndAnim(string id) {
-		base.OnEndAnim(id);
+    protected override void OnEndAnim(string id)
+    {
+        base.OnEndAnim(id);
 
-		if ( id==Data.ANIM_BAD_SHOOT_END.id ) {
-			fl_attack = false;
-			fl_wallWalk	= true;
-			MoveToSafePos();
-			UpdateSpeed();
-			if ( dx==0 & dy==0 ) {
-				WallWalk();
-			}
-		}
-	}
+        if (id == Data.ANIM_BAD_SHOOT_END.id)
+        {
+            fl_attack = false;
+            fl_wallWalk = true;
+            MoveToSafePos();
+            UpdateSpeed();
+            if (dx == 0 & dy == 0)
+            {
+                WallWalk();
+            }
+        }
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	EVENT: GEL
 	------------------------------------------------------------------------*/
-	protected override void OnFreeze() {
-		base.OnFreeze() ;
-		fl_attack = false;
-	}
+    protected override void OnFreeze()
+    {
+        base.OnFreeze();
+        fl_attack = false;
+    }
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	EVENT: SONN�
 	------------------------------------------------------------------------*/
-	protected override void OnKnock() {
-		base.OnKnock() ;
-		fl_attack = false;
-	}
+    protected override void OnKnock()
+    {
+        base.OnKnock();
+        fl_attack = false;
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	EVENT: TOUCHE LE SOL
 	------------------------------------------------------------------------*/
-	protected override void OnHitGround(float h) {
-		base.OnHitGround(h);
-		if ( Mathf.Abs(h)>=Data.CASE_HEIGHT*3 ) {
-			subs[0]._xscale = 2*100*scaleFactor;
-			subs[0]._yscale = 0.2f*100*scaleFactor;
-			subs[0]._y = ySubBase+10;
-			if ( !fl_freeze ) {
-				game.fxMan.InGameParticles( Data.PARTICLE_BLOB, x ,y, Random.Range(0, 3)+2 );
-			}
-		}
-	}
+    protected override void OnHitGround(float h)
+    {
+        base.OnHitGround(h);
+        if (Mathf.Abs(h) >= Data.CASE_HEIGHT * 3)
+        {
+            /* subs[0]._xscale = 2 * scaleFactor; // TODO Rework the crawler prefab. The mai animation should be a "sub"
+            subs[0]._yscale = 0.2f * scaleFactor;
+            subs[0]._y = ySubBase + 10; */
+            if (!fl_freeze)
+            {
+                game.fxMan.InGameParticles(Data.PARTICLE_BLOB, x, y, Random.Range(0, 3) + 2);
+            }
+        }
+    }
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	UPDATE GRAPHIQUE
 	------------------------------------------------------------------------*/
-	public override void EndUpdate() {
-		base.EndUpdate();
-		if ( fl_attack ) {
-			// Vibration attaque
-			_x += Random.Range(0, 15)/10 * (Random.Range(0, 2)*2-1);
-			_y += Random.Range(0, 15)/10 * (Random.Range(0, 2)*2-1);
-			xscale = scaleFactor * 100 + Random.Range(0, 20)*(Random.Range(0, 2)*2-1);
-			yscale = scaleFactor * 100 + Random.Range(0, 20)*(Random.Range(0, 2)*2-1);
-		}
-		else {
-			xscale = scaleFactor * 100;
-			yscale = scaleFactor * 100;
-		}
+    public override void EndUpdate()
+    {
+        base.EndUpdate();
+        if (fl_attack)
+        {
+            // Vibration attaque
+            _x += Random.Range(0, 15) / 10 * (Random.Range(0, 2) * 2 - 1);
+            _y += Random.Range(0, 15) / 10 * (Random.Range(0, 2) * 2 - 1);
+            _xscale = scaleFactor  + (Random.Range(0, 20) * (Random.Range(0, 2) * 2 - 1))/100.0f;
+            _yscale = scaleFactor  + (Random.Range(0, 20) * (Random.Range(0, 2) * 2 - 1))/100.0f;
+        }
+        else
+        {
+            _xscale = scaleFactor;
+            _yscale = scaleFactor;
+        }
 
-		if ( fl_wallWalk ) {
-			// Etirement en d�placement
-			if ( dx!=0 ) {
-				xscale = 100 * scaleFactor * CRAWL_STRETCH;
-			}
-			if ( dy!=0 ) {
-				yscale = 100 * scaleFactor * CRAWL_STRETCH;
-			}
-		}
+        if (fl_wallWalk)
+        {
+            // Etirement en d�placement
+            if (dx != 0)
+            {
+                _xscale = scaleFactor * CRAWL_STRETCH;
+            }
+            if (dy != 0)
+            {
+                _yscale = scaleFactor * CRAWL_STRETCH;
+            }
+        }
 
-		if ( IsHealthy() ) {
-			// D�formation blob cosinus
-			xscale+= 10*Mathf.Sin(blobCpt);
-			yscale+= 10*Mathf.Cos(blobCpt);
-			blobCpt+=Loader.Instance.tmod*0.1f;
-		}
-
-
-		subs[0]._xscale += SCALE_RECAL * (xscale - subs[0]._xscale);
-		subs[0]._yscale += SCALE_RECAL * (yscale - subs[0]._yscale);
-
-		if ( colorAlpha>0 ) {
-			colorAlpha-=Loader.Instance.tmod*3;
-			if ( colorAlpha<=0 ) {
-				/* ResetColor(); */
-			}
-			else {
-				/* SetColorHex( Mathf.Round(colorAlpha), COLOR ); */ // TODO Understand
-			}
-		}
+        if (IsHealthy())
+        {
+            // D�formation blob cosinus
+            _xscale += (10 * Mathf.Sin(blobCpt))/100;
+            _yscale += (10 * Mathf.Cos(blobCpt))/100;
+            blobCpt += Loader.Instance.tmod * 0.1f;
+        }
 
 
-	}
+        /* subs[0]._xscale += SCALE_RECAL * (xscale - subs[0]._xscale);
+        subs[0]._yscale += SCALE_RECAL * (yscale - subs[0]._yscale); */
+
+        if (colorAlpha > 0)
+        {
+            colorAlpha -= Loader.Instance.tmod * 3;
+            if (colorAlpha <= 0)
+            {
+                ResetColor();
+            }
+            else
+            {
+                SetColor(COLOR, Mathf.Round(colorAlpha));
+            }
+        }
+
+
+    }
 
 
 
-	/*------------------------------------------------------------------------
+    /*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
-	public override void HammerUpdate() {
-		if ( fl_attack ) {
-			dx = 0;
-			dy = 0;
-		}
+    public override void HammerUpdate()
+    {
+        if (fl_attack)
+        {
+            dx = 0;
+            dy = 0;
+        }
 
-		base.HammerUpdate();
+        base.HammerUpdate();
 
-		// Cooldown d'attaque
-		if ( attackCD>0 ) {
-			attackCD-=Loader.Instance.tmod;
-		}
+        // Cooldown d'attaque
+        if (attackCD > 0)
+        {
+            attackCD -= Loader.Instance.tmod;
+        }
 
-		// Attaque
-		if ( DecideAttack() ) {
-			if ( world.GetCase(cx+cp.x, cy+cp.y) > 0 ) {
-				PrepareAttack();
-			}
-		}
+        // Attaque
+        if (DecideAttack())
+        {
+            if (world.GetCase(cx + cp.x, cy + cp.y) > 0)
+            {
+                PrepareAttack();
+            }
+        }
 
-		if ( fl_attack & attackTimer>0 ) {
-			attackTimer-=Loader.Instance.tmod;
-			if ( attackTimer<=0 ) {
-				Attack();
-			}
-		}
-	}
+        if (fl_attack & attackTimer > 0)
+        {
+            attackTimer -= Loader.Instance.tmod;
+            if (attackTimer <= 0)
+            {
+                Attack();
+            }
+        }
+    }
 
 }

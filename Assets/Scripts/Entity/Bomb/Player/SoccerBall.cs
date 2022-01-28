@@ -27,7 +27,7 @@ public class SoccerBall : PlayerBomb
 	ATTACH
 	------------------------------------------------------------------------*/
 	public static SoccerBall Attach(GameMode g, float x, float y) {
-		var linkage = "hammer_bomb_soccer";
+		string linkage = "hammer_bomb_soccer";
 		SoccerBall mc = new SoccerBall(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
@@ -41,7 +41,7 @@ public class SoccerBall : PlayerBomb
 		base.Init(g);
 		Register(Data.SOCCERBALL);
 		FxManager.AddGlow(this, Data.ToColor(0x808080), 2);
-		game.fxMan.AttachShine( x, y-Data.CASE_HEIGHT*0.5f );
+		game.fxMan.AttachShine( x, y+Data.CASE_HEIGHT*0.5f );
 	}
 
 
@@ -154,7 +154,7 @@ public class SoccerBall : PlayerBomb
 				"hammer_fx_ballBurn"
 			);
 			var ratio = Mathf.Min(1,speed/TOP_SPEED);
-			fx.mc._xscale = 100 * ratio;
+			fx.mc._xscale = ratio;
 			fx.mc._yscale = fx.mc._xscale;
 			burnTimer-=Loader.Instance.tmod;
 		}

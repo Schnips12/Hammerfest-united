@@ -46,7 +46,7 @@ public class Tzongre : Flyer
         if ((e.types & Data.PLAYER) > 0)
         {
             Player et = e as Player;
-            game.fxMan.AttachFx(x, y - Data.CASE_HEIGHT, "hammer_fx_shine");
+            game.fxMan.AttachFx(x, y + Data.CASE_HEIGHT, "hammer_fx_shine");
             et.GetScore(this, 50000);
             DestroyThis();
         }
@@ -65,7 +65,7 @@ public class Tzongre : Flyer
 	------------------------------------------------------------------------*/
     public static Tzongre Attach(GameMode g, float x, float y)
     {
-        var linkage = Data.LINKAGES[Data.BAD_TZONGRE];
+        string linkage = Data.LINKAGES[Data.BAD_TZONGRE];
         Tzongre mc = new Tzongre(g.depthMan.Attach(linkage, Data.DP_BADS));
         mc.InitBad(g, x, y);
         mc.SetLifeTimer(Data.SECOND * 60);

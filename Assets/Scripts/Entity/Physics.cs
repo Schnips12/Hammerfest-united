@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class Physics : HammerAnimator
@@ -103,18 +104,18 @@ public class Physics : HammerAnimator
             return;
         }
         power /= e.shockResistance; // le poids r�duit la puissance
-        var dist = e.Distance(x, y); // Math.sqrt( Math.pow(e.x-x,2) + Math.pow(e.y-y,2) );
-        var ratio = 1 - dist / radius;
-        var ang = Mathf.Atan2(e.y - y, e.x - x);
+        float dist = e.Distance(x, y); // Math.sqrt( Math.pow(e.x-x,2) + Math.pow(e.y-y,2) );
+        float ratio = 1 - dist / radius;
+        float ang = Mathf.Atan2(e.y - y, e.x - x);
         e.dx = Mathf.Cos(ang) * ratio * power;
         if (e.fl_stable)
         {
-            e.dy = -5;
+            e.dy = 5;
         }
         else
         {
             e.dy += Mathf.Sin(ang) * ratio * power;
-            e.dy = Mathf.Max(e.dy ?? 0, -10);
+            e.dy = Mathf.Max(e.dy ?? 0, 10);
         }
         e.fl_stable = false;
     }
@@ -159,7 +160,7 @@ public class Physics : HammerAnimator
 	------------------------------------------------------------------------*/
     public void MoveToAng(float angDeg, float speed)
     {
-        var rad = Mathf.PI * angDeg / 180;
+        float rad = Mathf.PI * angDeg / 180;
         dx = Mathf.Cos(rad) * speed;
         dy = Mathf.Sin(rad) * speed;
     }
@@ -169,7 +170,7 @@ public class Physics : HammerAnimator
 	------------------------------------------------------------------------*/
     public void MoveToTarget(IEntity e, float speed)
     {
-        var rad = Mathf.Atan2(e.y - y, e.x - x);
+        float rad = Mathf.Atan2(e.y - y, e.x - x);
         dx = Mathf.Cos(rad) * speed;
         dy = Mathf.Sin(rad) * speed;
     }
@@ -179,7 +180,7 @@ public class Physics : HammerAnimator
 	------------------------------------------------------------------------*/
     protected void MoveToPoint(float x, float y, float speed)
     {
-        var rad = Mathf.Atan2(y - this.y, x - this.x);
+        float rad = Mathf.Atan2(y - this.y, x - this.x);
         dx = Mathf.Cos(rad) * speed;
         dy = Mathf.Sin(rad) * speed;
     }
@@ -213,7 +214,7 @@ public class Physics : HammerAnimator
     {
         x = e.x;
         y = e.y;
-        var ang = -Random.Range(0, Mathf.Round(100 * Mathf.PI)) / 100;
+        float ang = -Random.Range(0, Mathf.Round(100 * Mathf.PI)) / 100;
         x = e.x + Mathf.Cos(ang) * Data.CASE_WIDTH * 2;
         y = e.y + Mathf.Sin(ang) * Data.CASE_HEIGHT * 2;
         MoveToTarget(e, speed);
@@ -231,7 +232,7 @@ public class Physics : HammerAnimator
         {
             return;
         }
-        var pt = world.GetGround(cx, cy);
+        Vector2Int pt = world.GetGround(cx, cy);
         MoveToCase(pt.x, pt.y);
     }
 
@@ -243,7 +244,7 @@ public class Physics : HammerAnimator
 	------------------------------------------------------------------------*/
     protected virtual void CheckHits()
     {
-        var l = GetByType(Data.ENTITY);
+        List<IEntity> l = GetByType(Data.ENTITY);
         foreach (IEntity e in l)
         {
             if (!e.fl_kill & !fl_kill & this.HitBound(e) & e.uniqId != this.uniqId)
@@ -269,7 +270,7 @@ public class Physics : HammerAnimator
     {
         CheckHits();
 
-        var cid = world.GetCase(cx, cy);
+        int? cid = world.GetCase(cx, cy);
 
         // T�l�portation
         if (fl_teleport & !fl_kill)
@@ -643,11 +644,11 @@ public class Physics : HammerAnimator
                 if (fl_hitWall)
                 {
                     var fl_hasHitWall = false;
-                    if (dx > 0 & world.GetCase(Entity.x_rtc(ox + Data.CASE_WIDTH/2), Entity.y_rtc(oy)) > 0)
+                    if (dx > 0 & world.GetCase(Entity.x_rtc(ox + Data.CASE_WIDTH / 2), Entity.y_rtc(oy)) > 0)
                     {
                         fl_hasHitWall = true;
                     }
-                    if (dx < 0 & world.GetCase(Entity.x_rtc(ox - Data.CASE_WIDTH/2), Entity.y_rtc(oy)) > 0)
+                    if (dx < 0 & world.GetCase(Entity.x_rtc(ox - Data.CASE_WIDTH / 2), Entity.y_rtc(oy)) > 0)
                     {
                         fl_hasHitWall = true;
                     }
@@ -697,7 +698,7 @@ public class Physics : HammerAnimator
                             else
                             {
                                 stepInfos.dy = 0;
-								float fallheight = fallStart==null? 0 : (fallStart.Value - y);
+                                float fallheight = fallStart == null ? 0 : (fallStart.Value - y);
                                 OnHitGround(fallheight);
                                 fallStart = null;
                                 UpdateCoords();
@@ -709,7 +710,7 @@ public class Physics : HammerAnimator
                 // Plafond
                 if (fl_hitCeil & stepInfos.dy > 0)
                 {
-                    if (world.GetCase(Entity.rtc(ox, oy + Data.CASE_HEIGHT/2)) <= 0 & world.GetCase(Entity.rtc(x, y + Data.CASE_HEIGHT/2)) > 0)
+                    if (world.GetCase(Entity.rtc(ox, oy + Data.CASE_HEIGHT / 2)) <= 0 & world.GetCase(Entity.rtc(x, y + Data.CASE_HEIGHT / 2)) > 0)
                     {
                         stepInfos.dy = 0;
                         OnHitCeil();
@@ -733,7 +734,7 @@ public class Physics : HammerAnimator
                                 y = Entity.y_ctr(ocy);
                                 stepInfos.dy = 0;
                                 UpdateCoords();
-                                float fallheight = fallStart==null? 0 : (y - fallStart.Value);
+                                float fallheight = fallStart == null ? 0 : (y - fallStart.Value);
                                 OnHitGround(fallheight);
                                 fl_patch = true;
                             }

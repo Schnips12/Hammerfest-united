@@ -71,9 +71,9 @@ MonoBehaviour:
     m_OverrideEntries:
     - m_Name: 1
       m_Hash: -2082672713
-      m_Sprite: {fileID: 21300000, guid: 1136cbf44f2b6bd4a864abc8a1250607, type: 3}
+      m_Sprite: {fileID: 21300000, guid: 7d384efee8a57024bb66c561f55765f5, type: 3}
       m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: 1136cbf44f2b6bd4a864abc8a1250607, type: 3}
+      m_SpriteOverride: {fileID: 21300000, guid: 7d384efee8a57024bb66c561f55765f5, type: 3}
     m_FromMain: 0
     m_EntryOverrideCount: 1
   - m_Name: Knock
@@ -82,9 +82,9 @@ MonoBehaviour:
     m_OverrideEntries:
     - m_Name: 1
       m_Hash: -2082672713
-      m_Sprite: {fileID: 21300000, guid: 55575a354979f6248a9e0547233eb5db, type: 3}
+      m_Sprite: {fileID: 21300000, guid: 1f4a0e7edb6912343838fdb9f56b1543, type: 3}
       m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: 55575a354979f6248a9e0547233eb5db, type: 3}
+      m_SpriteOverride: {fileID: 21300000, guid: 1f4a0e7edb6912343838fdb9f56b1543, type: 3}
     m_FromMain: 0
     m_EntryOverrideCount: 1
   - m_Name: Die
@@ -93,9 +93,9 @@ MonoBehaviour:
     m_OverrideEntries:
     - m_Name: 1
       m_Hash: -2082672713
-      m_Sprite: {fileID: 21300000, guid: 545ab33aac6848941bf0d7753f81f628, type: 3}
+      m_Sprite: {fileID: 21300000, guid: a15a7409e984c7144aff20cb76b7a2e0, type: 3}
       m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: 545ab33aac6848941bf0d7753f81f628, type: 3}
+      m_SpriteOverride: {fileID: 21300000, guid: a15a7409e984c7144aff20cb76b7a2e0, type: 3}
     m_FromMain: 0
     m_EntryOverrideCount: 1
   - m_Name: Shoot_start

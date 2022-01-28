@@ -146,7 +146,6 @@ public class SpecialManager
     {
         string s = game.world.scriptEngine.script.ToString();
         game.world.scriptEngine.SafeMode();
-        //		game.world.scriptEngine.clearScript();
         game.KillPop();
         int n = 0;
         for (int y = 0; y < Data.LEVEL_HEIGHT; y++)
@@ -166,7 +165,6 @@ public class SpecialManager
             }
         }
         game.perfectItemCpt = n;
-        //		game.world.scriptEngine.compile();
     }
 
 
@@ -867,10 +865,10 @@ public class SpecialManager
                     for (var i = 0; i < 7; i++)
                     {
                         var it = ScoreItem.Attach(
-                            game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), Data.GAME_HEIGHT,
+                            game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), 0,
                             3, null
                         );
-                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), UnityEngine.Random.Range(0, 15) + 10);
+                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), UnityEngine.Random.Range(0, 15) - 10);
                     }
                 }
                 break;
@@ -1529,7 +1527,7 @@ public class SpecialManager
                     List<Bad> l = game.GetBadList();
                     for (int i = 0; i < l.Count; i++)
                     {
-                        l[i].alpha = 100;
+                        l[i]._alpha = 100;
                         l[i].filter = null;
                     }
                     player.filter = null;
@@ -1641,7 +1639,7 @@ public class SpecialManager
             s._y = bad._y - Data.CASE_HEIGHT * 0.5f;
             var dir = UnityEngine.Random.Range(0, 2) * 2 - 1;
             s._xscale *= dir;
-            s._yscale = UnityEngine.Random.Range(0, 50) + 50;
+            s._yscale = (UnityEngine.Random.Range(0, 50) + 50) / 100.0f;
             game.fxMan.AttachShine(bad.x, bad.y);
             bad.ForceKill(dir * (UnityEngine.Random.Range(0, 10) + 15));
         }

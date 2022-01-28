@@ -13,6 +13,7 @@ public interface IEntity {
 	float width { get; set; }
 	float height { get; set; }
 	bool fl_kill { get; set; }
+	bool fl_destroy { get; set; }
 	void DestroyThis();
 	void RemoveMovieClip();
 	void Show();
@@ -47,7 +48,6 @@ public class Entity : MovieClip, IEntity
 	public float _yOffset;
 
 	protected  float rotation;
-	public float alpha;
 	protected  float minAlpha;
 	public  float scaleFactor = 1; // facteur (1.0)
 
@@ -59,7 +59,7 @@ public class Entity : MovieClip, IEntity
 	protected float? totalLife;
 
 	public bool fl_kill { get; set; }
-	public bool fl_destroy;
+	public bool fl_destroy { get; set; }
 
 	public int uniqId { get; set; }
 	public IEntity parent;
@@ -111,7 +111,7 @@ public class Entity : MovieClip, IEntity
 		types = 0;
 		x = 0;
 		y = 0;
-		alpha = 100 ;
+		_alpha = 100 ;
 		rotation = 0 ;
 		minAlpha = 35 ;
 /* 		defaultBlend = BlendMode.NORMAL; */
@@ -542,7 +542,7 @@ public class Entity : MovieClip, IEntity
 			_y = y+_yOffset ;
 		}
 		_rotation = rotation ;
-		_alpha = Mathf.Max(minAlpha, alpha) ;
+		_alpha = Mathf.Max(minAlpha, _alpha) ;
 /* 		if ( alpha!=100 & blendId<=2 ) { // TODO Blend
 			blendMode = BlendMode.LAYER;
 		}

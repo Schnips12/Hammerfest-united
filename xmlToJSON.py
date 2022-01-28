@@ -4,7 +4,7 @@ from os.path import abspath
 from pathlib import Path
 
 currentPath = Path(abspath(getsourcefile(lambda:0)))
-name = "adventure"
+name = "shareware"
 xmlName = name+".xml"
 jsonName = name+".json"
 targetPath = currentPath.parent.parent / "hammerfest" / "xml" / "levels" / xmlName

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -18,7 +17,7 @@ public class RepelBomb : PlayerBomb
 	ATTACH
 	------------------------------------------------------------------------*/
 	public static RepelBomb Attach(GameMode g, float x, float y) {
-		var linkage = "hammer_bomb_repel";
+		string linkage = "hammer_bomb_repel";
 		RepelBomb mc = new RepelBomb(g.depthMan.Attach(linkage,Data.DP_BOMBS));
 		mc.InitBomb(g, x, y);
 		return mc;
@@ -51,14 +50,14 @@ public class RepelBomb : PlayerBomb
 
 
 		// Players
-		var pl = game.GetPlayerList();
-		for (var i=0;i<pl.Count;i++) {
-			var p = pl[i];
-			var dist = Distance(p.x, p.y);
+		List<Player> pl = game.GetPlayerList();
+		for (int i=0;i<pl.Count;i++) {
+			Player p = pl[i];
+			float dist = Distance(p.x, p.y);
 			if (dist<=radius) {
-				var ratio = (radius-dist)/radius;
+				float ratio = (radius-dist)/radius;
 				p.Knock(Data.SECOND + Data.SECOND*ratio);
-				var ang = Mathf.Atan2(p.y-y, p.x-x);
+				float ang = Mathf.Atan2(p.y-y, p.x-x);
 				p.dx = Mathf.Cos(ang)*power*ratio;
 				p.dy = Mathf.Sin(ang)*power*ratio;
 			}
@@ -66,18 +65,18 @@ public class RepelBomb : PlayerBomb
 
 
 		// Ballon
-		var l = game.GetList(Data.SOCCERBALL);
-		for (var i=0;i<l.Count;i++) {
+		List<IEntity> l = game.GetList(Data.SOCCERBALL);
+		for (int i=0;i<l.Count;i++) {
 			SoccerBall ball = l[i] as SoccerBall;
-			var dist = Distance(ball.x, ball.y);
+			float dist = Distance(ball.x, ball.y);
 			if ( dist<=radius ) {
 				ball.lastPlayer = owner;
-				var ratio = (radius-dist)/radius;
-				var ang = Mathf.Atan2(ball.y-y, ball.x-x);
+				float ratio = (radius-dist)/radius;
+				float ang = Mathf.Atan2(ball.y-y, ball.x-x);
 				ball.dx = Mathf.Cos(ang)*power*ratio*1.5f;
 				ball.dy = Mathf.Sin(ang)*power*ratio*1.5f;
-				if (ball.dy<4 & ball.dy>-8) {
-					ball.dy = -8;
+				if (ball.dy<8 & ball.dy>-4) {
+					ball.dy = 8;
 				}
 				ball.Burn();
 				if ( ball.fl_stable ) {

@@ -5,6 +5,7 @@ using UnityEngine;
 public class TileMC : MovieClip
 {
     public int skin;
+    public float size;
     public MovieClip endTile;
     public MovieClip maskTile;
     public MovieClip ombre;
@@ -12,23 +13,11 @@ public class TileMC : MovieClip
     public TileMC(MovieClip mc, string name, float size) : base(mc)
     {
         _name = name;
+        this.size = size;
 
         SpriteRenderer renderer = united.GetComponent<SpriteRenderer>();
         renderer.drawMode = SpriteDrawMode.Tiled;
         renderer.size = new Vector2(size, 1);
-
-        endTile = new MovieClip(this, 0.001f);
-        endTile._name = "End";
-        endTile._x = size-0.4f;
-        endTile._visible = false;
-
-        maskTile = new MovieClip(this, 0.002f);
-        maskTile._name = "Mask";
-        maskTile._visible = false;
-
-        ombre = new MovieClip(this, 0.001f);
-        ombre._name = "Ombre";
-        ombre._visible = false;
 
 		_xscale = Data.CASE_WIDTH;
 		_yscale = Data.CASE_HEIGHT;
@@ -38,14 +27,27 @@ public class TileMC : MovieClip
     {
         skin = skinId;
 
+        endTile = new MovieClip(this, 0.01f);
+        endTile._name = "End";
+
+/*         maskTile = new MovieClip(this, 0.02f);
+        maskTile._name = "Mask";
+        maskTile._visible = false;
+
+        ombre = new MovieClip(this, 0.01f);
+        ombre._name = "Ombre";
+        ombre._visible = false; */
+
         SpriteRenderer tileRenderer = united.GetComponent<SpriteRenderer>();
         tileRenderer.sprite = Resources.Load<Sprite>("Tiles/"+skin.ToString());
 
         SpriteRenderer endRenderer = endTile.united.GetComponent<SpriteRenderer>();
         endRenderer.sprite = Resources.Load<Sprite>("Tiles_end/"+skin.ToString());
-        endTile._visible = true;
         if(vertical) {
             endRenderer.flipY = true;
+            endTile._y = this._y - Data.CASE_HEIGHT*(size-0.4f);
+        } else {
+            endTile._x = this._x + Data.CASE_WIDTH*(size-0.4f);
         }
     }
 

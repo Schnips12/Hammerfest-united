@@ -35,8 +35,8 @@ public class Trigger : Entity
         {
             return;
         }
-        var list = world.triggers[cx][cy];
-        for (var i = 0; i < list.Count; i++)
+        List<Entity> list = world.triggers[cx][cy];
+        for (int i = 0; i < list.Count; i++)
         {
             if (list[i] == this)
             {
@@ -103,14 +103,14 @@ public class Trigger : Entity
     /*------------------------------------------------------------------------
 	RENVOIE LA LISTE DES ENTIT�S D'UN TYPE DONN� DANS LA CASE COURANTE
 	------------------------------------------------------------------------*/
-    protected List<Entity> GetByType(int type)
+    protected List<IEntity> GetByType(int type)
     {
         if (cx < 0 | cx >= Data.LEVEL_WIDTH | cy < 0 | cy >= Data.LEVEL_HEIGHT)
         {
-            return new List<Entity>();
+            return new List<IEntity>();
         }
         List<Entity> list = world.triggers[cx][cy];
-        List<Entity> res = new List<Entity>();
+        List<IEntity> res = new List<IEntity>();
         foreach (Entity e in list)
         {
             if ((e.types & type) != 0)

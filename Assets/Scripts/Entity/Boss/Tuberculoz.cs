@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -272,7 +271,7 @@ public class Tuberculoz : Mover
 	void UpdateBar() {
 /* 		lifeBar.FindSub("barFade")._xscale = lifeBar.FindSub("bar")._xscale; //FIXME
 		lifeBar.FindSub("barFade").GotoAndPlay(1);
-		lifeBar.FindSub("bar")._xscale = lives/LIVES*100; */
+		lifeBar.FindSub("bar")._xscale = lives/LIVES; */
 	}
 
 
@@ -512,7 +511,7 @@ public class Tuberculoz : Mover
 				s._y = y - Random.Range(0, 60);
 				s._x = Data.GAME_WIDTH*0.5f;
 				var d = Random.Range(0, 2)*2-1;
-				s._xscale = 100 * d;
+				s._xscale = d;
 				if ( dx< 0 ) {
 					dx = (Random.Range(0, 4)+2);
 				}
@@ -708,7 +707,7 @@ public class Tuberculoz : Mover
 		dx				= dist*0.025f;
 		dy				= -13;
 		dir				= (dx>0)?-1:1;
-		_xscale			= scaleFactor*100 * dir;
+		_xscale			= scaleFactor * dir;
 		lifeBar.RemoveMovieClip();
 
 		game.BulletTime(Data.SECOND*2);

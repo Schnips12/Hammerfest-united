@@ -61,12 +61,12 @@ public class Container
 	------------------------------------------------------------------------*/
 	public Vector2 Insert(Item b) {
 		b.Scale(scale);
-		var endX = currentX + b.width*scale + MARGIN;
+		float endX = currentX + b.width*scale + MARGIN;
 		if ( endX > width ) {
 			EndLine();
 			endX = b.width*scale + MARGIN;
 		}
-		var pt = new Vector2(currentX, currentY);
+		Vector2 pt = new Vector2(currentX, currentY);
 
 		currentX = endX;
 

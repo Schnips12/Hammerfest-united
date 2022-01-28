@@ -10,6 +10,12 @@ public class GameManager : MonoBehaviour
 	public static Hashtable HH			= new Hashtable();
 	[SerializeField] public GameObject snapshot;
 	[SerializeField] public GameObject darkness;
+	[SerializeField] public GameObject popup;
+    [SerializeField] public GameObject pointer;
+    [SerializeField] public GameObject itemName;
+    [SerializeField] public GameObject radius;
+    [SerializeField] public GameObject pause;
+    [SerializeField] public GameObject map;
 
 	public int uniq;
 
@@ -63,7 +69,7 @@ public class GameManager : MonoBehaviour
 	RENVOIE TRUE SI UN SET XML DE LEVEL EXISTE
 	------------------------------------------------------------------------*/
 	bool SetExists(string n) {
-		string data = Loader.Instance.root.ReadFile(n);
+		string data = Loader.Instance.root.ReadXmlFile(n);
 		return (data != null);
 	}
 
@@ -227,7 +233,7 @@ public class GameManager : MonoBehaviour
 			return;
 		}
 		if (IsAdventure()) {
-			StartMode(new Adventure(this, 0)); // TODO Start at zéro !
+			StartMode(new Adventure(this, 3)); // TODO Start at zéro !
 			return;
 		}
 

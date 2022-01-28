@@ -11,7 +11,7 @@ public class SoundManager
     }
 
     public void PlaySound(string reference, int channel) {
-        audioSource.PlayOneShot(Loader.Instance.effects.Find(x => x.name.Substring(4)== reference));
+        audioSource.PlayOneShot(Loader.Instance.soundEffects.Find(x => x.name.Substring(4)== reference));
     }
     public void SetMusic(int musicId) {
         audioSource.clip = Loader.Instance.musics[musicId];

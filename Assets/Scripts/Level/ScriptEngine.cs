@@ -2,49 +2,50 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Xml.Linq;
 using System;
+using UnityEngine.U2D.Animation;
 
 public class ScriptEngine
 {
     // References of all triggers and events.
-    const string T_TIMER    = "t_timer";
-    const string T_POS      = "t_pos";
-    const string T_ATTACH   = "attach";
-    const string T_DO       = "do";
-    const string T_END      = "end";
-    const string T_BIRTH    = "birth";
-    const string T_DEATH    = "death";
-    const string T_EXPLODE  = "exp";
-    const string T_ENTER    = "enter";
+    const string T_TIMER = "t_timer";
+    const string T_POS = "t_pos";
+    const string T_ATTACH = "attach";
+    const string T_DO = "do";
+    const string T_END = "end";
+    const string T_BIRTH = "birth";
+    const string T_DEATH = "death";
+    const string T_EXPLODE = "exp";
+    const string T_ENTER = "enter";
     const string T_NIGHTMARE = "night";
-    const string T_MIRROR   = "mirror";
-    const string T_MULTI    = "multi";
-    const string T_NINJA    = "ninja";
+    const string T_MIRROR = "mirror";
+    const string T_MULTI = "multi";
+    const string T_NINJA = "ninja";
 
-    const string E_SCORE    = "e_score";
-    const string E_SPECIAL  = "e_spec";
-    const string E_EXTEND   = "e_ext";
-    const string E_BAD      = "e_bad";
-    const string E_KILL     = "e_kill";
+    const string E_SCORE = "e_score";
+    const string E_SPECIAL = "e_spec";
+    const string E_EXTEND = "e_ext";
+    const string E_BAD = "e_bad";
+    const string E_KILL = "e_kill";
     const string E_TUTORIAL = "e_tuto";
-    const string E_MESSAGE  = "e_msg";
-    const string E_KILLMSG  = "e_killMsg";
-    const string E_POINTER  = "e_pointer";
-    const string E_KILLPTR  = "e_killPt";
-    const string E_MC       = "e_mc";
-    const string E_PLAYMC   = "e_pmc";
-    const string E_MUSIC    = "e_music";
-    const string E_ADDTILE  = "e_add";
-    const string E_REMTILE  = "e_rem";
+    const string E_MESSAGE = "e_msg";
+    const string E_KILLMSG = "e_killMsg";
+    const string E_POINTER = "e_pointer";
+    const string E_KILLPTR = "e_killPt";
+    const string E_MC = "e_mc";
+    const string E_PLAYMC = "e_pmc";
+    const string E_MUSIC = "e_music";
+    const string E_ADDTILE = "e_add";
+    const string E_REMTILE = "e_rem";
     const string E_ITEMLINE = "e_itemLine";
-    const string E_GOTO     = "e_goto";
-    const string E_HIDE     = "e_hide";
+    const string E_GOTO = "e_goto";
+    const string E_HIDE = "e_hide";
     const string E_HIDEBORDERS = "e_hideBorders";
     const string E_CODETRIGGER = "e_ctrigger";
-    const string E_PORTAL   = "e_portal";
-    const string E_SETVAR   = "e_setVar";
+    const string E_PORTAL = "e_portal";
+    const string E_SETVAR = "e_setVar";
     const string E_OPENPORTAL = "e_openPortal";
     const string E_DARKNESS = "e_darkness";
-    const string E_FAKELID  = "e_fakelid";
+    const string E_FAKELID = "e_fakelid";
 
     static string[] VERBOSE_TRIGGERS = new string[3] {
         T_POS,
@@ -55,7 +56,7 @@ public class ScriptEngine
     public XDocument script;
     string extraScript;
     string baseScript;
-    
+
     GameMode game;
     LevelData data;
     int bads;
@@ -86,7 +87,7 @@ public class ScriptEngine
             this.mc = mc;
         }
     }
-    
+
 
     /*------------------------------------------------------------------------
 	CONSTRUCTOR
@@ -100,13 +101,13 @@ public class ScriptEngine
         extraScript = "";
         cycle = 0;
         bads = 0;
-        fl_birth        = false;
-        fl_death        = false;
-        fl_safe         = false;
+        fl_birth = false;
+        fl_death = false;
+        fl_safe = false;
         fl_elevatorOpen = false;
-        fl_onAttach     = false;
-        fl_firstTorch   = false;
-        
+        fl_onAttach = false;
+        fl_firstTorch = false;
+
         history = new List<string>();
         recentExp = new List<Vector3>();
         entries = new List<Vector2Int>();
@@ -224,7 +225,7 @@ public class ScriptEngine
             return 0;
         }
         else
-        {            
+        {
             return res.Value;
         }
     }
@@ -299,6 +300,7 @@ public class ScriptEngine
 
         if (fl_compile)
         {
+            Debug.Log(str);
             xml = XDocument.Parse("<root>" + str + "</root>").Root as XElement;
             if (xml == null)
             {
@@ -310,7 +312,7 @@ public class ScriptEngine
                 script.Root.Add(node);
                 while (node != null)
                 {
-                    TraceHistory("  +" + node.Name.LocalName);                                      
+                    TraceHistory("  +" + node.Name.LocalName);
                     node = node.NextNode as XElement;
                 }
             }
@@ -352,7 +354,7 @@ public class ScriptEngine
             case E_SCORE:
                 {// score item
                     float x = Entity.x_ctr(GetInt(e, "x"));
-                    float y = Entity.y_ctr(Data.LEVEL_HEIGHT-1-GetInt(e, "y"));
+                    float y = Entity.y_ctr(Data.LEVEL_HEIGHT - 1 - GetInt(e, "y"));
                     x = game.FlipCoordReal(x);
 
                     int id = GetInt(e, "i");
@@ -372,12 +374,14 @@ public class ScriptEngine
 
             case E_SPECIAL:
                 {// special item
+                    Debug.Log("SPEC1" + game.CanAddItem().ToString() + fl_safe.ToString());
                     if (game.CanAddItem() & !fl_safe)
                     {
+                        Debug.Log("SPEC2");
                         float x = Entity.x_ctr(GetInt(e, "x"));
-                        float y = Entity.y_ctr(Data.LEVEL_HEIGHT-1-GetInt(e, "y"));
+                        float y = Entity.y_ctr(Data.LEVEL_HEIGHT - 1 - GetInt(e, "y"));
                         x = game.FlipCoordReal(x);
-                        
+
                         int id = GetInt(e, "i");
                         int? subId = GetNullableInt(e, "si");
                         SpecialItem mc = SpecialItem.Attach(game, x, y, id, subId);
@@ -408,7 +412,7 @@ public class ScriptEngine
                     if (!fl_safe && !game.world.IsVisited())
                     {
                         float x = Entity.x_ctr(GetInt(e, "x"));
-                        float y = Entity.y_ctr(Data.LEVEL_HEIGHT-1-GetInt(e, "y"));
+                        float y = Entity.y_ctr(Data.LEVEL_HEIGHT - 1 - GetInt(e, "y"));
                         x = game.FlipCoordReal(x);
 
                         int id = GetInt(e, "i");
@@ -492,7 +496,7 @@ public class ScriptEngine
                 {// flèche orientée
                     IEntity p = game.GetOne(Data.PLAYER);
                     int cx = GetInt(e, "x");
-                    int cy = Data.LEVEL_HEIGHT-1-GetInt(e, "y");
+                    int cy = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y");
                     cx = game.FlipCoordCase(cx);
                     game.AttachPointer(cx, cy, p.cx, p.cy);
                 }
@@ -507,9 +511,9 @@ public class ScriptEngine
             case E_MC:
                 {// sprite de décors
                     int cx = GetInt(e, "x");
-                    int cy = Data.LEVEL_HEIGHT-1-GetInt(e, "y");
-                    int xr = GetInt(e, "xr");
-                    int yr = GetInt(e, "yr");
+                    int cy = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y");
+                    int? xr = GetNullableInt(e, "xr");
+                    int? yr = GetNullableInt(e, "yr");
                     int? sid = GetNullableInt(e, "sid");
                     int back = GetInt(e, "back");
                     string name = GetString(e, "n");
@@ -517,24 +521,26 @@ public class ScriptEngine
 
                     KillById(sid);
                     float x, y;
-                    if (xr == -1)
+                    if (xr == null)
                     {
                         x = Entity.x_ctr(cx);
                         y = Entity.y_ctr(cy);
                     }
                     else
                     {
-                        x = xr;
-                        y = yr;
+                        x = xr.Value;
+                        y = Data.GAME_HEIGHT - yr.Value;
                     }
                     x = game.FlipCoordReal(x);
                     if (game.fl_mirror)
                     {
-                        x += Data.CASE_WIDTH;
                         x *= -1;
+                        x += Data.CASE_WIDTH;
                     }
                     MovieClip mc = game.world.view.AttachSprite("extra_mc", x, y, (back == 1) ? true : false);
-                    mc.SetAnim(name, 1);
+                    mc.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scriptedMovieclip.Find(x => x.name == name);
+                    mc.SetAnim("Frame", 1);
+
                     if (p > 0)
                     {
                         mc.Play();
@@ -543,11 +549,13 @@ public class ScriptEngine
                     {
                         mc.Stop();
                     }
-                    if ( name=="torch" ) {
-                        if ( !fl_firstTorch ) {
+                    if (name == "torch")
+                    {
+                        if (!fl_firstTorch)
+                        {
                             game.ClearExtraHoles();
                         }
-                        game.AddHole(x+Data.CASE_WIDTH*0.5f, y-Data.CASE_HEIGHT*0.5f, 180);
+                        game.AddHole(x + Data.CASE_WIDTH * 0.5f, y + Data.CASE_HEIGHT * 0.5f, 0.9f);
                         game.UpdateDarkness();
                         fl_firstTorch = true;
                     }
@@ -572,9 +580,9 @@ public class ScriptEngine
             case E_ADDTILE:
                 {// force cases and redraw the view
                     int cx1 = GetInt(e, "x1");
-                    int cy1 = Data.LEVEL_HEIGHT-1-GetInt(e, "y1");
+                    int cy1 = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y1");
                     int cx2 = GetInt(e, "x2");
-                    int cy2 = Data.LEVEL_HEIGHT-1-GetInt(e, "y2");
+                    int cy2 = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y2");
                     cx1 = game.FlipCoordCase(cx1);
                     cx2 = game.FlipCoordCase(cx2);
                     int id = GetInt(e, "type");
@@ -602,9 +610,9 @@ public class ScriptEngine
             case E_REMTILE:
                 {// force cases and redraw the view
                     int cx1 = GetInt(e, "x1");
-                    int cy1 = Data.LEVEL_HEIGHT-1-GetInt(e, "y1");
+                    int cy1 = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y1");
                     int cx2 = GetInt(e, "x2");
-                    int cy2 = Data.LEVEL_HEIGHT-1-GetInt(e, "y2");
+                    int cy2 = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y2");
                     cx1 = game.FlipCoordCase(cx1);
                     cx2 = game.FlipCoordCase(cx2);
                     while (cx1 != cx2 | cy1 != cy2)
@@ -624,7 +632,7 @@ public class ScriptEngine
                 {// add timed item drops to the script
                     int cx1 = GetInt(e, "x1");
                     int cx2 = GetInt(e, "x2");
-                    int cy = Data.LEVEL_HEIGHT-1-GetInt(e, "y");
+                    int cy = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y");
                     int id = GetInt(e, "i");
                     int? subId = GetNullableInt(e, "si");
                     int time = GetInt(e, "t");
@@ -634,7 +642,7 @@ public class ScriptEngine
                     {
                         AddScript(
                             "<" + T_TIMER + " t=\"" + (cycle + i * time) + "\">" +
-                            "<" + E_SCORE + " i=" + id + "\" si=\"" + subId + "\" x=\"" + cx1 + "\" y=\"" + cy + "\" inf=\"1\" />" +
+                            "<" + E_SCORE + " i=\"" + id + "\" si=\"" + subId + "\" x=\"" + cx1 + "\" y=\"" + cy + "\" inf=\"1\" />" +
                             "</" + T_TIMER + ">"
                         );
 
@@ -688,8 +696,10 @@ public class ScriptEngine
 
             case E_PORTAL:
                 {
+                    Debug.Log("PORTAL");
                     if (game.fl_clear & cycle > 10)
                     {
+                        Debug.Log("PORTAL2");
                         var pid = GetInt(e, "pid");
                         if (!game.UsePortal(pid, null))
                         {
@@ -711,7 +721,7 @@ public class ScriptEngine
             case E_OPENPORTAL:
                 {
                     int cx = GetInt(e, "x"); // Flipping done in the openportal
-                    int cy = Data.LEVEL_HEIGHT-1-GetInt(e, "y");
+                    int cy = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y");
                     int pid = GetInt(e, "pid");
                     game.OpenPortal(cx, cy, pid);
                 }
@@ -795,7 +805,7 @@ public class ScriptEngine
                 {// player position
                     var l = game.GetPlayerList();
                     var x = GetInt(trigger, "x");
-                    var y = Data.LEVEL_HEIGHT-1-GetInt(trigger, "y");
+                    var y = Data.LEVEL_HEIGHT - 1 - GetInt(trigger, "y");
                     x = game.FlipCoordCase(x);
                     var dist = GetInt(trigger, "d");
                     for (var i = 0; i < l.Count; i++)
@@ -803,8 +813,9 @@ public class ScriptEngine
                         if (!l[i].fl_kill & !l[i].fl_destroy)
                         {
                             var d = l[i].DistanceCase(x, y);
-                            if (d <= dist & d != -1)
+                            if (d <= dist)
                             {
+                                Debug.Log("TRIGGERED");
                                 return true;
                             }
                         }
@@ -850,7 +861,7 @@ public class ScriptEngine
             case T_EXPLODE:
                 {
                     var x = Entity.x_ctr(GetInt(trigger, "x"));
-                    var y = Entity.y_ctr(Data.LEVEL_HEIGHT-1-GetInt(trigger, "y")); //TODO CHeck offset
+                    var y = Entity.y_ctr(Data.LEVEL_HEIGHT - 1 - GetInt(trigger, "y")); //TODO CHeck offset
                     x = game.FlipCoordReal(x);
                     for (var i = 0; i < recentExp.Count; i++)
                     {
@@ -869,7 +880,7 @@ public class ScriptEngine
             case T_ENTER:
                 {
                     var cx = GetInt(trigger, "x");
-                    var cy = Data.LEVEL_HEIGHT-1-GetInt(trigger, "y");
+                    var cy = Data.LEVEL_HEIGHT - 1 - GetInt(trigger, "y");
                     cx = game.FlipCoordCase(cx);
                     for (var i = 0; i < entries.Count; i++)
                     {
@@ -917,7 +928,7 @@ public class ScriptEngine
     /// <summary>Execute all the children nodes of the provided element.</summary>
     void ExecuteTrigger(ref XElement trigger)
     {
-		TraceHistory(trigger.Name.LocalName);
+        TraceHistory(trigger.Name.LocalName);
 
         XElement e = trigger.FirstNode as XElement;
         while (e != null)
@@ -1048,7 +1059,7 @@ public class ScriptEngine
     public void InsertPortal(int cx, int cy, int pid)
     {
         AddScript(
-            "<" + T_POS + " x=\"" + cx + "\" y=\"" + cy + "\" d=\"1\" repeat=\"-1\">" +
+            "<" + T_POS + " x=\"" + cx + "\" y=\"" + (Data.LEVEL_HEIGHT-1-cy) + "\" d=\"1\" repeat=\"-1\">" + // TODO Inverted y
             "<" + E_PORTAL + " pid=\"" + pid + "\"/>" +
             "</" + T_POS + ">"
         );
@@ -1200,7 +1211,7 @@ public class ScriptEngine
     /// Only elements created by the scriptEngine have a sid/scriptID.</summary>
     void KillById(int? id)
     {
-        if (id==null)
+        if (id == null)
         {
             return;
         }
@@ -1228,8 +1239,7 @@ public class ScriptEngine
     /*------------------------------------------------------------------------
 	PLAY A SCRIPTED ELEMENT
 	------------------------------------------------------------------------*/
-    /// <summary>Runs the animation of a scripted MovieClip and its first sub.
-    /// At least one nested elements must be converted to the MovieClip format before invoking.</summary>
+    /// <summary>Runs the animation of a scripted MovieClip and its subs.</summary>
     public void PlayById(int? id)
     {
         if (id == null)
@@ -1241,7 +1251,10 @@ public class ScriptEngine
             if (mcList[i].sid == id)
             {
                 mcList[i].mc.Play();
-                mcList[i].mc.subs[0].Play();
+                foreach (MovieClip sub in mcList[i].mc.subs)
+                {
+                    sub.Play();
+                }
             }
         }
     }
@@ -1453,5 +1466,13 @@ public class ScriptEngine
             game.world.view.MoveToPreviousPos();
         }
         fl_firstTorch = false;
+
+        foreach (ClipWithId clip in mcList)
+        {
+            if (clip.mc.fl_playing)
+            {
+                clip.mc.NextFrame();
+            }
+        }
     }
 }

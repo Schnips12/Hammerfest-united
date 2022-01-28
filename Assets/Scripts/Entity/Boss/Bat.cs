@@ -102,7 +102,7 @@ public class Bat : Mover
 		MoveTo(Data.GAME_WIDTH*0.5f,30) ;
 
 		PlayAnim(Data.ANIM_BAT_INTRO);
-		_xscale = -scaleFactor*100;
+		_xscale = -scaleFactor;
 		EndUpdate();
 	}
 
@@ -146,7 +146,7 @@ public class Bat : Mover
 		Halt();
 		PlayAnim(Data.ANIM_BAT_SWITCH);
 		dir = -dir;
-		_xscale = dir*scaleFactor*100;
+		_xscale = dir*scaleFactor;
 	}
 
 
@@ -263,7 +263,7 @@ public class Bat : Mover
 
 		// arriv�e
 		if ( id==Data.ANIM_BAT_INTRO.id ) {
-			_xscale = scaleFactor*100;
+			_xscale = scaleFactor;
 			Shield();
 			MoveRandom();
 		}
@@ -525,7 +525,7 @@ public class Bat : Mover
 					"hammer_fx_pop"
 				);
 				fx.mc._rotation = Random.Range(0, 360);
-				fx.mc._xscale = Random.Range(0, 50)+50;
+				fx.mc._xscale = (Random.Range(0, 50)+50) / 100.0f;
 				fx.mc._yscale = fx.mc._xscale;
 //				game.fxMan.attachExplodeZone(
 //					x+Std.random(20)*(Std.random(2)*2-1),
@@ -536,7 +536,7 @@ public class Bat : Mover
 
 
 			if ( y<=-50 & fl_deathUp ) {
-				_xscale = scaleFactor*100;
+				_xscale = scaleFactor;
 				PlayAnim(Data.ANIM_BAT_FINAL_DIVE);
 				dy = 5;
 				fl_deathUp = false;

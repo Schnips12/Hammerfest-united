@@ -4,6 +4,7 @@ using UnityEngine;
 public class ViewManager : SetManager
 {
     public View view;
+    public View previousView;
     DepthManager depthMan;
     MovieClip fake;
     GameObject prevSnap;
@@ -55,52 +56,6 @@ public class ViewManager : SetManager
     public void SetDepthMan(DepthManager d)
     {
         depthMan = d;
-    }
-
-    /*------------------------------------------------------------------------
-	GESTION DE LA VUE FAKE
-	------------------------------------------------------------------------*/
-    void CloneView(View v)
-    {
-        GameObject snap = v.GetSnapShot();
-        CreateFake(snap);
-    }
-
-    void CreateFake(GameObject snap)
-    {
-        if (fake != null)
-        {
-            fake.RemoveMovieClip();
-        }
-        fake = depthMan.Empty(Data.DP_SCROLLER);
-		fake._name = "Fake View";
-        /* fake.blendMode = BlendMode.LAYER; */
-        MovieClip mc = new MovieClip(fake, 0);
-        snap.transform.SetParent(mc.united.transform.parent, false);
-        /* snap.transform.position += new Vector3(-20, 0, 0); */
-        GameObject.Destroy(mc.united);
-        mc.united = snap;
-        /* fake._alpha = Mathf.Max(0, 100 - darknessFactor); */
-    }
-
-    /*------------------------------------------------------------------------
-	R�ACTIVATION AVEC ANIM DE TRANSITION DEPUIS UN SNAPSHOT
-	------------------------------------------------------------------------*/
-    void RestoreFrom(GameObject snap, int lid)
-    {
-        prevSnap = snap;
-        CreateFake(prevSnap);
-        view.MoveTo(Data.GAME_WIDTH, 0);
-        Restore(lid);
-    }
-
-
-    /*------------------------------------------------------------------------
-	RENVOIE UN SNAP SHOT DE LA VUE EN COURS
-	------------------------------------------------------------------------*/
-    GameObject GetSnapShot()
-    {
-        return view.GetSnapShot();
     }
 
 
@@ -179,11 +134,12 @@ public class ViewManager : SetManager
         }
         else
         {
-            CloneView(view);
+            if (previousView!=null) {
+                previousView.DestroyThis();
+            }            
+            previousView = view;
 
             teleporterList = new List<TeleporterData>();
-
-            view.DestroyThis();
 
             view = CreateView(currentId);
             view.MoveTo(0, -Data.GAME_HEIGHT);
@@ -221,12 +177,13 @@ public class ViewManager : SetManager
 	------------------------------------------------------------------------*/
     protected virtual View CreateView(int id)
     {
-        GameObject ViewGO = GameObject.Instantiate(Resources.Load<GameObject>("View"), manager.transform);
-        View v = ViewGO.GetComponent<View>();
+        GameObject viewGO = GameObject.Instantiate(Resources.Load<GameObject>("View"), manager.transform);
+        View v = viewGO.GetComponent<View>();
+        depthMan.SetRoot(new MovieClip(viewGO));
         v.Init(this, depthMan);
         v.fl_hideTiles = fl_hideTiles;
         v.fl_hideBorders = fl_hideBorders;
-        /* v.Detach(); */
+        v.Detach();
         if (!fl_shadow)
         {
             v.RemoveShadows();
@@ -242,10 +199,11 @@ public class ViewManager : SetManager
     public override void Suspend()
     {
         base.Suspend();
-        if (view != null)
-        {
-            view.Detach();
+        if(previousView!=null) {
+            previousView.DestroyThis();
         }
+        previousView = view;
+        view = null;
     }
 
     public override void Restore(int lid)
@@ -259,9 +217,10 @@ public class ViewManager : SetManager
     /*------------------------------------------------------------------------
 	R�ACTIVATION AVEC ANIM DE TRANSITION DEPUIS UN SNAPSHOT
 	------------------------------------------------------------------------*/
-    public void RestoreFrom(int lid)
+    public void RestoreFrom(View v, int lid)
     {
-        view.MoveTo(Data.GAME_WIDTH, 0);
+        previousView = v;
+        previousView.MoveTo(Data.GAME_WIDTH, 0);
         Restore(lid);
     }
 
@@ -276,10 +235,8 @@ public class ViewManager : SetManager
         if (fl_scrolling)
         {
             scrollCpt += Data.SCROLL_SPEED * Loader.Instance.tmod;
-            view.MoveTo(0, Mathf.FloorToInt(Data.GAME_HEIGHT*(Mathf.Sin(scrollCpt)-1)));
-            //			fake.moveTo(0, -Math.sin(scrollCpt)*(Data.GAME_HEIGHT) ) ;
-            fake._x = 0;
-            fake._y = Mathf.Sin(scrollCpt) * (Data.GAME_HEIGHT);
+            view.MoveTo(0, Mathf.FloorToInt(Data.GAME_HEIGHT * (Mathf.Sin(scrollCpt) - 1)));
+            previousView.MoveTo(0, Mathf.FloorToInt(Data.GAME_HEIGHT * Mathf.Sin(scrollCpt)));
 
             if (scrollCpt >= Mathf.PI / 2)
             {
@@ -293,14 +250,14 @@ public class ViewManager : SetManager
             scrollCpt += scrollDir * Data.SCROLL_SPEED * Loader.Instance.tmod;
             if (scrollDir > 0)
             {
-                view.MoveTo( Mathf.FloorToInt((Data.GAME_WIDTH+20)*(1-Mathf.Sin(scrollCpt))), 0);
+                view.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 20) * (1 - Mathf.Sin(scrollCpt))), 0);
+                previousView.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 20) * (- Mathf.Sin(scrollCpt))), 0);
             }
             else
             {
-                view.MoveTo( Mathf.FloorToInt(-(Data.GAME_WIDTH+20)*(1-Mathf.Sin(scrollCpt))), 0);
+                view.MoveTo(Mathf.FloorToInt(-(Data.GAME_WIDTH + 20) * (1 - Mathf.Sin(scrollCpt))), 0);
+                previousView.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 20) * (Mathf.Sin(scrollCpt))), 0);
             }
-            fake._x = -Mathf.Sin(scrollCpt) * (Data.GAME_WIDTH + 20);
-            fake._y = 0;
 
             if (scrollCpt >= Mathf.PI / 2 || scrollCpt <= -Mathf.PI / 2)
             {
@@ -311,18 +268,19 @@ public class ViewManager : SetManager
 
         if (fl_fading)
         {
-            fake._alpha -= Loader.Instance.tmod * Data.FADE_SPEED;
-
+/*             fake._alpha -= Loader.Instance.tmod * Data.FADE_SPEED;
+ */
             /* var f = new flash.filters.BlurFilter();
 			f.blurX			= 100-fake._alpha;
 			f.blurY			= f.blurX*0.3;
 			fake.filters	= [f]; */
 
-            if (fake._alpha <= 0)
+/*             if (fake._alpha <= 0)
             {
-                OnTransitionDone();
-                OnFadeDone();
-            }
+                
+            } */
+            OnTransitionDone();
+            OnFadeDone();
         }
 
     }

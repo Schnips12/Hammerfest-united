@@ -328,9 +328,7 @@ public class GameInterface
 	public void GetExtend(int pid, int id) {
 		var l = letters[pid][id];
 		if (!l.activeSelf) {
-			var fx = new MovieClip(mc, "hammer_fx_letter_pop", game.manager.uniq++);
-			fx._x = l.transform.position.x;
-			fx._y = l.transform.position.y;
+			game.fxMan.AttachFxOverlay(l.transform.position.x, l.transform.position.y, "hammer_fx_letter_pop");
 			l.SetActive(true);
 		}
 	}
@@ -368,12 +366,5 @@ public class GameInterface
 				}
 			}
 		}
-
-		// Couleurs
-//		for (var pid=0;pid<2;pid++) {
-//			scores[pid].textColor = Data.BASE_COLORS[pid];
-//			FxManager.addGlow( downcast(scores[pid]), Data.DARK_COLORS[pid], 2);
-//		}
-//		FxManager.addGlow( downcast(level), 0x4f4763, 2);
 	}
 }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
-using System.Xml;
-using System.IO;
+using System.Linq;
+using System.Xml.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine.U2D.Animation;
 
@@ -11,19 +11,18 @@ public class Loader : MonoBehaviour
 	public static Loader Instance;
 
 	[SerializeField] public List<AudioClip> musics;
-	[SerializeField] public List<AudioClip> effects;
-	[SerializeField] public GameObject popupPrefab;
-    [SerializeField] public GameObject pointerPrefab;
-    [SerializeField] public GameObject radiusPrefab;
-	[SerializeField] public GameObject defautAsset;
+	[SerializeField] public List<AudioClip> soundEffects;
+	[SerializeField] public List<TextAsset> languageFiles;
+	[SerializeField] public List<TextAsset> parametersFiles;
+	[SerializeField] public List<TextAsset> levelFiles;
 	[SerializeField] public List<GameObject> prefabs;
 	[SerializeField] public List<SpriteLibraryAsset> scoreItems;
 	[SerializeField] public List<SpriteLibraryAsset> specialItems;
-	[SerializeField] public List<SpriteLibraryAsset> specialBg;
+	[SerializeField] public List<SpriteLibraryAsset> scriptedMovieclip;
 
 
     public Cookie root;
-	public XmlNode xmlLang;	
+	public XElement xmlLang;	
 	public List<string> families;
 	public List<string> options;
 	
@@ -32,7 +31,6 @@ public class Loader : MonoBehaviour
 	public bool fl_fade;
 
 	public float tmod;
-
 
 	// Awake is called when the script instance is being loaded.
 	void Awake() {
@@ -62,39 +60,38 @@ public class Loader : MonoBehaviour
 		root.SetVar("volume", "10");
 		options 	= new List<string>(root.ReadVar("options").Split(';'));
 		families 	= new List<string>();
-
 		
-
 		// Loading the default language before displaying the next scene.
 		LoadLang();
-
-		SceneManager.LoadScene("_main", LoadSceneMode.Single);
 	}
-
 
 	// TODO Allow the player to change language in game and invoke this to refresh all texts.
 	public void LoadLang() {
-		XmlDocument doc = new XmlDocument();
-		string rawLang = File.ReadAllText(Application.dataPath+"/xml/lang/"+root.ReadVar("lang")+".xml");
+		string fileName = root.ReadVar("lang");
+		string rawLang = languageFiles.Find(x => x.name == fileName).text;
 		Lang.Init(rawLang);
-        doc.LoadXml(rawLang);
-		xmlLang = doc.FirstChild.FirstChild;
-		while (xmlLang != null & xmlLang.Name!="statics") {
-			xmlLang = xmlLang.NextSibling;
+
+		XDocument doc = XDocument.Parse(rawLang);		
+		doc.DescendantNodes().OfType<XComment>().Remove();
+		xmlLang = doc.Root.FirstNode as XElement;
+		while (xmlLang != null & xmlLang.Name.LocalName !="statics") {
+			xmlLang = xmlLang.NextNode as XElement;
 		}
 	}
-
 
 	public bool IsMode(string modeName) {
 		return root.ReadVar("mode") == modeName;
 	}
 
-
 	public string GetLangStr(int id) {
-		XmlNode node = xmlLang.FirstChild;
-		while (node != null & node.Attributes["id"].Value != id.ToString()) {
-			node = node.NextSibling;
+		XElement node = xmlLang.FirstNode as XElement;
+		while (node != null && node.Attribute("id").Value != id.ToString()) {
+			node = node.NextNode as XElement;
 		}
-		return node.Attributes["v"].Value;
+		return node.Attribute("v").Value;
+	}
+
+	public void StartGame() {
+		SceneManager.LoadScene("_main", LoadSceneMode.Single);
 	}
 }

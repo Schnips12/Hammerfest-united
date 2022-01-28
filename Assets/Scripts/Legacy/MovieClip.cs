@@ -85,22 +85,22 @@ public class MovieClip
 
     public float _width
     {
-        get => united.GetComponent<Renderer>().bounds.max.x - united.GetComponent<Renderer>().bounds.min.x;
+        get => united.GetComponent<SpriteRenderer>().bounds.max.x - united.GetComponent<Renderer>().bounds.min.x;
     }
 
     public float _height
     {
-        get => united.GetComponent<Renderer>().bounds.max.y - united.GetComponent<Renderer>().bounds.min.y;
+        get => united.GetComponent<SpriteRenderer>().bounds.max.y - united.GetComponent<Renderer>().bounds.min.y;
     }
 
     public float _alpha
     {
-        get => Mathf.RoundToInt(united.GetComponent<Renderer>().material.color.a * 100);
+        get => Mathf.RoundToInt(united.GetComponent<SpriteRenderer>().material.color.a * 100);
         set
         {
-            Color c = united.GetComponent<Renderer>().material.color;
+            Color c = united.GetComponent<SpriteRenderer>().material.color;
             c.a = value/100;
-            united.GetComponent<Renderer>().material.SetColor("scripted alpha", c);
+            united.GetComponent<SpriteRenderer>().material.SetColor("scripted alpha", c);
         }
     }
 
@@ -144,31 +144,31 @@ public class MovieClip
 
     public MovieClip(MovieClip mc)
     {
-        united = GameObject.Instantiate(Loader.Instance.defautAsset, mc.united.transform, false);
+        GameObject tempRef = Loader.Instance.prefabs.Find(prefab => prefab.name == "Square");
+        united = GameObject.Instantiate(tempRef, mc.united.transform, false);  
         _name = "Default name";
         extraValues = new Hashtable();
         subs = new List<MovieClip>();
     }
 
-    private MovieClip(MovieClip mc, GameObject o)
+    public MovieClip(MovieClip mc, GameObject o)
     {
         united = o;
         united.transform.SetParent(mc.united.transform);
     }
 
-    public MovieClip(MovieClip mc, string reference, int depth) : this(mc)
+    public MovieClip(MovieClip mc, string reference, float depth) : this(mc)
     {
         GameObject tempRef = Loader.Instance.prefabs.Find(prefab => prefab.name == reference);
-        if (tempRef != null)
-        {
-            UnityEngine.GameObject.Destroy(united);
-            united = GameObject.Instantiate(tempRef, mc.united.transform, false);
-        }
-        else
+        if(tempRef==null)
         {
             Debug.Log("The asset you tried to load isn't referenced: " + reference);
+            tempRef = Loader.Instance.prefabs.Find(prefab => prefab.name == "Square");
         }
+
         _name = reference;
+        UnityEngine.GameObject.Destroy(united);
+        united = GameObject.Instantiate(tempRef, mc.united.transform, false);        
         united.transform.position -= new Vector3(0, 0, depth);
     }
 
@@ -223,7 +223,7 @@ public class MovieClip
     public void SetColor(Color baseColor, float alpha)
     {
         Color toSet = new Color(baseColor.r, baseColor.g, baseColor.b, alpha/100);
-        united.GetComponent<SpriteRenderer>().color = Color.white;
+        united.GetComponent<SpriteRenderer>().color = toSet;
     }
 
     public void ResetColor()
@@ -289,7 +289,7 @@ public class MovieClip
 
     public void NextFrame()
     {
-        GoTo(currentFrame+1);
+        GoTo(Mathf.Min(currentFrame+1, frameCount));
     }
 
     public int CurrentFrame()
@@ -311,7 +311,7 @@ public class MovieClip
         return -Mathf.FloorToInt(united.transform.position.z);
     }
 
-    public void SwapDepths(int depth)
+    public void SwapDepths(float depth)
     {
         united.transform.position = new Vector3(united.transform.position.x, united.transform.position.y, depth);
     }

@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class HammerAnimator : Trigger
@@ -14,6 +12,7 @@ public class HammerAnimator : Trigger
     protected float blinkColorAlpha;
     protected float blinkAlpha;
 
+    protected int resetPosition;
     protected bool fl_loop;
     protected bool fl_blink;
     protected bool fl_alphaBlink;
@@ -30,6 +29,7 @@ public class HammerAnimator : Trigger
 	------------------------------------------------------------------------*/
     public HammerAnimator(MovieClip mc) : base(mc)
     {
+        resetPosition = 1;
         frame = 0;
         fadeStep = 0;
         animFactor = 1.0f;
@@ -55,7 +55,6 @@ public class HammerAnimator : Trigger
         base.Init(g);
     }
 
-
     /*------------------------------------------------------------------------
 	ACTIVE/D�SACTIVE LE CLIGNOTEMENT
 	------------------------------------------------------------------------*/
@@ -74,7 +73,7 @@ public class HammerAnimator : Trigger
         fl_blinking = false;
         if (fl_alphaBlink)
         {
-            alpha = 100;
+            _alpha = 100;
         }
         else
         {
@@ -175,7 +174,7 @@ public class HammerAnimator : Trigger
                     {
                         if (fl_alphaBlink)
                         {
-                            alpha = 100;
+                            _alpha = 100;
                         }
                         else
                         {
@@ -187,7 +186,7 @@ public class HammerAnimator : Trigger
                     {
                         if (fl_alphaBlink)
                         {
-                            alpha = blinkAlpha;
+                            _alpha = blinkAlpha;
                         }
                         else
                         {
@@ -212,7 +211,7 @@ public class HammerAnimator : Trigger
                 {
                     if (fl_loop)
                     {
-                        SetAnim(animId, 1);
+                        GotoAndPlay(resetPosition);
                         frame--;
                     }
                     else

@@ -76,7 +76,7 @@ public class Adventure : GameMode
 			n = Random.Range(0, world.current.scoreSlots.Length);
 			pt = world.current.scoreSlots[n];
 			world.scriptEngine.InsertScoreItem(
-				Random.Range(0, Data.RAND_SCORES_ID),
+				randMan.Draw(Data.RAND_SCORES_ID),
 				null,
 				pt.x,
 				pt.y,
@@ -88,13 +88,13 @@ public class Adventure : GameMode
 
 			if ( globalActives[94] ) {
 				var cx = Random.Range(0, Data.LEVEL_WIDTH);
-				var cy = Random.Range(0, Data.LEVEL_HEIGHT-5);
+				var cy = Random.Range(5, Data.LEVEL_HEIGHT);
 				var ptC = world.GetGround(cx, cy);
 				world.scriptEngine.InsertScoreItem(
-					Random.Range(0, Data.RAND_SCORES_ID),
+					randMan.Draw(Data.RAND_SCORES_ID),
 					null,
-					ptC[0],
-					ptC[1],
+					ptC.x,
+					ptC.y,
 					Data.SCORE_ITEM_TIMER,
 					null,
 					false,
@@ -124,13 +124,13 @@ public class Adventure : GameMode
 	protected override void InitWorld() {
 		base.InitWorld();
 
-		AddWorld("adventure.json");
-		AddWorld("deepnight.json");
-		AddWorld("hiko.json");
-		AddWorld("ayame.json");
-		AddWorld("hk.json");
+		AddWorld("adventure");
+		AddWorld("deepnight");
+		AddWorld("hiko");
+		AddWorld("ayame");
+		AddWorld("hk");
 		if (manager.IsDev()) {
-			AddWorld("dev.json");
+			AddWorld("dev");
 		}
 	}
 
@@ -164,7 +164,7 @@ public class Adventure : GameMode
 	protected override void StartLevel() {
 		var pl = GetPlayerList();
 		for (var i=0;i<pl.Count;i++) {
-			/* pl[i].setBaseAnims(Data.ANIM_PLAYER_WALK, Data.ANIM_PLAYER_STOP); */ // TODO Use animation flags
+			pl[i].SetBaseAnims(Data.ANIM_PLAYER_WALK, Data.ANIM_PLAYER_STOP); // TODO Use animation flags
 		}
 		perfectOrder = new List<int>();
 		perfectCount = 0;
@@ -197,7 +197,7 @@ public class Adventure : GameMode
 		if (fl_warpStart) {
 			world.currentId = 0;
 			Unlock();
-			world.view.TimedDetach();
+			world.view.Detach();
 			ForcedGoto(10);
 		}
 	}

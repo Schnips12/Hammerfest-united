@@ -35,7 +35,7 @@ public class SetManager
 		portalList		= new List<PortalData>();
 
 		// Lecture niveaux
-		string data = Loader.Instance.root.ReadLevel(setName);
+		string data = Loader.Instance.root.ReadJsonLevel(setName);
 		json = new List<string>(data.Split(new string[] {";"}, StringSplitOptions.RemoveEmptyEntries));
 /* 		if (Loader.Instance.root.ReadFile(setName+"_back_xml") == null ) {
 			Loader.Instance.root.SaveFile(setName+"_back_xml", String.Join(";", json));
@@ -65,37 +65,11 @@ public class SetManager
 	}
 
 
-	/*------------------------------------------------------------------------
-	éCRASE LE CONTENU DU XML EN MéMOIRE
-	------------------------------------------------------------------------*/
-	void Overwrite(string sdata) {
-        if (Loader.Instance.root.ReadFile(setName+"_back") == null ) {
-			Loader.Instance.root.SaveFile(setName+"_back", String.Join(";", json));
-		}
-		json = new List<string>(sdata.Split(';'));
-		Loader.Instance.root.SaveFile(setName, sdata);
-	}
-
-	/*------------------------------------------------------------------------
-	RELIS LA DERNIèRE VERSION SAUVEGARDéE
-	------------------------------------------------------------------------*/
-	void Rollback() {
-		string rawStr = Loader.Instance.root.ReadFile(setName+"_back");
-		if (rawStr != null ) {
-            Loader.Instance.root.SaveFile(setName, rawStr);
-			json = new List<string>(rawStr.Split(';'));
-		}
-	}
 
 
-	/*------------------------------------------------------------------------
-	RELIS LA VERSION XML COMPILéE
-	------------------------------------------------------------------------*/
-	void Rollback_xml() {
-		string rawStr = Loader.Instance.root.ReadFile(setName+"_back_xml");
-		Loader.Instance.root.SaveFile(setName, rawStr);
-		json = new List<string>(rawStr.Split(';'));
-	}
+
+
+
 
 
 	/*------------------------------------------------------------------------
@@ -106,7 +80,7 @@ public class SetManager
 			return;
 		}
 		td.fl_on = true;
-		td.mc.subs[0].GotoAndStop(2);
+		/* td.mc.subs[0].GotoAndStop(2); */
 		td.podA.GotoAndStop(2);
 		td.podB.GotoAndStop(2);
 	}
@@ -116,7 +90,7 @@ public class SetManager
 			return;
 		}
 		td.fl_on = false;
-		td.mc.subs[0].GotoAndStop(1);
+		/* td.mc.subs[0].GotoAndStop(1); */
 		td.podA.GotoAndStop(1);
 		td.podB.GotoAndStop(1);
 	}
@@ -329,7 +303,7 @@ public class SetManager
 	/*------------------------------------------------------------------------
 	RETOURNE UNE CASE DE LA MAP
 	------------------------------------------------------------------------*/
-	public int? GetCase(int x, int y) {
+	public int GetCase(int x, int y) {
 		int cx = x;
 		int cy = y;
 		if (InBound(cx,cy)) {
@@ -343,12 +317,12 @@ public class SetManager
 				}
 			}
 			else {
-				return current.GetCase(cx, cy); // dans la zone de jeu
+				return current.GetCase(cx, cy).Value; // dans la zone de jeu
 			}
 		}
 		else
-		if (cy < 0) {
-			if (current.GetCase(cx, 0) > 0) {
+		if (cy >= Data.LEVEL_HEIGHT) {
+			if (current.GetCase(cx, Data.LEVEL_HEIGHT-1) > 0) {
 				return Data.WALL;
 			}
 			else {
@@ -359,7 +333,7 @@ public class SetManager
 			return Data.OUT_WALL;
 		}
 	}
-	public int? GetCase(Vector2Int pos) {
+	public int GetCase(Vector2Int pos) {
 		return GetCase(pos.x, pos.y);
 	}
 
@@ -395,9 +369,9 @@ public class SetManager
 	public bool ShapeInBound(Entity e) {
 		return (
 			e.x >= -e.width 			&
-			e.x < current.mapWidth() 	&
+			e.x <= current.mapWidth() 	&
 			e.y >= -e.height 			&
-			e.y < current.mapHeight()
+			e.y <= current.mapHeight()
         );
 	}
 
@@ -497,27 +471,6 @@ public class SetManager
 
 
 
-	// *** COOKIES ***
-
-	/*------------------------------------------------------------------------
-	EXPORT
-	------------------------------------------------------------------------*/
-	void ExportCookie() {
-		Loader.Instance.root.SaveFile(setName, String.Join(";", json.ToArray()));
-	}
-
-	/*------------------------------------------------------------------------
-	IMPORT
-	------------------------------------------------------------------------*/
-	void ImportCookie() {
-		string rawStr = Loader.Instance.root.ReadFile(setName);
-		if (rawStr != null) {
-			json = new List<string>(rawStr.Split(';'));
-		}
-		else {
-			ExportCookie();
-		}
-	}
 
 
 

@@ -198,10 +198,7 @@ public class GameMode : Mode, IGameMode
         fl_ninja = GameManager.CONFIG.HasOption(Data.OPT_NINJA);
         fl_bombExpert = GameManager.CONFIG.HasOption(Data.OPT_BOMB_EXPERT);
 
-        // TODO Map, Pause, Score, etc should be added to the main scene instead of being loaded via script.
-        pauseMC = new MovieClip(mc, "hammer_interf_instructions", 50);
-        pauseMC._x = Data.GAME_WIDTH * 0.5f;
-        pauseMC._y = Data.GAME_HEIGHT * 0.5f;
+        pauseMC = new MovieClip(manager.pause);
         pauseMC.FindTextfield("click").text = "";
         pauseMC.FindTextfield("title").text = Lang.Get(5);
         pauseMC.FindTextfield("move").text = Lang.Get(7);
@@ -211,13 +208,21 @@ public class GameMode : Mode, IGameMode
         pauseMC.FindTextfield("sector").text = Lang.Get(14);
         pauseMC._visible = false;
 
-        mapMC = new MovieClip(mc, "hammer_map", 50);
-        mapMC._x = Data.GAME_WIDTH * 0.5f;
-        mapMC._y = Data.GAME_HEIGHT * 0.5f;
-        mapMC.subs = new List<MovieClip>();
-        mapMC.subs.Add(new MovieClip(mapMC));
-        mapMC.subs.Add(new MovieClip(mapMC));
+        mapMC = new MovieClip(manager.map);
         mapMC._visible = false;
+
+        popMC = new MovieClip(manager.popup);
+        popMC.SetAnim("Frame", 1);
+        popMC.Play();
+        popMC._visible = false;
+
+        pointerMC = new MovieClip(manager.pointer);
+        pointerMC.SetAnim("Frame", 1);
+        pointerMC._visible = false;
+
+        itemNameMC = new MovieClip(manager.itemName);
+        itemNameMC._visible = false;
+
 
         randMan.Register(Data.RAND_EXTENDS_ID, Data.RAND_EXTENDS);
         randMan.Register(
@@ -330,8 +335,8 @@ public class GameMode : Mode, IGameMode
             player.OnStartLevel();
             if (player.y < 0)
             {
-/*                 fxMan.AttachEnter(player.x, l[i].pid);
- */            }
+                fxMan.AttachEnter(player.x, player.pid);
+            }
         }
     }
 
@@ -518,7 +523,6 @@ public class GameMode : Mode, IGameMode
         // Pause
         if (Input.GetKeyDown(KeyCode.P))
         {
-            Debug.Log("PAUSE KEY PRESSED");
             if (fl_lock)
             {
                 OnUnpause();
@@ -654,6 +658,7 @@ public class GameMode : Mode, IGameMode
         if (n == 0)
         {
             fxMan.AttachExit();
+            Debug.Log("CLEARED");
             fl_clear = true;
         }
 
@@ -827,7 +832,7 @@ public class GameMode : Mode, IGameMode
     ///<summary>Returns true if item spawning is allowed.</summary>
     public bool CanAddItem()
     {
-        return !(fl_clear | world.current.badList.Length == 0);
+        return !fl_clear || world.current.badList.Length == 0;
     }
 
 
@@ -1180,7 +1185,7 @@ public class GameMode : Mode, IGameMode
         {
             p.specialMan.ClearTemp();
             p.specialMan.ClearRec();
-            p._xscale = p.scaleFactor * 100;
+            p._xscale = p.scaleFactor;
             p._yscale = p._xscale;
             p.lockTimer = 0;
             p.fl_lockControls = false;
@@ -1199,7 +1204,7 @@ public class GameMode : Mode, IGameMode
             p.Hide();
         }
 
-        HoleUpdate(); // TODO
+        HoleUpdate();
         ClearExtraHoles();
 
         ClearLevel();
@@ -1208,14 +1213,15 @@ public class GameMode : Mode, IGameMode
         CleanKills();
         currentDim = id;
         world.Suspend();
+        View v = world.previousView;
         world = dimensions[currentDim];
         world.darknessFactor = dfactor;
         Lock();
-        fl_clear = false;
         if (pid < 0)
         {
             world.fl_fadeNextTransition = true;
         }
+        world.RestoreFrom(v, lid);
         UpdateEntitiesWorld();
         if (!world.fl_mainWorld)
         {
@@ -1226,6 +1232,7 @@ public class GameMode : Mode, IGameMode
             fakeLevelId = null;
         }
 
+        fl_clear = false;
         portalId = pid;
         nextLink = null;
     }
@@ -1271,7 +1278,7 @@ public class GameMode : Mode, IGameMode
         int py = world.current.playerY;
         bool fl_unstable = false;
 
-        if (pid >= 0 & world.portalList[pid] != null)
+        if (pid >= 0 && world.portalList.Count>pid && world.portalList[pid] != null)
         {
             px = world.portalList[pid].cx;
             py = world.portalList[pid].cy;
@@ -1327,36 +1334,46 @@ public class GameMode : Mode, IGameMode
     ///<summary>Uses a portal. Returns false if there's no exit.</summary>
     public bool UsePortal(int pid, Physics e)
     {
+        Debug.Log("USE PORTAL1");
         if (nextLink != null)
         {
             return false;
         }
+
+        Debug.Log("USE PORTAL2");
         PortalLink link = Data.Instance.GetLink(currentDim, world.currentId, pid);
         if (link == null)
         {
             return false;
         }
 
+        Debug.Log("USE PORTAL3 "+link.to_did+" "+link.to_lid);
         string name = Lang.GetLevelName(link.to_did, link.to_lid);
-
-        if (FlipCoordReal(e.x) >= Data.GAME_WIDTH * 0.5f)
-        {
-            fl_rightPortal = true;
-            RegisterMapEvent(Data.EVENT_EXIT_RIGHT, (world.currentId + 1) + ". " + name);
+        if (e!=null) {
+            if (FlipCoordReal(e.x) >= Data.GAME_WIDTH * 0.5f)
+            {
+                fl_rightPortal = true;
+                RegisterMapEvent(Data.EVENT_EXIT_RIGHT, (world.currentId + 1) + ". " + name);
+            }
+            else
+            {
+                fl_rightPortal = false;
+                RegisterMapEvent(Data.EVENT_EXIT_LEFT, (world.currentId + 1) + ". " + name);
+            }
+            SwitchDimensionById(link.to_did, link.to_lid, link.to_pid);
         }
         else
-        {
-            fl_rightPortal = false;
-            RegisterMapEvent(Data.EVENT_EXIT_LEFT, (world.currentId + 1) + ". " + name);
-        }
-
-        if (e == null)
         {
             List<Player> pl = GetPlayerList();
             foreach (Player p in pl)
             {
-                p.dx = (portalMcList[pid].x - p.x) * 0.018f;
-                p.dy = (portalMcList[pid].y - p.y) * 0.018f;
+                if(portalMcList.Count > pid) {
+                    p.dx = (portalMcList[pid].x - p.x) * 0.018f;
+                    p.dy = (portalMcList[pid].y - p.y) * 0.018f;
+                } else {
+                    p.dx = 0;
+                    p.dy = 0;
+                } 
                 p.fl_hitWall = false;
                 p.fl_hitGround = false;
                 p.fl_gravity = false;
@@ -1368,10 +1385,6 @@ public class GameMode : Mode, IGameMode
             }
             nextLink = link;
         }
-        else
-        {
-            SwitchDimensionById(link.to_did, link.to_lid, link.to_pid);
-        }
         return true;
     }
 
@@ -1382,7 +1395,7 @@ public class GameMode : Mode, IGameMode
     ///<summary>Opens a floating portal (visual effects + insertion in the script).</summary>
     public bool OpenPortal(int cx, int cy, int pid)
     {
-        if (portalMcList.Count <= pid || portalMcList[pid] != null)
+        if (portalMcList.Count > pid && portalMcList[pid] != null)
         {
             return false;
         }
@@ -1390,13 +1403,16 @@ public class GameMode : Mode, IGameMode
         {
             world.scriptEngine.InsertPortal(cx, cy, pid);
             var x = Entity.x_ctr(FlipCoordCase(cx));
-            var y = Entity.y_ctr(cy) - Data.CASE_HEIGHT * 0.5f;
+            var y = Entity.y_ctr(cy) + Data.CASE_HEIGHT * 0.5f;
             var p = depthMan.Attach("hammer_portal", Data.DP_SPRITE_BACK_LAYER);
             p._x = x;
             p._y = y;
             fxMan.AttachExplosion(x, y, 40);
             fxMan.InGameParticles(Data.PARTICLE_PORTAL, x, y, 5);
             fxMan.AttachShine(x, y);
+            while(portalMcList.Count <= pid) {
+                portalMcList.Add(new LabelledPortalMC());
+            }
             portalMcList[pid] = new LabelledPortalMC();
             portalMcList[pid].x = x;
             portalMcList[pid].y = y;
@@ -1760,20 +1776,18 @@ public class GameMode : Mode, IGameMode
     ///<summary>Displays a pop up message.</summary>
     public void AttachPop(string msg, bool fl_tuto)
     {
-        KillPop();
-        popMC = depthMan.Attach("hammer_interf_pop", Data.DP_INTERF);
-        popMC.ConvertNestedAnimators();
-        popMC._x = Data.GAME_WIDTH * 0.5f;
+        popMC._visible = true;
+        popMC.SetAnim("Frame", 1);
+        popMC.GotoAndPlay(1);
 
-/*         if (fl_tuto)
+        if (fl_tuto)
         {
-            popMC.subs[0].GotoAndStop(2);
-            popMC.subs[0].FindTextfield("header").text = Lang.Get(2); // FIXME
+            popMC.FindTextfield("header").text = Lang.Get(2);
         }
         else
         {
-            popMC.subs[0].GotoAndStop(1);
-        } */
+            popMC.FindTextfield("header").enabled = false;
+        }
 
         // Trims leading endLines
         while (msg[0] == 10 || msg[0] == 13)
@@ -1791,12 +1805,12 @@ public class GameMode : Mode, IGameMode
     ///<summary>Displays a target arrow.</summary>
     public void AttachPointer(int cx, int cy, int ocx, int ocy)
     {
-        KillPointer();
+        pointerMC._visible = true;
+        pointerMC.GotoAndPlay(1);
         var x = Entity.x_ctr(cx);
         var y = Entity.y_ctr(cy);
         var ox = Entity.x_ctr(ocx);
         var oy = Entity.y_ctr(ocy);
-        pointerMC = depthMan.Attach("hammer_fx_pointer", Data.DP_INTERF);
         pointerMC._x = x;
         pointerMC._y = y;
         var ang = Mathf.Atan2(oy - y, ox - x) * 180 / Mathf.PI;
@@ -1810,7 +1824,7 @@ public class GameMode : Mode, IGameMode
     ///<summary>Displays a debug disc.</summary>
     public void AttachRadius(float x, float y, float r)
     {
-        KillRadius();
+        radiusMC._visible = true;
         radiusMC = depthMan.Attach("debug_radius", Data.DP_INTERF);
         radiusMC._x = x;
         radiusMC._y = y;
@@ -1845,10 +1859,7 @@ public class GameMode : Mode, IGameMode
         if (s != "")
         {
             // Affichage
-            KillItemName();
-            itemNameMC = depthMan.Attach("hammer_interf_item_name", Data.DP_TOP);
-            itemNameMC._x = Data.GAME_WIDTH / 2; // icon width
-            itemNameMC._y = 20;
+            itemNameMC._visible = true;
             itemNameMC.FindTextfield("field").text = s;
             itemNameMC._alpha = 105;
 
@@ -1869,7 +1880,7 @@ public class GameMode : Mode, IGameMode
             icon._x = itemNameMC._x - itemNameMC.FindTextfield("field").fontSize * 0.5f + 20; // FIXME
             icon._y = 20;
             icon._xscale = 0.75f;
-            icon._yscale = icon._xscale;
+            icon._yscale = 0.75f;
         }
     }
 
@@ -1880,41 +1891,25 @@ public class GameMode : Mode, IGameMode
     ///<summary>Removes the previous pop up.</summary>
     public void KillPop()
     {
-        if (popMC != null)
-        {
-            popMC.RemoveMovieClip();
-            popMC = null;
-        }
+        popMC._visible = false;
     }
 
     ///<summary>Removes the previous target arrow.</summary>
     public void KillPointer()
     {
-        if (pointerMC != null)
-        {
-            pointerMC.RemoveMovieClip();
-            pointerMC = null;
-        }
+        pointerMC._visible = false;
     }
 
     ///<summary>Removes the previous debug disc.</summary>
     public void KillRadius()
     {
-        if (radiusMC != null)
-        {
-            radiusMC.RemoveMovieClip();
-            radiusMC = null;
-        }
+        radiusMC._visible = false;
     }
 
     ///<summary>Removes the previous item name.</summary>
     public void KillItemName()
     {
-        if (itemNameMC != null)
-        {
-            itemNameMC.RemoveMovieClip();
-            itemNameMC = null;
-        }
+        itemNameMC._visible = false;
     }
 
     ///<summary>Removes all the portals.</summary>
@@ -2129,7 +2124,7 @@ public class GameMode : Mode, IGameMode
                 it.DestroyThis();
             }
         }
-
+        
         fl_clear = true;
         fxMan.AttachExit();
 
@@ -2385,7 +2380,6 @@ public class GameMode : Mode, IGameMode
                 else
                 {
                     targetDark = world.currentId;
-                    Debug.Log("currentId:"+world.currentId);
                 }
             }
             else
@@ -2413,9 +2407,8 @@ public class GameMode : Mode, IGameMode
             string sizeName = "HoleScale_"+i;
             string positionName = "HolePosition_"+i;
             material.SetFloat(floatName, 0);
-            material.SetVector(sizeName, new Vector4(extraHoles[i].d, extraHoles[i].d, 0, 0));
-            material.SetVector(positionName, new Vector4(extraHoles[i].x, extraHoles[i].y, 0, 0));
-
+            material.SetVector(sizeName, new Vector4(extraHoles[i-2].d, extraHoles[i-2].d, 0, 0));
+            material.SetVector(positionName, new Vector4(extraHoles[i-2].x, extraHoles[i-2].y, 0, 0));
         }
 
         // Effets des évolutions des joueurs
@@ -2461,7 +2454,7 @@ public class GameMode : Mode, IGameMode
         for (var i = 2; i < 2+extraHoles.Count; i++)
         {
             string floatName = "Disabled_"+i;
-            darknessMC.GetComponent<Material>().SetFloat(floatName, 1);
+            darknessMC.GetComponent<Renderer>().material.SetFloat(floatName, 1);
         }
     }
 
@@ -2538,7 +2531,7 @@ public class GameMode : Mode, IGameMode
         // FPS
         if (GameManager.CONFIG.fl_detail)
         {
-            if (1 / Loader.Instance.tmod <= 16)
+/*             if (1 / Loader.Instance.tmod <= 16)
             { // lag manager
                 lagCpt += Loader.Instance.tmod;
                 if (lagCpt >= Data.SECOND * 30)
@@ -2550,7 +2543,7 @@ public class GameMode : Mode, IGameMode
             else
             {
                 lagCpt = 0;
-            }
+            } */
         }
 
         // Bullet time
@@ -2615,7 +2608,7 @@ public class GameMode : Mode, IGameMode
                         p.y + UnityEngine.Random.Range(0, 25) * (UnityEngine.Random.Range(0, 2) * 2 - 1),
                         "hammer_fx_star"
                     );
-                    a.mc._xscale = UnityEngine.Random.Range(0, 70) + 30;
+                    a.mc._xscale = (UnityEngine.Random.Range(0, 70) + 30) / 100.0f;
                     a.mc._yscale = a.mc._xscale;
                 }
             }
@@ -2640,7 +2633,7 @@ public class GameMode : Mode, IGameMode
         }
 
         // FX manager
-        fxMan.Main();
+        fxMan.Main(); 
 
         // Hurry up!
         huTimer += Loader.Instance.tmod;
@@ -2648,7 +2641,7 @@ public class GameMode : Mode, IGameMode
         { // H
             huTimer += Loader.Instance.tmod * 20;
         }
-        if (huState < Data.HU_STEPS.Length & huTimer >= Data.HU_STEPS[huState] / diffFactor)
+        if (huState < Data.HU_STEPS.Length && huTimer >= Data.HU_STEPS[huState] / diffFactor)
         {
             OnHurryUp();
         }
@@ -2685,7 +2678,7 @@ public class GameMode : Mode, IGameMode
                 var p = pl[i];
                 p._xscale *= 0.85f;
                 p._yscale = Mathf.Abs(p._xscale);
-                if (Mathf.Abs(p._xscale) <= 2)
+                if (Mathf.Abs(p._xscale) <= 0.02f)
                 {
                     SwitchDimensionById(nextLink.to_did, nextLink.to_lid, nextLink.to_pid);
                     i = 9999;
@@ -2779,6 +2772,13 @@ public class GameMode : Mode, IGameMode
                 {
                     b.AngerMore();
                 }
+            }
+        }
+
+        if(pointerMC._visible) {
+            pointerMC.NextFrame();
+            if(pointerMC.CurrentFrame()==pointerMC.TotalFrames()) {
+                pointerMC.GotoAndPlay(1);
             }
         }
 

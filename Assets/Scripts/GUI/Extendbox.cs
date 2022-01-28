@@ -32,8 +32,8 @@ public class Extendbox
 		mc.GotoAndStop(id+1);
 		mc._x = x;
 		mc._y = y+id*16;
-		mc._xscale = 75;
-		mc._yscale = mc._xscale;
+		mc._xscale = 0.75f;
+		mc._yscale = 0.75f;
 		list.Add(mc);
 	}
 

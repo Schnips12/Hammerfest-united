@@ -30,8 +30,8 @@ public class Item : MovieClip
 	RESIZE
 	------------------------------------------------------------------------*/
 	public void Scale(float ratio) {
-		_xscale = ratio*100;
-		_yscale = _xscale;
+		_xscale = ratio;
+		_yscale = ratio;
 	}
 
 

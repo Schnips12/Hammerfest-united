@@ -32,7 +32,7 @@ public class Abricot : Jumper
 	------------------------------------------------------------------------*/
     public static Abricot Attach(GameMode g, float x, float y, bool spawner)
     {
-        var linkage = Data.LINKAGES[Data.BAD_ABRICOT];
+        string linkage = Data.LINKAGES[Data.BAD_ABRICOT];
         Abricot mc = new Abricot(g.depthMan.Attach(linkage, Data.DP_BADS));
         mc.fl_spawner = spawner;
         mc.InitBad(g, x, y);

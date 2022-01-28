@@ -45,9 +45,6 @@ public class View : MonoBehaviour
     List<MovieClip> gridList;
     List<MovieClip> mcList;
 
-    //	var thumb				: BitmapData;
-    //	var fl_thumb			: bool;
-
     private List<List<bool?>> _fieldMap;
 
     /*------------------------------------------------------------------------
@@ -69,8 +66,11 @@ public class View : MonoBehaviour
         mcList = new List<MovieClip>();
 
         _sprite_top = depthMan.Empty(Data.DP_SPRITE_TOP_LAYER);
-        _sprite_back = depthMan.Empty(Data.DP_SPRITE_BACK_LAYER);
+        _sprite_top._name = "Sprite_top";
         _sprite_top_dm = new DepthManager(_sprite_top);
+
+        _sprite_back = depthMan.Empty(Data.DP_SPRITE_BACK_LAYER);
+        _sprite_back._name = "Sprite_back";
         _sprite_back_dm = new DepthManager(_sprite_back);
 
         fl_fast = false;
@@ -351,7 +351,7 @@ public class View : MonoBehaviour
         }
 
         // skin
-		mc.subs[0].Play(); // Skins and flipping to implement
+		/* mc.subs[0].Play(); */ // TODO Skins and flipping to implement
 		if (fl_flip) {
 			mc.FlipTile();
 		}
@@ -422,13 +422,13 @@ public class View : MonoBehaviour
     public MovieClip AttachSpecialBg(int id, int? subId)
     {
         _specialBg = depthMan.Attach("hammer_special_bg", Data.DP_SPECIAL_BG);
-        _specialBg.GotoAndStop(id + 1);
+        _specialBg.SetAnim((id + 1).ToString(), 1);
 
-        if (subId != null)
+/*         if (subId != null)
         {
             _specialBg.subs[0].GotoAndStop(subId??0+1);
         }
-        _bg._visible = false;
+        _bg._visible = false; */ // FIXME
 
         return _specialBg;
     }
@@ -658,9 +658,9 @@ public class View : MonoBehaviour
     public MovieClip AttachSprite(string link, float x, float y, bool fl_back)
     {
         var dm = fl_back ? _sprite_back_dm : _sprite_top_dm;
-        var mc = dm.Attach(link, 10);
-        mc._x = x;
-        mc._y = y;
+        var mc = dm.Attach(link, 1);
+        mc._x += x;
+        mc._y += y;
         mcList.Add(mc);
 
         return mc;
@@ -674,15 +674,9 @@ public class View : MonoBehaviour
     {
         DetachLevel();
         DetachSprites();
-        fl_attach = false;
-    }
-    public void TimedDetach()
-    {
-        StartCoroutine("TimedDetachLevel");
-        StartCoroutine("TimedDetachSprites");
-        fl_attach = false;
-    }
 
+        fl_attach = false;
+    }
 
     public void DetachLevel()
     {
@@ -711,14 +705,6 @@ public class View : MonoBehaviour
         }
     }
 
-    IEnumerator TimedDetachLevel()
-    {
-        yield return new WaitForEndOfFrame();
-        yield return new WaitForSeconds(0.05f);
-        DetachLevel();
-    }
-
-
     public void DetachSprites()
     {
         for (var i = 0; i < mcList.Count; i++)
@@ -729,15 +715,6 @@ public class View : MonoBehaviour
         _sprite_back_dm.DestroyThis();
         _sprite_top_dm.DestroyThis();
     }
-
-    IEnumerator TimedDetachSprites()
-    {
-        yield return new WaitForEndOfFrame();
-        yield return new WaitForSeconds(0.05f);
-        DetachSprites();
-    }
-
-
 
 
     /*------------------------------------------------------------------------
@@ -773,15 +750,6 @@ public class View : MonoBehaviour
     }
 
     /*------------------------------------------------------------------------
-	RENVOIE UN BITMAP DE LA VUE
-	------------------------------------------------------------------------*/
-    public GameObject GetSnapShot()
-    {
-        snapShot = GameObject.Find("SnapShot").GetComponent<BitmapData>().CreateFake();
-        return snapShot;
-    }
-
-    /*------------------------------------------------------------------------
 	REPLACE LA VUE EN POSITION
 	------------------------------------------------------------------------*/
     public void MoveToPreviousPos()
@@ -795,6 +763,16 @@ public class View : MonoBehaviour
     public void DestroyThis()
     {
         Detach();
+        if (_sprite_back != null)
+        {
+            _sprite_back.RemoveMovieClip();
+            _sprite_back = null;
+        }
+        if (_sprite_top != null)
+        {
+            _sprite_top.RemoveMovieClip();
+            _sprite_top = null;
+        }
     }
 }
 

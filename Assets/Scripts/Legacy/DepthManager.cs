@@ -25,6 +25,10 @@ public class DepthManager
 		root_mc._name = name;
 	}
 
+	public void SetRoot(MovieClip newRoot) {
+		root_mc = newRoot;
+	}
+
 	private Plan GetPlan(int pnb) {
 		while(plans.Count <= pnb) {
 			plans.Add(new Plan());
@@ -46,7 +50,7 @@ public class DepthManager
 		int b = plan * 1000;
 		for(i=0 ; i<max ; i++)
 			if( p[i].united != null ) {
-				p[i].SwapDepths((b+cur)/1000);
+				p[i].SwapDepths((b+cur)/1000.0f);
 				p[cur] = p[i];
 				cur++;
 			}
@@ -61,7 +65,7 @@ public class DepthManager
 			Compact(plan);
 			return Attach(inst, plan);
 		}
-		MovieClip mc = new MovieClip(root_mc, inst, plan+d/1000);
+		MovieClip mc = new MovieClip(root_mc, inst, plan+d/1000.0f);
 		while(p.Count <= d) {
 			p.Add(null);
 		}
@@ -78,7 +82,7 @@ public class DepthManager
 			Compact(plan);
 			return Empty(plan);
 		}
-		MovieClip mc = new MovieClip(root_mc, plan+d/1000);
+		MovieClip mc = new MovieClip(root_mc, plan+d/1000.0f);
 		p.Add(mc);
 		plan_data.cur++;
 		return mc;
@@ -139,7 +143,7 @@ public class DepthManager
 				Compact(plan);
 			d = plan_data.cur;
 			plan_data.cur++;
-			mc.SwapDepths(plan + d/1000);
+			mc.SwapDepths(plan + d/1000.0f);
 			p[d] = mc;
 		}
 	}

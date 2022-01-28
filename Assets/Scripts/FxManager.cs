@@ -213,8 +213,8 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        /* a.mc._width = radius * 2;
-        a.mc._height = a.mc._width; */
+        a.mc._xscale = radius / 10;
+        a.mc._yscale = radius / 10;
         return a;
     }
 
@@ -226,8 +226,9 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        /* a.mc._width = radius * 2;
-        a.mc._height = a.mc._width; */
+        a.mc._xscale = radius / 10;
+        a.mc._yscale = radius / 10;
+        /* a.mc.blendMode	= BlendMode.OVERLAY; */
         return a;
     }
 
@@ -295,6 +296,21 @@ public class FxManager
         HammerAnimation a = new HammerAnimation(game);
         a.Attach(x, y, link, Data.DP_FX);
         a.mc.Play();
+        a.mc.SetAnim("Frame", 1);
+        animList.Add(a);
+        return a;
+    }
+
+    public HammerAnimation AttachFxOverlay(float x, float y, string link)
+    {
+        if (game.fl_lock)
+        {
+            return null;
+        }
+        HammerAnimation a = new HammerAnimation(game);
+        a.Attach(x, y, link, Data.DP_INTERF+1);
+        a.mc.Play();
+        a.mc.SetAnim("Frame", 1);
         animList.Add(a);
         return a;
     }
@@ -330,8 +346,8 @@ public class FxManager
                 y,
                 "hammer_fx_dust"
             );
-            fx.mc._xscale = Random.Range(0, 50) + 50 * (Random.Range(0, 2) * 2 - 1);
-            fx.mc._yscale = Random.Range(0, 80) + 10;
+            fx.mc._xscale = (Random.Range(0, 50) + 50 * (Random.Range(0, 2) * 2 - 1)) / 100.0f;
+            fx.mc._yscale = (Random.Range(0, 80) + 10) / 100.0f;
             fx.mc._alpha = Random.Range(0, 50) + 50;
             fx.mc.GotoAndPlay((Random.Range(0, 5) + 5));
         }
@@ -366,6 +382,7 @@ public class FxManager
         {
             return;
         }
+        
 
         // Epuration des fx
         var l = game.GetList(Data.FX);
@@ -480,8 +497,6 @@ public class FxManager
         f.blurY = f.blurX;
         mc.filter = f;
     }
-
-
 
     /*------------------------------------------------------------------------
 	MAIN
