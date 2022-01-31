@@ -142,10 +142,7 @@ public class SetManager
 			return;
 		}
 		if (!fl_read[id]) {
-			Debug.Log("Reading JSON :" + id);
-			Debug.Log(json[id]);
-			worldmap[id] = JsonUtility.FromJson<LevelData>(json[id]);
-			worldmap[id].script = worldmap[id].script.Replace("\r", "").Replace("$", "");
+			worldmap[id] = Unserialize(id);
 			fl_read[id] = true;
 		}
 		SetCurrent(id);
@@ -189,7 +186,7 @@ public class SetManager
 	/*------------------------------------------------------------------------
 	INVERSION HORIZONTALE DéFINITIVE
 	------------------------------------------------------------------------*/
-	LevelData Flip(LevelData l) {  // TODO this should be a LevelData constructor (flipped copy)
+	LevelData Flip(LevelData l) {
 		if (!fl_mirror) {
 			return l;
 		}
@@ -432,6 +429,8 @@ public class SetManager
 	------------------------------------------------------------------------*/
 	protected virtual LevelData Unserialize(int id) { // TODO adapt that to JSON format instead of the old serialized data
 		//if(GameManager.HH.get("$"+Md5.encode(setName))!="$"+Md5.encode(""+csum)) {GameManager.fatal(""); return null;}
+		Debug.Log("Reading JSON :" + id);
+		Debug.Log(json[id]);
 		LevelData l = JsonUtility.FromJson<LevelData>(json[id]);
 		if (fl_mirror) {
 			l = Flip(l);
@@ -441,6 +440,7 @@ public class SetManager
 			Debug.Log("empty slot array found ! spec="+l.specialSlots.Length+" score="+l.scoreSlots.Length);
 		}
 		fl_read[id]=true;
+		l.script = l.script.Replace("\r", "").Replace("$", "");
 		return l;
 	}
 

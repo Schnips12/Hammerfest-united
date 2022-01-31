@@ -15,7 +15,7 @@ public class Smoke : Supa
     protected override void InitSupa(GameMode g, float x, float y)
     {
         base.InitSupa(g, x, y);
-        Scale(265);
+        Scale(2.65f);
         SetLifeTimer(Data.SECOND * 3);
     }
 

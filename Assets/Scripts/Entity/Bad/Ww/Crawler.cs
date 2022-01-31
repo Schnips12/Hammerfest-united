@@ -39,7 +39,7 @@ public class Crawler : WallWalker
     protected override void InitBad(GameMode g, float x, float y)
     {
         base.InitBad(g, x, y);
-        Scale(90);
+        Scale(0.9f);
     }
 
 
@@ -100,7 +100,7 @@ public class Crawler : WallWalker
         s.MoveTo(x, y);
         s.dx = -cp.x * SHOOT_SPEED;
         s.dy = -cp.y * SHOOT_SPEED;
-        s.Scale(70);
+        s.Scale(0.7f);
         int n = Random.Range(0, 3) + 2;
         if (cp.x != 0)
         {
@@ -266,8 +266,8 @@ public class Crawler : WallWalker
         if (IsHealthy())
         {
             // D�formation blob cosinus
-            _xscale += (10 * Mathf.Sin(blobCpt))/100;
-            _yscale += (10 * Mathf.Cos(blobCpt))/100;
+            _xscale += Mathf.Sin(blobCpt)/10;
+            _yscale += Mathf.Cos(blobCpt)/10;
             blobCpt += Loader.Instance.tmod * 0.1f;
         }
 

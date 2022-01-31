@@ -30,7 +30,7 @@ public class Container
 	public Container(Mode m, float x, float y, int wid) {
 		mode = m;
 		mc = mode.depthMan.Empty(Data.DP_INTERF);
-		depthMan = new DepthManager(mc);
+		depthMan = new DepthManager(mc, "Interface");
 
 		mc._x = x;
 		mc._y = y;

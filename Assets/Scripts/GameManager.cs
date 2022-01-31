@@ -16,6 +16,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] public GameObject radius;
     [SerializeField] public GameObject pause;
     [SerializeField] public GameObject map;
+	[SerializeField] public GameObject interf;
 
 	public int uniq;
 
@@ -233,7 +234,7 @@ public class GameManager : MonoBehaviour
 			return;
 		}
 		if (IsAdventure()) {
-			StartMode(new Adventure(this, 3)); // TODO Start at zéro !
+			StartMode(new Adventure(this, Loader.Instance.chosenLevel.value)); // TODO Start at zéro !
 			return;
 		}
 

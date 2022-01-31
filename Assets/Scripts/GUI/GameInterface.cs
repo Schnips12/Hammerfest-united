@@ -285,7 +285,7 @@ public class GameInterface
 		}
 		else {
 			while ( currentLives[pid]<v & currentLives[pid]<MAX_LIVES ) {
-				var newmc = new MovieClip(mc, "hammer_interf_life", Data.DP_TOP+1);
+				var newmc = new MovieClip(mc, "hammer_interf_life", "Overlay", 1);
 				newmc._x = baseX+currentLives[pid]*baseWid;
 				newmc._y = -9;
 				plives.Add(newmc);
@@ -295,7 +295,7 @@ public class GameInterface
 				more.Add(null);
 			}
 			if ( v>MAX_LIVES & more[pid]==null ) {
-				more[pid] = new MovieClip(mc,"hammer_interf_more", Data.DP_TOP+1);
+				more[pid] = new MovieClip(mc,"hammer_interf_more", "Overlay", 1);
 				more[pid]._x = baseX + baseWid*MAX_LIVES - 4;
 				if ( pid>0 ) {
 					more[pid]._x-=baseWid;

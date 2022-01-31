@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Library:
-  - m_Name: Frame
-    m_Hash: 1949897673
+  - m_Name: Shoot
+    m_Hash: -1316629574
     m_CategoryList: []
     m_OverrideEntries:
     - m_Name: 1

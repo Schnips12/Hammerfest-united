@@ -143,7 +143,7 @@ public class Adventure : GameMode
 		soundMan.SetVolume(GameManager.CONFIG.generalVolume);
 		PlayMusic(0);		
 		world.Goto(firstLevel);
-		InsertPlayer(world.current.playerX, Data.LEVEL_HEIGHT-world.current.playerY);
+		InsertPlayer(world.current.playerX, Data.LEVEL_HEIGHT-1-world.current.playerY);
 	}
 
 
@@ -248,7 +248,7 @@ public class Adventure : GameMode
 				world.view.AttachSprite(
 					"door_secret",
 					Entity.x_ctr( world.current.playerX ),
-					Entity.x_ctr( world.current.playerY ) + Data.CASE_HEIGHT*0.5f,
+					Entity.x_ctr( Data.LEVEL_HEIGHT-1-world.current.playerY ) + Data.CASE_HEIGHT*0.5f,
 					true
 				);
 			}

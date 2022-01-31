@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Library:
-  - m_Name: Frame
-    m_Hash: 1949897673
+  - m_Name: Shoot
+    m_Hash: -1316629574
     m_CategoryList: []
     m_OverrideEntries:
     - m_Name: 1
@@ -32,31 +32,6 @@ MonoBehaviour:
       m_Sprite: {fileID: 21300000, guid: e1dd231e40791bc48a19ff6a5557fa10, type: 3}
       m_FromMain: 0
       m_SpriteOverride: {fileID: 21300000, guid: e1dd231e40791bc48a19ff6a5557fa10, type: 3}
-    - m_Name: 4
-      m_Hash: -206169288
-      m_Sprite: {fileID: 21300000, guid: a8cab5d66c46e724b9da72b39b1ce562, type: 3}
-      m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: a8cab5d66c46e724b9da72b39b1ce562, type: 3}
-    - m_Name: 5
-      m_Hash: -2068763730
-      m_Sprite: {fileID: 21300000, guid: 488e0e7442e03c7489415d4f997c5f1c, type: 3}
-      m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: 488e0e7442e03c7489415d4f997c5f1c, type: 3}
-    - m_Name: 6
-      m_Hash: 498629140
-      m_Sprite: {fileID: 21300000, guid: eb3556c01f8827a43b0268848105bb62, type: 3}
-      m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: eb3556c01f8827a43b0268848105bb62, type: 3}
-    - m_Name: 7
-      m_Hash: 1790921346
-      m_Sprite: {fileID: 21300000, guid: 077dbdf140e573d4ab1f336dcc00e0c7, type: 3}
-      m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: 077dbdf140e573d4ab1f336dcc00e0c7, type: 3}
-    - m_Name: 8
-      m_Hash: -100641005
-      m_Sprite: {fileID: 21300000, guid: 4254d0ae03380d84e8c139d19af0695d, type: 3}
-      m_FromMain: 0
-      m_SpriteOverride: {fileID: 21300000, guid: 4254d0ae03380d84e8c139d19af0695d, type: 3}
     m_FromMain: 0
-    m_EntryOverrideCount: 8
+    m_EntryOverrideCount: 3
   m_PrimaryLibraryGUID: 

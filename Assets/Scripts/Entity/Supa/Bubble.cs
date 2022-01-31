@@ -35,7 +35,7 @@ public class Bubble : Supa
         radius = 80;
         MoveTo(Data.GAME_WIDTH / 2, Data.GAME_HEIGHT / 2);
         MoveToAng(
-            45 + (Random.Range(0, 30)) * (Random.Range(0, 2) * 2 - 1) + (Random.Range(0, 4) + 1) * 90,
+            -45 - (Random.Range(0, 30)) * (Random.Range(0, 2) * 2 - 1) - (Random.Range(0, 4) + 1) * 90,
             speed + Random.Range(0, 5)
         );
         SetLifeTimer(Data.SECOND * 10);

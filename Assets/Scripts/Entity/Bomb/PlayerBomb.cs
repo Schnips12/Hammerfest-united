@@ -101,7 +101,7 @@ public class PlayerBomb : Bomb
         fl_blink = true;
         fl_alphaBlink = false;
         blinkColor = Data.ToColor(0xff0000);
-        Scale(scaleFactor * UPGRADE_FACTOR * 100);
+        Scale(scaleFactor * UPGRADE_FACTOR);
         owner = p;
         upgrades++;
     }

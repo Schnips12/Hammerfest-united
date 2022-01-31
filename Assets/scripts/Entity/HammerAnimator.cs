@@ -158,6 +158,11 @@ public class HammerAnimator : Trigger
     {
         base.HammerUpdate();
 
+        if(united==null)
+        {
+            return;
+        }
+
         // Clignotement
         if (fl_blink)
         {

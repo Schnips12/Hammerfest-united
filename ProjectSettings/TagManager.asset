@@ -11,8 +11,8 @@ TagManager:
   - 
   - Water
   - UI
-  - Mask
-  - See Through
+  - 
+  - 
   - 
   - 
   - 
@@ -40,4 +40,58 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Background
+    uniqueID: 3500538501
+    locked: 0
+  - name: Special Background
+    uniqueID: 3106269635
+    locked: 0
+  - name: Sprite Back
+    uniqueID: 816846227
+    locked: 0
+  - name: Field
+    uniqueID: 1497037939
+    locked: 0
+  - name: Spear
+    uniqueID: 3666975071
+    locked: 0
+  - name: Player
+    uniqueID: 3685305995
+    locked: 0
+  - name: Items
+    uniqueID: 3412449467
+    locked: 0
+  - name: Shots
+    uniqueID: 2017579225
+    locked: 0
+  - name: Bads
+    uniqueID: 2227941435
+    locked: 0
+  - name: Bombs
+    uniqueID: 2629410345
+    locked: 0
+  - name: Fx
+    uniqueID: 380646927
+    locked: 0
+  - name: Supa
+    uniqueID: 1164410971
+    locked: 0
+  - name: Top
+    uniqueID: 1573002565
+    locked: 0
+  - name: Sprite Top
+    uniqueID: 2086678969
+    locked: 0
+  - name: Scroller
+    uniqueID: 370984527
+    locked: 0
+  - name: Borders
+    uniqueID: 1189098149
+    locked: 0
+  - name: Interface
+    uniqueID: 1601534659
+    locked: 0
+  - name: Overlay
+    uniqueID: 856677711
     locked: 0

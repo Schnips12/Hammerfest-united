@@ -48,7 +48,7 @@ public class Particle : Mover
         SetAnim("Frame", 1);
         this.GotoAndStop(pid);
 
-        Scale(Random.Range(0, 50) + 50);
+        Scale((Random.Range(0, 50) + 50)/100.0f);
         rotation = Random.Range(0, 360);
 
         MoveTo(x, y);
@@ -58,19 +58,19 @@ public class Particle : Mover
         switch (pid)
         {
             case Data.PARTICLE_SPARK:
-                Scale(scaleFactor * 100 * 2);
+                Scale(scaleFactor * 2);
                 UpdateLifeTimer(Data.SECOND);
                 break;
             case Data.PARTICLE_STONE:
-                Scale(scaleFactor * 150);
+                Scale(scaleFactor * 1.5f);
                 break;
             case Data.PARTICLE_RAIN:
-                _yscale = 10;
+                _yscale = 0.1f;
                 rotation = 5;
                 _alpha = Random.Range(0, 70) + 30;
                 break;
             case Data.PARTICLE_METAL:
-                Scale(Random.Range(0, 40) + 80);
+                Scale((Random.Range(0, 40) + 80)/100.0f);
                 bounceFactor = 0.3f;
                 break;
             case Data.PARTICLE_LITCHI:
@@ -82,7 +82,7 @@ public class Particle : Mover
                 fl_blink = false;
                 _alpha = Random.Range(0, 80) + 20;
                 MoveUp(0.3f + Random.Range(0, 10) / 10);
-                Scale(Random.Range(0, 40) + 30);
+                Scale((Random.Range(0, 40) + 30)/100.0f);
                 next = null;
                 UpdateLifeTimer(Data.SECOND + Random.Range(0, Data.SECOND * 20) / 10);
                 break;
@@ -120,7 +120,7 @@ public class Particle : Mover
             Player et = e as Player;
             if (!et.fl_shield)
             {
-                et.Scale(100 * et.scaleFactor - 1);
+                et.Scale(et.scaleFactor - 0.01f);
                 DestroyThis();
             }
         }
@@ -243,7 +243,7 @@ public class Particle : Mover
     {
         if (pid == Data.PARTICLE_RAIN)
         {
-            _yscale = Mathf.Min(100, _yscale + Loader.Instance.tmod * 4)/100;
+            _yscale = Mathf.Min(1, _yscale + Loader.Instance.tmod * 4);
             rotation *= 0.93f;
         }
         else

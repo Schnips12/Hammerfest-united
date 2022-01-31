@@ -21,7 +21,7 @@
             {
                 "type": "System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
                 "key": "buildOutputDirList",
-                "value": "{\"m_Value\":\"C:/Users/pierr/GitHub/Hammerfest-united/WebGL Builds/0.1;;;;;;;;;\"}"
+                "value": "{\"m_Value\":\"D:/Unity builds/Hammerfest-United/WebGL/alpha.0.0.2;D:/Unity builds/Hammerfest-United/WebGL/alpha.0.0.1;C:/Users/pierr/GitHub/Hammerfest-united/WebGL Builds/0.1;;;;;;;\"}"
             }
         ]
     }

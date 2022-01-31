@@ -5,7 +5,7 @@ public class ViewManager : SetManager
 {
     public View view;
     public View previousView;
-    DepthManager depthMan;
+
     MovieClip fake;
     GameObject prevSnap;
 
@@ -48,14 +48,6 @@ public class ViewManager : SetManager
     {
         base.DestroyThis();
         view.DestroyThis();
-    }
-
-    /*------------------------------------------------------------------------
-	LINK UN DEPTH-MANAGER EXTERNE
-	------------------------------------------------------------------------*/
-    public void SetDepthMan(DepthManager d)
-    {
-        depthMan = d;
     }
 
 
@@ -179,7 +171,8 @@ public class ViewManager : SetManager
     {
         GameObject viewGO = GameObject.Instantiate(Resources.Load<GameObject>("View"), manager.transform);
         View v = viewGO.GetComponent<View>();
-        depthMan.SetRoot(new MovieClip(viewGO));
+
+        DepthManager depthMan = new DepthManager(new MovieClip(viewGO), "Default");
         v.Init(this, depthMan);
         v.fl_hideTiles = fl_hideTiles;
         v.fl_hideBorders = fl_hideBorders;

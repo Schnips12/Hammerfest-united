@@ -38,7 +38,7 @@ public class GameMode : Mode, IGameMode
     }
 
     // Recurring visual elements
-    public GameInterface gi;
+    public GameInterfaceSolo gi;
     private MovieClip popMC;
     private MovieClip pointerMC;
     private MovieClip itemNameMC;
@@ -169,7 +169,7 @@ public class GameMode : Mode, IGameMode
         mc = new MovieClip(manager.gameObject);
 
         // Managers
-        depthMan = new DepthManager(mc);
+        depthMan = new DepthManager(mc, "Default");
         fxMan = new FxManager(this);
         statsMan = new StatsManager(this);
         randMan = new RandomManager();
@@ -308,11 +308,8 @@ public class GameMode : Mode, IGameMode
     ///<summary>Resets the game interface.</summary>
     protected virtual void InitInterface()
     {
-        if (gi != null)
-        {
-            gi.DestroyThis();
-        }
-        gi = new GameInterface(this);
+        gi = manager.interf.GetComponent<GameInterfaceSolo>();
+        gi.InitSingle(this);
     }
 
 
@@ -333,7 +330,7 @@ public class GameMode : Mode, IGameMode
         foreach (Player player in l)
         {
             player.OnStartLevel();
-            if (player.y < 0)
+            if (player.y > Data.GAME_HEIGHT)
             {
                 fxMan.AttachEnter(player.x, player.pid);
             }
@@ -709,7 +706,7 @@ public class GameMode : Mode, IGameMode
         {
             p.MoveTo(
                 Entity.x_ctr(world.current.playerX),
-                Entity.y_ctr(world.current.playerY - 1)
+                Entity.y_ctr(Data.LEVEL_HEIGHT-1-world.current.playerY)
             );
             p.Shield(Data.SHIELD_DURATION * 1.3f);
             p.Hide();
@@ -1186,7 +1183,7 @@ public class GameMode : Mode, IGameMode
             p.specialMan.ClearTemp();
             p.specialMan.ClearRec();
             p._xscale = p.scaleFactor;
-            p._yscale = p._xscale;
+            p._yscale = p.scaleFactor;
             p.lockTimer = 0;
             p.fl_lockControls = false;
             p.fl_gravity = true;
@@ -1247,7 +1244,7 @@ public class GameMode : Mode, IGameMode
         GameMechanics dim = new GameMechanics(manager, name);
         dim.fl_mirror = fl_mirror;
         dim.SetGame(this);
-        dim.SetDepthMan(depthMan);
+
         if (dimensions.Count > 0)
         {
             dim.Suspend();
@@ -1275,7 +1272,7 @@ public class GameMode : Mode, IGameMode
     linkPt GetPortalEntrance(int pid)
     {
         int px = world.current.playerX;
-        int py = world.current.playerY;
+        int py = Data.LEVEL_HEIGHT-1-world.current.playerY;
         bool fl_unstable = false;
 
         if (pid >= 0 && world.portalList.Count>pid && world.portalList[pid] != null)
@@ -1284,11 +1281,11 @@ public class GameMode : Mode, IGameMode
             py = world.portalList[pid].cy;
 
             // Vertical
-            if (world.GetCase(px, py + 1) == Data.FIELD_PORTAL)
+            if (world.GetCase(px, py - 1) == Data.FIELD_PORTAL)
             {
-                while (world.GetCase(px, py + 1) == Data.FIELD_PORTAL)
+                while (world.GetCase(px, py - 1) == Data.FIELD_PORTAL)
                 {
-                    py++;
+                    py--;
                 }
                 // gauche
                 if (world.GetCase(px - 1, py) <= 0)
@@ -1334,20 +1331,17 @@ public class GameMode : Mode, IGameMode
     ///<summary>Uses a portal. Returns false if there's no exit.</summary>
     public bool UsePortal(int pid, Physics e)
     {
-        Debug.Log("USE PORTAL1");
         if (nextLink != null)
         {
             return false;
         }
 
-        Debug.Log("USE PORTAL2");
         PortalLink link = Data.Instance.GetLink(currentDim, world.currentId, pid);
         if (link == null)
         {
             return false;
         }
 
-        Debug.Log("USE PORTAL3 "+link.to_did+" "+link.to_lid);
         string name = Lang.GetLevelName(link.to_did, link.to_lid);
         if (e!=null) {
             if (FlipCoordReal(e.x) >= Data.GAME_WIDTH * 0.5f)
@@ -1867,13 +1861,13 @@ public class GameMode : Mode, IGameMode
             MovieClip icon;
             if (id < 1000)
             {
-                icon = new MovieClip(itemNameMC, "hammer_item_special", manager.uniq++);
+                icon = new MovieClip(itemNameMC, "hammer_item_special", "Overlay", manager.uniq++);
                 icon.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.specialItems.Find(x => x.name.Substring(20)==(id+1).ToString());
                 icon.SetAnim("Frame", 1);
             }
             else
             {
-                icon = new MovieClip(itemNameMC, "hammer_item_score", manager.uniq++);
+                icon = new MovieClip(itemNameMC, "hammer_item_score", "Overlay", manager.uniq++);
                 icon.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scoreItems.Find(x => x.name.Substring(18)==(id-1000+1).ToString());
                 icon.SetAnim("Frame", 1);
             }
@@ -2720,7 +2714,7 @@ public class GameMode : Mode, IGameMode
             if (!fl_flipY)
             {
                 mc._y = -7 + 7 * Mathf.Cos(aquaTimer);
-                mc._yscale = 102 - 2 * Mathf.Cos(aquaTimer);
+                mc._yscale = (102 - 2 * Mathf.Cos(aquaTimer)) / 100.0f;
             }
         }
         else

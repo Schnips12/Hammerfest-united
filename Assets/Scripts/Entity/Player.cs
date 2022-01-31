@@ -119,7 +119,7 @@ public class Player : Physics, IEntity
         if (GameManager.CONFIG.HasFamily(100)) { initialMaxBombs++; }
         maxBombs = initialMaxBombs;
         coolDown = 0;
-        lives = 1;
+        lives = 30; // TODO Set to 1
         if (GameManager.CONFIG.HasFamily(102)) { lives++; } // coeur 1
         if (GameManager.CONFIG.HasFamily(103)) { lives++; } // coeur 2
         if (GameManager.CONFIG.HasFamily(104)) { lives++; } // coeur 3
@@ -602,7 +602,7 @@ public class Player : Physics, IEntity
         base.Resurrect();
         game.manager.LogAction("R" + lives);
         // Joueur
-        MoveTo(Entity.x_ctr(world.current.playerX), Entity.y_ctr(Data.LEVEL_HEIGHT - world.current.playerY));
+        MoveTo(Entity.x_ctr(world.current.playerX), Entity.y_ctr(Data.LEVEL_HEIGHT-1-world.current.playerY));
         dx = 0;
         dy = 0;
         Shield(null);
@@ -1528,7 +1528,7 @@ public class Player : Physics, IEntity
             game.fxMan.InGameParticles(Data.PARTICLE_RAIN, x +
                     UnityEngine.Random.Range(0, 20) * (UnityEngine.Random.Range(0, 2) * 2 - 1),
                     y + 60 + UnityEngine.Random.Range(0, 5), UnityEngine.Random.Range(0, 2) + 1);
-            Scale(Mathf.Min(100, (scaleFactor + 0.002f * Loader.Instance.tmod) * 100));
+            Scale(Mathf.Min(1, scaleFactor + 0.002f * Loader.Instance.tmod));
             if (scaleFactor <= 0.60)
             {
                 KillHit(0);

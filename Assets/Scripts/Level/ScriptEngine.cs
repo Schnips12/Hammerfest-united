@@ -374,10 +374,8 @@ public class ScriptEngine
 
             case E_SPECIAL:
                 {// special item
-                    Debug.Log("SPEC1" + game.CanAddItem().ToString() + fl_safe.ToString());
                     if (game.CanAddItem() & !fl_safe)
                     {
-                        Debug.Log("SPEC2");
                         float x = Entity.x_ctr(GetInt(e, "x"));
                         float y = Entity.y_ctr(Data.LEVEL_HEIGHT - 1 - GetInt(e, "y"));
                         x = game.FlipCoordReal(x);
@@ -529,7 +527,7 @@ public class ScriptEngine
                     else
                     {
                         x = xr.Value;
-                        y = Data.GAME_HEIGHT - yr.Value;
+                        y = yr.Value;
                     }
                     x = game.FlipCoordReal(x);
                     if (game.fl_mirror)
@@ -632,7 +630,7 @@ public class ScriptEngine
                 {// add timed item drops to the script
                     int cx1 = GetInt(e, "x1");
                     int cx2 = GetInt(e, "x2");
-                    int cy = Data.LEVEL_HEIGHT - 1 - GetInt(e, "y");
+                    int cy = GetInt(e, "y");
                     int id = GetInt(e, "i");
                     int? subId = GetNullableInt(e, "si");
                     int time = GetInt(e, "t");
@@ -696,10 +694,8 @@ public class ScriptEngine
 
             case E_PORTAL:
                 {
-                    Debug.Log("PORTAL");
                     if (game.fl_clear & cycle > 10)
                     {
-                        Debug.Log("PORTAL2");
                         var pid = GetInt(e, "pid");
                         if (!game.UsePortal(pid, null))
                         {
@@ -815,7 +811,6 @@ public class ScriptEngine
                             var d = l[i].DistanceCase(x, y);
                             if (d <= dist)
                             {
-                                Debug.Log("TRIGGERED");
                                 return true;
                             }
                         }
@@ -1349,7 +1344,7 @@ public class ScriptEngine
                         Entity.y_ctr(s.y)
                     );
                     b.dx = (10 + UnityEngine.Random.Range(0, 10)) * (UnityEngine.Random.Range(0, 2) * 2 - 1);
-                    b.dy = -UnityEngine.Random.Range(0, 5) - 5;
+                    b.dy = UnityEngine.Random.Range(0, 5) - 5;
                 }
                 break;
 
@@ -1381,10 +1376,13 @@ public class ScriptEngine
 
             case 10:
                 {// d�sactive les jump down sur les monstres !
-                    var l = game.GetBadList();
+                    List<Bad> l = game.GetBadList();
                     for (var i = 0; i < l.Count; i++)
                     {
-                        (l[i] as Jumper).SetJumpDown(null); // TODO Interface IJumper
+                        if (l[i].GetType().IsAssignableFrom(typeof(Jumper)))
+                        {
+                            (l[i] as Jumper).SetJumpDown(null);
+                        }
                     }
                 }
                 break;
@@ -1395,7 +1393,7 @@ public class ScriptEngine
                     for (var i = 0; i < l.Count; i++)
                     {
                         var b = l[i];
-                        game.fxMan.AttachFx(b.x, b.y - Data.CASE_HEIGHT, "hammer_fx_pop");
+                        game.fxMan.AttachFx(b.x, b.y + Data.CASE_HEIGHT, "hammer_fx_pop");
                         b.DestroyThis();
                     }
                 }
@@ -1420,7 +1418,7 @@ public class ScriptEngine
                     for (var i = 0; i < l.Count; i++)
                     {
                         var it = l[i];
-                        game.fxMan.AttachFx(it.x, it.y - Data.CASE_HEIGHT, "hammer_fx_pop");
+                        game.fxMan.AttachFx(it.x, it.y + Data.CASE_HEIGHT, "hammer_fx_pop");
                         it.DestroyThis();
                     }
                 }

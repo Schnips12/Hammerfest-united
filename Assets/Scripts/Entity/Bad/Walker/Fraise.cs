@@ -140,16 +140,16 @@ public class Fraise : Shooter
 
         // Cherche un receveur
         List<IEntity> l = game.GetListCopy(Data.CATCHER);
-        Bad bad = null;
+        Fraise bad = null;
         do
         {
             int i = Random.Range(0, l.Count);
-            bad = l[i] as Bad;
+            bad = l[i] as Fraise;
             l.RemoveAt(i);
         } while (l.Count > 0 & (bad == this | !bad.IsReady()));
 
 
-        if (bad != null)
+        if (bad != null && bad != this && bad.IsReady())
         {
             ballTarget = bad;
         }
@@ -209,15 +209,18 @@ public class Fraise : Shooter
         } */
 
         // Se tourne dans la direction du tir
-        if (dx == 0 & ballTarget.fl_destroy == false)
+        if (ballTarget!=null)
         {
-            if (ballTarget.x > x)
+            if (dx == 0 & ballTarget.fl_destroy == false)
             {
-                _xscale = Mathf.Abs(_xscale);
-            }
-            if (ballTarget.x < x)
-            {
-                _xscale = -Mathf.Abs(_xscale);
+                if (ballTarget.x > x)
+                {
+                    _xscale = Mathf.Abs(_xscale);
+                }
+                if (ballTarget.x < x)
+                {
+                    _xscale = -Mathf.Abs(_xscale);
+                }
             }
         }
     }
@@ -246,7 +249,9 @@ public class Fraise : Shooter
             List<IEntity> bl = game.GetList(Data.BAD_CLEAR);
             for (int i = 0; i < bl.Count; i++)
             {
-                if ((bl[i] as Fraise).fl_ball)
+                Debug.Log(this.GetType());
+
+                if (bl[i].GetType()==this.GetType() && (bl[i] as Fraise).fl_ball)
                 {
                     fl_lost = false;
                 }

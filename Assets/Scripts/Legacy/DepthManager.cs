@@ -2,156 +2,157 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+///</Summary>A DepthManager handles the depth sorting of MovieClips.
+/// Each SortingLayer is managed as a group (plan) of up to 1000 elements, all of different Z depth.
+/// A DepthManager can reference one group per SortingLayer. A default layer is used when not explicitly instructed otherwise.
+/// When using several DepthManagers at once, if they use the same SortingLayers, conflicts might arise.</summary>
 public class DepthManager
 {    
-    MovieClip root_mc;
+    MovieClip hierarchyParent;
+	string defaultLayer;
 
     class Plan {
+		public string name;
         public List<MovieClip> tbl;
         public int cur;
-        public Plan() {
+        public Plan(string name) {
+			this.name = name;
             tbl = new List<MovieClip>();
             cur = 0;
         }
     }
 	List<Plan> plans;
 
-	public DepthManager(MovieClip mc) {
-		root_mc = mc;
+	public DepthManager(MovieClip mc, string layer) {
+		hierarchyParent = mc;
+		defaultLayer = layer;
 		plans = new List<Plan>();
 	}
 
 	public void SetName(string name) {
-		root_mc._name = name;
+		hierarchyParent._name = name;
 	}
 
 	public void SetRoot(MovieClip newRoot) {
-		root_mc = newRoot;
+		hierarchyParent = newRoot;
 	}
 
-	private Plan GetPlan(int pnb) {
-		while(plans.Count <= pnb) {
-			plans.Add(new Plan());
+	private Plan GetPlan(string layer) {
+		Plan plan_data = plans.Find(x => x.name == layer);
+		if (plan_data==null) {
+			plan_data = new Plan(layer);
+			plans.Add(plan_data);
 		}
-		Plan plan_data = plans[pnb];
-		if(plan_data == null) {
-			plan_data = new Plan();
-			plans[pnb] = plan_data;
-		}
+
 		return plan_data;
 	}
 
-	void Compact(int plan) {
-		var plan_data = plans[plan];
-		var p = plan_data.tbl;
-		var max = plan_data.cur;
+	void Compact(Plan plan_data) {
+		List<MovieClip> p = plan_data.tbl;
+		int max = plan_data.cur;
 		int i;
 		int cur = 0;
-		int b = plan * 1000;
 		for(i=0 ; i<max ; i++)
 			if( p[i].united != null ) {
-				p[i].SwapDepths((b+cur)/1000.0f);
+				p[i].SetDepth(cur);
 				p[cur] = p[i];
 				cur++;
 			}
 		plan_data.cur = cur;
 	}
 
-	public MovieClip Attach(string inst, int plan) {
-		var plan_data = GetPlan(plan);
-		var p = plan_data.tbl;
-		var d = plan_data.cur;
-		if(d == 1000) {
-			Compact(plan);
-			return Attach(inst, plan);
-		}
-		MovieClip mc = new MovieClip(root_mc, inst, plan+d/1000.0f);
-		while(p.Count <= d) {
-			p.Add(null);
-		}
-		p[d] = mc;
-		plan_data.cur++;
-		return mc;
+	public MovieClip Attach(string inst)
+	{
+		return Attach(inst, defaultLayer);
 	}
 
-	public MovieClip Empty(int plan) {
-		var plan_data = GetPlan(plan);
-		var p = plan_data.tbl;
-		var d = plan_data.cur;
+	public MovieClip Attach(string inst, string layer) {
+		Plan plan_data = GetPlan(layer);
+		List<MovieClip> p = plan_data.tbl;
+		int d = plan_data.cur;
 		if(d == 1000) {
-			Compact(plan);
-			return Empty(plan);
+			Compact(plan_data);
+			return Attach(inst, layer);
 		}
-		MovieClip mc = new MovieClip(root_mc, plan+d/1000.0f);
+		MovieClip mc = new MovieClip(hierarchyParent, inst, layer, d);
 		p.Add(mc);
 		plan_data.cur++;
 		return mc;
 	}
 
-	int Reserve(MovieClip mc, int plan) {
-		var plan_data = GetPlan(plan);
-		var p = plan_data.tbl;
-		var d = plan_data.cur;
+	public MovieClip Empty()
+	{
+		return Empty(defaultLayer);
+	}
+
+	public MovieClip Empty(string layer) {
+		Plan plan_data = GetPlan(layer);
+		List<MovieClip> p = plan_data.tbl;
+		int d = plan_data.cur;
 		if(d == 1000) {
-			Compact(plan);
-			return Reserve(mc, plan);
+			Compact(plan_data);
+			return Empty();
+		}
+		MovieClip mc = new MovieClip(hierarchyParent, d);
+		p.Add(mc);
+		plan_data.cur++;
+		return mc;
+	}
+
+	int Reserve(MovieClip mc, string layer) {
+		Plan plan_data = GetPlan(layer);
+		List<MovieClip> p = plan_data.tbl;
+		int d = plan_data.cur;
+		if(d == 1000) {
+			Compact(plan_data);
+			return Reserve(mc, layer);
 		}
 		p[d] = mc;
 		plan_data.cur++;
-		return d + plan * 1000;
+		return d;
 	}
 
-	public void Swap(MovieClip mc, int plan) {
-		var src_plan = Mathf.FloorToInt(mc.GetDepth());
-		if( src_plan == plan )
+	public void Swap(MovieClip mc, string layer) {
+		string src_plan = mc.GetLayer();
+		if( src_plan == layer )
 			return;
-		var plan_data = GetPlan(src_plan);
-		var p = plan_data.tbl;
-		var max = plan_data.cur;
+		Plan plan_data = GetPlan(src_plan);
+		List<MovieClip> p = plan_data.tbl;
+		int max = plan_data.cur;
 		int i;
 		for(i=0 ; i<max ; i++)
 			if( p[i] == mc ) {
 				p[i] = null;
 				break;
 			}
-		mc.SwapDepths(Reserve(mc, plan));
+		mc.SetLayer(layer, Reserve(mc, layer));
 	}
 
 	void Under(MovieClip mc) {
-		var d = mc.GetDepth();
-		var plan = Mathf.FloorToInt(d);
-		var plan_data = GetPlan(plan);
-		var p = plan_data.tbl;
-		var pd = (d * 1000) % 1000;
-		if(p[pd] == mc) {
-			p[pd] = null;
+		int d = mc.GetDepth();
+		string layer = mc.GetLayer();
+		Plan plan_data = GetPlan(layer);
+		List<MovieClip> p = plan_data.tbl;
+		if(p[d] == mc) {
+			p.RemoveAt(d);
 			p.Insert(0, mc);
-			plan_data.cur++;
-			Compact(plan);
 		}
 	}
 
 	void Over(MovieClip mc) {
-		var d = mc.GetDepth();
-		var plan = Mathf.FloorToInt(d);
-		var plan_data = GetPlan(plan);
-		var p = plan_data.tbl;
-		var pd = (d * 1000) % 1000;
-		if( p[pd] == mc ) {
-			p[pd] = null;
-			if(plan_data.cur == 1000)
-				Compact(plan);
-			d = plan_data.cur;
-			plan_data.cur++;
-			mc.SwapDepths(plan + d/1000.0f);
-			p[d] = mc;
+		int d = mc.GetDepth();
+		string layer = mc.GetLayer();
+		Plan plan_data = GetPlan(layer);
+		List<MovieClip> p = plan_data.tbl;
+		if( p[d] == mc ) {
+			p.RemoveAt(d);
+			p.Add(mc);
 		}
 	}
 
-	void Clear(int plan) {
-		var plan_data = GetPlan(plan);
+	void Clear(Plan plan_data) {
 		int i;
-		var p = plan_data.tbl;
+		List<MovieClip> p = plan_data.tbl;
 		for(i=0 ; i<plan_data.cur ; i++) {
 			p[0].RemoveMovieClip();
 			p.RemoveAt(0);
@@ -159,20 +160,20 @@ public class DepthManager
 		plan_data.cur = 0;
 	}
 
-	void Ysort(int plan) {
-		var plan_data = GetPlan(plan);
-		var p = plan_data.tbl;
-		var len = plan_data.cur;
+	void Ysort(string layer) {
+		Plan plan_data = GetPlan(layer);
+		List<MovieClip> p = plan_data.tbl;
+		int len = plan_data.cur;
 		int i, j;
 		float y = -99999999;
 		for(i=0 ; i<len ; i++) {
-			var mc = p[i];
-			var mcy = mc._y;
+			MovieClip mc = p[i];
+			float mcy = mc._y;
 			if( mcy >= y )
 				y = mcy;
 			else {
 				for(j=i;j>0;j--) {
-					var mc2 = p[j-1];
+					MovieClip mc2 = p[j-1];
 					if( mc2._y > mcy ) {
 						p[j] = mc2;
 						mc.SwapDepths(mc2);
@@ -188,8 +189,9 @@ public class DepthManager
 	}
 
 	public void DestroyThis() {
-		int i;
-		for(i=0;i<plans.Count;i++)
-			Clear(i);
+		foreach (Plan p in plans)
+		{
+			Clear(p);
+		}
 	}
 }

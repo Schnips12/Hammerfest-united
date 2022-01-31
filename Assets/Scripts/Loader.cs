@@ -4,6 +4,7 @@ using System.Linq;
 using System.Xml.Linq;
 using UnityEngine.SceneManagement;
 using UnityEngine.U2D.Animation;
+using TMPro;
 
 
 public class Loader : MonoBehaviour
@@ -19,6 +20,8 @@ public class Loader : MonoBehaviour
 	[SerializeField] public List<SpriteLibraryAsset> scoreItems;
 	[SerializeField] public List<SpriteLibraryAsset> specialItems;
 	[SerializeField] public List<SpriteLibraryAsset> scriptedMovieclip;
+
+	[SerializeField] public TMP_Dropdown chosenLevel;
 
 
     public Cookie root;
@@ -42,6 +45,13 @@ public class Loader : MonoBehaviour
 		} else {
 			Destroy(gameObject);
 		}
+
+		chosenLevel.ClearOptions();
+		List<string> options = new List<string>();
+		for (int i=0; i<102; i++) {
+			options.Add(i.ToString()); 
+		}
+		chosenLevel.AddOptions(options);
 
 		tmod = 1;
 		QualitySettings.vSyncCount = 0;

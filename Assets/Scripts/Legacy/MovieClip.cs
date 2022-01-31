@@ -172,6 +172,20 @@ public class MovieClip
         united.transform.position -= new Vector3(0, 0, depth);
     }
 
+    public MovieClip(MovieClip mc, string reference, string layer, float depth) : this(mc, reference, depth) {
+        List<Renderer> renderers = united.GetComponentsInChildren<Renderer>().ToList();
+        Renderer thisRenderer = united.GetComponent<Renderer>();
+        if(thisRenderer!=null)
+        {
+            renderers.Add(thisRenderer);
+        }
+        
+        foreach (Renderer r in renderers)
+        {
+            r.sortingLayerID = SortingLayer.NameToID(layer);
+        }
+    }
+
     public MovieClip(MovieClip mc, float depth) : this(mc)
     {
         united.transform.position -= new Vector3(0, 0, depth);
@@ -311,15 +325,34 @@ public class MovieClip
         return -Mathf.FloorToInt(united.transform.position.z);
     }
 
-    public void SwapDepths(float depth)
+    public string GetLayer()
     {
-        united.transform.position = new Vector3(united.transform.position.x, united.transform.position.y, depth);
+        return united.GetComponent<Renderer>().sortingLayerName;
     }
 
-    public void SwapDepths(MovieClip withClip)
+    public void SetDepth(float depth)
     {
-        this.SwapDepths(withClip.GetDepth());
-        withClip.SwapDepths(this.GetDepth());
+        united.transform.position = new Vector3(united.transform.position.x, united.transform.position.y, -depth);
+    }
+
+    public void SetLayer(string layer, float depth)
+    {
+        united.GetComponent<SpriteRenderer>().sortingLayerID = SortingLayer.NameToID(layer);
+        SetDepth(depth);
+    }
+
+    public void SetLayer(string layer)
+    {
+        united.GetComponent<SpriteRenderer>().sortingLayerID = SortingLayer.NameToID(layer);
+    }
+
+    public void SwapDepths(MovieClip clip)
+    {
+        float thisDepth = this.GetDepth();
+        float clipDepth = clip.GetDepth();
+
+        this.SetDepth(clipDepth);
+        clip.SetDepth(thisDepth);
     }
 
     /*------------------------------------------------------------------------

@@ -33,11 +33,11 @@ public class Poire : Shooter
         int spd = 10;
         if (dir < 0)
         {
-            s.MoveToAng(-135, spd);
+            s.MoveToAng(135, spd);
         }
         else
         {
-            s.MoveToAng(-45, spd);
+            s.MoveToAng(45, spd);
         }
         SetNext(null, null, shootDuration, Data.ACTION_FALLBACK);
     }

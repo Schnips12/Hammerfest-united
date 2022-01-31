@@ -138,7 +138,7 @@ public class Entity : MovieClip, IEntity
 		uniqId = game.GetUniqId();
 		Register(Data.ENTITY) ;
 		world = game.world;
-		Scale(100);
+		Scale(1);
 	}
 
 
@@ -359,7 +359,7 @@ public class Entity : MovieClip, IEntity
 	RE-SCALE DE L'ENTITé
 	------------------------------------------------------------------------*/
 	public virtual void Scale(float n) {
-		scaleFactor = n/100 ;
+		scaleFactor = n;
 		_xscale = scaleFactor;
 		_yscale = scaleFactor;
 	}

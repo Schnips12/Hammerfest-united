@@ -7,7 +7,8 @@ public class HammerAnimation
 
     public bool fl_kill;
     public bool fl_loop;
-    bool fl_loopDone;
+    public bool fl_loopDone;
+    public bool fl_stay;
     bool fl_blink;
 
     float frame;
@@ -32,9 +33,9 @@ public class HammerAnimation
     /*------------------------------------------------------------------------
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
-    public void Attach(float x, float y, string link, int depth)
+    public void Attach(float x, float y, string link, string layer)
     {
-        mc = game.depthMan.Attach(link, depth);
+        mc = game.depthMan.Attach(link, layer);
         mc._x = x;
         mc._y = y;
     }

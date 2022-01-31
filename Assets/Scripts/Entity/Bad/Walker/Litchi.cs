@@ -60,11 +60,11 @@ public class Litchi : Jumper
 	------------------------------------------------------------------------*/
     void Weaken()
     {
-        if (child._name != null)
+        if (child != null)
         {
             return;
         }
-        child = LitchiWeak.Attach(game, x, y - Data.CASE_HEIGHT);
+        child = LitchiWeak.Attach(game, x, y + Data.CASE_HEIGHT);
         child.AngerMore();
         child.UpdateSpeed();
         child.Halt();

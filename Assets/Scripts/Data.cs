@@ -21,7 +21,7 @@ public class Data
         float R = (float)((HexVal >> 16) & 0xFF);
         float G = (float)((HexVal >> 8) & 0xFF);
         float B = (float)((HexVal) & 0xFF);
-        return new Color(R / 255, G / 255, B / 255, 255 / 255);
+        return new Color(R / 255, G / 255, B / 255, 1);
     }
 
     public static GameManager manager = null;
@@ -43,26 +43,24 @@ public class Data
     public static int auto_inc = 0;
 
     // *** DEPTHS
-    public static int DP_SPECIAL_BG = auto_inc++;
-    public static int DP_BACK_LAYER = auto_inc++;
-    public static int DP_SPRITE_BACK_LAYER = auto_inc++;
-    public static int DP_FIELD_LAYER = auto_inc++;
-    public static int DP_SPEAR = auto_inc++;
-    public static int DP_PLAYER = auto_inc++;
-    public static int DP_ITEMS = auto_inc++;
-    public static int DP_SHOTS = auto_inc++;
-    public static int DP_BADS = auto_inc++;
-    public static int DP_BOMBS = auto_inc++;
-    public static int DP_FX = auto_inc++;
-    public static int DP_SUPA = auto_inc++;
-    public static int DP_TOP_LAYER = auto_inc++;
-    public static int DP_SPRITE_TOP_LAYER = auto_inc++;
-    public static int DP_BORDERS = auto_inc++;
-    public static int DP_SCROLLER = auto_inc++;
-    public static int DP_INTERF = auto_inc++;
-    public static int DP_TOP = auto_inc++;
-    public static int DP_SOUNDS = auto_inc++;
-
+    public static string DP_SPECIAL_BG = "Special background";
+    public static string DP_BACK_LAYER = "Background";
+    public static string DP_SPRITE_BACK_LAYER = "Sprite Back";
+    public static string DP_FIELD_LAYER = "Field";
+    public static string DP_SPEAR = "Spear";
+    public static string DP_PLAYER = "Player";
+    public static string DP_ITEMS = "Items";
+    public static string DP_SHOTS = "Shots";
+    public static string DP_BADS = "Bads";
+    public static string DP_BOMBS = "Bombs";
+    public static string DP_FX = "Fx";
+    public static string DP_SUPA = "Supa";
+    public static string DP_TOP_LAYER = "Top";
+    public static string DP_SPRITE_TOP_LAYER = "Sprite Top";
+    public static string DP_BORDERS = "Borders";
+    public static string DP_SCROLLER = "Scroller";
+    public static string DP_INTERF = "Interface";
+    public static string DP_TOP = "Overlay";
 
     // *** SOUNDS
     public static int CHAN_MUSIC = 0;

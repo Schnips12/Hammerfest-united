@@ -60,7 +60,7 @@ public class FxManager
         stack = new List<stackable>();
         fl_bg = false;
 
-        igMsg = new MovieClip(game.mc, "hammer_interf_ingamemsg", Data.DP_TOP);
+        igMsg = new MovieClip(game.mc, "hammer_interf_ingamemsg", "Overlay", 0);
         igMsg.timer = 0.0f;
     }
 
@@ -213,8 +213,8 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        a.mc._xscale = radius / 10;
-        a.mc._yscale = radius / 10;
+        a.mc._xscale = radius / 20;
+        a.mc._yscale = radius / 20;
         return a;
     }
 
@@ -226,8 +226,8 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        a.mc._xscale = radius / 10;
-        a.mc._yscale = radius / 10;
+        a.mc._xscale = radius / 20;
+        a.mc._yscale = radius / 20;
         /* a.mc.blendMode	= BlendMode.OVERLAY; */
         return a;
     }
@@ -308,7 +308,7 @@ public class FxManager
             return null;
         }
         HammerAnimation a = new HammerAnimation(game);
-        a.Attach(x, y, link, Data.DP_INTERF+1);
+        a.Attach(x, y, link, Data.DP_TOP);
         a.mc.Play();
         a.mc.SetAnim("Frame", 1);
         animList.Add(a);

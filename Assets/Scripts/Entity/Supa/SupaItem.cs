@@ -21,7 +21,7 @@ public class SupaItem : Supa
     protected override void InitSupa(GameMode g, float x, float y)
     {
         base.InitSupa(g, x, y);
-        Scale(200);
+        Scale(2);
         MoveDown(5);
         GotoAndStop(supaId + 1);
     }

@@ -22,7 +22,7 @@ public class Abricot : Jumper
         base.Init(g);
         if (!fl_spawner)
         {
-            Scale(75);
+            Scale(0.75f);
         }
         dir = -1;
     }

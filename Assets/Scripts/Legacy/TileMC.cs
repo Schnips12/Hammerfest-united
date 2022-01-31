@@ -13,6 +13,7 @@ public class TileMC : MovieClip
     public TileMC(MovieClip mc, string name, float size) : base(mc)
     {
         _name = name;
+        SetLayer(Data.DP_BACK_LAYER);
         this.size = size;
 
         SpriteRenderer renderer = united.GetComponent<SpriteRenderer>();
@@ -27,8 +28,9 @@ public class TileMC : MovieClip
     {
         skin = skinId;
 
-        endTile = new MovieClip(this, 0.01f);
+        endTile = new MovieClip(this);
         endTile._name = "End";
+        endTile.SetLayer(Data.DP_BACK_LAYER, 1);
 
 /*         maskTile = new MovieClip(this, 0.02f);
         maskTile._name = "Mask";

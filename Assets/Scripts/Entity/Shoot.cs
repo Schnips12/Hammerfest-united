@@ -32,6 +32,7 @@ public class Shoot : Physics
     {
         base.Init(g);
         Register(Data.SHOOT);
+        Play();
         PlayAnim(Data.ANIM_SHOOT);
     }
 

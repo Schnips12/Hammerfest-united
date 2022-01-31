@@ -505,7 +505,7 @@ public class Tuberculoz : Mover
 		if ( next.action==DIE ) {
 			dx *= game.xFriction;
 			if ( Random.Range(0, 3)==0 ) {
-				var s = game.depthMan.Attach("hammer_fx_strike", Data.FX);
+				var s = game.depthMan.Attach("hammer_fx_strike", Data.DP_FX);
 				PlayAnim(Data.ANIM_BOSS_HIT);
 				ReplayAnim();
 				s._y = y - Random.Range(0, 60);

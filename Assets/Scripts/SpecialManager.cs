@@ -9,7 +9,6 @@ public class SpecialManager
     GameMode game;
     Player player;
 
-    MovieClip phoneMC;
     List<MovieClip> clouds;
 
     List<int> permList;
@@ -46,7 +45,6 @@ public class SpecialManager
         actives = new bool[150];
 
         recurring = new List<recurringEvent>();
-        phoneMC = new MovieClip(game.mc, "hammer_fx_phone", 0);
 
         clouds = new List<MovieClip>();
     }
@@ -868,7 +866,7 @@ public class SpecialManager
                             game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), 0,
                             3, null
                         );
-                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), UnityEngine.Random.Range(0, 15) - 10);
+                        it.MoveToAng(20 + UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
                     }
                 }
                 break;
@@ -882,7 +880,7 @@ public class SpecialManager
                             game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), Data.GAME_HEIGHT,
                             4, null
                         );
-                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), UnityEngine.Random.Range(0, 15) + 10);
+                        it.MoveToAng(20 + UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
                     }
                 }
                 break;
@@ -896,7 +894,7 @@ public class SpecialManager
                             game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), Data.GAME_HEIGHT,
                             5, null
                         );
-                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), UnityEngine.Random.Range(0, 15) + 10);
+                        it.MoveToAng(20 + UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
                     }
                 }
                 break;
@@ -1067,7 +1065,7 @@ public class SpecialManager
                 {
                     player.Curse(Data.CURSE_SHRINK);
                     game.fxMan.AttachShine(player.x, player.y);
-                    player.Scale(50);
+                    player.Scale(0.5f);
                     Temporary(id, Data.SECOND * 30);
                 }
                 break;
@@ -1399,11 +1397,11 @@ public class SpecialManager
                     player.speedFactor = 1.0f;
                 }
                 break;
-
+            
+            // *** 10. Phone effect (removed)
             case 10:
                 {
-                    phoneMC.RemoveMovieClip();
-                    phoneMC=null;
+                    // Do nothing
                 }
                 break;
 
@@ -1538,7 +1536,7 @@ public class SpecialManager
             case 88:
                 {
                     player.Unstick();
-                    player.Scale(100);
+                    player.Scale(1);
                 }
                 break;
 
@@ -1598,7 +1596,7 @@ public class SpecialManager
                 {
                     game.fxMan.AttachFx(player.sticker._x, player.sticker._y, "hammer_fx_pop");
                     player.Unstick();
-                    player.Scale(100);
+                    player.Scale(1);
                 }
                 break;
 
@@ -1634,7 +1632,7 @@ public class SpecialManager
 
         if (bad.fl_kill == false)
         {
-            var s = game.depthMan.Attach("hammer_fx_strike", Data.FX);
+            var s = game.depthMan.Attach("hammer_fx_strike", Data.DP_FX);
             s._x = Data.GAME_WIDTH / 2;
             s._y = bad._y - Data.CASE_HEIGHT * 0.5f;
             var dir = UnityEngine.Random.Range(0, 2) * 2 - 1;
@@ -1653,7 +1651,7 @@ public class SpecialManager
     {
         var x = UnityEngine.Random.Range(0, Mathf.RoundToInt(Data.GAME_WIDTH)) + 50;
         var s = FireRain.Attach(game, x, -UnityEngine.Random.Range(0, 50));
-        s.MoveToAng(95 + UnityEngine.Random.Range(0, 30), s.shootSpeed);
+        s.MoveToAng(-95 - UnityEngine.Random.Range(0, 30), s.shootSpeed);
     }
 
 
@@ -1690,13 +1688,6 @@ public class SpecialManager
                     n--;
                 }
             }
-        }
-
-
-        // Ecran de portable
-        if (phoneMC != null)
-        {
-            phoneMC.FindTextfield("field").text = DateTime.UtcNow.ToString("T"); // TODO use Lang
         }
 
 

@@ -46,7 +46,7 @@ public class Saw : WallWalker
     protected override void InitBad(GameMode g, float x, float y)
     {
         base.InitBad(g, x, y);
-        Scale(80);
+        Scale(0.8f);
     }
 
 
@@ -220,13 +220,13 @@ public class Saw : WallWalker
         {
             if (fl_kill)
             {
-                subs[0]._rotation += Loader.Instance.tmod * 14.5f;
+                /* subs[0]._rotation += Loader.Instance.tmod * 14.5f; */
             }
             else
             {
                 if (IsHealthy())
                 {
-                    subs[0]._rotation += (0 - subs[0]._rotation) * (ROTATION_RECAL * 0.25f);
+                    /* subs[0]._rotation += (0 - subs[0]._rotation) * (ROTATION_RECAL * 0.25f); */
                 }
             }
         }
@@ -239,7 +239,7 @@ public class Saw : WallWalker
         {
             rotSpeed = Mathf.Min(ROTATION_SPEED, rotSpeed + Loader.Instance.tmod);
         }
-        subs[0]._rotation += rotSpeed;
+        /* subs[0]._rotation += rotSpeed; */
     }
 
 

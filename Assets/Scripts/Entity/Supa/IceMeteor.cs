@@ -32,7 +32,7 @@ public class IceMeteor : Supa
         base.InitSupa(g, x, y);
         speed = 10;
         radius = 50;
-        MoveToAng(130, speed);
+        MoveToAng(-130, speed);
         SetLifeTimer(Data.SUPA_DURATION);
     }
 

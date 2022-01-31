@@ -27,10 +27,12 @@ public class Tzongre : Flyer
     {
 
     }
+
     public override void Knock(float d)
     {
 
     }
+    
     public override void KillHit(float? dx)
     {
 

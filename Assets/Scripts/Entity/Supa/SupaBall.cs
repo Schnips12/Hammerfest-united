@@ -37,7 +37,7 @@ public class SupaBall : Supa
         gravityFactor = 0.8f;
         dx = speed;
         MoveTo(0, Data.GAME_HEIGHT + 50);
-        Scale(220);
+        Scale(2.2f);
     }
 
 
