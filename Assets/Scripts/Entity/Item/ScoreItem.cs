@@ -7,7 +7,7 @@ public class ScoreItem : Item
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    ScoreItem(MovieClip mc) : base(mc)
+    ScoreItem(string reference) : base(reference)
     {
 
     }
@@ -40,7 +40,8 @@ public class ScoreItem : Item
         {
             id -= 1000;
         }
-        ScoreItem mc = new ScoreItem(g.depthMan.Attach("hammer_item_score", Data.DP_ITEMS));
+        ScoreItem mc = new ScoreItem("hammer_item_score");
+        g.depthMan.Attach(mc, Data.DP_ITEMS);
         mc.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scoreItems.Find(x => x.name.Substring(18) == (id + 1).ToString());
         mc.InitItem(g, x, y, id, subId);
         return mc;
@@ -86,20 +87,16 @@ public class ScoreItem : Item
 
         // Recherche rarity
         int? r = null;
-        int i = 0;
-        List<List<ItemFamilySet>> family = Data.Instance.SCORE_ITEM_FAMILIES;
-        while (r == null & i < family.Count)
+        ItemFamilySet item;
+        Dictionary<int, List<ItemFamilySet>> family = Data.Instance.SCORE_ITEM_FAMILIES;
+        foreach (KeyValuePair<int, List<ItemFamilySet>> kp in family)
         {
-            int j = 0;
-            while (r == null & j < family[i].Count)
+            item = kp.Value.Find(x => x.id==id+1000);
+            if(item!=null)
             {
-                if (family[i][j].id == id + 1000)
-                {
-                    r = family[i][j].r;
-                }
-                j++;
+                r = item.r;
+                break;
             }
-            i++;
         }
 
         if (r > 0)

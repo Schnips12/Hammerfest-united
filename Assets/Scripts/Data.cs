@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -252,11 +251,6 @@ public class Data
     public static int IA_CLIMB_LEFT = 1 << (flag_bit++);
     public static int IA_CLIMB_RIGHT = 1 << (flag_bit++);
 
-    //	public static int IA_CORNER_UP		= 1<<(flag_bit++);
-    //	public static int IA_CORNER_DOWN	= 1<<(flag_bit++);
-    //	public static int IA_CORNER_LEFT	= 1<<(flag_bit++);
-    //	public static int IA_CORNER_RIGHT	= 1<<(flag_bit++);
-
     public static int FL_TELEPORTER = 1 << (flag_bit++);
 
     public static int IA_HJUMP = 2; // distance de saut horizontal
@@ -508,11 +502,11 @@ public class Data
 
     public static int[] RAND_EXTENDS = { 10, 10, 6, 5, 5, 10, 4 };
 
-    public List<List<ItemFamilySet>> SPECIAL_ITEM_FAMILIES;
-    public List<List<ItemFamilySet>> SCORE_ITEM_FAMILIES;
-    public List<int> ITEM_VALUES;
-    public List<int> FAMILY_CACHE;
+    public Dictionary<int, List<ItemFamilySet>> SPECIAL_ITEM_FAMILIES;
+    public Dictionary<int, List<ItemFamilySet>> SCORE_ITEM_FAMILIES;
+    public Dictionary<int, int> ITEM_VALUES;
     public List<PortalLink> LINKS;
+    public Quests QUESTS;
     public struct LevelTag
     {
         public string name;
@@ -522,7 +516,6 @@ public class Data
     public static List<LevelTag> LEVEL_TAG_LIST;
 
 
-
     /*------------------------------------------------------------------------
 	INITALISATION
 	------------------------------------------------------------------------*/
@@ -530,10 +523,11 @@ public class Data
     {
         SPECIAL_ITEM_FAMILIES = Xml_readSpecialItems();
         SCORE_ITEM_FAMILIES = Xml_readScoreItems();
-        FAMILY_CACHE = CacheFamilies();
         ITEM_VALUES = GetScoreItemValues();
         LINKS = Xml_readPortalLinks();
+        QUESTS = Xml_ReadQuests();
     }
+
     public void SetManager(GameManager m)
     {
         manager = m;
@@ -541,61 +535,11 @@ public class Data
 
 
     /*------------------------------------------------------------------------
-	READS XML_ITEMS, RAW FORMAT
-	(transitionnal)
-	------------------------------------------------------------------------*/
-    static int[] InitItemsRaw()
-    {
-        List<int> tab = new List<int>();
-        string raw = Loader.Instance.root.ReadXmlFile("xml_items");
-        XDocument doc = XDocument.Parse(raw);
-        XElement node = doc.FirstNode as XElement;
-        if (node.Name != "items")
-        {
-            GameManager.Fatal("XML error: invalid node '" + node.Name + "'");
-            return null;
-        }
-
-        // DEBUG: lecture et stockage "raw" de tous les items dans une seule famille
-        XElement family = node.FirstNode as XElement;
-        XElement item;
-        while (family != null)
-        {
-            item = family.FirstNode as XElement;
-            while (item != null)
-            {
-                int rarity = Int32.Parse(item.Attribute("rarity").Value);
-                int id = Int32.Parse(item.Attribute("id").Value);
-                int rand = Data.__NA;
-                switch (rarity)
-                {
-                    case 1: rand = Data.COMM; break;
-                    case 2: rand = Data.UNCO; break;
-                    case 3: rand = Data.RARE; break;
-                    case 4: rand = Data.UNIQ; break;
-                    case 5: rand = Data.MYTH; break;
-                    case 6: rand = Data.__NA; break;
-                    case 7: rand = Data.CANE; break;
-                }
-                while (tab.Count < id)
-                {
-                    tab.Add(0);
-                }
-                tab[id] = rand;
-                item = item.NextNode as XElement;
-            }
-            family = family.NextNode as XElement;
-        }
-
-        return tab.ToArray();
-    }
-
-    /*------------------------------------------------------------------------
 	READS XML ITEMS DATA
 	------------------------------------------------------------------------*/
-    List<List<ItemFamilySet>> Xml_readFamily(string xmlName)
+    Dictionary<int, List<ItemFamilySet>> Xml_readFamily(string xmlName)
     { // note: append leading "$" for obfuscator
-        var tab = new List<List<ItemFamilySet>>();
+        Dictionary<int, List<ItemFamilySet>> tab = new Dictionary<int, List<ItemFamilySet>>();
         string raw = Loader.Instance.root.ReadXmlFile(xmlName);
 
         XDocument doc = XDocument.Parse(raw);
@@ -613,17 +557,13 @@ public class Data
         {
             XElement item = family.FirstNode as XElement;
             int fid = Int32.Parse(family.Attribute("id").Value);
-            while (tab.Count <= fid)
-            {
-                tab.Add(new List<ItemFamilySet>());
-            }
-            tab[fid] = new List<ItemFamilySet>();
+            tab.Add(fid, new List<ItemFamilySet>());
+
             while (item != null)
             {
                 ItemFamilySet temp = new ItemFamilySet();
                 temp.id = Int32.Parse(item.Attribute("id").Value);
                 temp.r = Data.RARITY[Int32.Parse(item.Attribute("rarity").Value)];
-
                 if (item.Attribute("value") != null && item.Attribute("value").Value != "--")
                 {
                     temp.v = Int32.Parse(item.Attribute("value").Value);
@@ -632,7 +572,6 @@ public class Data
                 {
                     temp.v = 0;
                 }
-
                 temp.name = Lang.GetItemName(temp.id);
 
                 tab[fid].Add(temp);
@@ -643,12 +582,17 @@ public class Data
         return tab;
     }
 
-    List<List<ItemFamilySet>> Xml_readSpecialItems()
+    Quests Xml_ReadQuests()
+    {
+        return Quests.ReadQuests(Loader.Instance.root.ReadXmlFile("quests"));
+    }
+
+    Dictionary<int, List<ItemFamilySet>> Xml_readSpecialItems()
     {
         return Xml_readFamily("specialItems");
     }
 
-    List<List<ItemFamilySet>> Xml_readScoreItems()
+    Dictionary<int, List<ItemFamilySet>> Xml_readScoreItems()
     {
         return Xml_readFamily("scoreItems");
     }
@@ -657,83 +601,38 @@ public class Data
     /*------------------------------------------------------------------------
 	BUILD A RAND ITEM TABLE CONTAINING SPECIFIED FAMILIES
 	------------------------------------------------------------------------*/
-    public static int[] GetRandFromFamilies(List<List<ItemFamilySet>> familySet, List<int> familiesId)
+    public static int[] GetRandFromFamilies(Dictionary<int, List<ItemFamilySet>> familySet, List<int> familiesId)
     {
-        List<int> tab = new List<int>();
-        for (int i = 0; i < familiesId.Count; i++)
+        int[] tab = new int[2000];
+        foreach (int famId in familiesId)
         {
-            List<ItemFamilySet> family = familySet[familiesId[i]];
-            for (int n = 0; n < family.Count; n++)
+            if(familySet.ContainsKey(famId))
             {
-                while (tab.Count <= family[n].id)
+                foreach (ItemFamilySet item in familySet[famId])
                 {
-                    tab.Add(0);
+                    tab[item.id] = item.r;
                 }
-                tab[family[n].id] = family[n].r;
             }
         }
-        return tab.ToArray();
+        return tab;
     }
 
 
     /*------------------------------------------------------------------------
 	EXTRACTS SCORE VALUES FROM FAMILIES
 	------------------------------------------------------------------------*/
-    List<int> GetScoreItemValues()
+    Dictionary<int, int> GetScoreItemValues()
     {
-        List<int> tab = new List<int>();
-        for (int i = 0; i < SCORE_ITEM_FAMILIES.Count; i++)
+        Dictionary<int, int> tab = new Dictionary<int, int>();
+        foreach(KeyValuePair<int, List<ItemFamilySet>> kp in SCORE_ITEM_FAMILIES)
         {
-            List<ItemFamilySet> family = SCORE_ITEM_FAMILIES[i];
-            for (int n = 0; n < family.Count; n++)
+            foreach(ItemFamilySet item in kp.Value)
             {
-                while (tab.Count <= family[n].id)
-                {
-                    tab.Add(0);
-                }
-                tab[family[n].id] = family[n].v;
+                tab.Add(item.id, item.v);
             }
         }
         return tab;
     }
-
-
-
-    /*------------------------------------------------------------------------
-	G�N�RE LA TABLE DE CORRESPONDANCE ITEM -> FAMILLE
-	------------------------------------------------------------------------*/
-    List<int> CacheFamilies()
-    {
-        List<int> tab = new List<int>();
-
-        for (int fid = 0; fid < SPECIAL_ITEM_FAMILIES.Count; fid++)
-        {
-            List<ItemFamilySet> f = SPECIAL_ITEM_FAMILIES[fid];
-            for (int i = 0; i < f.Count; i++)
-            {
-                while (tab.Count <= f[i].id)
-                {
-                    tab.Add(0);
-                }
-                tab[f[i].id] = fid;
-            }
-        }
-
-        for (int fid = 0; fid < SCORE_ITEM_FAMILIES.Count; fid++)
-        {
-            List<ItemFamilySet> f = SCORE_ITEM_FAMILIES[fid];
-            for (int i = 0; i < f.Count; i++)
-            {
-                while (tab.Count <= f[i].id)
-                {
-                    tab.Add(0);
-                }
-                tab[f[i].id] = fid;
-            }
-        }
-        return tab;
-    }
-
 
 
     /*------------------------------------------------------------------------
@@ -936,47 +835,6 @@ public class Data
 
 
     /*------------------------------------------------------------------------
-	SERIALISATION, Format:  fileName;elem:elem:elem # fileName;elem:(...)
-	------------------------------------------------------------------------*/
-    /* 	static function serializeHash(h:Hash<Array<String>>):String {
-            var str = "";
-            h.iter(
-                fun(k,e:Array<String>) {
-                    if (str.length>0)
-                    str+="#";
-                    str += k + ";" + e.join(":");
-                }
-            );
-            return str;
-        } */
-
-
-
-    /*------------------------------------------------------------------------
-	D�SERIALISATION
-	------------------------------------------------------------------------*/
-    /* 	static function unserializeHash(str:String): Hash<Array<String>> {
-            var h = new Hash();
-
-            if ( str==null ) {
-                return h;
-            }
-
-            var pairs = str.split("#");
-            for (var i=0;i<pairs.length;i++) {
-                var pair : Array<String> = pairs[i].split(";");
-                var k = pair[0];
-                var e = pair[1];
-                if (e.length!=null) {
-                    h.set(k, Std.cast(e.split(":")));
-                }
-            }
-
-            return h;
-        } */
-
-
-    /*------------------------------------------------------------------------
 	ENL�VE LES LEADING / END SPACES
 	------------------------------------------------------------------------*/
     static string CleanLeading(string s)
@@ -1074,13 +932,11 @@ public class Data
 	------------------------------------------------------------------------*/
     public PortalLink GetLink(int did, int lid, int pid)
     {
-        Debug.Log("Looking for : " + did + " " + lid + " " + pid);
         PortalLink link = null;
         int i = 0;
         while (i < LINKS.Count & link == null)
         {
             PortalLink l = LINKS[i];
-            Debug.Log("Comparing with : " + l.from_did + " " + l.from_lid + " " + l.from_pid);
             if (l.from_did == did & l.from_lid == lid & l.from_pid == pid)
             {
                 Debug.Log("Matched");

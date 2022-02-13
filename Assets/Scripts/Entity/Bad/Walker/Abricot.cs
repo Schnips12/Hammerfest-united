@@ -2,10 +2,8 @@ public class Abricot : Jumper
 {
     bool fl_spawner;
 
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Abricot(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Abricot(string reference) : base(reference)
     {
         animFactor = 0.65f;
         SetJumpUp(5);
@@ -14,9 +12,18 @@ public class Abricot : Jumper
         SetFall(20);
     }
 
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
+    public static Abricot Attach(GameMode g, float x, float y, bool spawner)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_ABRICOT];
+        Abricot mc = new Abricot(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+        mc.fl_spawner = spawner;
+        mc.InitBad(g, x, y);
+        return mc;
+    }
+
+    /// <summary>Child abricots are smaller and their direction is fixed (easier tracking for the player).</summary>
     protected override void Init(GameMode g)
     {
         base.Init(g);
@@ -27,21 +34,7 @@ public class Abricot : Jumper
         dir = -1;
     }
 
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
-    public static Abricot Attach(GameMode g, float x, float y, bool spawner)
-    {
-        string linkage = Data.LINKAGES[Data.BAD_ABRICOT];
-        Abricot mc = new Abricot(g.depthMan.Attach(linkage, Data.DP_BADS));
-        mc.fl_spawner = spawner;
-        mc.InitBad(g, x, y);
-        return mc;
-    }
-
-    /*------------------------------------------------------------------------
-	EVENT: LIGNE DU BAS
-	------------------------------------------------------------------------*/
+    /// <summary>Parent abricots spawn two children when they leave the screen.</summary>
     protected override void OnDeathLine()
     {
         if (fl_spawner)

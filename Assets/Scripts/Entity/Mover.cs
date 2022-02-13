@@ -23,7 +23,7 @@ public class Mover : Physics
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Mover(MovieClip mc) : base(mc)
+    protected Mover(string reference) : base(reference)
     {
         fl_bounce = false;
         bounceFactor = 0.5f;

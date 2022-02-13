@@ -4,16 +4,12 @@ using UnityEngine;
 public class Ananas : Jumper
 {
     static float CHANCE_DASH = 6;
-
-    bool fl_attack;
-
     float dashRadius;
     float dashPower;
+    bool fl_attack;
 
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Ananas(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Ananas(string reference) : base(reference)
     {
         SetJumpH(100);
         speed *= 0.8f;
@@ -24,10 +20,17 @@ public class Ananas : Jumper
         shockResistance = 2.0f;
     }
 
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
+    public static Ananas Attach(GameMode g, float x, float y)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_ANANAS];
+        Ananas mc = new Ananas(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+        mc.InitBad(g, x, y);
+        return mc;
+    }
 
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
+    /// <summary>Wider attack radius in bomb expert mode.</summary>
     protected override void Init(GameMode g)
     {
         base.Init(g);
@@ -37,22 +40,7 @@ public class Ananas : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
-    public static Ananas Attach(GameMode g, float x, float y)
-    {
-        string linkage = Data.LINKAGES[Data.BAD_ANANAS];
-        Ananas mc = new Ananas(g.depthMan.Attach(linkage, Data.DP_BADS));
-        mc.InitBad(g, x, y);
-        return mc;
-    }
-
-
-    /*------------------------------------------------------------------------
-	GEL�
-	------------------------------------------------------------------------*/
+    /// <summary>Falls faster than other frozen bads. Cannot prepare an attack while frozen.</summary>
     public override void Freeze(float d)
     {
         base.Freeze(d);
@@ -61,9 +49,7 @@ public class Ananas : Jumper
         Unstick();
     }
 
-    /*------------------------------------------------------------------------
-	ASSOM�
-	------------------------------------------------------------------------*/
+    /// <summary>Falls faster than other frozen bads. Cannot prepare an attack while knocked.</summary>
     public override void Knock(float d)
     {
         base.Knock(d);
@@ -72,37 +58,31 @@ public class Ananas : Jumper
         Unstick();
     }
 
-
-    /*------------------------------------------------------------------------
-	MORT
-	------------------------------------------------------------------------*/
+    /// <summary>Cannot prepare an attack when dead.</summary>
     public override void KillHit(float? dx)
     {
         base.KillHit(dx);
         fl_attack = false;
     }
 
-
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI LE BAD EST PR�T POUR UNE ACTION
-	------------------------------------------------------------------------*/
+    /// <summary>Cannot perform any action while preparing an attack.</summary>
     public override bool IsReady()
     {
         return !fl_attack & base.IsReady();
     }
 
-
-    /*------------------------------------------------------------------------
-	REPOUSSE UN TYPE D'ENTIT�
-	------------------------------------------------------------------------*/
+    /// <summary>Pushes back every other entity of the given type. Players also get knocked.</summary>
     void Repel(int type, float powerFactor)
     {
         List<IEntity> l = game.GetClose(type, x, y, dashRadius, false);
-        for (int i = 0; i < l.Count; i++)
+        foreach(IEntity e in l)
         {
-            Physics e = l[i] as Physics; // TODO Implement IPhysics cause this is gonna fail
-            ShockWave(e, dashRadius, dashPower * powerFactor);
-            e.dy += 8;
+            if (typeof(Physics).IsAssignableFrom(e.GetType()))
+            {
+                Physics p = e as Physics;
+                ShockWave(p, dashRadius, dashPower * powerFactor);
+                p.dy += 8;
+            }            
             if (e.IsType(Data.PLAYER))
             {
                 (e as Player).Knock(Data.SECOND * 1.5f);
@@ -110,10 +90,7 @@ public class Ananas : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	REPOUSSE UN TYPE D'ENTIT�
-	------------------------------------------------------------------------*/
+    /// <summary>Destroys every entity of the given type.</summary>
     void Vaporize(int type)
     {
         List<IEntity> l = game.GetClose(type, x, y, dashRadius, false);
@@ -125,17 +102,14 @@ public class Ananas : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	LANCE L'ATTAQUE
-	------------------------------------------------------------------------*/
+    /// <summary>Angry phase before the real attack.</summary>
     void StartAttack()
     {
         bool fl_allOut = true;
         List<Player> pl = game.GetPlayerList();
-        for (int i = 0; i < pl.Count; i++)
+        foreach (Player p in pl)
         {
-            if (!pl[i].fl_knock)
+            if (!p.fl_knock)
             {
                 fl_allOut = false;
             }
@@ -149,14 +123,13 @@ public class Ananas : Jumper
         ForceLoop(true);
         SetNext(0, 10, Data.SECOND * 0.9f, Data.ACTION_MOVE);
         fl_attack = true;
-        MovieClip mc = game.depthMan.Attach("curse", Data.DP_FX);
-        mc.GotoAndStop(Data.CURSE_TAUNT);
+        MovieClip mc = new MovieClip("curse");
+        game.depthMan.Attach(mc, Data.DP_FX);
+        mc.SetAnim("Frame", Data.CURSE_TAUNT);
         Stick(mc, 0, Data.CASE_HEIGHT * 2.5f);
     }
 
-    /*------------------------------------------------------------------------
-	EFFETS DE L'ATTAQUE
-	------------------------------------------------------------------------*/
+    /// <summary>Real atack, jumping and pushing stuff.</summary>
     void Attack()
     {
         HammerAnimation fx = game.fxMan.AttachExplodeZone(x, y, dashRadius);
@@ -179,7 +152,6 @@ public class Ananas : Jumper
                 }
             }
         }
-
         Repel(Data.BOMB, 1);
         Repel(Data.PLAYER, 2);
         Vaporize(Data.PLAYER_SHOOT);
@@ -188,13 +160,10 @@ public class Ananas : Jumper
         Unstick();
     }
 
-    /*------------------------------------------------------------------------
-	EVENT: ATTERRISSAGE
-	------------------------------------------------------------------------*/
+    /// <summary>Hitting the ground is also the trigger of the end of an attack.</summary>
     protected override void OnHitGround(float h)
     {
         base.OnHitGround(h);
-
         if (fl_attack & IsHealthy())
         {
             Attack();
@@ -207,9 +176,7 @@ public class Ananas : Jumper
         }
     }
 
-    /*------------------------------------------------------------------------
-	EVENT: TOUCHE UN MUR
-	------------------------------------------------------------------------*/
+    /// <summary>Makes the screen shake heavily.</summary>
     protected override void OnHitWall()
     {
         if (!IsHealthy())
@@ -219,9 +186,7 @@ public class Ananas : Jumper
         base.OnHitWall();
     }
 
-    /*------------------------------------------------------------------------
-	EVENT: FIN D'ANIM D'ATTAQUE
-	------------------------------------------------------------------------*/
+    /// <summary>Sets the next animation.</summary>
     protected override void OnEndAnim(string id)
     {
         base.OnEndAnim(id);
@@ -231,9 +196,7 @@ public class Ananas : Jumper
         }
     }
 
-    /*------------------------------------------------------------------------
-	PR�FIXE DE STEPPING
-	------------------------------------------------------------------------*/
+    /// <summary>Checks if an attack can be started.</summary>
     protected override void Prefix()
     {
         if (IsReady())

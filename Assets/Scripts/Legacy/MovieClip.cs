@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -6,19 +5,39 @@ using System.Linq;
 using TMPro;
 using UnityEngine.U2D.Animation;
 
-
-public class MovieClip
+/// <summary>The IMovieClip interface provide minimal compatibility for the DepthManager.</summary>
+public interface IMovieClip
 {
-    public GameObject united;
+    GameObject united { get; set; }
+    string _name { get; set; }
+    float _x { get; set; }
+    float _y { get; set; }
+
+    void RemoveMovieClip();
+
+    void SetParent(IMovieClip mc);
+
+    string GetLayer();
+    void SetLayer(string layer);
+
+    int GetDepth();
+    void SetDepth(int depth);
+    void SwapDepths(IMovieClip clip);
+}
+
+/// <summary>Replicates the features of Flash MovieClip used by the original hammerfest game.
+/// The MovieClip itself is just a wrapper for the unity GameObject.
+/// Advanced control of the visual asset is possible by accessing the united property.</summary>
+public class MovieClip : IMovieClip
+{
+    public GameObject united { get; set; }
 
     private SpriteResolver resolver;
-    private bool fl_animated;
     private string currentAnim;
     private int currentFrame;
     private int frameCount;
-    
-    public bool fl_playing;
-    
+    private bool fl_animated;    
+    public bool fl_playing; 
 
     public string _name
     {
@@ -31,6 +50,30 @@ public class MovieClip
 
     public bool _visible
     {
+/*         get
+        {
+            Renderer renderer = united.GetComponent<Renderer>();
+            if (renderer !=null)
+            {
+                return renderer.enabled;
+            }
+            else
+            {
+                return united.activeSelf;
+            }
+        }
+        set
+        {
+            Renderer renderer = united.GetComponent<Renderer>();
+            if (renderer !=null)
+            {
+                renderer.enabled = value;
+            }
+            else
+            {
+                united.SetActive(value);
+            }
+        } */
         get => united.activeSelf;
         set
         {
@@ -79,7 +122,7 @@ public class MovieClip
         get => united.transform.rotation.eulerAngles.z;
         set
         {
-            united.transform.rotation = Quaternion.Euler(0, 0, value);
+            united.transform.eulerAngles = new Vector3(0, 0, value);
         }
     }
 
@@ -99,19 +142,13 @@ public class MovieClip
         set
         {
             Color c = united.GetComponent<SpriteRenderer>().material.color;
-            c.a = value/100;
+            c.a = value / 100;
             united.GetComponent<SpriteRenderer>().material.SetColor("scripted alpha", c);
         }
     }
 
-    public Hashtable extraValues;
+    public Dictionary<string, float> extraValues;
     public List<MovieClip> subs;
-
-    public Action onRelease;
-    public Action onRollOut;
-    public Action onRollOver;
-
-    public float timer;
 
     public class Filter
     {
@@ -125,72 +162,39 @@ public class MovieClip
     public Filter filter;
 
 
-
-
-
-
     /*------------------------------------------------------------------------
-	CONSTRUCTION & DESTRUCTION
+	CONSTRUCTORS
 	------------------------------------------------------------------------*/
-    protected MovieClip()
-    {
-        // This constructor is for inheritance only.
-    }
 
+    /// <summary>Constructor for converting a GameObject already present in the scene into a MovieClip for script control.</summary>
     public MovieClip(GameObject o)
     {
         united = o;
+        extraValues = new Dictionary<string, float>();
     }
 
-    public MovieClip(MovieClip mc)
-    {
-        GameObject tempRef = Loader.Instance.prefabs.Find(prefab => prefab.name == "Square");
-        united = GameObject.Instantiate(tempRef, mc.united.transform, false);  
-        _name = "Default name";
-        extraValues = new Hashtable();
-        subs = new List<MovieClip>();
-    }
-
-    public MovieClip(MovieClip mc, GameObject o)
-    {
-        united = o;
-        united.transform.SetParent(mc.united.transform);
-    }
-
-    public MovieClip(MovieClip mc, string reference, float depth) : this(mc)
+    /// <summary>Instatiates a GameObject. The reference must be the name of a prefab present in the Loader's list.</summary>
+    public MovieClip(string reference)
     {
         GameObject tempRef = Loader.Instance.prefabs.Find(prefab => prefab.name == reference);
-        if(tempRef==null)
+        if (tempRef == null)
         {
             Debug.Log("The asset you tried to load isn't referenced: " + reference);
             tempRef = Loader.Instance.prefabs.Find(prefab => prefab.name == "Square");
         }
+        united = GameObject.Instantiate(tempRef);
 
         _name = reference;
-        UnityEngine.GameObject.Destroy(united);
-        united = GameObject.Instantiate(tempRef, mc.united.transform, false);        
-        united.transform.position -= new Vector3(0, 0, depth);
+        extraValues = new Dictionary<string, float>();
+        RegisterSubs();
     }
 
-    public MovieClip(MovieClip mc, string reference, string layer, float depth) : this(mc, reference, depth) {
-        List<Renderer> renderers = united.GetComponentsInChildren<Renderer>().ToList();
-        Renderer thisRenderer = united.GetComponent<Renderer>();
-        if(thisRenderer!=null)
-        {
-            renderers.Add(thisRenderer);
-        }
-        
-        foreach (Renderer r in renderers)
-        {
-            r.sortingLayerID = SortingLayer.NameToID(layer);
-        }
-    }
+    /*------------------------------------------------------------------------
+	DESTRUCTOR
+	------------------------------------------------------------------------*/
 
-    public MovieClip(MovieClip mc, float depth) : this(mc)
-    {
-        united.transform.position -= new Vector3(0, 0, depth);
-    }
-
+    /// <summary>Removes the GameObject nested in the MovieClip and all its children.
+    /// The MovieClip must be explicitly discarded by the method invoking this.</summary>
     public void RemoveMovieClip()
     {
         if (united != null)
@@ -203,15 +207,18 @@ public class MovieClip
         }
     }
 
-    public GameObject FindSub(string name)
+    /*------------------------------------------------------------------------
+	CHILDREN MANAGEMENT
+	------------------------------------------------------------------------*/
+
+    /// <summary>Returns a sub MovieClip by name. Returns null if no matching name is found.</summary>
+    public MovieClip FindSub(string name)
     {
-        return united.transform.Find(name).gameObject;
+        return subs.Find(x => x._name==name);
     }
 
-    public TextMeshPro FirstTextfield()
-    {
-        return united.GetComponentInChildren<TextMeshPro>();
-    }
+    /// <summary>Returns a TMP_Text child by name. Returns null if no matching name is found.
+    /// If several children share the same name, the TMP_Text component of the first one is returned.</summary>
     public TextMeshPro FindTextfield(string name)
     {
         foreach (Transform child in united.transform)
@@ -224,27 +231,44 @@ public class MovieClip
         return null;
     }
 
-
-    public void ConvertNestedAnimators() {
-        foreach(Transform child in united.transform) {
-            if (child.GetComponent<Animator>()!=null) {
-                subs.Add(new MovieClip(this, child.gameObject));
+    /// <summary>Wraps every children possessing a SpriteResolver into a MovieClip for script control.</summary>
+    public void RegisterSubs()
+    {
+        subs = new List<MovieClip>();
+        foreach (Transform child in united.transform)
+        {
+            if (child.GetComponent<SpriteResolver>() != null)
+            {
+                subs.Add(new MovieClip(child.gameObject));
+                child.GetComponent<SpriteResolver>().SetCategoryAndLabel("Frame", "1");
             }
         }
     }
 
-
-    public void SetColor(Color baseColor, float alpha)
+    /// <summary>Makes every child animator position match the main animation.
+    /// This doesn't affect frame by frame SpriteResolver based animations. Those should be updated by adressing each sub manually.</summary>
+    public void UpdateNestedAnimators()
     {
-        Color toSet = new Color(baseColor.r, baseColor.g, baseColor.b, alpha/100);
-        united.GetComponent<SpriteRenderer>().color = toSet;
+        foreach (Transform child in united.transform)
+        {
+            Animator animator = child.GetComponent<Animator>();
+            if (animator != null)
+            {
+                float normalizedTime = (float) currentFrame / (float) frameCount;
+                AnimatorClipInfo info = animator.GetCurrentAnimatorClipInfo(0)[0];
+                animator.Play(info.clip.name, 0, normalizedTime);
+            }
+        }
     }
 
-    public void ResetColor()
+    /// <summary>Makes every child MovieClip position match the main animation.</summary>
+    public void UpdateNestedClips()
     {
-        united.GetComponent<SpriteRenderer>().color = Color.white;
+        foreach (MovieClip sub in subs)
+        {
+            sub.SetAnim(currentAnim, currentFrame);
+        }
     }
-
 
     /*------------------------------------------------------------------------
 	ANIMATION
@@ -273,13 +297,14 @@ public class MovieClip
     {
         if (!IsAnimated())
         {
-            Debug.Log("Tried to animate an object whithout sprite resolver: "+_name);
+            Debug.Log("Tried to animate an object whithout sprite resolver: " + _name);
             return;
         }
-        if(frameCount==0 | currentAnim!=movement) {
+        if (frameCount == 0 | currentAnim != movement)
+        {
             currentAnim = movement;
             frameCount = resolver.spriteLibrary.spriteLibraryAsset.GetCategoryLabelNames(currentAnim).Count<string>();
-        }        
+        }
         currentFrame = frame;
         resolver.SetCategoryAndLabel(currentAnim, currentFrame.ToString());
     }
@@ -303,7 +328,7 @@ public class MovieClip
 
     public void NextFrame()
     {
-        GoTo(Mathf.Min(currentFrame+1, frameCount));
+        GoTo(Mathf.Min(currentFrame + 1, frameCount));
     }
 
     public int CurrentFrame()
@@ -317,39 +342,73 @@ public class MovieClip
     }
 
 
+    /// <summary>Changes the coloring and transparency of the sprite renderer. Alpha value must be chosen between 0 and 100.</summary>
+    public void SetColor(Color baseColor, float alpha)
+    {
+        Color toSet = new Color(baseColor.r, baseColor.g, baseColor.b, alpha / 100);
+        united.GetComponent<SpriteRenderer>().color = toSet;
+    }
+
+    public void ResetColor()
+    {
+        united.GetComponent<SpriteRenderer>().color = Color.white;
+    }
+
+
     /*------------------------------------------------------------------------
 	DEPTHMANAGER UTILITY
 	------------------------------------------------------------------------*/
-    public int GetDepth()
-    {
-        return -Mathf.FloorToInt(united.transform.position.z);
-    }
-
     public string GetLayer()
     {
         return united.GetComponent<Renderer>().sortingLayerName;
     }
 
-    public void SetDepth(float depth)
+    public int GetDepth()
     {
-        united.transform.position = new Vector3(united.transform.position.x, united.transform.position.y, -depth);
+        return united.GetComponent<SpriteRenderer>().sortingOrder;
     }
 
-    public void SetLayer(string layer, float depth)
+    public void SetParent(IMovieClip mc)
     {
-        united.GetComponent<SpriteRenderer>().sortingLayerID = SortingLayer.NameToID(layer);
-        SetDepth(depth);
+        united.transform.SetParent(mc.united.transform, false);
     }
 
     public void SetLayer(string layer)
     {
-        united.GetComponent<SpriteRenderer>().sortingLayerID = SortingLayer.NameToID(layer);
+        List<Renderer> renderers = united.GetComponentsInChildren<Renderer>().ToList();
+        Renderer thisRenderer = united.GetComponent<Renderer>();
+
+        if (thisRenderer != null)
+        {
+            renderers.Add(thisRenderer);
+        }
+
+        foreach (Renderer r in renderers)
+        {
+            r.sortingLayerID = SortingLayer.NameToID(layer);
+        }
     }
 
-    public void SwapDepths(MovieClip clip)
+    public void SetDepth(int depth)
     {
-        float thisDepth = this.GetDepth();
-        float clipDepth = clip.GetDepth();
+        List<Renderer> renderers = united.GetComponentsInChildren<Renderer>().ToList();
+        Renderer thisRenderer = united.GetComponent<Renderer>();
+
+        if (thisRenderer != null)
+        {
+            renderers.Add(thisRenderer);
+        }
+
+        foreach (Renderer r in renderers)
+        {
+            r.sortingOrder = depth;
+        }
+    }
+
+    public void SwapDepths(IMovieClip clip)
+    {
+        int thisDepth = this.GetDepth();
+        int clipDepth = clip.GetDepth();
 
         this.SetDepth(clipDepth);
         clip.SetDepth(thisDepth);
@@ -360,7 +419,7 @@ public class MovieClip
 	------------------------------------------------------------------------*/
     public virtual void SetSkin(int skinId, bool vertical)
     {
-        /* united.GetComponentInChildren<UnityEngine.U2D.Animation.SpriteResolver>().SetCategoryAndLabel("skin", (skinId+1).ToString()); */
+        united.GetComponentInChildren<SpriteResolver>().SetCategoryAndLabel("skin", (skinId).ToString());
     }
 
     public virtual void FlipTile()

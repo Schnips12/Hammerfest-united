@@ -300,7 +300,6 @@ public class ScriptEngine
 
         if (fl_compile)
         {
-            Debug.Log(str);
             xml = XDocument.Parse("<root>" + str + "</root>").Root as XElement;
             if (xml == null)
             {
@@ -527,7 +526,7 @@ public class ScriptEngine
                     else
                     {
                         x = xr.Value;
-                        y = yr.Value;
+                        y = Data.GAME_HEIGHT - yr.Value;
                     }
                     x = game.FlipCoordReal(x);
                     if (game.fl_mirror)
@@ -571,7 +570,7 @@ public class ScriptEngine
             case E_MUSIC:
                 {
                     int id = GetInt(e, "id");
-                    game.PlayMusic(id);
+                    game.PlayMusic(id+1);
                 }
                 break;
 

@@ -134,7 +134,10 @@ public class GameInterfaceSolo : MonoBehaviour
         {
             while (currentLives < v & currentLives < MAX_LIVES)
             {
-                MovieClip newmc = new MovieClip(mc, "hammer_interf_life", Data.DP_TOP, 0);
+                MovieClip newmc = new MovieClip("hammer_interf_life");
+                newmc.SetParent(mc);
+                newmc.SetLayer(Data.DP_TOP);
+                newmc.SetDepth(0);
                 newmc._x = baseX + currentLives * baseWid;
                 newmc._y = -9;
                 newmc.SetAnim("Frame", 1);
@@ -148,7 +151,10 @@ public class GameInterfaceSolo : MonoBehaviour
             }
             if (v > MAX_LIVES & more == null)
             {
-                more = new MovieClip(mc, "hammer_interf_more", Data.DP_TOP, 0);
+                more = new MovieClip("hammer_interf_more");
+                more.SetParent(mc);
+                more.SetLayer(Data.DP_TOP);
+                more.SetDepth(0);
                 more._x = baseX + baseWid * MAX_LIVES - 4;
                 more._y = -5;
             }
@@ -201,7 +207,10 @@ public class GameInterfaceSolo : MonoBehaviour
         if (!l.activeSelf)
         {
             HammerAnimation anim =  new HammerAnimation(null);
-            anim.mc = new MovieClip(mc, "hammer_fx_letter_pop", "Overlay", 0);
+            anim.mc = new MovieClip("hammer_fx_letter_pop");
+            anim.mc.SetParent(mc);
+            anim.mc.SetLayer("Overlay");
+            anim.mc.SetDepth(0);
             anim.mc._x = l.transform.position.x;
             anim.mc._y = l.transform.position.y;
             anim.mc.SetAnim("Frame", 1);

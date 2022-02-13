@@ -6,7 +6,7 @@ public class RepelBomb : PlayerBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public RepelBomb(MovieClip mc) : base(mc) {
+	public RepelBomb(string reference) : base(reference) {
 		duration	= 38;
 		power		= 20;
 		radius		= Data.CASE_WIDTH*3;
@@ -18,7 +18,8 @@ public class RepelBomb : PlayerBomb
 	------------------------------------------------------------------------*/
 	public static RepelBomb Attach(GameMode g, float x, float y) {
 		string linkage = "hammer_bomb_repel";
-		RepelBomb mc = new RepelBomb(g.depthMan.Attach(linkage,Data.DP_BOMBS));
+		RepelBomb mc = new RepelBomb(linkage);
+		g.depthMan.Attach(mc,Data.DP_BOMBS);
 		mc.InitBomb(g, x, y);
 		return mc;
 	}

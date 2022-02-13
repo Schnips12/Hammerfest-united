@@ -9,7 +9,7 @@ public class PlayerPearl : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    PlayerPearl(MovieClip mc) : base(mc)
+    PlayerPearl(string reference) : base(reference)
     {
         shootSpeed = 8.5f;
         coolDown = Data.SECOND * 2;
@@ -32,7 +32,8 @@ public class PlayerPearl : Shoot
     public static PlayerPearl Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_player_pearl";
-        PlayerPearl s = new PlayerPearl(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        PlayerPearl s = new PlayerPearl(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y);
         return s;
     }

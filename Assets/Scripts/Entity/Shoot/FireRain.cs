@@ -5,7 +5,7 @@ public class FireRain : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    FireRain(MovieClip mc) : base(mc)
+    FireRain(string reference) : base(reference)
     {
         shootSpeed = 10 + Random.Range(0, 5);
         fl_checkBounds = false;
@@ -26,7 +26,8 @@ public class FireRain : Shoot
     public static FireRain Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_firerain";
-        FireRain s = new FireRain(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        FireRain s = new FireRain(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y + 10);
         return s;
     }

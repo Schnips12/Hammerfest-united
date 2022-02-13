@@ -11,11 +11,8 @@ public class Framboise : Shooter
     int arrived;
     float white;
 
-
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Framboise(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Framboise(string reference) : base(reference)
     {
         SetJumpUp(3);
         SetJumpDown(6);
@@ -28,77 +25,67 @@ public class Framboise : Shooter
 
         white = 0;
         fl_phased = false;
+        FindSub("o1")._visible = false;
+        FindSub("o2")._visible = false;
     }
 
-
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
-    protected override void Init(GameMode g)
-    {
-        base.Init(g);
-    }
-
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Framboise Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_FRAMBOISE];
-        Framboise mc = new Framboise(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Framboise mc = new Framboise(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }
 
-
-    /*------------------------------------------------------------------------
-	APPROXIMATIVE COORDS
-	------------------------------------------------------------------------*/
+    /// <summary>Returns an x coordinate around b within a one case range.</summary>
     float AroundX(float b)
     {
         return b + Random.Range(0, Data.CASE_WIDTH) * (Random.Range(0, 2) * 2 - 1);
     }
 
+    /// <summary>Returns an y coordinate around b within a one case range.</summary>
     float AroundY(float b)
     {
         return b + Random.Range(0, Data.CASE_HEIGHT);
     }
 
-
+    /// <summary>Not ready when phasing.</summary>
     public override bool IsReady()
     {
         return base.IsReady() & !fl_phased;
     }
 
-
-    /*------------------------------------------------------------------------
-	BAD'S EVENTS
-	------------------------------------------------------------------------*/
+    /// <summary>Freezing cancels the phasing.</summary>
     public override void Freeze(float d)
     {
         PhaseIn();
         base.Freeze(d);
     }
 
+    /// <summary>Knocking cancels the phasing.</summary>
     public override void Knock(float d)
     {
         PhaseIn();
         base.Knock(d);
     }
 
+    /// <summary>Dying cancels the phasing.</summary>
     public override void KillHit(float? dx)
     {
         PhaseIn();
         base.KillHit(dx);
     }
 
+    /// <summary>Removes framballs.</summary>
     public override void DestroyThis()
     {
         ClearFrags();
         base.DestroyThis();
     }
 
+    /// <summary>Graphic details.</summary>
     protected override void OnHitGround(float h)
     {
         base.OnHitGround(h);
@@ -108,10 +95,7 @@ public class Framboise : Shooter
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	A FRAGMENT HAS ARRIVED
-	------------------------------------------------------------------------*/
+    /// <summary>All framballs have arrived at the destination event.</summary>
     public void OnArrived(FramBall fb)
     {
         Show();
@@ -121,16 +105,16 @@ public class Framboise : Shooter
         {
             if (fb.CurrentFrame() == 5)
             {
-                FindSub("o1").SetActive(true);
+                FindSub("o1")._visible = true;
             }
             else
             {
-                FindSub("o2").SetActive(true);
+                FindSub("o2")._visible = true;
             }
         }
         else
         {
-            this.subs[0].NextFrame();
+            NextFrame();
         }
 
         arrived++;
@@ -150,11 +134,16 @@ public class Framboise : Shooter
         for (int i = 0; i < sl.Count; i++)
         {
             IEntity s = sl[i];
-            if ((s as FramBall).owner == this)
+            if(typeof(FramBall).IsAssignableFrom(s.GetType()))
             {
-                s.DestroyThis();
-            }
+                if ((s as FramBall).owner == this)
+                {
+                    s.DestroyThis();
+                }
+            }            
         }
+        FindSub("o1")._visible = false;
+        FindSub("o2")._visible = false;
     }
 
 
@@ -170,10 +159,10 @@ public class Framboise : Shooter
         dy = 0;
         DisableShooter();
         Stop();
-        this.GotoAndStop(15);
-        this.subs[0].Stop();
-        FindSub("o1").SetActive(false);
-        FindSub("o2").SetActive(false);
+        /* this.GotoAndStop(15); */
+        /* this.subs[0].Stop(); */
+        FindSub("o1")._visible = false;
+        FindSub("o2")._visible = false;
         Hide();
     }
 
@@ -228,7 +217,7 @@ public class Framboise : Shooter
         {
             s = FramBall.Attach(game, AroundX(x), AroundY(y));
             s.SetOwner(this);
-            s.GotoAndStop(i + 1);
+            s.SetAnim("Frame", i+1);
         }
     }
 
@@ -263,9 +252,11 @@ public class Framboise : Shooter
     {
         if (!_visible)
         {
-            MoveTo(100, -200);
+            Debug.Log("not visible");
+            MoveTo(100, Data.GAME_HEIGHT+200);
             if (!IsHealthy())
             {
+                Debug.Log("not healthy");
                 Show();
                 MoveTo(tx, ty);
                 PhaseIn();
@@ -282,5 +273,4 @@ public class Framboise : Shooter
 
         base.HammerUpdate();
     }
-
 }

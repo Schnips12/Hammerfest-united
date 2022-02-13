@@ -3,7 +3,7 @@ public class Pepin : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Pepin(MovieClip mc) : base(mc)
+    Pepin(string reference) : base(reference)
     {
         shootSpeed = 5;
         _yOffset = 2;
@@ -16,7 +16,8 @@ public class Pepin : Shoot
     public static Pepin Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_pepin";
-        Pepin s = new Pepin(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        Pepin s = new Pepin(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y);
         return s;
     }

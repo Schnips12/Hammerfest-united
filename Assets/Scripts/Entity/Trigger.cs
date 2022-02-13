@@ -7,7 +7,7 @@ public class Trigger : Entity
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public Trigger(MovieClip mc) : base(mc)
+    public Trigger(string reference) : base(reference)
     {
         fl_largeTrigger = false;
     }
@@ -85,7 +85,7 @@ public class Trigger : Entity
     {
         TRem(cx, cy);
         this.x = x;
-        this.y = y + 1;
+        this.y = y+1;
         UpdateCoords();
         TAdd(cx, cy);
     }

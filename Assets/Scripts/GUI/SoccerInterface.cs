@@ -28,7 +28,8 @@ public class SoccerInterface
 	INITIALISATION
 	------------------------------------------------------------------------*/
 	void Init() {
-		mc		= game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
+		mc		= new MovieClip("hammer_interf_game");
+		game.depthMan.Attach(mc, Data.DP_TOP);
 		mc._x	= -game.mc._x;
 		mc._y	= 0;
 		mc.GotoAndStop(3);

@@ -163,7 +163,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 3.8560371, y: 0, z: 3.8560333, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   _SortingLayer: 0
@@ -335,7 +335,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
+  m_margin: {x: 4.477974, y: 0, z: 6.592575, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   _SortingLayer: 0
@@ -421,7 +421,7 @@ SpriteRenderer:
   m_SortingLayerID: 1601534659
   m_SortingLayer: 17
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: d288988d596916a409d38bcc31faf277, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f7402da34087ce34f8fecd555005030b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -460,4 +460,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_CategoryHash: 0
   m_labelHash: 0
-  m_SpriteKey: -0.00000007545667
+  m_SpriteKey: -1.5647296e+15

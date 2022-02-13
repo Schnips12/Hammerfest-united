@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface IEntity {
+	GameObject united { get; set; }
 	int types { get; set; }
 	int uniqId { get; set; }
 	int? scriptId { get; set; }
@@ -10,8 +11,8 @@ public interface IEntity {
 	GameMechanics world { get; set; }
 	float x { get; set; }
 	float y { get; set; }
-	float width { get; set; }
-	float height { get; set; }
+	float _width { get; }
+	float _height { get; }
 	bool fl_kill { get; set; }
 	bool fl_destroy { get; set; }
 	void DestroyThis();
@@ -31,8 +32,6 @@ public class Entity : MovieClip, IEntity
 
 	public float x { get; set; } // real coords
 	public float y { get; set; }
-	public float width { get; set; }
-	public float height { get; set; }
 
 	public float oldX; // previous real coords
 	public float oldY;
@@ -75,7 +74,6 @@ public class Entity : MovieClip, IEntity
 	bool fl_stickBound;
 	bool fl_elastick;
 	protected bool fl_softRecal;
-	protected bool visible;
 
 	protected float softRecalFactor;
 
@@ -83,31 +81,8 @@ public class Entity : MovieClip, IEntity
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public Entity(MovieClip mc) : base() {
-		// The MovieClip is created through an attach function.
-		// TODO Consider giving all the parameters for attaching an entity through the chain of constructors.
-		// (it would avoid the mess below)
-    	united = mc.united;
-    	_name = mc._name;
-    	_visible = mc._visible;
-		_x = mc._x;
-		_y = mc._y;
-		_xscale = mc._xscale;
-		_yscale = mc._yscale;
-		_rotation = mc._rotation;
-		_alpha = mc._alpha;
-		extraValues = mc.extraValues;
-		subs = mc.subs;
-		onRelease = mc.onRelease;
-		onRollOut = mc.onRollOut;
-		onRollOver = mc.onRollOver;
-		timer = mc.timer;
-		filter = mc.filter;
-
-		width = Data.CASE_WIDTH;
-		height  = Data.CASE_HEIGHT; // TODO Set the actual sprite size
-		// End of mess.
-
+	public Entity(string reference) : base(reference)
+	{
 		types = 0;
 		x = 0;
 		y = 0;
@@ -206,11 +181,15 @@ public class Entity : MovieClip, IEntity
 	HIT TEST DE BOUNDING BOX
 	------------------------------------------------------------------------*/
 	protected bool HitBound(IEntity e) {
+		if(united==null | e.united==null)
+		{
+			return false;
+		}
 		bool res = (
-			x+width/2 > e.x-e.width/2 &
-			y > e.y-e.height &
-			x-width/2 < e.x+e.width/2 &
-			y-height < e.y
+			x+_width/2 > e.x-e._width/2 &
+			x-_width/2 < e.x+e._width/2 &
+			y < e.y+e._height &
+			y+_height > e.y
 			);
 		return res;
 	}
@@ -342,15 +321,15 @@ public class Entity : MovieClip, IEntity
 	MASQUE/AFFICHE L'ENTIT�
 	------------------------------------------------------------------------*/
 	public virtual void Hide() {
-		visible = false;
+		_visible = false;
 		if (sticker!=null) {
-			sticker._visible = visible;
+			sticker._visible = _visible;
 		}
 	}
 	public virtual void Show() {
-		visible = true ;
+		_visible = true ;
 		if (sticker!=null) {
-			sticker._visible = visible;
+			sticker._visible = _visible;
 		}
 	}
 
@@ -436,19 +415,23 @@ public class Entity : MovieClip, IEntity
 		return Mathf.FloorToInt(n/Data.CASE_WIDTH) ;
 	}
 	public static int y_rtc(float n) {
-		return Mathf.FloorToInt(n/Data.CASE_HEIGHT) ;
+		return Mathf.FloorToInt(n/Data.CASE_HEIGHT + 0.5f) ;
 	}
 
 
 	/*------------------------------------------------------------------------
 	CONVERSION CASE -> REAL
 	------------------------------------------------------------------------*/
+	public static Vector2 ctr(Vector2Int pt) {
+		return new Vector2(x_ctr(pt.x), y_ctr(pt.y));
+	}
 	public static float x_ctr(int n) {
 		return Data.CASE_WIDTH *(n+0.5f);
 	}
 	public static float y_ctr(int n) {
-		return Data.CASE_HEIGHT*(n+0.5f);
+		return Data.CASE_HEIGHT*(n);
 	}
+
 
 
 	/*------------------------------------------------------------------------
@@ -488,7 +471,7 @@ public class Entity : MovieClip, IEntity
 		return Mathf.Sqrt(Mathf.Pow(cy-this.cy, 2)+ Mathf.Pow(cx-this.cx, 2));
 	}
 
-	public float Distance(float cx, float cy) {
+	public float Distance(float x, float y) {
 		return Mathf.Sqrt(Mathf.Pow(y-this.y, 2)  + Mathf.Pow(x-this.x, 2));
 	}
 

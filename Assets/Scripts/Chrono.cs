@@ -5,30 +5,22 @@ public class Chrono
     float suspendTimer;
     float haltedTimer;
     float gameTimer;
+
     bool fl_stop;
     bool fl_init;
 
-    float prevFrameTimer;
-    float frameTimer;
-
-
     /*------------------------------------------------------------------------
-	CONSTRUCTEUR
+	CONSTRUCTOR
 	------------------------------------------------------------------------*/
     public Chrono()
     {
-        gameTimer = Time.time;
-        suspendTimer = 0;
-        haltedTimer = Get();
-
         Reset();
         fl_stop = true;
         fl_init = false;
     }
 
-
     /*------------------------------------------------------------------------
-	RENVOIE LA VALEUR DU CHRONO ACTUEL (millisecondes)
+	RETURNS THE CURRENT CHRONO VALUE
 	------------------------------------------------------------------------*/
     public float Get()
     {
@@ -43,17 +35,18 @@ public class Chrono
     }
 
     /*------------------------------------------------------------------------
-	GESTION DU CHRONO
+	CHRONO MANAGEMENT
 	------------------------------------------------------------------------*/
     public void Reset()
     {
         fl_init = true;
         fl_stop = false;
-        suspendTimer = 0;
         gameTimer = Time.time;
+        suspendTimer = 0;
+        haltedTimer = 0;
     }
 
-    public void Begin()
+    public void Resume()
     {
         if (suspendTimer != 0)
         {
@@ -61,8 +54,8 @@ public class Chrono
             gameTimer += d;
         }
         haltedTimer = 0;
-        fl_stop = false;
         suspendTimer = 0;
+        fl_stop = false;
     }
 
     public void Stop()
@@ -76,11 +69,6 @@ public class Chrono
         suspendTimer = Time.time;
     }
 
-
-
-    /*------------------------------------------------------------------------
-	GAIN DE TEMPS
-	------------------------------------------------------------------------*/
     void TimeShift(float n)
     {
         gameTimer = Mathf.Min(Time.time, gameTimer + n);

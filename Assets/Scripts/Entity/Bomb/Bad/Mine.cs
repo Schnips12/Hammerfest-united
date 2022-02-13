@@ -14,7 +14,7 @@ public class Mine : BadBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public Mine(MovieClip mc) : base(mc)
+    public Mine(string reference) : base(reference)
     {
         fl_blink = true;
         fl_alphaBlink = false;
@@ -46,7 +46,8 @@ public class Mine : BadBomb
     public static Mine Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_mine";
-        Mine mc = new Mine(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        Mine mc = new Mine(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

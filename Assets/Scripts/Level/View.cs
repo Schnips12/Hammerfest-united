@@ -22,7 +22,6 @@ public class View : MonoBehaviour
     DepthManager _sprite_top_dm; // no cache
     DepthManager _sprite_back_dm; // no cache
 
-    float xOffset;
     public bool fl_attach;
     public bool fl_shadow;
     public bool fl_hideTiles;
@@ -54,7 +53,6 @@ public class View : MonoBehaviour
     {
         world = w;
         depthMan = dm;
-		xOffset = 0;
 
         fl_attach = false;
         fl_shadow = true;
@@ -200,21 +198,24 @@ public class View : MonoBehaviour
         {
             skin = 30;
         }
-        TileMC tile = new TileMC(_tiles, "tile", wid);
+        TileMC tile = new TileMC(wid);
+        _back_dm.Attach(tile);
+        tile.SetParent(_tiles);
 
         tile._x = sx * Data.CASE_WIDTH;
         tile._y = sy * Data.CASE_HEIGHT;
 
-
         /* tile.maskTile._width = wid*Data.CASE_WIDTH; */ // TODO TIile MC
 
         tile.SetSkin(skin, false);
-        /* tile.endTile.SetSkin(skin); */
 
         if (!fl_shadow | fl_fast)
         {
             tile.ombre._visible = false;
         }
+
+        _back_dm.Attach(tile);
+        tile.SetParent(_tiles);
 
         tileList.Add(tile);
     }
@@ -230,24 +231,24 @@ public class View : MonoBehaviour
         {
             skin = 30;
         }
-        tile = new TileMC(_tiles, "tile", wid);
+        tile = new TileMC(wid);
 
         tile._rotation = -90;
         tile.united.GetComponent<SpriteRenderer>().flipY = true;
         tile._x = (sx+1) * Data.CASE_WIDTH;
         tile._y = (sy+wid) * Data.CASE_HEIGHT;
 
-
-        // TODO Flip sprites and subs.
         /* tile.maskTile._width = wid*Data.CASE_WIDTH; */ // TODO Populate the TILE MC class
 
         tile.SetSkin(skin, true);
-        /* tile.endTile.SetSkin(skin); */
 
         if (!fl_shadow | fl_fast)
         {
             tile.ombre._visible = false;
         }
+
+        _back_dm.Attach(tile);
+        tile.SetParent(_tiles);
 
         tileList.Add(tile);
     }
@@ -270,17 +271,20 @@ public class View : MonoBehaviour
         // attachement
 		switch(id) {
 			case Data.FIELD_TELEPORT:
-				mc = _field_dm.Attach("Strechable tpField");
+				mc = new MovieClip("Strechable tpField");
+                _field_dm.Attach(mc);
 				break;
 			case Data.FIELD_PORTAL:
-				mc = _field_dm.Attach("Strechable portalField");
+				mc = new MovieClip("Strechable portalField");
+                _field_dm.Attach(mc);
 				break;
 			default:
-				mc = _field_dm.Attach("Strechable bombField");
+				mc = new MovieClip("Strechable bombField");
+                _field_dm.Attach(mc);
 				mc.SetSkin(Mathf.Abs(id), false);
 				break;
 		}
-		mc.ConvertNestedAnimators();
+		mc.RegisterSubs();
         mc._x = sx * Data.CASE_WIDTH;
         mc._y = sy * Data.CASE_HEIGHT;
 
@@ -359,12 +363,14 @@ public class View : MonoBehaviour
         // t�l�porteur
         if (id == Data.FIELD_TELEPORT)
         {
-            td.podA = _field_dm.Attach("hammer_pod", Data.DP_INTERF);
+            td.podA = new MovieClip("hammer_pod");
+            _field_dm.Attach(td.podA, Data.DP_FIELD_LAYER);
             td.podA._x = td.startX;
             td.podA._y = td.startY;
             td.podA.Play();
 
-            td.podB = _field_dm.Attach("hammer_pod", Data.DP_INTERF);
+            td.podB = new MovieClip("hammer_pod");
+            _field_dm.Attach(td.podB, Data.DP_FIELD_LAYER);
             td.podB._x = td.endX;
             td.podB._y = td.endY;
             td.podB._rotation = 180;
@@ -374,13 +380,13 @@ public class View : MonoBehaviour
 
             if (td.direction == Data.HORIZONTAL)
             {
-                /* td.podA._y -= Data.CASE_HEIGHT * 0.5f;
-                td.podB._y -= Data.CASE_HEIGHT * 0.5f; */
+                td.podA._y += Data.CASE_HEIGHT * 0.5f;
+                td.podB._y += Data.CASE_HEIGHT * 0.5f;
             }
             else
             {
-                td.podA._y += Data.CASE_HEIGHT * 0.5f;
-                td.podB._y += Data.CASE_HEIGHT * 0.5f;
+                /* td.podA._y += Data.CASE_HEIGHT;
+                td.podB._y += Data.CASE_HEIGHT; */
                 td.podA._rotation += 90;
                 td.podB._rotation += 90;
             }
@@ -404,14 +410,15 @@ public class View : MonoBehaviour
     {
         if (_bg != null)
             _bg.RemoveMovieClip();
-        _bg = _back_dm.Attach("hammer_bg", Data.DP_BACK_LAYER);
-        _bg._x = xOffset;
-		_bg._y = 1;
+        _bg = new MovieClip("hammer_bg");
+        _back_dm.Attach(_bg, Data.DP_BACK_LAYER);
+        _bg._x = -10;
+        _bg.SetAnim("Frame", 1);
         _bg.GotoAndStop(data.skinBg);
         if (world.fl_mirror)
         {
             _bg._xscale *= -1;
-            _bg._x += Data.GAME_WIDTH;
+            _bg._x = Data.GAME_WIDTH+10;
         }
     }
 
@@ -421,7 +428,8 @@ public class View : MonoBehaviour
 	------------------------------------------------------------------------*/
     public MovieClip AttachSpecialBg(int id, int? subId)
     {
-        _specialBg = depthMan.Attach("hammer_special_bg", Data.DP_SPECIAL_BG);
+        _specialBg = new MovieClip("hammer_special_bg");
+        depthMan.Attach(_specialBg, Data.DP_SPECIAL_BG);
         _specialBg.SetAnim((id + 1).ToString(), 1);
 
 /*         if (subId != null)
@@ -462,15 +470,16 @@ public class View : MonoBehaviour
 
         // Containers g�n�raux
         _top = depthMan.Empty(Data.DP_TOP_LAYER);
-        _field = depthMan.Empty(Data.DP_FIELD_LAYER);
-        _back = depthMan.Empty(Data.DP_BACK_LAYER);
         _top_dm = new DepthManager(_top, Data.DP_TOP_LAYER);
         _top_dm.SetName("View_top");
+        
+        _field = depthMan.Empty(Data.DP_FIELD_LAYER);
         _field_dm = new DepthManager(_field, Data.DP_FIELD_LAYER);
         _field_dm.SetName("View_field");
+
+        _back = depthMan.Empty(Data.DP_BACK_LAYER);
         _back_dm = new DepthManager(_back, Data.DP_BACK_LAYER);
         _back_dm.SetName("View_back");
-        _top._x = xOffset;
 
         // Background
         if (!fl_fast)
@@ -481,7 +490,6 @@ public class View : MonoBehaviour
         // Container pour les dalles
         _tiles = _back_dm.Empty();
         _tiles._name = "Tiles holder";
-        _tiles._x = xOffset;
         _tiles._visible = !fl_hideTiles;
 
         _fieldMap = new List<List<bool?>>();
@@ -570,10 +578,13 @@ public class View : MonoBehaviour
         // Colonnes de pierre
         if (!fl_fast)
         {
-            _leftBorder = _top_dm.Attach("hammer_sides");
-            _leftBorder._x = -15;
-            _rightBorder = _top_dm.Attach("hammer_sides");
-            _rightBorder._x = Data.GAME_WIDTH - 15;
+            _leftBorder = new MovieClip("hammer_sides");
+            _top_dm.Attach(_leftBorder, Data.DP_TOP_LAYER);
+            _leftBorder._x = -20;
+
+            _rightBorder = new MovieClip("hammer_sides");
+            _top_dm.Attach(_rightBorder, Data.DP_TOP_LAYER);
+            _rightBorder._x = Data.GAME_WIDTH - 10;
 
             _leftBorder._visible = !fl_hideBorders;
             _rightBorder._visible = !fl_hideBorders;
@@ -597,7 +608,8 @@ public class View : MonoBehaviour
         for (var i = 0; i < data.badList.Length; i++)
         {
             var sp = data.badList[i];
-            MovieClip mc = _sprite_top_dm.Attach("hammer_editor_bad", Data.DP_BADS);
+            MovieClip mc = new MovieClip("hammer_editor_bad");
+            _sprite_top_dm.Attach(mc, Data.DP_BADS);
             mc._x = Entity.x_ctr(sp.x) + Data.CASE_WIDTH * 0.5f;
             mc._y = Entity.y_ctr(Data.LEVEL_HEIGHT - sp.y);
             mc.GotoAndStop(sp.id + 1);
@@ -621,8 +633,9 @@ public class View : MonoBehaviour
         {
             for (var cy = 0; cy < Data.LEVEL_HEIGHT; cy++)
             {
-                MovieClip mc = _top_dm.Attach("debugGrid", depth);
-                mc._x = cx * Data.CASE_WIDTH + xOffset;
+                MovieClip mc = new MovieClip("debugGrid");
+                _top_dm.Attach(mc, depth);
+                mc._x = cx * Data.CASE_WIDTH;
                 mc._y = cy * Data.CASE_HEIGHT;
                 if ((world.manager.current.world.flagMap[cx][cy] & flag) == 0)
                 {
@@ -657,7 +670,8 @@ public class View : MonoBehaviour
     public MovieClip AttachSprite(string link, float x, float y, bool fl_back)
     {
         var dm = fl_back ? _sprite_back_dm : _sprite_top_dm;
-        var mc = dm.Attach(link);
+        MovieClip mc = new MovieClip(link);
+        dm.Attach(mc);
         mc._x += x;
         mc._y += y;
         mcList.Add(mc);
@@ -723,11 +737,11 @@ public class View : MonoBehaviour
     {
         viewX = Mathf.RoundToInt(x);
         viewY = Mathf.RoundToInt(y);
-        _top._x = x - xOffset;
+        _top._x = x;
         _top._y = y;
         _back._x = _top._x;
         _back._y = _top._y;
-        _field._x = _top._x + xOffset;
+        _field._x = _top._x;
         _field._y = _top._y;
         _sprite_back._x = _top._x;
         _sprite_back._y = _top._y;
@@ -772,6 +786,7 @@ public class View : MonoBehaviour
             _sprite_top.RemoveMovieClip();
             _sprite_top = null;
         }
+        Destroy(this.gameObject);
     }
 }
 

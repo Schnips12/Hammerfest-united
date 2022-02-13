@@ -22,7 +22,7 @@ public class GameMode : Mode, IGameMode
     public Chrono gameChrono;
 
     // Parallel dimensions
-    List<GameMechanics> dimensions;
+    protected List<GameMechanics> dimensions;
     protected int currentDim;
     protected int portalId;
     PortalLink nextLink;
@@ -42,6 +42,7 @@ public class GameMode : Mode, IGameMode
     private MovieClip popMC;
     private MovieClip pointerMC;
     private MovieClip itemNameMC;
+    private MovieClip icon;
     private MovieClip radiusMC;
     private MovieClip pauseMC;
     private MovieClip mapMC;
@@ -212,17 +213,11 @@ public class GameMode : Mode, IGameMode
         mapMC._visible = false;
 
         popMC = new MovieClip(manager.popup);
-        popMC.SetAnim("Frame", 1);
-        popMC.Play();
         popMC._visible = false;
 
         pointerMC = new MovieClip(manager.pointer);
         pointerMC.SetAnim("Frame", 1);
         pointerMC._visible = false;
-
-        itemNameMC = new MovieClip(manager.itemName);
-        itemNameMC._visible = false;
-
 
         randMan.Register(Data.RAND_EXTENDS_ID, Data.RAND_EXTENDS);
         randMan.Register(
@@ -805,7 +800,7 @@ public class GameMode : Mode, IGameMode
     public override void Unlock()
     {
         base.Unlock();
-        gameChrono.Begin();
+        gameChrono.Resume();
     }
 
 
@@ -862,15 +857,15 @@ public class GameMode : Mode, IGameMode
     COMPTAGE D'ITEMS
     ------------------------------------------------------------------------*/
     ///<summary>Add an occurence of this id to the list of picked special items.</summary>
-    public int PickUpSpecial(int id)
+    public void PickUpSpecial(int id)
     {
-        return ++specialPicks[id];
+        specialPicks[id]++;
     }
 
     ///<summary>Add an occurence of this id to the list of picked score items.</summary>
-    public int PickUpScore(int id, int? subId)
+    public void PickUpScore(int id, int? subId)
     {
-        return ++scorePicks[id];
+        scorePicks[id]++;
     }
 
     ///<summary>Returns all the picked items as a string "id1=count|id2=count|etc".</summary>
@@ -906,28 +901,22 @@ public class GameMode : Mode, IGameMode
     }
 
     ///<summary>Returns all the picked items as an array.</summary>
-    int[] GetPicks2()
+    protected int[] GetPicks2()
     {
-        int[] s = new int[1000 + specialPicks.Count];
+        int[] s = new int[2000];
 
         int i = 0;
         foreach (int pick in specialPicks)
         {
-            if (pick != 0)
-            {
-                s[i] = pick;
-                i++;
-            }
+            s[i] = pick;
+            i++;
         }
 
         i = 0;
-        foreach (int pick in specialPicks)
+        foreach (int pick in scorePicks)
         {
-            if (pick != 0)
-            {
-                s[i + 1000] = pick;
-                i++;
-            }
+            s[i + 1000] = pick;
+            i++;
         }
 
         return s;
@@ -1070,9 +1059,17 @@ public class GameMode : Mode, IGameMode
     }
 
     ///<summary>Return the value of a dynamic parameter with int type.</summary>
-    public int GetDynamicInt(string name)
+    public int? GetDynamicInt(string name)
     {
-        return Int32.Parse(GetDynamicVar(name));
+        string s = GetDynamicVar(name);
+        if(s==null)
+        {
+            return null;
+        }
+        else
+        {
+            return Int32.Parse(GetDynamicVar(name));
+        }        
     }
 
 
@@ -1110,6 +1107,18 @@ public class GameMode : Mode, IGameMode
         if (savedScores[pid] <= 0)
         {
             savedScores[pid] = score;
+        }
+    }
+
+    public int GetScore(int pid)
+    {
+        if (savedScores.Count < pid)
+        {
+            return savedScores[pid];
+        }
+        else
+        {
+            return 0;
         }
     }
 
@@ -1389,6 +1398,7 @@ public class GameMode : Mode, IGameMode
     ///<summary>Opens a floating portal (visual effects + insertion in the script).</summary>
     public bool OpenPortal(int cx, int cy, int pid)
     {
+        Debug.Log("open portal: "+cx+" "+cy+" "+pid);
         if (portalMcList.Count > pid && portalMcList[pid] != null)
         {
             return false;
@@ -1398,7 +1408,8 @@ public class GameMode : Mode, IGameMode
             world.scriptEngine.InsertPortal(cx, cy, pid);
             var x = Entity.x_ctr(FlipCoordCase(cx));
             var y = Entity.y_ctr(cy) + Data.CASE_HEIGHT * 0.5f;
-            var p = depthMan.Attach("hammer_portal", Data.DP_SPRITE_BACK_LAYER);
+            MovieClip p = new MovieClip("hammer_portal");
+            depthMan.Attach(p, Data.DP_SPRITE_BACK_LAYER);
             p._x = x;
             p._y = y;
             fxMan.AttachExplosion(x, y, 40);
@@ -1535,16 +1546,12 @@ public class GameMode : Mode, IGameMode
             float square = Mathf.Pow(e.x - x, 2) + Mathf.Pow(e.y - y, 2);
             if (square <= sqrRad)
             {
-                if (Mathf.Sqrt(square) <= radius)
+                if (!fl_onGround | (fl_onGround & e.y >= y - Data.CASE_HEIGHT))
                 {
-                    if (!fl_onGround | (fl_onGround & e.y <= y + Data.CASE_HEIGHT))
-                    {
-                        res.Add(e);
-                    }
+                    res.Add(e);
                 }
             }
         }
-
         return res;
     }
 
@@ -1772,7 +1779,6 @@ public class GameMode : Mode, IGameMode
     {
         popMC._visible = true;
         popMC.SetAnim("Frame", 1);
-        popMC.GotoAndPlay(1);
 
         if (fl_tuto)
         {
@@ -1808,7 +1814,7 @@ public class GameMode : Mode, IGameMode
         pointerMC._x = x;
         pointerMC._y = y;
         var ang = Mathf.Atan2(oy - y, ox - x) * 180 / Mathf.PI;
-        pointerMC._rotation = ang - 90;
+        pointerMC._rotation = ang + 90;
     }
 
 
@@ -1819,7 +1825,8 @@ public class GameMode : Mode, IGameMode
     public void AttachRadius(float x, float y, float r)
     {
         radiusMC._visible = true;
-        radiusMC = depthMan.Attach("debug_radius", Data.DP_INTERF);
+        radiusMC = new MovieClip("debug_radius");
+        depthMan.Attach(radiusMC, Data.DP_INTERF);
         radiusMC._x = x;
         radiusMC._y = y;
         /* radiusMC._width = r * 2;
@@ -1831,47 +1838,52 @@ public class GameMode : Mode, IGameMode
     AFFICHE UN NOM D'ITEM SPÉCIAL RAMASSÉ
     ------------------------------------------------------------------------*/
     ///<summary>Displays an icon and the name of the last picked item.</summary>
-    public void AttachItemName(List<List<ItemFamilySet>> family, int id)
+    public void AttachItemName(Dictionary<int, List<ItemFamilySet>> family, int id)
     {
+        KillItemName();
+
         // Recherche du nom
         string s = "";
-        int i = 0;
-        while (s == "" & i < family.Count)
+        ItemFamilySet item;
+        foreach (KeyValuePair<int, List<ItemFamilySet>> kp in family)
         {
-            int j = 0;
-            while (s == "" & j < family[i].Count)
+            item = kp.Value.Find(x => x.id==id);
+            if(item!=null)
             {
-                if (family[i][j].id == id)
-                {
-                    s = family[i][j].name;
-                }
-                j++;
+                s = item.name;
+                break;
             }
-            i++;
         }
 
         if (s != "")
         {
             // Affichage
-            itemNameMC._visible = true;
+            itemNameMC = new MovieClip("hammer_interf_item_name");
+            itemNameMC._x = Data.GAME_WIDTH / 2;
+            itemNameMC._y = 20;
             itemNameMC.FindTextfield("field").text = s;
             itemNameMC._alpha = 105;
 
             // Item icon
-            MovieClip icon;
             if (id < 1000)
             {
-                icon = new MovieClip(itemNameMC, "hammer_item_special", "Overlay", manager.uniq++);
+                icon = new MovieClip("hammer_item_special");
+                icon.SetParent(itemNameMC);
+                icon.SetLayer("Overlay");
+                icon.SetDepth(manager.uniq++);
                 icon.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.specialItems.Find(x => x.name.Substring(20)==(id+1).ToString());
                 icon.SetAnim("Frame", 1);
             }
             else
             {
-                icon = new MovieClip(itemNameMC, "hammer_item_score", "Overlay", manager.uniq++);
+                icon = new MovieClip("hammer_item_score");
+                icon.SetParent(itemNameMC);
+                icon.SetLayer("Overlay");
+                icon.SetDepth(manager.uniq++);
                 icon.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scoreItems.Find(x => x.name.Substring(18)==(id-1000+1).ToString());
                 icon.SetAnim("Frame", 1);
             }
-            icon._x = itemNameMC._x - itemNameMC.FindTextfield("field").fontSize * 0.5f + 20; // FIXME
+            icon._x = itemNameMC._x - s.Length * 2.5f - 20; // FIXME
             icon._y = 20;
             icon._xscale = 0.75f;
             icon._yscale = 0.75f;
@@ -1903,7 +1915,16 @@ public class GameMode : Mode, IGameMode
     ///<summary>Removes the previous item name.</summary>
     public void KillItemName()
     {
-        itemNameMC._visible = false;
+        if(itemNameMC!=null)
+        {
+            itemNameMC.RemoveMovieClip();
+            itemNameMC = null;
+        }
+        if(icon!=null)
+        {
+            icon.RemoveMovieClip();
+            icon = null;
+        }
     }
 
     ///<summary>Removes all the portals.</summary>
@@ -1941,7 +1962,8 @@ public class GameMode : Mode, IGameMode
             x = Data.GAME_WIDTH * 0.5f + 5;
         }
 
-        var mc = depthMan.Attach("hammer_interf_mapIcon", Data.DP_INTERF);
+        var mc = new MovieClip("hammer_interf_mapIcon");
+        depthMan.Attach(mc, Data.DP_INTERF);
         mc.GotoAndStop(eid);
         mc._x = Mathf.Floor(x);
         mc._y = Mathf.Floor(y);
@@ -2540,6 +2562,11 @@ public class GameMode : Mode, IGameMode
             } */
         }
 
+        if (fl_gameOver)
+        {
+            Loader.Instance.GameOver();
+        }
+
         // Bullet time
         if (fl_bullet & bulletTimer > 0)
         {
@@ -2776,5 +2803,8 @@ public class GameMode : Mode, IGameMode
             }
         }
 
+        if(popMC._visible) {
+            popMC.NextFrame();
+        }
     }
 }

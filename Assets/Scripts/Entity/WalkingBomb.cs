@@ -15,7 +15,7 @@ public class WalkingBomb : Physics
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	WalkingBomb(MovieClip mc) : base(mc) {
+	WalkingBomb(string reference) : base(reference) {
 		dir		= 1;
 
 		fl_slide		= false;
@@ -33,7 +33,9 @@ public class WalkingBomb : Physics
 	------------------------------------------------------------------------*/
 	public static WalkingBomb Attach(GameMode g, PlayerBomb b) {
 		string linkage = "hammer_player_wbomb" ;
-		WalkingBomb mc = new WalkingBomb(g.depthMan.Attach(linkage,Data.DP_BOMBS));
+
+		WalkingBomb mc = new WalkingBomb(linkage);
+		g.depthMan.Attach(mc,Data.DP_BOMBS);
 		mc.InitBomb(g, b) ;
 		return mc ;
 	}

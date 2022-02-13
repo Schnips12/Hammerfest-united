@@ -3,7 +3,7 @@ public class Smoke : Supa
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Smoke(MovieClip mc) : base(mc)
+    Smoke(string reference) : base(reference)
     {
         fl_blink = false;
     }
@@ -26,7 +26,8 @@ public class Smoke : Supa
     public static Smoke Attach(GameMode g)
     {
         string linkage = "hammer_supa_smoke";
-        Smoke mc = new Smoke(g.depthMan.Attach(linkage, Data.DP_SUPA));
+        Smoke mc = new Smoke(linkage);
+        g.depthMan.Attach(mc, Data.DP_SUPA);
         mc.InitSupa(g, Data.GAME_WIDTH / 2, Data.GAME_HEIGHT / 2);
         return mc;
     }

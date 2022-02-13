@@ -62,6 +62,11 @@ public class PlayerController
             waterJump = 3;
         }
 
+        if(Input.GetKeyDown(KeyCode.Keypad0))
+        {
+            game.NextLevel();
+        }
+
         // *** Gauche
         if (Input.GetKey(KeyCode.LeftArrow))
         {

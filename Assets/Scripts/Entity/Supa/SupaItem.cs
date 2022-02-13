@@ -9,7 +9,7 @@ public class SupaItem : Supa
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    SupaItem(MovieClip mc) : base(mc)
+    SupaItem(string reference) : base(reference)
     {
         radius = 50;
     }
@@ -33,7 +33,8 @@ public class SupaItem : Supa
     public static SupaItem Attach(GameMode g, int id)
     {
         string linkage = "hammer_supa_item";
-        SupaItem mc = new SupaItem(g.depthMan.Attach(linkage, Data.DP_SUPA));
+        SupaItem mc = new SupaItem(linkage);
+        g.depthMan.Attach(mc, Data.DP_SUPA);
         mc.supaId = id;
         mc.InitSupa(g, Data.GAME_WIDTH / 2, Data.GAME_HEIGHT + 50);
         return mc;

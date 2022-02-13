@@ -1,9 +1,7 @@
 public class Pomme : Shooter
 {
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Pomme(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Pomme(string reference) : base(reference)
     {
         SetJumpUp(3);
         SetJumpH(100);
@@ -14,31 +12,17 @@ public class Pomme : Shooter
         InitShooter(20, 12);
     }
 
-
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
-    protected override void Init(GameMode g)
-    {
-        base.Init(g);
-    }
-
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Pomme Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_POMME];
-        Pomme mc = new Pomme(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Pomme mc = new Pomme(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: TIR
-	------------------------------------------------------------------------*/
+    /// <summary>Shoot event.</summary>
     protected override void OnShoot()
     {
         var s = Pepin.Attach(game, x, y);

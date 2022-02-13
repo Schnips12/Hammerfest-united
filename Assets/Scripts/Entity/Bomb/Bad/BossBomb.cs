@@ -5,7 +5,7 @@ public class BossBomb : BadBomb, IBomb
     /*------------------------------------------------------------------------
         CONSTRUCTEUR
         ------------------------------------------------------------------------*/
-    public BossBomb(MovieClip mc) : base(mc)
+    public BossBomb(string reference) : base(reference)
     {
         duration = Data.SECOND * 2 + (Random.Range(0, 50) / 10 * (Random.Range(0, 2) * 2 - 1));
         fl_blink = true;
@@ -21,7 +21,8 @@ public class BossBomb : BadBomb, IBomb
     public static BossBomb Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_boss";
-        BossBomb mc = new BossBomb(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        BossBomb mc = new BossBomb(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

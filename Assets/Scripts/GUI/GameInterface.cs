@@ -69,22 +69,12 @@ public class GameInterface
 		fl_multi = false;
 
 		// skin
-		mc = game.depthMan.Attach("hammer_interf_game",Data.DP_TOP);
+		mc = new MovieClip("hammer_interf_game");
+		game.depthMan.Attach(mc,Data.DP_TOP);
 		mc._x = game.mc._x-10;
 		mc._y = 0;
 		scores	= new List<TextMeshPro>();
 		scores.Add(mc.FindTextfield("score0"));
-
-		// Lettres Extend
-		letters = new List<List<GameObject>>();
-		letters.Add(new List<GameObject>());
-		letters[0].Add(mc.FindSub("letter0_0"));
-		letters[0].Add(mc.FindSub("letter0_1"));
-		letters[0].Add(mc.FindSub("letter0_2"));
-		letters[0].Add(mc.FindSub("letter0_3"));
-		letters[0].Add(mc.FindSub("letter0_4"));
-		letters[0].Add(mc.FindSub("letter0_5"));
-		letters[0].Add(mc.FindSub("letter0_6"));
 
 		fakeScores		= new List<int>();
         fakeScores.Add(0);
@@ -112,7 +102,8 @@ public class GameInterface
 		fl_multi = true;
 
 		// skin
-		mc = game.depthMan.Attach("hammer_interf_game_multi",Data.DP_TOP);
+		mc = new MovieClip("hammer_interf_game_multi");
+		game.depthMan.Attach(mc,Data.DP_TOP);
 		mc._x = -game.mc._x;
 		mc._y = 0;
 		mc.GotoAndStop(2);
@@ -176,7 +167,8 @@ public class GameInterface
 		BASE_WIDTH *= 0.75f;
 
 		// skin
-		mc = game.depthMan.Attach("hammer_interf_game", Data.DP_TOP);
+		mc = new MovieClip("hammer_interf_game");
+		game.depthMan.Attach(mc, Data.DP_TOP);
 		mc._x = -game.mc._x;
 		mc._y = 0;
 		mc.GotoAndStop(3);
@@ -285,7 +277,10 @@ public class GameInterface
 		}
 		else {
 			while ( currentLives[pid]<v & currentLives[pid]<MAX_LIVES ) {
-				var newmc = new MovieClip(mc, "hammer_interf_life", "Overlay", 1);
+				var newmc = new MovieClip("hammer_interf_life");
+				newmc.SetParent(mc);
+				newmc.SetLayer("Overlay");
+				newmc.SetDepth(1);
 				newmc._x = baseX+currentLives[pid]*baseWid;
 				newmc._y = -9;
 				plives.Add(newmc);
@@ -295,7 +290,10 @@ public class GameInterface
 				more.Add(null);
 			}
 			if ( v>MAX_LIVES & more[pid]==null ) {
-				more[pid] = new MovieClip(mc,"hammer_interf_more", "Overlay", 1);
+				more[pid] = new MovieClip("hammer_interf_more");
+				more[pid].SetParent(mc);
+				more[pid].SetLayer("Overlay");
+				more[pid].SetDepth(1);
 				more[pid]._x = baseX + baseWid*MAX_LIVES - 4;
 				if ( pid>0 ) {
 					more[pid]._x-=baseWid;

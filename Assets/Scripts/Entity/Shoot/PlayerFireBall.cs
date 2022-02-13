@@ -5,7 +5,7 @@ public class PlayerFireBall : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    PlayerFireBall(MovieClip mc) : base(mc)
+    PlayerFireBall(string reference) : base(reference)
     {
         shootSpeed = 8;
         coolDown = Data.SECOND * 2;
@@ -26,7 +26,8 @@ public class PlayerFireBall : Shoot
     public static PlayerFireBall Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_player_fireball";
-        PlayerFireBall s = new PlayerFireBall(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        PlayerFireBall s = new PlayerFireBall(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y);
         return s;
     }

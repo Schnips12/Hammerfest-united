@@ -6,7 +6,7 @@ public class Arrow : Supa
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Arrow(MovieClip mc) : base(mc)
+    Arrow(string reference) : base(reference)
     {
 
     }
@@ -17,7 +17,8 @@ public class Arrow : Supa
     public static Arrow Attach(GameMode g)
     {
         string linkage = "hammer_supa_arrow";
-        Arrow mc = new Arrow(g.depthMan.Attach(linkage, Data.DP_SUPA));
+        Arrow mc = new Arrow(linkage);
+        g.depthMan.Attach(mc, Data.DP_SUPA);
         mc.InitSupa(g, Data.GAME_WIDTH, Data.GAME_HEIGHT + 50);
         return mc;
     }

@@ -44,7 +44,7 @@ public class WallWalker : Bad
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected WallWalker(MovieClip mc) : base(mc)
+    protected WallWalker(string reference) : base(reference)
     {
         speed = 3;
         angerFactor = 0.4f;
@@ -119,7 +119,7 @@ public class WallWalker : Bad
             }
         }
 
-        choice cho = choices.Count > 1 ? choices[Random.Range(0, choices.Count)] : null;
+        choice cho = choices.Count > 0 ? choices[Random.Range(0, choices.Count)] : null;
         if (cho != null)
         {
             SetDir(cho.x, cho.y);
@@ -254,7 +254,7 @@ public class WallWalker : Bad
         {
             dirX = (dx==null || dx==0) ? 0 : Mathf.RoundToInt(Mathf.Sign(dx.Value));
             dirY = (dy==null || dy==0) ? 0 : Mathf.RoundToInt(Mathf.Sign(dy.Value));
-            if (world.GetCase(cx + dirX, cy + dirY) > 0 & world.GetCase(cx + cp.x, cy + cp.y) < 0)
+            if (world.GetCase(cx + dirX, cy + dirY) > 0 & world.GetCase(cx + cp.x, cy + cp.y) > 0)
             {
                 SetDir(-cp.x, -cp.y);
                 SetCP(dirX, dirY);

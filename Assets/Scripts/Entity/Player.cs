@@ -82,7 +82,7 @@ public class Player : Physics, IEntity
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Player(MovieClip mc) : base(mc)
+    Player(string reference) : base(reference)
     {
         name = "Igor";
 
@@ -119,7 +119,7 @@ public class Player : Physics, IEntity
         if (GameManager.CONFIG.HasFamily(100)) { initialMaxBombs++; }
         maxBombs = initialMaxBombs;
         coolDown = 0;
-        lives = 30; // TODO Set to 1
+        lives = 1;
         if (GameManager.CONFIG.HasFamily(102)) { lives++; } // coeur 1
         if (GameManager.CONFIG.HasFamily(103)) { lives++; } // coeur 2
         if (GameManager.CONFIG.HasFamily(104)) { lives++; } // coeur 3
@@ -331,7 +331,8 @@ public class Player : Physics, IEntity
 	------------------------------------------------------------------------*/
     public static Player Attach(GameMode g, float x, float y)
     {
-        Player mc = new Player(g.depthMan.Attach("hammer_player", Data.DP_PLAYER));
+        Player mc = new Player("hammer_player");
+        g.depthMan.Attach(mc, Data.DP_PLAYER);
         mc.InitPlayer(g, x, y);
         return mc;
     }
@@ -546,9 +547,9 @@ public class Player : Physics, IEntity
 
         game.statsMan.Inc(Data.STAT_DEATH, 1);
         lives--;
-        game.gi.SetLives(pid, lives);
         if (lives >= 0)
         {
+            game.gi.SetLives(pid, lives);
             Resurrect();
         }
         else
@@ -582,7 +583,6 @@ public class Player : Physics, IEntity
 
                 }
             }
-
 
             for (int i = 0; i < pl.Count; i++)
             {
@@ -731,7 +731,8 @@ public class Player : Physics, IEntity
 	------------------------------------------------------------------------*/
     public void Curse(int id)
     {
-        MovieClip c = game.depthMan.Attach("curse", Data.DP_FX);
+        MovieClip c = new MovieClip("curse");
+        game.depthMan.Attach(c, Data.DP_FX);
         c._alpha = 70;
         c.SetAnim("Frame", 1);
         c.GotoAndStop(id);
@@ -1492,7 +1493,7 @@ public class Player : Physics, IEntity
     {
         base.EndUpdate();
 
-        if (shieldMC != null)
+        if (shieldMC != null && shieldMC.mc!=null)
         {
             if (shieldTimer <= Data.SECOND * 3)
             {
@@ -1555,7 +1556,7 @@ public class Player : Physics, IEntity
         // D�placement
         if (!fl_kill & !fl_lockControls)
         {
-            if (!fl_entering & visible)
+            if (!fl_entering & _visible)
             {
                 ctrl.HammerUpdate();
             }

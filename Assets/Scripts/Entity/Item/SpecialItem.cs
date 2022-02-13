@@ -7,7 +7,7 @@ public class SpecialItem : Item
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    SpecialItem(MovieClip mc) : base(mc)
+    SpecialItem(string reference) : base(reference)
     {
 
     }
@@ -32,7 +32,8 @@ public class SpecialItem : Item
             return null;
         }
 
-        SpecialItem mc = new SpecialItem(g.depthMan.Attach("hammer_item_special", Data.DP_ITEMS));
+        SpecialItem mc = new SpecialItem("hammer_item_special");
+        g.depthMan.Attach(mc, Data.DP_ITEMS);
         mc.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.specialItems.Find(x => x.name.Substring(20) == (id + 1).ToString());
         mc.InitItem(g, x, y, id, subId);
         return mc;

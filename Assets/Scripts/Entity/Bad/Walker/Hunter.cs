@@ -9,11 +9,8 @@ public class Hunter : Jumper
     Physics prey;
     bool fl_hunt;
 
-
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Hunter(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Hunter(string reference) : base(reference)
     {
         SetJumpUp(5);
         SetJumpDown(5);
@@ -24,46 +21,36 @@ public class Hunter : Jumper
         fl_hunt = false;
     }
 
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
+    public static Hunter Attach(GameMode g, float x, float y)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_BANANE];
+        Hunter mc = new Hunter(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+        mc.InitBad(g, x, y);
+        return mc;
+    }
 
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
+    /// <summary>Sets a random player as the prey.</summary>
     protected override void Init(GameMode g)
     {
         base.Init(g);
         prey = game.GetOne(Data.PLAYER) as Physics;
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
-    public static Hunter Attach(GameMode g, float x, float y)
-    {
-        string linkage = Data.LINKAGES[Data.BAD_BANANE];
-        Hunter mc = new Hunter(g.depthMan.Attach(linkage, Data.DP_BADS));
-        mc.InitBad(g, x, y);
-        return mc;
-    }
-
-
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI LE PLAYER EST PROCHE
-	------------------------------------------------------------------------*/
+    /// <summary>Returns true if the prey is verticaly close.</summary>
     bool Vclose()
     {
         return Mathf.Abs(prey.y - y) <= VCLOSE_DISTANCE;
     }
 
+    /// <summary>Returns true if the prey is close.</summary>
     bool Close()
     {
         return Distance(prey.x, prey.y) <= CLOSE_DISTANCE;
     }
 
-
-    /*------------------------------------------------------------------------
-	CALCUL DE LA VITESSE DE MARCHE
-	------------------------------------------------------------------------*/
+    /// <summary>Moves faster when the prey is close.</summary>
     protected override void CalcSpeed()
     {
         base.CalcSpeed();
@@ -73,19 +60,13 @@ public class Hunter : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	�NERVEMENT D�SACTIV�
-	------------------------------------------------------------------------*/
+    /// <summary>Anger disabled.</summary>
     public override void AngerMore()
     {
         anger = 0;
     }
 
-
-    /*------------------------------------------------------------------------
-	INFIXE DE STEPPING
-	------------------------------------------------------------------------*/
+    /// <summary>Checks if the hunt can begin.</summary>
     protected override void Infix()
     {
         base.Infix();
@@ -96,19 +77,13 @@ public class Hunter : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI UNE TRAQUE EST � LANCER
-	------------------------------------------------------------------------*/
+    /// <summary>Returns true if the prey is close.</summary>
     bool DecideHunt()
     {
         return Close();
     }
 
-
-    /*------------------------------------------------------------------------
-	LANCE UNE TRAQUE
-	------------------------------------------------------------------------*/
+    /// <summary>If the prey if verticaly close, look in its direction and increases the speed.</summary>
     void Hunt()
     {
         if (Vclose())
@@ -122,10 +97,7 @@ public class Hunter : Jumper
         UpdateSpeed();
     }
 
-
-    /*------------------------------------------------------------------------
-	MAIN
-	------------------------------------------------------------------------*/
+    /// <summary>Disables the hunt when the prey is not close.</summary>
     public override void HammerUpdate()
     {
         if (fl_hunt)

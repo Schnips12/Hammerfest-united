@@ -6,7 +6,7 @@ public class Classic : PlayerBomb
     /*------------------------------------------------------------------------
         CONSTRUCTEUR
         ------------------------------------------------------------------------*/
-    public Classic(MovieClip mc) : base(mc)
+    public Classic(string reference) : base(reference)
     {
         duration = 45;
         power = 30;
@@ -19,7 +19,8 @@ public class Classic : PlayerBomb
     public static Classic Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_classic";
-        Classic mc = new Classic(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        Classic mc = new Classic(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

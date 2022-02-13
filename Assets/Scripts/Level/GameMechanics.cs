@@ -219,7 +219,7 @@ public class GameMechanics : ViewManager
 				flags |= Data.IA_ALLOW_FALL;
 			}
 
-			// Point de saut vertical, vers le bas (on est sous une dalle)
+			// Point de saut vertical, vers le bas (on est sur une dalle)
 			if (GetCase(cx,cy)==0 & GetCase(cx,cy-1)==Data.GROUND) {
 				fallHeight = _checkSecureFall(cx,cy-2) ;
 				if (fallHeight>=0) {
@@ -265,14 +265,14 @@ public class GameMechanics : ViewManager
 					// Gauche
 					if (GetCase(cx-1,cy)>0) {
 						var h = GetWallHeight(cx-1, cy, Data.IA_CLIMB);
-						if (h!=-1 & h<maxHeight & cy+h<=Data.LEVEL_HEIGHT) {
+						if (h!=-1 & h<maxHeight & (cy+h)<Data.LEVEL_HEIGHT) {
 							flags |= Data.IA_CLIMB_LEFT;
 						}
 					}
 					// Droite
 					if (GetCase(cx+1,cy)>0) {
 						var h = GetWallHeight(cx+1, cy, Data.IA_CLIMB);
-						if (h!=-1 & h<maxHeight & cy+h<=Data.LEVEL_HEIGHT) {
+						if (h!=-1 & h<maxHeight & (cy+h)<Data.LEVEL_HEIGHT) {
 							flags |= Data.IA_CLIMB_RIGHT;
 						}
 					}
@@ -300,18 +300,18 @@ public class GameMechanics : ViewManager
 				if (maxHeight>0) {
 					// Gauche
 					if (GetCase(cx+1,cy-1)==Data.GROUND) {
-						int h = GetStepHeight(cx,cy, Data.IA_CLIMB);
-						if (h!=-1 & h<maxHeight) {
-							if (CheckFlag(new Vector2Int(cx, cy+h), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx+1, cy+h), Data.IA_FALL_SPOT)) {
+						int? h = GetStepHeight(cx, cy, Data.IA_CLIMB);
+						if (h!=null && h<maxHeight) {
+							if (CheckFlag(new Vector2Int(cx, cy+h.Value), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx+1, cy+h.Value), Data.IA_FALL_SPOT)) {
 								flags |= Data.IA_CLIMB_LEFT;
 							}
 						}
 					}
 					// Droite
 					if (GetCase(cx-1,cy-1)==Data.GROUND) {
-						int h = GetStepHeight(cx,cy, Data.IA_CLIMB);
-						if (h!=-1 & h<maxHeight) {
-							if (CheckFlag(new Vector2Int(cx, cy+h), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx-1, cy+h), Data.IA_FALL_SPOT)) {
+						int? h = GetStepHeight(cx, cy, Data.IA_CLIMB);
+						if (h!=null && h<maxHeight) {
+							if (CheckFlag(new Vector2Int(cx, cy+h.Value), Data.IA_BORDER) & CheckFlag(new Vector2Int(cx-1, cy+h.Value), Data.IA_FALL_SPOT)) {
 								flags |= Data.IA_CLIMB_RIGHT;
 							}
 						}
@@ -413,16 +413,20 @@ public class GameMechanics : ViewManager
 	/*------------------------------------------------------------------------
 	RENVOIE LA HAUTEUR D'UNE MARCHE DANS LE VIDE
 	------------------------------------------------------------------------*/
-	public int GetStepHeight(int cx, int cy, int max) {
+	public int? GetStepHeight(int cx, int cy, int max) {
 		int h=0;
-		while (GetCase(cx,cy+h)<=0  &  h<max) {
+		while (GetCase(cx,cy+h)<=0  &  h<max)
+		{
 			h++;
 		}
 		h++;
 		if (h>=max) {
-			h=-1;
+			return null;
 		}
-		return h;
+		else
+		{
+			return h;
+		}
 	}
 
 	// *** EVENTS *****

@@ -9,7 +9,7 @@ public class Red : PlayerBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public Red(MovieClip mc) : base(mc)
+    public Red(string reference) : base(reference)
     {
         duration = 38;
         power = 30;
@@ -23,7 +23,8 @@ public class Red : PlayerBomb
     public static Red Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_red";
-        Red mc = new Red(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        Red mc = new Red(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

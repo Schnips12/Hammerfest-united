@@ -13,7 +13,7 @@ public class SoccerBall : PlayerBomb
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	public SoccerBall(MovieClip mc) : base(mc) {
+	public SoccerBall(string reference) : base(reference) {
 		lastPlayer		= null;
 		duration		= 999999;
 		burnTimer		= 0;
@@ -28,7 +28,8 @@ public class SoccerBall : PlayerBomb
 	------------------------------------------------------------------------*/
 	public static SoccerBall Attach(GameMode g, float x, float y) {
 		string linkage = "hammer_bomb_soccer";
-		SoccerBall mc = new SoccerBall(g.depthMan.Attach(linkage,Data.DP_BOMBS));
+		SoccerBall mc = new SoccerBall(linkage);
+		g.depthMan.Attach(mc,Data.DP_BOMBS);
 		mc.InitBomb(g, x, y);
 		return mc;
 	}
@@ -40,7 +41,7 @@ public class SoccerBall : PlayerBomb
 	protected override void Init(GameMode g) {
 		base.Init(g);
 		Register(Data.SOCCERBALL);
-		FxManager.AddGlow(this, Data.ToColor(0x808080), 2);
+		/* FxManager.AddGlow(this, Data.ToColor(0x808080), 2); */
 		game.fxMan.AttachShine( x, y+Data.CASE_HEIGHT*0.5f );
 	}
 

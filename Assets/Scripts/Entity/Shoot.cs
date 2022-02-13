@@ -11,7 +11,7 @@ public class Shoot : Physics
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Shoot(MovieClip mc) : base(mc)
+    protected Shoot(string reference) : base(reference)
     {
         // Physics
         fl_hitWall = false;

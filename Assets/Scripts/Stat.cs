@@ -1,20 +1,21 @@
-public struct Stat
+public partial class StatsManager
 {
-    public float current;
-    public float total;
-
-
-    /*------------------------------------------------------------------------
-	OP�RATIONS COURANTES
-	------------------------------------------------------------------------*/
-    public void Inc(float n)
+    private struct Stat
     {
-        current += n;
-    }
+        public float current;
+        public float total;
 
-    public void Reset()
-    {
-        total += current;
-        current = 0;
+        /// <summary>Increases the current value of the amount n.</summary>
+        public void Inc(float n)
+        {
+            current += n;
+        }
+
+        /// <summary>Sets the current value to zero after updating the total.</summary>
+        public void Reset()
+        {
+            total += current;
+            current = 0;
+        }
     }
 }

@@ -7,7 +7,7 @@ public class SupaBall : Supa
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    SupaBall(MovieClip mc) : base(mc)
+    SupaBall(string reference) : base(reference)
     {
         fl_gravity = true;
     }
@@ -19,7 +19,8 @@ public class SupaBall : Supa
     public static SupaBall Attach(GameMode g)
     {
         string linkage = "hammer_supa_ball";
-        SupaBall mc = new SupaBall(g.depthMan.Attach(linkage, Data.DP_SUPA));
+        SupaBall mc = new SupaBall(linkage);
+        g.depthMan.Attach(mc, Data.DP_SUPA);
         mc.InitSupa(g, Data.GAME_WIDTH, 0);
         return mc;
     }

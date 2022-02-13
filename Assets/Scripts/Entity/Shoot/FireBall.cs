@@ -3,7 +3,7 @@ public class ShootFireBall : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    ShootFireBall(MovieClip mc) : base(mc)
+    ShootFireBall(string reference) : base(reference)
     {
         fl_largeTrigger = true;
         shootSpeed = 7;
@@ -24,7 +24,8 @@ public class ShootFireBall : Shoot
     public static ShootFireBall Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_fireball";
-        ShootFireBall s = new ShootFireBall(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        ShootFireBall s = new ShootFireBall(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y + 10);
         return s;
     }

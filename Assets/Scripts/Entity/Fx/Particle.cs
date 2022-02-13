@@ -10,7 +10,7 @@ public class Particle : Mover
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Particle(MovieClip mc) : base(mc)
+    Particle(string reference) : base(reference)
     {
         SetLifeTimer(Data.SECOND * 2 + (Data.SECOND * 2) * Random.Range(0, 100) / 100);
         Stop();
@@ -228,7 +228,8 @@ public class Particle : Mover
     public static Particle Attach(GameMode g, int frame, float x, float y)
     {
         string linkage = "hammer_fx_particle";
-        Particle mc = new Particle(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Particle mc = new Particle(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
 		mc.SetAnim("Frame", frame);
         mc.InitParticle(g, frame, x, y);
         return mc;

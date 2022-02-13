@@ -12,7 +12,7 @@ public class Shooter : Jumper
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Shooter(MovieClip mc) : base(mc)
+    protected Shooter(string reference) : base(reference)
     {
         shootCD = Data.PEACE_COOLDOWN;
         DisableShooter();

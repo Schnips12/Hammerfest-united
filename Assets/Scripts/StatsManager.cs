@@ -1,51 +1,50 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StatsManager
+public partial class StatsManager
 {
     GameMode game;
     Stat[] stats;
     List<int> extendList;
 
-
     /*------------------------------------------------------------------------
-	CONSTRUCTEUR
+	CONSTRUCTOR
 	------------------------------------------------------------------------*/
+    /// <summary>Providing a GameMode is necessary for accessing to the RandomManager and the ScriptEngine.</summary>
     public StatsManager(GameMode g)
     {
         game = g;
         stats = new Stat[50];
     }
 
-
     /*------------------------------------------------------------------------
-	LECTURE
+	READ / WRITE
 	------------------------------------------------------------------------*/
+    /// <summary>Returns the current value of the id stat.</summary>
     public float Read(int id)
     {
         return stats[id].current;
     }
+
+    /// <summary>Returns the total value of the id stat.</summary>
     public float GetTotal(int id)
     {
         return stats[id].total;
     }
 
-    /*------------------------------------------------------------------------
-	�CRITURE
-	------------------------------------------------------------------------*/
+    /// <summary>Sets the current value of the id stat.</summary>
     public void Write(int id, float n)
     {
         stats[id].current = n;
     }
+
+    /// <summary>Adds n to the current value of the id stat.</summary>
     public void Inc(int id, float n)
     {
         stats[id].Inc(n);
     }
 
-
-    /*------------------------------------------------------------------------
-	REMISE � 0 DES CURRENTS
-	------------------------------------------------------------------------*/
+    /// <summary>Resets the current value of every stat. Updates the totals.</summary>
     public void Reset()
     {
         foreach (Stat stat in stats)
@@ -54,10 +53,10 @@ public class StatsManager
         }
     }
 
-
     /*------------------------------------------------------------------------
-	DISTRIBUTION DES EXTENDS POUR LE NIVEAU EN COURS
+	EXTENDS MANAGEMENT
 	------------------------------------------------------------------------*/
+    /// <summary>Returns the number of different extends susceptible to appear on this level.</summary>
     public float CountExtend()
     {
         float nb = 1;
@@ -65,54 +64,40 @@ public class StatsManager
         {
             nb += Read(Data.STAT_MAX_COMBO) - 1;
         }
-        return Mathf.Min(7, nb);
+        return Mathf.Min(Data.RAND_EXTENDS.Length, nb);
     }
 
-
-    /*------------------------------------------------------------------------
-	CALCULE LES EXTENDS POUR LE NIVEAU EN COURS
-	------------------------------------------------------------------------*/
+    /// <summary>Generates of a randomized list of the extends susceptible to appear on this level.</summary>
     public void SpreadExtend()
     {
         float nb = CountExtend();
-
         if (nb > 0)
         {
-            game.world.scriptEngine.InsertExtend();
-
             extendList = new List<int>();
-            bool[] l = new bool[7];
-			int id;
+            bool[] l = new bool[Data.RAND_EXTENDS.Length];
+            int subId;
 
             for (int i = 0; i < nb; i++)
-            {                
+            {
                 do
                 {
-                    id = game.randMan.Draw(Data.RAND_EXTENDS_ID);
+                    subId = game.randMan.Draw(Data.RAND_EXTENDS_ID);
                 }
-                while (l[id] == true);
+                while (l[subId] == true);
 
-                l[id] = true;
-                extendList.Add(id);
+                l[subId] = true;
+                extendList.Add(subId);
             }
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACH: LETTRE D'EXTEND
-	------------------------------------------------------------------------*/
+    /// <summary>Returns an extend on a random ground position.</summary>
     public SpecialItem AttachExtend()
     {
-        if (game.fl_clear)
-        {
-            return null;
-        }
-        Vector2Int pt = game.world.GetGround(Random.Range(0, Data.LEVEL_WIDTH), Random.Range(0, Data.LEVEL_HEIGHT));
-        float x = Entity.x_ctr(pt.x);
-        float y = Entity.y_ctr(pt.y);
-        int id = extendList[Random.Range(0, extendList.Count)];
-        SpecialItem mc = SpecialItem.Attach(game, x, y, 0, id);
+        int subId = extendList[Random.Range(0, extendList.Count)];
+        Vector2Int cpt = game.world.GetGround(Random.Range(0, Data.LEVEL_WIDTH), Random.Range(0, Data.LEVEL_HEIGHT));
+        Vector2 rpt = Entity.ctr(cpt);
+        SpecialItem mc = SpecialItem.Attach(game, rpt.x, rpt.y, 0, subId);
         return mc;
     }
 }

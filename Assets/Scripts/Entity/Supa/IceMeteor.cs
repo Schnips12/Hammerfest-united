@@ -6,7 +6,7 @@ public class IceMeteor : Supa
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    IceMeteor(MovieClip mc) : base(mc)
+    IceMeteor(string reference) : base(reference)
     {
 
     }
@@ -18,7 +18,8 @@ public class IceMeteor : Supa
     public static IceMeteor Attach(GameMode g)
     {
         string linkage = "hammer_supa_icemeteor";
-        IceMeteor mc = new IceMeteor(g.depthMan.Attach(linkage, Data.DP_SUPA));
+        IceMeteor mc = new IceMeteor(linkage);
+        g.depthMan.Attach(mc, Data.DP_SUPA);
         mc.InitSupa(g, Data.GAME_WIDTH, 0);
         return mc;
     }

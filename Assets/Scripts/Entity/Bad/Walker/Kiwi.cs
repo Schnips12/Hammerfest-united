@@ -5,10 +5,8 @@ public class Kiwi : Shooter
 {
     List<Mine> mineList;
 
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Kiwi(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Kiwi(string reference) : base(reference)
     {
         SetJumpUp(10);
         SetJumpDown(20);
@@ -26,22 +24,17 @@ public class Kiwi : Shooter
         mineList = new List<Mine>();
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Kiwi Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_KIWI];
-        Kiwi mc = new Kiwi(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Kiwi mc = new Kiwi(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: POSE DE MINE
-	------------------------------------------------------------------------*/
+    /// <summary>Drops a mine.</summary>
     protected override void OnShoot()
     {
         var m = Mine.Attach(
@@ -52,10 +45,7 @@ public class Kiwi : Shooter
         mineList.Add(m);
     }
 
-
-    /*------------------------------------------------------------------------
-	EFFACE TOUTES LES MINES POS�ES PAR CE BAD
-	------------------------------------------------------------------------*/
+    /// <summary>Removes all the mines dropped by this Kiwi.</summary>
     void ClearMines()
     {
         for (int i = 0; i < mineList.Count; i++)

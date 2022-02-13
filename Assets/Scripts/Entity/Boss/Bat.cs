@@ -42,7 +42,7 @@ public class Bat : Mover
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Bat(MovieClip mc) : base(mc) {
+	Bat(string reference) : base(reference) {
 		fl_hitGround	= false;
 		fl_hitCeil 		= false;
 		fl_hitWall		= false;
@@ -77,7 +77,8 @@ public class Bat : Mover
 	------------------------------------------------------------------------*/
 	public static Bat Attach(GameMode g) {
 		var linkage = "hammer_boss_bat";
-		Bat mc = new Bat(g.depthMan.Attach(linkage,Data.DP_BADS));
+		Bat mc = new Bat(linkage);
+		g.depthMan.Attach(mc,Data.DP_BADS);
 		mc.InitBoss(g) ;
 		return mc ;
 	}

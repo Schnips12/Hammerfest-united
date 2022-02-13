@@ -12,12 +12,10 @@ public class Saw : WallWalker
     bool fl_updateSpeed;
     float stunTimer;
     float rotSpeed;
+    int subFrame;
 
-
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Saw(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Saw(string reference) : base(reference)
     {
         speed = BASE_SPEED;
         angerFactor = 0;
@@ -26,52 +24,42 @@ public class Saw : WallWalker
         fl_stun = false;
         fl_stop = false;
         fl_updateSpeed = false;
+        subFrame = 1;
     }
 
-
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
+    /// <summary>Removes the spear from the list of ennemies that are to be cleared before proceeding to the next level.</summary>
     protected override void Init(GameMode g)
     {
         base.Init(g);
         Unregister(Data.BAD_CLEAR);
     }
 
-
-
-    /*------------------------------------------------------------------------
-	INITIALISATION BAD
-	------------------------------------------------------------------------*/
+    /// <summary>Rescaling the saw. Could be removed if the asset size was adjusted.</summary>
     protected override void InitBad(GameMode g, float x, float y)
     {
         base.InitBad(g, x, y);
         Scale(0.8f);
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Saw Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_SAW];
-        Saw mc = new Saw(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Saw mc = new Saw(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }
 
 
-    /*------------------------------------------------------------------------
-	INTERRUPTION
-	------------------------------------------------------------------------*/
+    /// <summary>Saw can be stopped but should never fall from the wall. Stun is an alternative to the knock uop system.</summary>
     void Stun()
     {
         if (fl_stop)
         {
             return;
         }
-        game.fxMan.AttachExplosion(x, y - Data.CASE_HEIGHT * 0.5f, 30);
+        game.fxMan.AttachExplosion(x, y + Data.CASE_HEIGHT * 0.5f, 30);
         if (!fl_stun)
         {
             game.fxMan.InGameParticlesDir(Data.PARTICLE_METAL, x, y, 5, dx);
@@ -85,9 +73,7 @@ public class Saw : WallWalker
     }
 
 
-    /*------------------------------------------------------------------------
-	ARR�T / MARCHE
-	------------------------------------------------------------------------*/
+    /// <summary>Pauses the wallwaking routine.</summary>
     void Halt()
     {
         if (fl_stop)
@@ -100,6 +86,7 @@ public class Saw : WallWalker
         dy = 0;
     }
 
+    /// <summary>Resumes the wallwalking routine.</summary>
     void Run()
     {
         if (!fl_stop)
@@ -111,10 +98,7 @@ public class Saw : WallWalker
         UpdateSpeed();
     }
 
-
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI "EN BONNE SANT�"
-	------------------------------------------------------------------------*/
+    /// <summary>Returns true if the saw can move.</summary>
     protected override bool IsHealthy()
     {
         return !fl_kill & !fl_stun & !fl_stop;
@@ -143,8 +127,8 @@ public class Saw : WallWalker
             {
                 Bomb b = e as Bomb;
                 b.SetLifeTimer(Data.SECOND * 0.6f);
-                b.dx = (dx != 0) ? -dx : -cp.x * 4;
-                b.dy = (cp.y != 0) ? cp.y * 13 : 8;
+                b.dx = (dx!=0 )		? -dx		: -cp.x*4;
+				b.dy = (cp.y!=0)	? -cp.y*13	: -8;
                 game.fxMan.InGameParticlesDir(Data.PARTICLE_SPARK, b.x, b.y, 2, b.dx);
             }
         }
@@ -204,42 +188,52 @@ public class Saw : WallWalker
         if (fl_wallWalk | fl_stop)
         {
             float ang = Mathf.Atan2(cp.y, cp.x);
-            float angDeg = 180 * ang / Mathf.PI - 90;
-            float delta = angDeg - subs[0]._rotation;
-            if (delta < -180)
+            float angDeg = 180 * ang / Mathf.PI + 90;
+            float delta = angDeg - FindSub("saw")._rotation;
+            while (delta < -180)
             {
                 delta += 360;
             }
-            if (delta > 180)
+            while (delta > 180)
             {
                 delta -= 360;
             }
-            subs[0]._rotation += (delta) * ROTATION_RECAL; // TODO Rework the saw prefab to set the reflection as "sub".
+            FindSub("saw")._rotation += delta * ROTATION_RECAL; // TODO Rework the saw prefab to set the reflection as "sub".
         }
         else
         {
             if (fl_kill)
             {
-                /* subs[0]._rotation += Loader.Instance.tmod * 14.5f; */
+                FindSub("saw")._rotation += Loader.Instance.tmod * 14.5f;
             }
             else
             {
                 if (IsHealthy())
                 {
-                    /* subs[0]._rotation += (0 - subs[0]._rotation) * (ROTATION_RECAL * 0.25f); */
+                   FindSub("saw")._rotation += (0 - FindSub("saw")._rotation) * (ROTATION_RECAL * 0.25f);
                 }
             }
         }
 
-        if (fl_stop | fl_stun)
+        /* if (fl_stop | fl_stun)
         {
-            rotSpeed *= 0.9f;
+            rotSpeed *= 0.9f; // TODO Rework the saw asset so it can rotate
         }
         else
         {
             rotSpeed = Mathf.Min(ROTATION_SPEED, rotSpeed + Loader.Instance.tmod);
+        } */
+
+        if(subFrame==1)
+        {
+            FindSub("saw").SetAnim("Walk", 2);
+            subFrame = 2;
         }
-        /* subs[0]._rotation += rotSpeed; */
+        else
+        {
+            FindSub("saw").SetAnim("Walk", 1);
+            subFrame = 1;
+        }
     }
 
 
@@ -251,9 +245,9 @@ public class Saw : WallWalker
     {
 
         // Controle par variables dynamiques
-        int dyn_sp = game.GetDynamicInt("SAW_SPEED");
+        int? dyn_sp = game.GetDynamicInt("SAW_SPEED");
         float old = speed;
-        if (dyn_sp < 0)
+        if (dyn_sp==null || dyn_sp.Value < 0)
         {
             speed = BASE_SPEED;
             Run();
@@ -266,7 +260,7 @@ public class Saw : WallWalker
             }
             else
             {
-                speed = dyn_sp;
+                speed = dyn_sp.Value;
                 Run();
             }
         }

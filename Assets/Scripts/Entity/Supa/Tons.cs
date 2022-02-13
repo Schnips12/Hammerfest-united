@@ -6,7 +6,7 @@ public class Tons : Supa
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Tons(MovieClip mc) : base(mc)
+    Tons(string reference) : base(reference)
     {
         fl_gravity = true;
     }
@@ -18,7 +18,8 @@ public class Tons : Supa
     public static Tons Attach(GameMode g)
     {
         string linkage = "hammer_supa_tons";
-        Tons mc = new Tons(g.depthMan.Attach(linkage, Data.DP_SUPA));
+        Tons mc = new Tons(linkage);
+        g.depthMan.Attach(mc, Data.DP_SUPA);
         mc.InitSupa(g, Data.GAME_WIDTH, Data.GAME_HEIGHT);
         return mc;
     }

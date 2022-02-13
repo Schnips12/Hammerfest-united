@@ -16,14 +16,10 @@ public class Crawler : WallWalker
     float attackCD;
     float attackTimer;
     float colorAlpha;
-
     float blobCpt;
 
-
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Crawler(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Crawler(string reference) : base(reference)
     {
         speed = 2;
         angerFactor = 0.5f;
@@ -32,53 +28,37 @@ public class Crawler : WallWalker
         blobCpt = 0;
     }
 
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
+    public static Crawler Attach(GameMode g, float x, float y)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_CRAWLER];
+        Crawler mc = new Crawler(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+        mc.InitBad(g, x, y);
+        return mc;
+    }
 
-    /*------------------------------------------------------------------------
-	INITIALISATION BAD
-	------------------------------------------------------------------------*/
+    /// <summary>Rescaling the blob. Could be removed if the asset size was adjusted.</summary>
     protected override void InitBad(GameMode g, float x, float y)
     {
         base.InitBad(g, x, y);
         Scale(0.9f);
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
-    public static Crawler Attach(GameMode g, float x, float y)
-    {
-        string linkage = Data.LINKAGES[Data.BAD_CRAWLER];
-        Crawler mc = new Crawler(g.depthMan.Attach(linkage, Data.DP_BADS));
-        mc.InitBad(g, x, y);
-        return mc;
-    }
-
-
-
-
-    /*------------------------------------------------------------------------
-	MORT
-	------------------------------------------------------------------------*/
+    //// <summary>Cancel the attack when killed.</summary>
     public override void KillHit(float? dx)
     {
         base.KillHit(dx);
         fl_attack = false;
     }
 
-
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI DISPONIBLE POUR UNE ACTION
-	------------------------------------------------------------------------*/
+    /// <summary>Is not ready if preparing an attack.</summary>
     public override bool IsReady()
     {
         return base.IsReady() & !fl_attack;
     }
 
-
-    /*------------------------------------------------------------------------
-	D�MARRAGE ATTAQUE
-	------------------------------------------------------------------------*/
+    /// <summary>Setting the movement to zero (overwriting the walking instructions).</summary>
     void PrepareAttack()
     {
         dx = 0;
@@ -89,10 +69,7 @@ public class Crawler : WallWalker
         PlayAnim(Data.ANIM_BAD_SHOOT_START);
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTAQUE
-	------------------------------------------------------------------------*/
+    /// <summary>Spawning a fireball shooting in front of the blob.</summary>
     void Attack()
     {
         // Fireball
@@ -115,16 +92,14 @@ public class Crawler : WallWalker
         /* subs[0]._xscale = (150 + Mathf.Abs(cp.x) * 150) / 100.0f;
         subs[0]._yscale = (150 + Mathf.Abs(cp.y) * 150) / 100.0f; */
         colorAlpha = COLOR_ALPHA;
-        SetColor(COLOR, Mathf.Round(colorAlpha));
+        /* SetColor(COLOR, colorAlpha); */ // TODO
+        SetColor(COLOR, 100-colorAlpha);
 
         attackCD = COOLDOWN;
         PlayAnim(Data.ANIM_BAD_SHOOT_END);
     }
 
-
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI D�CIDE D'ATTAQUER
-	------------------------------------------------------------------------*/
+    /// <summary>If the player can be shot at, the attack cooldown is reduced and the chances to shoot are increased.</summary>
     bool DecideAttack()
     {
         if (fl_attack)
@@ -166,14 +141,10 @@ public class Crawler : WallWalker
             attackCD -= Loader.Instance.tmod * 4;
             factor = 8;
         }
-
         return IsReady() & IsHealthy() & attackCD <= 0 & Random.Range(0, 1000) < CHANCE_ATTACK * factor;
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: FIN D'ANIM
-	------------------------------------------------------------------------*/
+    /// <summary>Resets the position of the blob at the end of the attack to cancel the blob shaking effect.</summary>
     protected override void OnEndAnim(string id)
     {
         base.OnEndAnim(id);
@@ -184,6 +155,7 @@ public class Crawler : WallWalker
             fl_wallWalk = true;
             MoveToSafePos();
             UpdateSpeed();
+            PlayAnim(Data.ANIM_BAD_WALK);
             if (dx == 0 & dy == 0)
             {
                 WallWalk();
@@ -191,29 +163,21 @@ public class Crawler : WallWalker
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: GEL
-	------------------------------------------------------------------------*/
+    /// <summary>Cancel the attack on freeze.</summary>
     protected override void OnFreeze()
     {
         base.OnFreeze();
         fl_attack = false;
     }
 
-    /*------------------------------------------------------------------------
-	EVENT: SONN�
-	------------------------------------------------------------------------*/
+    /// <summary>Cancel the attack on knocked.</summary>
     protected override void OnKnock()
     {
         base.OnKnock();
         fl_attack = false;
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: TOUCHE LE SOL
-	------------------------------------------------------------------------*/
+    /// <summary>Graphic animation of the blob.</summary>
     protected override void OnHitGround(float h)
     {
         base.OnHitGround(h);
@@ -229,10 +193,7 @@ public class Crawler : WallWalker
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	UPDATE GRAPHIQUE
-	------------------------------------------------------------------------*/
+    /// <summary>Graphic update.</summary>
     public override void EndUpdate()
     {
         base.EndUpdate();
@@ -284,18 +245,13 @@ public class Crawler : WallWalker
             }
             else
             {
-                SetColor(COLOR, Mathf.Round(colorAlpha));
+                SetColor(COLOR, 100-colorAlpha);
+                /* SetColor(COLOR, colorAlpha); */ // TODO
             }
         }
-
-
     }
 
-
-
-    /*------------------------------------------------------------------------
-	MAIN
-	------------------------------------------------------------------------*/
+    /// <summary>Attack management.</summary>
     public override void HammerUpdate()
     {
         if (fl_attack)
@@ -330,5 +286,4 @@ public class Crawler : WallWalker
             }
         }
     }
-
 }

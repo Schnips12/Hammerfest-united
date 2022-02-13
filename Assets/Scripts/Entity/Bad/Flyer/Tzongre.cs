@@ -1,47 +1,48 @@
 public class Tzongre : Flyer
 {
-
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Tzongre(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Tzongre(string reference) : base(reference)
     {
 
     }
 
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
+    public static Tzongre Attach(GameMode g, float x, float y)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_TZONGRE];
+        Tzongre mc = new Tzongre(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+        mc.InitBad(g, x, y);
+        mc.SetLifeTimer(Data.SECOND * 60);
+        return mc;
+    }
 
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
+    /// <summary>The level can be cleared even if the Tzongre is still fying around.</summary>
     protected override void Init(GameMode g)
     {
         base.Init(g);
         Unregister(Data.BAD_CLEAR);
     }
 
-
-    /*------------------------------------------------------------------------
-	ANNULATION DE CERTAINES FONCTIONNALIT�S
-	------------------------------------------------------------------------*/
+    /// <summary>Immune to freeze.</summary>
     public override void Freeze(float d)
     {
 
     }
 
+    /// <summary>Immune to knock.</summary>
     public override void Knock(float d)
     {
 
     }
     
+    /// <summary>No effect when killed.</summary>
     public override void KillHit(float? dx)
     {
 
     }
 
-
-    /*------------------------------------------------------------------------
-	RENCONTRE UNE AUTRE ENTIT�
-	------------------------------------------------------------------------*/
+    /// <summary>Can be picked up by the player. Knocks bads.</summary>
     public override void Hit(IEntity e)
     {
         // Joueur
@@ -59,18 +60,5 @@ public class Tzongre : Flyer
             Bad et = e as Bad;
             et.Knock(Data.KNOCK_DURATION);
         }
-    }
-
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
-    public static Tzongre Attach(GameMode g, float x, float y)
-    {
-        string linkage = Data.LINKAGES[Data.BAD_TZONGRE];
-        Tzongre mc = new Tzongre(g.depthMan.Attach(linkage, Data.DP_BADS));
-        mc.InitBad(g, x, y);
-        mc.SetLifeTimer(Data.SECOND * 60);
-        return mc;
     }
 }

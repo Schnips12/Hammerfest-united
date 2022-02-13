@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public class HammerAnimation
 {
     GameMode game;
@@ -35,7 +33,8 @@ public class HammerAnimation
 	------------------------------------------------------------------------*/
     public void Attach(float x, float y, string link, string layer)
     {
-        mc = game.depthMan.Attach(link, layer);
+        mc = new MovieClip(link);
+        game.depthMan.Attach(mc, layer);
         mc._x = x;
         mc._y = y;
     }
@@ -126,6 +125,7 @@ public class HammerAnimation
                 }
                 fl_loopDone = true;
             }
+            mc.UpdateNestedAnimators();
             frame--;
         }
     }

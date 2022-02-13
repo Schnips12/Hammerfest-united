@@ -6,7 +6,7 @@ public class Supa : Mover
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Supa(MovieClip mc) : base(mc)
+    protected Supa(string reference) : base(reference)
     {
         fl_hitGround = false;
         fl_hitWall = false;

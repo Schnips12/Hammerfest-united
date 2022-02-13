@@ -5,7 +5,7 @@ public class PlayerArrow : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    PlayerArrow(MovieClip mc) : base(mc)
+    PlayerArrow(string reference) : base(reference)
     {
         shootSpeed = 4;
         coolDown = Data.SECOND * 2;
@@ -33,7 +33,8 @@ public class PlayerArrow : Shoot
     public static PlayerArrow Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_arrow";
-        PlayerArrow s = new PlayerArrow(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        PlayerArrow s = new PlayerArrow(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y);
         return s;
     }

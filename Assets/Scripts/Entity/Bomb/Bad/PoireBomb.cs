@@ -6,7 +6,7 @@ public class PoireBomb : BadBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    PoireBomb(MovieClip mc) : base(mc)
+    PoireBomb(string reference) : base(reference)
     {
         duration = 45;
         power = 30;
@@ -20,7 +20,8 @@ public class PoireBomb : BadBomb
     public static PoireBomb Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_poire";
-        PoireBomb mc = new PoireBomb(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        PoireBomb mc = new PoireBomb(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

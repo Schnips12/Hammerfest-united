@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -53,11 +54,12 @@ public class Adventure : GameMode
 		// Extends
 		if ( world.current.specialSlots.Length>0 ) {
 			statsMan.SpreadExtend();
+			world.scriptEngine.InsertExtend();
 		}
 
 		// Special
 		if ( world.current.specialSlots.Length>0 ) {
-			n = Random.Range(0, world.current.specialSlots.Length);
+			n = UnityEngine.Random.Range(0, world.current.specialSlots.Length);
 			pt = world.current.specialSlots[n];
 			world.scriptEngine.InsertSpecialItem(
 				randMan.Draw(Data.RAND_ITEMS_ID),
@@ -73,7 +75,7 @@ public class Adventure : GameMode
 
 		// Score
 		if ( world.current.scoreSlots.Length>0 ) {
-			n = Random.Range(0, world.current.scoreSlots.Length);
+			n = UnityEngine.Random.Range(0, world.current.scoreSlots.Length);
 			pt = world.current.scoreSlots[n];
 			world.scriptEngine.InsertScoreItem(
 				randMan.Draw(Data.RAND_SCORES_ID),
@@ -87,8 +89,8 @@ public class Adventure : GameMode
 			);
 
 			if ( globalActives[94] ) {
-				var cx = Random.Range(0, Data.LEVEL_WIDTH);
-				var cy = Random.Range(5, Data.LEVEL_HEIGHT);
+				var cx = UnityEngine.Random.Range(0, Data.LEVEL_WIDTH);
+				var cy = UnityEngine.Random.Range(5, Data.LEVEL_HEIGHT);
 				var ptC = world.GetGround(cx, cy);
 				world.scriptEngine.InsertScoreItem(
 					randMan.Draw(Data.RAND_SCORES_ID),
@@ -207,19 +209,32 @@ public class Adventure : GameMode
 	ENVOI DU R�SULTAT DE LA PARTIE
 	------------------------------------------------------------------------*/
 	void SaveScore() {
-		if(world.setName!="xml_adventure") {
-			GameManager.Fatal("");
-			return;
-		}
-/* 		Std.getGlobal("gameOver") ( // TODO Create a save system
-			savedScores[0],
-			null,
+		Loader.Instance.root.SetVar("reachedLevel", dimensions[0].currentId.ToString());
+		Loader.Instance.root.SetVar("score0", GetScore(0).ToString());
+		Loader.Instance.root.SetVar("score1", GetScore(1).ToString());
+		Loader.Instance.root.SetVar("history", string.Join<string>(";", manager.history));
+
+		string[] totalS = Loader.Instance.root.ReadVar("totalPickups").Split(";");
+		int[] total;
+		int[] run = GetPicks2();
+		if(totalS.Length==run.Length)
+		{
+			total = Array.ConvertAll<string, int>(totalS, x => Int32.Parse(x));
+			for (int i=0; i<total.Length; i++)
 			{
-				$reachedLevel	: dimensions[0].currentId,
-				$item2			: getPicks2(),
-				$data			: manager.history,
+				total[i] += run[i];
 			}
-		); */
+		}
+		else
+		{
+			Loader.Instance.root.SetVar("obsoleteTotal", string.Join<string>(";",totalS));
+			total = run;
+		}
+		Loader.Instance.root.SetVar("totalPickups", string.Join<int>(";",total));
+		Loader.Instance.root.SetVar("lastRunPickups", string.Join<int>(";",run));
+		Loader.Instance.root.SetVar("families", string.Join<int>(";", Data.Instance.QUESTS.UpdateFamilies(total)));
+
+		Loader.Instance.root.Flush();
 	}
 
 
@@ -326,7 +341,7 @@ public class Adventure : GameMode
 			"t="+Mathf.Round(duration/Data.SECOND)
 		);
 
-		var fl_illegal = string.Join("|", manager.history.ToArray()).IndexOf("!", 0) >= 0;
+		bool fl_illegal = string.Join("|", manager.history.ToArray()).IndexOf("!", 0) >= 0;
 
 		manager.history = new List<string>();
 		manager.history.Add("F="+Loader.Instance.root.version);

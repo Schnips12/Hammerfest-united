@@ -6,16 +6,12 @@ public class Coward : Jumper
     static float CLOSE_DISTANCE = Data.CASE_WIDTH * 7;
     static float SPEED_BOOST = 3;
     static float FLEE_DURATION = Data.SECOND * 4;
-
     static float FLEE_JUMP_FACTOR = 25;
 
     float fleeTimer;
 
-
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Coward(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Coward(string reference) : base(reference)
     {
         SetJumpUp(5);
         SetJumpDown(5);
@@ -25,31 +21,17 @@ public class Coward : Jumper
         closeDistance = 0;
     }
 
-
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
-    protected override void Init(GameMode g)
-    {
-        base.Init(g);
-    }
-
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Coward Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_BANANE];
-        Coward mc = new Coward(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Coward mc = new Coward(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }
 
-
-    /*------------------------------------------------------------------------
-	SAUT: CHANGEMENT DE D�LAI
-	------------------------------------------------------------------------*/
+    /// <summary>Overriding the delay before a jump.</summary>
     protected override void Jump(float dx, float dy, float? delay)
     {
         if (delay != null & delay > 0)
@@ -59,10 +41,7 @@ public class Coward : Jumper
         base.Jump(dx, dy, delay);
     }
 
-
-    /*------------------------------------------------------------------------
-	CALCUL DES CHANCES DE CHANGER D'�TAGE
-	------------------------------------------------------------------------*/
+    /// <summary>Calculatings the chances of jumping up.</summary>
     bool DecideJumpUp()
     {
         bool fl_danger = player.y > y & fleeTimer > 0;
@@ -74,15 +53,16 @@ public class Coward : Jumper
         {
             if (player.y > y)
             {
-                return !fl_danger & Random.Range(0, 1000) * 0.5 < chanceJumpUp & IsReady();
+                return !fl_danger & (Random.Range(0, 1000) * 0.5 < chanceJumpUp) & IsReady();
             }
             else
             {
-                return !fl_danger & Random.Range(0, 1000) < chanceJumpUp & IsReady();
+                return !fl_danger & (Random.Range(0, 1000) < chanceJumpUp) & IsReady();
             }
         }
     }
 
+    /// <summary>Calculatings the chances of jumping down.</summary>
     bool DecideJumpDown()
     {
         bool fl_danger = player.y < y & fleeTimer > 0;
@@ -103,10 +83,7 @@ public class Coward : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	CHANCE DE SE LAISSER TOMBER
-	------------------------------------------------------------------------*/
+    /// <summary>Calculatings the chances of falling at the end of the tile.</summary>
     protected override bool DecideFall()
     {
         int fall = world.fallMap[cx][cy];
@@ -120,10 +97,7 @@ public class Coward : Jumper
         return false;
     }
 
-
-    /*------------------------------------------------------------------------
-	CHANCE DE GRIMPER UN MUR
-	------------------------------------------------------------------------*/
+    /// <summary>Calculatings the chances of climbing a step.</summary>
     bool DecideClimb()
     {
         bool fl_stairway =
@@ -131,17 +105,14 @@ public class Coward : Jumper
             (world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT) & world.GetCase(cx + 1, cy + 1) <= 0);
 
         bool fl_danger =
-            fleeTimer > 0 & player.cy < cy &
+            fleeTimer > 0 & player.cy > cy &
             ((world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_LEFT) & player.x < x) |
                 (world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT) & player.x > x));
 
         return !fl_danger & IsReady() & (fl_stairway | Random.Range(0, 1000) < chanceClimb);
     }
 
-
-    /*------------------------------------------------------------------------
-	CHANCE DE S'ENFUIR FACE AU JOUEUR
-	------------------------------------------------------------------------*/
+    /// <summary>Calculatings the chances of fleeing from the player.</summary>
     bool DecideFlee()
     {
         if (fl_stable & dx != 0 & next == null)
@@ -158,25 +129,19 @@ public class Coward : Jumper
         return false;
     }
 
-
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI LE PLAYER EST PROCHE
-	------------------------------------------------------------------------*/
+    /// <summary>Returns true if the player is verticaly close.</summary>
     bool Vclose()
     {
         return Mathf.Abs(player.y - y) <= VCLOSE_DISTANCE;
     }
 
-
+    /// <summary>Returns true if the player is close.</summary>
     bool Close()
     {
         return Distance(player.x, player.y) <= CLOSE_DISTANCE;
     }
 
-
-    /*------------------------------------------------------------------------
-	CALCUL DE LA VITESSE DE MARCHE
-	------------------------------------------------------------------------*/
+    /// <summary>Calculating the walking speed.</summary>
     protected override void CalcSpeed()
     {
         base.CalcSpeed();
@@ -186,19 +151,13 @@ public class Coward : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	�NERVEMENT D�SACTIV�
-	------------------------------------------------------------------------*/
+    /// <summary>Anger disabled.</summary>
     public override void AngerMore()
     {
         anger = 0;
     }
 
-
-    /*------------------------------------------------------------------------
-	INFIXE DE STEPPING
-	------------------------------------------------------------------------*/
+    /// <summary>Using the infix to activate the fleeing system.</summary>
     protected override void Infix()
     {
         base.Infix();
@@ -209,10 +168,7 @@ public class Coward : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	GESTION FUITE
-	------------------------------------------------------------------------*/
+    /// <summary>Fleeing system.</summary>
     void Flee()
     {
         if ((player.x <= x & dir < 0) | (player.x >= x & dir > 0))
@@ -223,15 +179,13 @@ public class Coward : Jumper
         UpdateSpeed();
     }
 
+    /// <summary>Resetting the walking speed.</summary>
     void EndFlee()
     {
         UpdateSpeed();
     }
 
-
-    /*------------------------------------------------------------------------
-	MAIN
-	------------------------------------------------------------------------*/
+    /// <summary>Manages the curse stick and fleeing timer.</summary>
     public override void HammerUpdate()
     {
         base.HammerUpdate();
@@ -239,7 +193,8 @@ public class Coward : Jumper
         {
             if (!fl_stick)
             {
-                MovieClip mc = game.depthMan.Attach("curse", Data.DP_FX);
+                MovieClip mc = new MovieClip("curse");
+                game.depthMan.Attach(mc, Data.DP_FX);
                 mc.GotoAndStop(Data.CURSE_TAUNT);
                 Stick(mc, 0, Data.CASE_HEIGHT * 2.5f);
             }

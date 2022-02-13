@@ -6,7 +6,7 @@ public class Black : PlayerBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public Black(MovieClip mc) : base(mc)
+    public Black(string reference) : base(reference)
     {
         duration = 100;
         power = 20;
@@ -20,7 +20,8 @@ public class Black : PlayerBomb
     public static Black Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_black";
-        Black mc = new Black(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        Black mc = new Black(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

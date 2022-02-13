@@ -13,7 +13,7 @@ public class Flyer : Bad
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Flyer(MovieClip mc) : base(mc)
+    protected Flyer(string reference) : base(reference)
     {
         speed = 4;
         angerFactor = 0.5f;
@@ -260,7 +260,7 @@ public class Flyer : Bad
         base.HammerUpdate();
 
         // Collisions haut du niveau
-        if (fl_fly & dy > 0 & y >= Data.CASE_HEIGHT)
+        if (fl_fly & dy > 0 & y >= Data.GAME_HEIGHT)
         {
             dy = -dy;
         }

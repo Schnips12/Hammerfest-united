@@ -32,18 +32,17 @@ public class TeleporterData
 		fl_on = false;
 
 		// Calcul du point central
-		centerX	= cx * Data.CASE_WIDTH + Data.CASE_WIDTH/2;
-		centerY	= cy * Data.CASE_HEIGHT + Data.CASE_HEIGHT;
-		startX	= Entity.x_ctr(x);
-		startY	= Entity.y_ctr(y);
+		centerX	= Entity.x_ctr(cx);
+		centerY	= Entity.x_ctr(cy);
+		startX	= Entity.x_ctr(cx);
+		startY	= Entity.y_ctr(cy);
 
 		if (direction == Data.HORIZONTAL) {
-			centerX += length/2*Data.CASE_WIDTH;
-			startX -= Data.CASE_WIDTH*0.5f;
+			centerX += 0.5f * (length-1) * Data.CASE_WIDTH;
+			startX -= 0.5f * Data.CASE_WIDTH;
 		}
 		if (direction == Data.VERTICAL) {
-			centerY += length/2*Data.CASE_HEIGHT ;
-			startY -= Data.CASE_HEIGHT;
+			centerY += 0.5f * (length-1) * Data.CASE_HEIGHT;
 		}
 
 		endX = startX;

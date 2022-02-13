@@ -15,6 +15,8 @@ public class PortalData
 		this.mc = mc;
 		this.cx = cx;
 		this.cy = cy;
+		x = Data.CASE_WIDTH * cx;
+		y = Data.CASE_HEIGHT * (cy+1);
 		cpt = 0;
 	}
 }

@@ -10,10 +10,9 @@ public class TileMC : MovieClip
     public MovieClip maskTile;
     public MovieClip ombre;
 
-    public TileMC(MovieClip mc, string name, float size) : base(mc)
+    public TileMC(float size) : base("Square")
     {
-        _name = name;
-        SetLayer(Data.DP_BACK_LAYER);
+        _name = "Tile";
         this.size = size;
 
         SpriteRenderer renderer = united.GetComponent<SpriteRenderer>();
@@ -28,9 +27,10 @@ public class TileMC : MovieClip
     {
         skin = skinId;
 
-        endTile = new MovieClip(this);
+        endTile = new MovieClip("Square");
         endTile._name = "End";
-        endTile.SetLayer(Data.DP_BACK_LAYER, 1);
+        endTile.SetParent(this);
+        endTile.united.transform.position -= new Vector3(0, 0, 1);
 
 /*         maskTile = new MovieClip(this, 0.02f);
         maskTile._name = "Mask";

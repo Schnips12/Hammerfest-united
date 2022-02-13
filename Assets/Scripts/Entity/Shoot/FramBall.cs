@@ -12,7 +12,7 @@ public class FramBall : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    FramBall(MovieClip mc) : base(mc)
+    FramBall(string reference) : base(reference)
     {
         shootSpeed = 5 + Random.Range(0, 3);
         turnSpeed = 0.03f + Random.Range(0, 10) / 100 + shootSpeed * 0.02f;
@@ -45,7 +45,8 @@ public class FramBall : Shoot
     public static FramBall Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_framBall2";
-        FramBall s = new FramBall(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        FramBall s = new FramBall(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y);
         return s;
     }

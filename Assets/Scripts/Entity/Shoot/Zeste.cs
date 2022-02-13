@@ -5,7 +5,7 @@ public class Zeste : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Zeste(MovieClip mc) : base(mc)
+    Zeste(string reference) : base(reference)
     {
         shootSpeed = 6;
     }
@@ -17,7 +17,8 @@ public class Zeste : Shoot
     public static Zeste Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_zest";
-        Zeste s = new Zeste(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        Zeste s = new Zeste(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y);
         return s;
     }

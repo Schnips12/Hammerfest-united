@@ -12,7 +12,7 @@ public class Field : Item
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Field(MovieClip mc) : base(mc) {
+	Field(string reference) : base(reference) {
 		field.text="";
 	}
 
@@ -33,9 +33,10 @@ public class Field : Item
 	ATTACHEMENT
 	------------------------------------------------------------------------*/
 	public static Field Attach(Container c) {
-		Field mc = new Field(c.depthMan.Attach("hammer_editor_field", Data.DP_INTERF));
-		mc.InitField(c);
-		return mc;
+		Field f  = new Field("hammer_editor_field");
+		c.depthMan.Attach(f, Data.DP_INTERF);
+		f.InitField(c);
+		return f;
 	}
 
 

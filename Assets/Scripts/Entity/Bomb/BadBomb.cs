@@ -5,7 +5,7 @@ public class BadBomb : Bomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public BadBomb(MovieClip mc) : base(mc)
+    public BadBomb(string reference) : base(reference)
     {
         fl_airKick = true;
     }

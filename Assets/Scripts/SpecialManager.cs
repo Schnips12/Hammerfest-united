@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
-using TMPro;
 
 public class SpecialManager
 {
@@ -11,49 +9,49 @@ public class SpecialManager
 
     List<MovieClip> clouds;
 
+    public bool[] actives;
     List<int> permList;
 
-    struct tempEvent
+    private class TempEvent
     {
         public int id;
         public float end;
     }
-    List<tempEvent> tempList;
+    List<TempEvent> tempList;
 
-    public bool[] actives;
-
-    struct recurringEvent
+    private class RecurringEvent
     {
         public float timer;
         public float baseTimer;
         public bool fl_repeat;
         public Action func;
     }
-    List<recurringEvent> recurring;
-
+    List<RecurringEvent> recurring;
 
     /*------------------------------------------------------------------------
-	CONSTRUCTEUR
+	CONSTRUCTOR
 	------------------------------------------------------------------------*/
+    /// <summary>A SpecialManager handles the active items and effects of one player.
+    /// The SpecialManager can also activate global effects stored at the GameMode level.</summary>
     public SpecialManager(GameMode g, Player p)
     {
         game = g;
         player = p;
 
-        permList = new List<int>();
-        tempList = new List<tempEvent>();
-        actives = new bool[150];
-
-        recurring = new List<recurringEvent>();
-
         clouds = new List<MovieClip>();
+
+        actives = new bool[150]; // TODO Use the real number of special items based on the Initialized Data.
+        permList = new List<int>();        
+
+        tempList = new List<TempEvent>();
+        recurring = new List<RecurringEvent>();
     }
 
-
     /*------------------------------------------------------------------------
-	ACTIVATION D'UN EFFET PERMANENT
+	REGISTERING PASSIVE EFFECTS
 	------------------------------------------------------------------------*/
-    void Permanent(int id)
+    /// <summary>Activates a permanent effect.</summary>
+    private void Permanent(int id)
     {
         if (actives[id] != true)
         {
@@ -62,37 +60,30 @@ public class SpecialManager
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	ACTIVATION D'UN EFFET TEMPORAIRE
-	------------------------------------------------------------------------*/
-    void Temporary(int id, int? duration)
+    /// <summary>Activates a temporary effect. If the effect was already active the duration will not be updated.</summary>
+    private void Temporary(int id, int? duration)
     {
-        // si zéro, dure jusqu'à la fin du level en cours
+        if (duration == null || duration.Value == 0)
+        {
+            duration = 99999;
+        }
         if (actives[id] != true)
         {
             actives[id] = true;
-            tempEvent t = new tempEvent();
+            TempEvent t = new TempEvent();
             t.id = id;
-            t.end = game.cycle + duration ?? 99999;
+            t.end = game.cycle + duration.Value;
             tempList.Add(t);
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	ACTIVATION D'UN EFFET PERMANENT GLOBAL (RARE)
-	------------------------------------------------------------------------*/
-    void Global(int id)
+    /// <summary>Activates a global effect.</summary>
+    private void Global(int id)
     {
         game.globalActives[id] = true;
     }
 
-
-
-    /*------------------------------------------------------------------------
-	ARR�TE TOUS LES EFFETS TEMPORAIRES
-	------------------------------------------------------------------------*/
+    /// <summary>Removes all the temporary effects.</summary>
     public void ClearTemp()
     {
         while (tempList.Count > 0)
@@ -102,10 +93,7 @@ public class SpecialManager
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	ARR�TE TOUS LES PERMANENTS
-	------------------------------------------------------------------------*/
+    /// <summary>Removes all the permanent effects.</summary>
     public void ClearPerm()
     {
         while (permList.Count > 0)
@@ -116,20 +104,12 @@ public class SpecialManager
     }
 
     /*------------------------------------------------------------------------
-	ARR�TE TOUS LES EFFETS SP�CIAUX R�CURRENTS
+	RECURRING EVENTS
 	------------------------------------------------------------------------*/
-    public void ClearRec()
+    /// <summary>Adds a recurring event.</summary>
+    private void RegisterRecurring(Action function, float t, bool fl_repeat)
     {
-        recurring = new List<recurringEvent>();
-    }
-
-
-    /*------------------------------------------------------------------------
-	AJOUTE UN �V�NEMENT R�CURRENT
-	------------------------------------------------------------------------*/
-    void RegisterRecurring(Action function, float t, bool fl_repeat)
-    {
-        recurringEvent rec = new recurringEvent();
+        RecurringEvent rec = new RecurringEvent();
         rec.func = function;
         rec.timer = t;
         rec.baseTimer = t;
@@ -137,12 +117,18 @@ public class SpecialManager
         recurring.Add(rec);
     }
 
-    /*------------------------------------------------------------------------
-	SPAWN UN ITEM DONN� AU DESSUS DE CHAQUE DALLE DU NIVEAU
-	------------------------------------------------------------------------*/
-    void LevelConversion(int id, int sid)
+    /// <summary>Removes all the recurring events.</summary>
+    public void ClearRec()
     {
-        string s = game.world.scriptEngine.script.ToString();
+        recurring = new List<RecurringEvent>();
+    }
+
+    /*------------------------------------------------------------------------
+	ACTIVE EFFECTS
+	------------------------------------------------------------------------*/
+    /// <summary>Spanws the required score item on each ground of the level.</summary>
+    private void LevelConversion(int id, int sid)
+    {
         game.world.scriptEngine.SafeMode();
         game.KillPop();
         int n = 0;
@@ -152,11 +138,7 @@ public class SpecialManager
             {
                 if (game.world.CheckFlag(new Vector2Int(x, y), Data.IA_TILE_TOP))
                 {
-                    int t = n * 2;
-                    if (n < 4)
-                    {
-                        t = 1;
-                    }
+                    int t = n < 4 ? 1 : n * 2;
                     game.world.scriptEngine.InsertScoreItem(id, sid, game.FlipCoordCase(x), y, t, null, true, false);
                     n++;
                 }
@@ -165,37 +147,29 @@ public class SpecialManager
         game.perfectItemCpt = n;
     }
 
-
-    /*------------------------------------------------------------------------
-	EFFETS DES ZODIAQUES
-	------------------------------------------------------------------------*/
-    void GetZodiac(int id)
+    /// <summary>Effetcs of the Zodiac items.</summary>
+    private void GetZodiac(int id)
     {
         game.fxMan.AttachBg(Data.BG_CONSTEL, id, Data.SECOND * 4);
         List<Bad> l = game.GetBadClearList();
-        for (int i = 0; i < l.Count; i++)
+        foreach (Bad b in l)
         {
-            ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT * 2, 169, null);
+            ScoreItem.Attach(game, b.x, b.y + Data.CASE_HEIGHT * 2, 169, null);
         }
     }
 
-    /*------------------------------------------------------------------------
-	EFFETS DES POTIONS DU ZODIAQUE
-	------------------------------------------------------------------------*/
-    void GetZodiacPotion(int id)
+    /// <summary>Effects of the Zodiac potions.</summary>
+    private void GetZodiacPotion(int id)
     {
         List<Bad> l = game.GetBadClearList();
-        for (int i = 0; i < l.Count; i++)
+        foreach (Bad b in l)
         {
-            ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT * 2, 169, null);
+            ScoreItem.Attach(game, b.x, b.y + Data.CASE_HEIGHT * 2, 169, null);
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	DONNE LE BONUS PERFECT
-	------------------------------------------------------------------------*/
-    void OnPerfect()
+    /// <summary>Gives the perfect bonus (after collecting all the convert diamonds).</summary>
+    private void OnPerfect()
     {
         Interrupt(81);
         Interrupt(96);
@@ -203,26 +177,27 @@ public class SpecialManager
         Interrupt(98);
 
         int bonus = 50000;
-        MovieClip mc = game.depthMan.Attach("hammer_fx_perfect",Data.DP_INTERF);
-        mc._x = Data.GAME_WIDTH*0.5f;
-        mc._y = Data.GAME_HEIGHT*0.5f;
+        MovieClip mc = new MovieClip("hammer_fx_perfect");
+        game.depthMan.Attach(mc, Data.DP_INTERF);
+        mc._x = Data.GAME_WIDTH * 0.5f;
+        mc._y = Data.GAME_HEIGHT * 0.5f;
         mc.FindTextfield("label").text = Lang.Get(11);
-        if (actives[95]) { // effet sac à thunes
-            mc.FindTextfield("bonus").text = ""+bonus*2;
+        if (actives[95])
+        { // effet sac à thunes
+            mc.FindTextfield("bonus").text = "" + bonus * 2;
         }
-        else {
-            mc.FindTextfield("bonus").text = ""+bonus;
+        else
+        {
+            mc.FindTextfield("bonus").text = "" + bonus;
         }
         List<Player> pl = game.GetPlayerList();
-        for (int i = 0; i < pl.Count; i++)
+        foreach (Player p in pl)
         {
-            pl[i].GetScoreHidden(Mathf.FloorToInt(bonus / pl.Count));
+            p.GetScoreHidden(Mathf.FloorToInt(bonus / pl.Count));
         }
     }
 
-    /*------------------------------------------------------------------------
-	EVENT: RAMASSE UN DIAMANT DE CONVERSION
-	------------------------------------------------------------------------*/
+    /// <summary>Picks up a convert diamond.</summary>
     public void OnPickPerfectItem()
     {
         game.perfectItemCpt--;
@@ -232,32 +207,12 @@ public class SpecialManager
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	T�L�PORTATION VERS UN NIVEAU BONUS
-	------------------------------------------------------------------------*/
-    //	function gotoSpecialLevel( did, lid ) {
-    //		game.destroyList(Data.BAD);
-    //		var link	= new levels.PortalLink();
-    //		link.from_did	= did;
-    //		link.from_lid	= lid;
-    //		link.from_pid	= 0;
-    //		link.to_did		= game.currentDim;
-    //		link.to_lid		= game.world.currentId;
-    //		link.to_pid		= -1;
-    //		Data.LINKS.push(link);
-    //		game.switchDimensionById( did, lid, -1 );
-    //	}
-
-
-    /*------------------------------------------------------------------------
-	EX�CUTE L'EFFET D'UN EXTEND
-	------------------------------------------------------------------------*/
+    /// <summary>Executes the effect of an extend.</summary>
     public void ExecuteExtend(bool fl_perfect)
     {
         game.RegisterMapEvent(Data.EVENT_EXTEND, null);
         game.manager.LogAction("ext");
-        var a = game.fxMan.AttachFx(Data.GAME_WIDTH / 2, Data.GAME_HEIGHT / 2, "extendSequence");
+        HammerAnimation a = game.fxMan.AttachFx(Data.GAME_WIDTH / 2, Data.GAME_HEIGHT / 2, "extendSequence");
         a.lifeTimer = 9999;
         game.DestroyList(Data.BAD);
         game.DestroyList(Data.BAD_BOMB);
@@ -267,13 +222,13 @@ public class SpecialManager
         game.gi.SetLives(player.pid, player.lives);
         if (fl_perfect)
         {
-            MovieClip mc;
-            mc = game.depthMan.Attach("hammer_fx_perfect", Data.DP_INTERF);
+            MovieClip mc = new MovieClip("hammer_fx_perfect");
+            game.depthMan.Attach(mc, Data.DP_INTERF);
             mc._x = Data.GAME_WIDTH * 0.5f;
             mc._y = Data.GAME_HEIGHT * 0.2f;
             mc.FindTextfield("label").text = Lang.Get(11);
-            if (actives[95])
-            { // effet sac � thunes
+            if (actives[95]) // effet sac � thunes
+            {
                 mc.FindTextfield("field").text = "300000";
             }
             else
@@ -285,14 +240,12 @@ public class SpecialManager
     }
 
 
-    /*------------------------------------------------------------------------
-	LANCE UN WARPZONE "+N" LEVEL
-	------------------------------------------------------------------------*/
-    void WarpZone(int w)
+    /// <summary>Warps N levels further.</summary>
+    private void WarpZone(int w)
     {
-        var arrival = game.world.currentId + w;
+        int arrival = game.world.currentId + w;
         game.manager.LogAction("WZ>" + arrival);
-        var i = game.world.currentId + 1;
+        int i = game.world.currentId + 1;
         while (i <= arrival)
         {
             if (game.IsBossLevel(i))
@@ -317,10 +270,60 @@ public class SpecialManager
         game.ForcedGoto(arrival);
     }
 
+    
+    /// <summary>Kills an ennemy. First registered, first dead.</summary>
+    void OnStrike()
+    {
+        List<IEntity> blist = game.GetList(Data.BAD_CLEAR);
+
+        if (blist == null || blist.Count == 0)
+        {
+            return;
+        }
+
+        Bad bad;
+        int n = 0;
+        do
+        {
+            bad = blist[n] as Bad;
+            n++;
+        } while (bad!=null && bad.fl_kill == true);
+
+        if (bad!=null && bad.fl_kill == false)
+        {
+            MovieClip s = new MovieClip("hammer_fx_strike");
+            game.depthMan.Attach(s, Data.DP_FX);
+            s._x = Data.GAME_WIDTH / 2;
+            s._y = bad._y + Data.CASE_HEIGHT * 0.5f;
+            int dir = UnityEngine.Random.Range(0, 2) * 2 - 1;
+            s._xscale *= dir;
+            s._yscale = (UnityEngine.Random.Range(0, 50) + 50) / 100.0f;
+            game.fxMan.AttachShine(bad.x, bad.y);
+            bad.ForceKill(dir * (UnityEngine.Random.Range(0, 10) + 15));
+        }
+    }
+
+
+    /// <summary>Makes a fireball rain from the skies.</summary>
+    void OnFireRain()
+    {
+        int x = UnityEngine.Random.Range(0, Mathf.RoundToInt(Data.GAME_WIDTH)) + 50;
+        FireRain s = FireRain.Attach(game, x, Data.GAME_HEIGHT+UnityEngine.Random.Range(0, 50));
+        s.MoveToAng(-95 - UnityEngine.Random.Range(0, 30), s.shootSpeed);
+    }
+
+
+    /// <summary>Points over time.</summary>
+    void OnPoT()
+    {
+        player.GetScore(player, 250);
+    }
+
 
     /*------------------------------------------------------------------------
-	EX�CUTE UN ITEM SP�CIAL
+	ACTIVATION OF A SPECIAL ITEM
 	------------------------------------------------------------------------*/
+    /// <summary>Executes the effect of special item.</summary>
     public void Execute(SpecialItem item)
     {
         int id = item.id;
@@ -383,10 +386,10 @@ public class SpecialManager
             // *** 6. yin yang: freeze all
             case 6:
                 {
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].Freeze(Data.FREEZE_DURATION * 2);
+                        b.Freeze(Data.FREEZE_DURATION * 2);
                     }
                 }
                 break;
@@ -417,12 +420,7 @@ public class SpecialManager
             // *** 10. t�l�phone: effet nokia
             case 10:
                 {
-                    //				phoneMC.removeMovieClip();
-                    //				phoneMC = downcast( game.depthMan.attach("hammer_fx_phone", Data.DP_TOP) );
-                    //				phoneMC._x -= game.xOffset;
-                    //				phoneMC.screen.blendMode = BlendMode.HARDLIGHT;
-                    //				phoneMC.lines._visible = GameManager.CONFIG.fl_detail;
-                    //				temporary(id, null);
+                    // Effect removed from the game
                 }
                 break;
 
@@ -499,11 +497,11 @@ public class SpecialManager
             case 19:
                 {
                     Smoke.Attach(game);
-                    var l = game.GetBadClearList();
+                    List<Bad> l = game.GetBadClearList();
                     game.fxMan.AttachBg(Data.BG_ORANGE, null, Data.SECOND * 3);
-                    for (var i = 0; i < l.Count; i++)
+                    foreach (Bad b in l)
                     {
-                        l[i].ForceKill(null);
+                        b.ForceKill(null);
                     }
                 }
                 break;
@@ -511,9 +509,9 @@ public class SpecialManager
             // *** 20. coffre tr�sor
             case 20:
                 {
-                    for (var i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
-                        var s = ScoreItem.Attach(game, item.x, item.y, 0, UnityEngine.Random.Range(0, 4));
+                        ScoreItem s = ScoreItem.Attach(game, item.x, item.y, 0, UnityEngine.Random.Range(0, 4));
                         s.MoveFrom(item, 8);
                     }
                 }
@@ -525,7 +523,7 @@ public class SpecialManager
                     Bad bad = game.GetOne(Data.BAD_CLEAR) as Bad;
                     if (bad != null)
                     {
-                        game.fxMan.AttachFx(bad.x, bad.y - Data.CASE_HEIGHT, "hammer_fx_pop");
+                        game.fxMan.AttachFx(bad.x, bad.y + Data.CASE_HEIGHT, "hammer_fx_pop");
                         bad.ForceKill(null);
                         game.fxMan.AttachBg(Data.BG_SINGER, null, Data.SECOND * 3);
                     }
@@ -545,12 +543,11 @@ public class SpecialManager
             // *** 23. boule de cristal
             case 23:
                 {
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        var b = l[i];
-                        var s = PlayerPearl.Attach(game, player.x, player.y - Data.CASE_WIDTH);
-                        s.MoveToTarget(l[i], s.shootSpeed);
+                        PlayerPearl s = PlayerPearl.Attach(game, player.x, player.y + Data.CASE_WIDTH);
+                        s.MoveToTarget(b, s.shootSpeed);
                         s.fl_borderBounce = true;
                         s.SetLifeTimer(Data.SECOND * 3 + UnityEngine.Random.Range(0, 400) / 10);
                         s._yOffset = 0;
@@ -570,14 +567,14 @@ public class SpecialManager
             case 25:
                 {
                     PlayerFireBall s;
-                    for (var i = 0; i < 4; i++)
+                    for (int i = 0; i < 4; i++)
                     {
-                        s = PlayerFireBall.Attach(game, Data.GAME_WIDTH * 0.125f + Data.GAME_WIDTH * 0.25f * i, 10);
+                        s = PlayerFireBall.Attach(game, Data.GAME_WIDTH * 0.125f + Data.GAME_WIDTH * 0.25f * i, Data.GAME_HEIGHT - 10);
                         s.MoveDown(s.shootSpeed);
                     }
-                    for (var i = 0; i < 4; i++)
+                    for (int i = 0; i < 4; i++)
                     {
-                        s = PlayerFireBall.Attach(game, Data.GAME_WIDTH * 0.25f + Data.GAME_WIDTH * 0.25f * i, Data.GAME_HEIGHT - 10);
+                        s = PlayerFireBall.Attach(game, Data.GAME_WIDTH * 0.25f + Data.GAME_WIDTH * 0.25f * i, 10);
                         s.MoveUp(s.shootSpeed);
                     }
                 }
@@ -602,10 +599,10 @@ public class SpecialManager
             case 28:
                 {
                     game.fxMan.AttachBg(Data.BG_STAR, null, Data.SECOND * 9);
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].Knock(Data.SECOND * 10);
+                        b.Knock(Data.SECOND * 10);
                     }
                 }
                 break;
@@ -637,11 +634,11 @@ public class SpecialManager
             // *** 32. as pique: transforme tous les bads en cristaux
             case 32:
                 {
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].DestroyThis();
-                        ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT, 0, 0);
+                        b.DestroyThis();
+                        ScoreItem.Attach(game, b.x, b.y + Data.CASE_HEIGHT, 0, 0);
                     }
                 }
                 break;
@@ -649,11 +646,11 @@ public class SpecialManager
             // *** 33. as trefle
             case 33:
                 {
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].DestroyThis();
-                        ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT, 0, 2);
+                        b.DestroyThis();
+                        ScoreItem.Attach(game, b.x, b.y + Data.CASE_HEIGHT, 0, 2);
                     }
                 }
                 break;
@@ -661,11 +658,11 @@ public class SpecialManager
             // *** 34. as carreau
             case 34:
                 {
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].DestroyThis();
-                        ScoreItem.Attach(game, l[i].x, l[i].y - Data.CASE_HEIGHT, 0, 5);
+                        b.DestroyThis();
+                        ScoreItem.Attach(game, b.x, b.y + Data.CASE_HEIGHT, 0, 5);
                     }
                 }
                 break;
@@ -673,12 +670,12 @@ public class SpecialManager
             // *** 35. as coeur
             case 35:
                 {
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].DestroyThis();
-                        ScoreItem.Attach(game, l[i].x - Data.CASE_WIDTH, l[i].y - Data.CASE_HEIGHT, 0, 6);
-                        ScoreItem.Attach(game, l[i].x + Data.CASE_WIDTH, l[i].y - Data.CASE_HEIGHT, 0, 6);
+                        b.DestroyThis();
+                        ScoreItem.Attach(game, b.x - Data.CASE_WIDTH, b.y + Data.CASE_HEIGHT, 0, 6);
+                        ScoreItem.Attach(game, b.x + Data.CASE_WIDTH, b.y + Data.CASE_HEIGHT, 0, 6);
                     }
                 }
                 break;
@@ -688,7 +685,7 @@ public class SpecialManager
                 {
                     player.lives++;
                     game.gi.SetLives(player.pid, player.lives);
-                    game.fxMan.AttachShine(item.x, item.y - Data.CASE_HEIGHT * 0.5f);
+                    game.fxMan.AttachShine(item.x, item.y + Data.CASE_HEIGHT * 0.5f);
                 }
                 break;
 
@@ -703,7 +700,7 @@ public class SpecialManager
             // *** 38. totem
             case 38:
                 {
-                    var s = Arrow.Attach(game);
+                    Arrow s = Arrow.Attach(game);
                     s.SetLifeTimer(Data.SUPA_DURATION);
                 }
                 break;
@@ -712,7 +709,7 @@ public class SpecialManager
             case 39:
                 {
                     player.fallFactor = 1.6f;
-                    Temporary(id, 0);
+                    Temporary(id, null);
                 }
                 break;
 
@@ -747,7 +744,7 @@ public class SpecialManager
             // *** 64. arc en ciel: spawn d'extends
             case 64:
                 {
-                    for (var i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         int x = UnityEngine.Random.Range(0, Data.LEVEL_WIDTH);
                         int y = UnityEngine.Random.Range(0, Data.LEVEL_HEIGHT);
@@ -761,16 +758,16 @@ public class SpecialManager
             // *** 65. bou�e canard: points pour chaque bad
             case 65:
                 {
-                    var l = game.GetBadList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        if ((l[i].types & Data.BAD_CLEAR) > 0)
+                        if ((b.types & Data.BAD_CLEAR) > 0)
                         {
-                            player.GetScore(l[i], 2500);
+                            player.GetScore(b, 2500);
                         }
                         else
                         {
-                            player.GetScore(l[i], 600);
+                            player.GetScore(b, 600);
                         }
 
                     }
@@ -805,11 +802,11 @@ public class SpecialManager
                 {
                     Global(id);
                     Temporary(id, Data.SECOND * 30);
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].UpdateSpeed();
-                        l[i].animFactor *= 0.6f;
+                        b.UpdateSpeed();
+                        b.animFactor *= 0.6f;
                     }
                 }
                 break;
@@ -838,11 +835,10 @@ public class SpecialManager
                     game.DestroyList(Data.ITEM);
                     game.DestroyList(Data.BAD_BOMB);
 
-                    var l = game.GetList(Data.BAD_CLEAR);
-                    var n = 1;
-                    for (var i = 0; i < l.Count; i++)
+                    int n = 1;
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        Bad b = l[i] as Bad;
                         ScoreItem.Attach(game, b.x, b.y, 0, n);
                         b.DestroyThis();
                         n++;
@@ -860,13 +856,13 @@ public class SpecialManager
             // *** 74. fantome orange: spawn bonbons
             case 74:
                 {
-                    for (var i = 0; i < 7; i++)
+                    for (int i = 0; i < 7; i++)
                     {
-                        var it = ScoreItem.Attach(
+                        ScoreItem it = ScoreItem.Attach(
                             game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), 0,
                             3, null
                         );
-                        it.MoveToAng(20 + UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
+                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
                     }
                 }
                 break;
@@ -880,7 +876,7 @@ public class SpecialManager
                             game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), Data.GAME_HEIGHT,
                             4, null
                         );
-                        it.MoveToAng(20 + UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
+                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
                     }
                 }
                 break;
@@ -894,7 +890,7 @@ public class SpecialManager
                             game, UnityEngine.Random.Range(0, Data.GAME_WIDTH), Data.GAME_HEIGHT,
                             5, null
                         );
-                        it.MoveToAng(20 + UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
+                        it.MoveToAng(-20 - UnityEngine.Random.Range(0, 160), 10 + UnityEngine.Random.Range(0, 15));
                     }
                 }
                 break;
@@ -902,12 +898,11 @@ public class SpecialManager
             // *** 77. poisson bleu: cristaux bleus � la fin du level
             case 77:
                 {
-                    var me = game;
-                    for (var i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         game.endLevelStack.Add(
-                            () => ScoreItem.AttachAndDump(me, UnityEngine.Random.Range(0, Data.GAME_WIDTH),
-                                                        -30 - UnityEngine.Random.Range(0, 50), 0, 0)
+                            () => ScoreItem.AttachAndDump(game, UnityEngine.Random.Range(0, Data.GAME_WIDTH),
+                                                        Data.GAME_HEIGHT + 30 + UnityEngine.Random.Range(0, 50), 0, 0)
                         );
                     }
                 }
@@ -916,12 +911,11 @@ public class SpecialManager
             // *** 78. poisson rouge
             case 78:
                 {
-                    var me = game;
-                    for (var i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         game.endLevelStack.Add(
-                                () => ScoreItem.AttachAndDump(me, UnityEngine.Random.Range(0, Data.GAME_WIDTH),
-                                                            -30 - UnityEngine.Random.Range(0, 50), 0, 2)
+                                () => ScoreItem.AttachAndDump(game, UnityEngine.Random.Range(0, Data.GAME_WIDTH),
+                                                            Data.GAME_HEIGHT + 30 + UnityEngine.Random.Range(0, 50), 0, 2)
                             );
                     }
                 }
@@ -930,12 +924,11 @@ public class SpecialManager
             // *** 79. poisson jaune
             case 79:
                 {
-                    var me = game;
-                    for (var i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
                         game.endLevelStack.Add(
-                                () => ScoreItem.AttachAndDump(me, UnityEngine.Random.Range(0, Data.GAME_WIDTH),
-                                                            -30 - UnityEngine.Random.Range(0, 50), 0, 3)
+                                () => ScoreItem.AttachAndDump(game, UnityEngine.Random.Range(0, Data.GAME_WIDTH),
+                                                            Data.GAME_HEIGHT + 30 + UnityEngine.Random.Range(0, 50), 0, 3)
                             );
                     }
                 }
@@ -946,11 +939,11 @@ public class SpecialManager
                 {
                     Global(id);
                     Temporary(id, Data.SECOND * 30);
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].UpdateSpeed();
-                        l[i].animFactor *= 0.3f;
+                        b.UpdateSpeed();
+                        b.animFactor *= 0.3f;
                     }
                 }
                 break;
@@ -987,20 +980,25 @@ public class SpecialManager
             case 84:
                 {
                     MovieClip c;
-                    c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER));
-                    c._name = "rain of fire";
+
+                    c = new MovieClip("hammer_fx_clouds");
+                    game.depthMan.Attach(c, Data.DP_SPRITE_BACK_LAYER);
+                    c._name = "rain of fire back";
+                    c._y = Data.GAME_HEIGHT + 9;
                     c.extraValues["speed"] = 0.5f;
-                    c = game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_BACK_LAYER);
-                    c._y += 9;
-                    clouds.Add(c);
-                    var f = new MovieClip.Filter();
+                    /* MovieClip.Filter f = new MovieClip.Filter(); // TODO Filters
                     f.blurX = 4;
                     f.blurY = f.blurX;
                     c.filter = f;
-                    c = new MovieClip(game.depthMan.Attach("hammer_fx_clouds", Data.DP_SPRITE_TOP_LAYER));
-                    c._name = "rain of fire clouds";
+                    clouds.Add(c); */
+                    
+                    c = new MovieClip("hammer_fx_clouds");
+                    game.depthMan.Attach(c, Data.DP_SPRITE_TOP_LAYER);
+                    c._name = "rain of fire top";
+                    c._y = Data.GAME_HEIGHT;
                     c.extraValues["speed"] = 1;
                     clouds.Add(c);
+
                     Temporary(id, null);
                     RegisterRecurring(() => OnFireRain(), Data.SECOND * 0.8f, true);
                     OnFireRain();
@@ -1011,7 +1009,7 @@ public class SpecialManager
             // *** 85. marteau
             case 85:
                 {
-                    var s = Hammer.Attach(game, player.x, player.y);
+                    Hammer s = Hammer.Attach(game, player.x, player.y);
                     s.SetOwner(player);
                     Temporary(id, null);
                 }
@@ -1020,7 +1018,7 @@ public class SpecialManager
             // *** 86. bonbon fantome: mode ghostbuster, chaque bad donne 666pts
             case 86:
                 {
-                    var glow = new MovieClip.Filter();
+                    MovieClip.Filter glow = new MovieClip.Filter();
                     glow.color = Data.ToColor(0x8cc0ff);
                     glow.alpha = 0.5f;
                     glow.strength = 100;
@@ -1028,14 +1026,13 @@ public class SpecialManager
                     glow.blurY = 2;
                     player.filter = glow;
                     Temporary(id, Data.SECOND * 60);
-                    //				global(id);
                     game.fxMan.AttachBg(Data.BG_GHOSTS, null, Data.SECOND * 57);
-                    var l = game.GetBadList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadList();
+                    foreach (Bad b in l)
                     {
                         glow.alpha = 1.0f;
                         glow.color = Data.ToColor(0xff5500);
-                        l[i].filter = glow;
+                        b.filter = glow;
                     }
                 }
                 break;
@@ -1043,7 +1040,7 @@ public class SpecialManager
             // *** 87. larve bleue: transforme un bad au hasard en larve bleue
             case 87:
                 {
-                    var bad = game.GetOne(Data.BAD_CLEAR);
+                    IEntity bad = game.GetOne(Data.BAD_CLEAR);
                     if (bad != null)
                     {
                         if (game.GetBadClearList().Count == 1)
@@ -1054,7 +1051,7 @@ public class SpecialManager
                         {
                             SpecialItem.Attach(game, bad.x, bad.y, id, subId);
                         }
-                        game.fxMan.AttachShine(bad.x, bad.y - Data.CASE_HEIGHT * 0.5f);
+                        game.fxMan.AttachShine(bad.x, bad.y + Data.CASE_HEIGHT * 0.5f);
                         bad.DestroyThis();
                     }
                 }
@@ -1073,10 +1070,10 @@ public class SpecialManager
             // *** 89. oeuf mutant: transforme un bad en une tzongre
             case 89:
                 {
-                    var e = game.GetOne(Data.BAD_CLEAR);
+                    IEntity e = game.GetOne(Data.BAD_CLEAR);
                     if (e != null)
                     {
-                        Tzongre.Attach(game, e.x, e.y - Data.CASE_HEIGHT);
+                        Tzongre.Attach(game, e.x, e.y + Data.CASE_HEIGHT);
                         e.DestroyThis();
                     }
                 }
@@ -1120,7 +1117,7 @@ public class SpecialManager
 
                         if (player.Distance(x, y) >= 100)
                         {
-                            var e = SpecialItem.Attach(game, x, y, 101, null);
+                            SpecialItem e = SpecialItem.Attach(game, x, y, 101, null);
                             e.SetLifeTimer(null);
                             k--;
                         }
@@ -1194,8 +1191,9 @@ public class SpecialManager
                 {
                     Temporary(id, Data.SECOND * 30);
                     game.fxMan.AttachBg(Data.BG_GUU, null, Data.SECOND * 30);
-                    var mc = game.depthMan.Attach("hammer_fx_cloud", Data.DP_PLAYER);
-                    player.Stick(mc, 0, -80);
+                    MovieClip mc = new MovieClip("hammer_fx_cloud");
+                    game.depthMan.Attach(mc, Data.DP_PLAYER);
+                    player.Stick(mc, 0, 80);
                     player.SetElaStick(0.4f);
                 }
                 break;
@@ -1210,7 +1208,7 @@ public class SpecialManager
                     }
                     else
                     {
-                        var b = PoireBomb.Attach(game, item.x, item.y);
+                        PoireBomb b = PoireBomb.Attach(game, item.x, item.y);
                         b.MoveUp(10);
                     }
                 }
@@ -1222,7 +1220,6 @@ public class SpecialManager
                     game.world.scriptEngine.PlayById(100);
                     game.huTimer = 0;
                     player.GetScore(item, 4 * 25000);
-                    //				player.playAnim(Data.ANIM_PLAYER_CARROT);
 
                     player.fl_carot = true;
                 }
@@ -1233,7 +1230,7 @@ public class SpecialManager
                 {
                     player.lives++;
                     game.gi.SetLives(player.pid, player.lives);
-                    game.fxMan.AttachShine(item.x, item.y - Data.CASE_HEIGHT * 0.5f);
+                    game.fxMan.AttachShine(item.x, item.y + Data.CASE_HEIGHT * 0.5f);
                     game.randMan.Remove(Data.RAND_ITEMS_ID, id);
                 }
                 break;
@@ -1243,7 +1240,7 @@ public class SpecialManager
                 {
                     player.lives++;
                     game.gi.SetLives(player.pid, player.lives);
-                    game.fxMan.AttachShine(item.x, item.y - Data.CASE_HEIGHT * 0.5f);
+                    game.fxMan.AttachShine(item.x, item.y + Data.CASE_HEIGHT * 0.5f);
                     game.randMan.Remove(Data.RAND_ITEMS_ID, id);
                 }
                 break;
@@ -1253,7 +1250,7 @@ public class SpecialManager
                 {
                     player.lives++;
                     game.gi.SetLives(player.pid, player.lives);
-                    game.fxMan.AttachShine(item.x, item.y - Data.CASE_HEIGHT * 0.5f);
+                    game.fxMan.AttachShine(item.x, item.y + Data.CASE_HEIGHT * 0.5f);
                     game.randMan.Remove(Data.RAND_ITEMS_ID, id);
                 }
                 break;
@@ -1261,9 +1258,9 @@ public class SpecialManager
             // *** 106. livre champignons
             case 106:
                 {
-                    for (var i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
-                        var s = ScoreItem.Attach(game, item.x, item.y, 1047 + UnityEngine.Random.Range(0, 4), null);
+                        ScoreItem s = ScoreItem.Attach(game, item.x, item.y, 1047 + UnityEngine.Random.Range(0, 4), null);
                         s.MoveFrom(item, 8);
                     }
                 }
@@ -1272,9 +1269,9 @@ public class SpecialManager
             // *** 107. livre �toiles
             case 107:
                 {
-                    for (var i = 0; i < 5; i++)
+                    for (int i = 0; i < 5; i++)
                     {
-                        var s = ScoreItem.Attach(game, item.x, item.y, 0, 0); // todo: etoile � pts
+                        ScoreItem s = ScoreItem.Attach(game, item.x, item.y, 0, 0); // todo: etoile � pts
                         s.MoveFrom(item, 8);
                     }
                 }
@@ -1290,7 +1287,7 @@ public class SpecialManager
             // *** 109. flocon 1
             case 109:
                 {
-                    game.fxMan.AttachShine(item.x, item.y - Data.CASE_HEIGHT * 0.5f);
+                    game.fxMan.AttachShine(item.x, item.y + Data.CASE_HEIGHT * 0.5f);
                     game.randMan.Remove(Data.RAND_ITEMS_ID, id);
                 }
                 break;
@@ -1298,14 +1295,14 @@ public class SpecialManager
             // *** 110. flocon 2
             case 110:
                 {
-                    game.fxMan.AttachShine(item.x, item.y - Data.CASE_HEIGHT * 0.5f);
+                    game.fxMan.AttachShine(item.x, item.y + Data.CASE_HEIGHT * 0.5f);
                 }
                 break;
 
             // *** 111. flocon 3
             case 111:
                 {
-                    game.fxMan.AttachShine(item.x, item.y - Data.CASE_HEIGHT * 0.5f);
+                    game.fxMan.AttachShine(item.x, item.y + Data.CASE_HEIGHT * 0.5f);
                 }
                 break;
 
@@ -1366,11 +1363,10 @@ public class SpecialManager
         }
     }
 
-
-
     /*------------------------------------------------------------------------
-	UN EFFET SE TERMINE
+	REMOVES AN EFECT
 	------------------------------------------------------------------------*/
+    /// <summary>Removes an effect.</summary>
     public void Interrupt(int id)
     {
         if (!actives[id])
@@ -1382,7 +1378,6 @@ public class SpecialManager
 
         switch (id)
         {
-
             // *** 4. lampes or et noire
             case 4:
             case 5:
@@ -1397,7 +1392,7 @@ public class SpecialManager
                     player.speedFactor = 1.0f;
                 }
                 break;
-            
+
             // *** 10. Phone effect (removed)
             case 10:
                 {
@@ -1474,11 +1469,11 @@ public class SpecialManager
             case 69:
                 {
                     game.globalActives[id] = false;
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].UpdateSpeed();
-                        l[i].animFactor *= 1 / 0.6f;
+                        b.UpdateSpeed();
+                        b.animFactor *= 1 / 0.6f;
                     }
                 }
                 break;
@@ -1487,11 +1482,11 @@ public class SpecialManager
             case 80:
                 {
                     game.globalActives[id] = false;
-                    var l = game.GetBadClearList();
-                    for (var i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i].UpdateSpeed();
-                        l[i].animFactor *= 1 / 0.3f;
+                        b.UpdateSpeed();
+                        b.animFactor *= 1 / 0.3f;
                     }
                 }
                 break;
@@ -1500,9 +1495,6 @@ public class SpecialManager
             case 81:
                 {
                     game.DestroyList(Data.PERFECT_ITEM);
-                    //				game.world.scriptEngine.clearScript();
-                    // source de bug potentielle pour les scripts pr�vus pour s'ex�cuter
-                    // apres la fin du level !
                 }
                 break;
 
@@ -1521,12 +1513,11 @@ public class SpecialManager
             // *** 86. bonbon fantome
             case 86:
                 {
-                    //				game.globalActives[id]=false;
-                    List<Bad> l = game.GetBadList();
-                    for (int i = 0; i < l.Count; i++)
+                    List<Bad> l = game.GetBadClearList();
+                    foreach (Bad b in l)
                     {
-                        l[i]._alpha = 100;
-                        l[i].filter = null;
+                        b._alpha = 100;
+                        b.filter = null;
                     }
                     player.filter = null;
                 }
@@ -1539,7 +1530,6 @@ public class SpecialManager
                     player.Scale(1);
                 }
                 break;
-
 
             // *** 90. Mal�diction de goldorak
             case 90:
@@ -1555,14 +1545,12 @@ public class SpecialManager
                 }
                 break;
 
-
             // *** 94. anneau antok
             case 94:
                 {
                     game.globalActives[id] = false;
                 }
                 break;
-
 
             // *** 95. sac � thunes
             case 95:
@@ -1571,13 +1559,12 @@ public class SpecialManager
                 }
                 break;
 
-            // *** 96/97/98. perles (voir commentaire sur 81)
+            // *** 96/97/98. perles
             case 96:
             case 97:
             case 98:
                 {
                     game.DestroyList(Data.PERFECT_ITEM);
-                    //				game.world.scriptEngine.clearScript();
                 }
                 break;
 
@@ -1611,68 +1598,15 @@ public class SpecialManager
 
 
     /*------------------------------------------------------------------------
-	EVENT: STRIKE!
-	------------------------------------------------------------------------*/
-    void OnStrike()
-    {
-        List<IEntity> blist = game.GetList(Data.BAD_CLEAR);
-
-        if (blist == null || blist.Count == 0)
-        {
-            return;
-        }
-
-        Bad bad;
-        int n = 0;
-        do
-        {
-            bad = blist[n] as Bad;
-            n++;
-        } while (bad.fl_kill == true);
-
-        if (bad.fl_kill == false)
-        {
-            var s = game.depthMan.Attach("hammer_fx_strike", Data.DP_FX);
-            s._x = Data.GAME_WIDTH / 2;
-            s._y = bad._y - Data.CASE_HEIGHT * 0.5f;
-            var dir = UnityEngine.Random.Range(0, 2) * 2 - 1;
-            s._xscale *= dir;
-            s._yscale = (UnityEngine.Random.Range(0, 50) + 50) / 100.0f;
-            game.fxMan.AttachShine(bad.x, bad.y);
-            bad.ForceKill(dir * (UnityEngine.Random.Range(0, 10) + 15));
-        }
-    }
-
-
-    /*------------------------------------------------------------------------
-	EVENT: PLUIE DE FEU
-	------------------------------------------------------------------------*/
-    void OnFireRain()
-    {
-        var x = UnityEngine.Random.Range(0, Mathf.RoundToInt(Data.GAME_WIDTH)) + 50;
-        var s = FireRain.Attach(game, x, -UnityEngine.Random.Range(0, 50));
-        s.MoveToAng(-95 - UnityEngine.Random.Range(0, 30), s.shootSpeed);
-    }
-
-
-    /*------------------------------------------------------------------------
-	EVENT: POINTS OVER TIME
-	------------------------------------------------------------------------*/
-    void OnPoT()
-    {
-        player.GetScore(player, 250);
-    }
-
-
-    /*------------------------------------------------------------------------
 	MAIN
 	------------------------------------------------------------------------*/
+    /// <summary>Must be invoked at every frame to keep the recurring events runing and to update the lifetime of temprorary effects</summary>
     public void Main()
     {
         // Gestion des évènements spéciaux récurrents du niveau
-        for (var n = 0; n < recurring.Count; n++)
+        for (int n = 0; n < recurring.Count; n++)
         {
-            recurringEvent e = recurring[n];
+            RecurringEvent e = recurring[n];
             e.timer -= Loader.Instance.tmod;
             if (e.timer <= 0)
             {
@@ -1689,7 +1623,6 @@ public class SpecialManager
                 }
             }
         }
-
 
         // Gestion de durée de vie des temporaires
         for (int i = 0; i < tempList.Count; i++)

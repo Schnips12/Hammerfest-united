@@ -38,9 +38,8 @@ public class Physics : HammerAnimator
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public Physics(MovieClip mc) : base(mc)
+    public Physics(string reference) : base(reference)
     {
-
         dx = 0;
         dy = 0;
         gravityFactor = 1.0f;
@@ -105,7 +104,7 @@ public class Physics : HammerAnimator
         }
         power /= e.shockResistance; // le poids r�duit la puissance
         float dist = e.Distance(x, y); // Math.sqrt( Math.pow(e.x-x,2) + Math.pow(e.y-y,2) );
-        float ratio = 1 - dist / radius;
+        float ratio = 1 - (dist / radius);
         float ang = Mathf.Atan2(e.y - y, e.x - x);
         e.dx = Mathf.Cos(ang) * ratio * power;
         if (e.fl_stable)
@@ -214,7 +213,7 @@ public class Physics : HammerAnimator
     {
         x = e.x;
         y = e.y;
-        float ang = -Random.Range(0, Mathf.Round(100 * Mathf.PI)) / 100;
+        float ang = Random.Range(0, Mathf.Round(100 * Mathf.PI)) / 100;
         x = e.x + Mathf.Cos(ang) * Data.CASE_WIDTH * 2;
         y = e.y + Mathf.Sin(ang) * Data.CASE_HEIGHT * 2;
         MoveToTarget(e, speed);
@@ -282,7 +281,7 @@ public class Physics : HammerAnimator
                 {
                     bool fl_rand = false;
                     var target = world.GetNextTeleporter(start, ref fl_rand);
-                    game.fxMan.AttachFx(x, y - Data.CASE_HEIGHT, "hammer_fx_pop");
+                    game.fxMan.AttachFx(x, y + Data.CASE_HEIGHT, "hammer_fx_pop");
                     if (target.direction == Data.HORIZONTAL)
                     {
                         if (fl_rand)
@@ -305,7 +304,7 @@ public class Physics : HammerAnimator
                             MoveTo(target.centerX, target.centerY + Entity.y_ctr(cy) - start.centerY);
                         }
                     }
-                    game.fxMan.AttachFx(x, y - Data.CASE_HEIGHT, "hammer_fx_shine");
+                    game.fxMan.AttachFx(x, y + Data.CASE_HEIGHT, "hammer_fx_shine");
                     game.soundMan.PlaySound("sound_teleport", Data.CHAN_FIELD);
                     fl_stopStepping = true;
                     lastTeleporter = target;
@@ -741,7 +740,7 @@ public class Physics : HammerAnimator
                         }
                     }
 
-                    // Patch entr�e dans un sol (coins en diagonal)
+                    // Patch d'entr�e dans un sol avec air jump
                     if (fl_hitGround & dy <= 0 & ocx != cx & ocy != cy)
                     {
                         if (world.GetCase(ocx, ocy) <= 0 & world.GetCase(cx, cy) == Data.GROUND)

@@ -1,21 +1,17 @@
 public class Cerise : Walker
 {
-    /*------------------------------------------------------------------------
-        CONSTRUCTEUR
-    ------------------------------------------------------------------------*/
-    Cerise(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Cerise(string reference) : base(reference)
     {
         animFactor = 0.65f;
     }
 
-
-    /*------------------------------------------------------------------------
-        ATTACHEMENT
-    ------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Cerise Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_CERISE];
-        Cerise mc = new Cerise(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Cerise mc = new Cerise(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }

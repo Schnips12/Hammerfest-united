@@ -14,7 +14,7 @@ public class BossFireBall : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    BossFireBall(MovieClip mc) : base(mc)
+    BossFireBall(string reference) : base(reference)
     {
         fl_checkBounds = false;
         fl_largeTrigger = true;
@@ -66,7 +66,8 @@ public class BossFireBall : Shoot
     public static BossFireBall Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_boss_fireball";
-        BossFireBall s = new BossFireBall(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        BossFireBall s = new BossFireBall(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y + 10);
         return s;
     }

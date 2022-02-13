@@ -22,7 +22,7 @@ public class Jumper : Walker
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Jumper(MovieClip mc) : base(mc)
+    protected Jumper(string reference) : base(reference)
     {
         jumpTimer = 0;
         SetJumpUp(null);
@@ -54,7 +54,7 @@ public class Jumper : Walker
         else
         {
             fl_jUp = true;
-            chanceJumpUp = 10 * chance ?? 0;
+            chanceJumpUp = 10 * chance.Value;
         }
         SetJumper();
     }
@@ -69,7 +69,7 @@ public class Jumper : Walker
         else
         {
             fl_jDown = true;
-            chanceJumpDown = 10 * chance ?? 0;
+            chanceJumpDown = 10 * chance.Value;
         }
         SetJumper();
     }
@@ -84,7 +84,7 @@ public class Jumper : Walker
         else
         {
             fl_jH = true;
-            chanceJumpH = 10 * chance ?? 0;
+            chanceJumpH = 10 * chance.Value;
         }
         SetJumper();
     }
@@ -101,7 +101,7 @@ public class Jumper : Walker
         {
             fl_climb = true;
             maxClimb = max;
-            chanceClimb = 10 * chance ?? 0;
+            chanceClimb = 10 * chance.Value;
         }
         SetJumper();
     }
@@ -184,7 +184,7 @@ public class Jumper : Walker
             // Gauche
             if (dx < 0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_LEFT))
             {
-                int h;
+                int? h;
                 if (world.CheckFlag(new Vector2Int(cx, cy), Data.IA_TILE_TOP))
                 {
                     h = world.GetWallHeight(cx - 1, cy, Data.IA_CLIMB);
@@ -198,11 +198,11 @@ public class Jumper : Walker
                     int wait = (h > 1) ? Data.SECOND : 0;
                     if (world.CheckFlag(new Vector2Int(cx, cy), Data.IA_TILE_TOP))
                     {
-                        Jump(-Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[h - 1], wait);
+                        Jump(-Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[h.Value - 1], wait);
                     }
                     else
                     {
-                        Jump(-Data.BAD_VJUMP_X, Data.BAD_VJUMP_Y_LIST[h - 1], wait);
+                        Jump(-Data.BAD_VJUMP_X, Data.BAD_VJUMP_Y_LIST[h.Value - 1], wait);
                         x = oldX;
                     }
                     fl_stopStepping = true;
@@ -212,7 +212,7 @@ public class Jumper : Walker
             // Droite
             if (dx > 0 & world.CheckFlag(new Vector2Int(cx, cy), Data.IA_CLIMB_RIGHT))
             {
-                int h;
+                int? h;
                 if (world.CheckFlag(new Vector2Int(cx, cy), Data.IA_TILE_TOP))
                 {
                     h = world.GetWallHeight(cx + 1, cy, Data.IA_CLIMB);
@@ -226,11 +226,11 @@ public class Jumper : Walker
                     var wait = (h > 1) ? Data.SECOND : 0;
                     if (world.CheckFlag(new Vector2Int(cx, cy), Data.IA_TILE_TOP))
                     {
-                        Jump(Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[h - 1], wait);
+                        Jump(Data.BAD_VJUMP_X_CLIFF, Data.BAD_VJUMP_Y_LIST[h.Value - 1], wait);
                     }
                     else
                     {
-                        Jump(Data.BAD_VJUMP_X, Data.BAD_VJUMP_Y_LIST[h - 1], wait);
+                        Jump(Data.BAD_VJUMP_X, Data.BAD_VJUMP_Y_LIST[h.Value - 1], wait);
                         x = oldX;
                     }
                     fl_stopStepping = true;

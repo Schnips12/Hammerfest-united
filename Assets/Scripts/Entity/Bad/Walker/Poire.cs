@@ -1,9 +1,7 @@
 public class Poire : Shooter
 {
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Poire(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Poire(string reference) : base(reference)
     {
         SetJumpH(100);
         SetClimb(100, 1);
@@ -11,22 +9,17 @@ public class Poire : Shooter
         InitShooter(50, 8);
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Poire Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_POIRE];
-        Poire mc = new Poire(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Poire mc = new Poire(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: TIR
-	------------------------------------------------------------------------*/
+    /// <summary>Shoot event.</summary>
     protected override void OnShoot()
     {
         PoireBomb s = PoireBomb.Attach(game, x, y);

@@ -94,7 +94,7 @@ public class Tuberculoz : Mover
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-	Tuberculoz(MovieClip mc) : base(mc) {
+	Tuberculoz(string reference) : base(reference) {
 		fl_hitGround	= false;
 		fl_hitCeil 		= false;
 		fl_hitWall		= false;
@@ -136,7 +136,8 @@ public class Tuberculoz : Mover
 	------------------------------------------------------------------------*/
 	public static Tuberculoz Attach(GameMode g) {
 		var linkage = "hammer_boss_human";
-		Tuberculoz mc = new Tuberculoz(g.depthMan.Attach(linkage,Data.DP_BADS));
+		Tuberculoz mc = new Tuberculoz(linkage);
+		g.depthMan.Attach(mc,Data.DP_BADS);
 		mc.InitBoss(g) ;
 		return mc ;
 	}
@@ -161,7 +162,8 @@ public class Tuberculoz : Mover
 		PlayAnim(Data.ANIM_BOSS_BAT_FORM);
 		EndUpdate();
 
-		lifeBar		= game.depthMan.Attach("hammer_interf_boss_bar",Data.DP_INTERF);
+		lifeBar		= new MovieClip("hammer_interf_boss_bar");
+		game.depthMan.Attach(lifeBar,Data.DP_INTERF);
 		lifeBar._rotation = -90;
 		lifeBar._x = 0;
 		lifeBar._y	= Data.GAME_HEIGHT*0.5f;
@@ -505,7 +507,8 @@ public class Tuberculoz : Mover
 		if ( next.action==DIE ) {
 			dx *= game.xFriction;
 			if ( Random.Range(0, 3)==0 ) {
-				var s = game.depthMan.Attach("hammer_fx_strike", Data.DP_FX);
+				var s = new MovieClip("hammer_fx_strike");
+				game.depthMan.Attach(s, Data.DP_FX);
 				PlayAnim(Data.ANIM_BOSS_HIT);
 				ReplayAnim();
 				s._y = y - Random.Range(0, 60);

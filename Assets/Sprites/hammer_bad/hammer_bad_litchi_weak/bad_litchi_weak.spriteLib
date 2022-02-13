@@ -154,8 +154,8 @@ MonoBehaviour:
     m_Hash: 1094578476
     m_CategoryList: []
     m_OverrideEntries:
-    - m_Name: 1280
-      m_Hash: 2138766705
+    - m_Name: 1
+      m_Hash: -2082672713
       m_Sprite: {fileID: 21300000, guid: 515b014e28188b040a19ff6a601d7939, type: 3}
       m_FromMain: 0
       m_SpriteOverride: {fileID: 21300000, guid: 515b014e28188b040a19ff6a601d7939, type: 3}

@@ -16,7 +16,7 @@ public class FireBall : Bad
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    FireBall(MovieClip mc) : base(mc)
+    FireBall(string reference) : base(reference)
     {
         Stop();
         fl_hitGround = false;
@@ -28,7 +28,7 @@ public class FireBall : Bad
 
         speed = 2.5f;
         angSpeed = 1.5f;
-        ang = 270;
+        ang = 90;
 
         summonTimer = 85;
         fl_summon = true;
@@ -57,8 +57,9 @@ public class FireBall : Bad
     public static FireBall Attach(GameMode g, Player p)
     {
         string linkage = Data.LINKAGES[Data.BAD_FIREBALL]; ;
-        FireBall mc = new FireBall(g.depthMan.Attach(linkage, Data.DP_BADS));
-		mc.eyes = new MovieClip(mc, mc.united.transform.GetChild(0).gameObject);
+        FireBall mc = new FireBall(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+		mc.eyes = new MovieClip(mc.united.transform.GetChild(0).gameObject);
 
         int n = g.CountList(Data.PLAYER);
         int offs = (n == 1) ? 0 : -30 + p.pid * 60;
@@ -76,14 +77,17 @@ public class FireBall : Bad
     {
         // do nothing
     }
+
     public override void Freeze(float d)
     {
         // do nothing
     }
+    
     public override void Knock(float d)
     {
         // do nothing
     }
+    
     public override void KillHit(float? dx)
     {
         // do nothing

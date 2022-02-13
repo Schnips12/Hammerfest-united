@@ -13,7 +13,7 @@ public class PlayerBomb : Bomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public PlayerBomb(MovieClip mc) : base(mc)
+    public PlayerBomb(string reference) : base(reference)
     {
         fl_airKick = true;
         fl_unstable = false;

@@ -5,7 +5,7 @@ public class Ball : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Ball(MovieClip mc) : base(mc)
+    Ball(string reference) : base(reference)
     {
         shootSpeed = 8.5f;
         _yOffset = 0;
@@ -32,7 +32,8 @@ public class Ball : Shoot
     public static Ball Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_ball";
-        Ball s = new Ball(g.depthMan.Attach(linkage, Data.DP_SHOTS));
+        Ball s = new Ball(linkage);
+        g.depthMan.Attach(s, Data.DP_SHOTS);
         s.InitShoot(g, x, y);
         return s;
     }

@@ -7,7 +7,7 @@ public class Green : PlayerBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public Green(MovieClip mc) : base(mc)
+    public Green(string reference) : base(reference)
     {
         duration = 200;
         power = 25;
@@ -24,7 +24,8 @@ public class Green : PlayerBomb
     public static Green Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_green";
-        Green mc = new Green(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        Green mc = new Green(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

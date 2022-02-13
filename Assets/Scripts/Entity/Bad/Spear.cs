@@ -8,7 +8,7 @@ public class Spear : Bad
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Spear(MovieClip mc) : base(mc)
+    Spear(string reference) : base(reference)
     {
         DisablePhysics();
         Stop();
@@ -49,26 +49,17 @@ public class Spear : Bad
         {
             this.GotoAndStop(1);
         }
-        else
+        else if (world.GetCase(cx, cy + 1) > 0)
         {
-            if (world.GetCase(cx, cy + 1) > 0)
-            {
-                this.GotoAndStop(3);
-            }
-            else
-            {
-                if (world.GetCase(cx - 1, cy) > 0)
-                {
-                    this.GotoAndStop(2);
-                }
-                else
-                {
-                    if (world.GetCase(cx + 1, cy) > 0)
-                    {
-                        this.GotoAndStop(4);
-                    }
-                }
-            }
+            this.GotoAndStop(3);
+        }
+        else if (world.GetCase(cx - 1, cy) > 0)
+        {
+            this.GotoAndStop(2);
+        }         
+        else if (world.GetCase(cx + 1, cy) > 0)
+        {
+            this.GotoAndStop(4);
         }
 
         if (game.world.scriptEngine.cycle > Data.SECOND)
@@ -110,7 +101,8 @@ public class Spear : Bad
     public static Spear Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_SPEAR];
-        Spear mc = new Spear(g.depthMan.Attach(linkage, Data.DP_SPEAR));
+        Spear mc = new Spear(linkage);
+        g.depthMan.Attach(mc, Data.DP_SPEAR);
         mc.InitBad(g, x, y);
         return mc;
     }

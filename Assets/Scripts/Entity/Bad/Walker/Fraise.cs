@@ -3,28 +3,30 @@ using UnityEngine;
 
 public class Fraise : Shooter
 {
-
     bool fl_ball;
     IEntity ballTarget;
     float catchCD; // cooldown apres r�cup de la balle
 
-
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Fraise(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Fraise(string reference) : base(reference)
     {
         catchCD = 0;
         animFactor = 1.0f;
         SetShoot(4);
-
         InitShooter(0, 10);
     }
 
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
+    public static Fraise Attach(GameMode g, float x, float y)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_FRAISE];
+        Fraise mc = new Fraise(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+        mc.InitBad(g, x, y);
+        return mc;
+    }
 
-    /*------------------------------------------------------------------------
-	INITIALISATION
-	------------------------------------------------------------------------*/
+    /// <summary>Ensure there's only one ball in the game at a time.</summary>
     protected override void Init(GameMode g)
     {
         base.Init(g);
@@ -41,32 +43,14 @@ public class Fraise : Shooter
                 fl_ball = false;
             }
         }
-
-
         if (game.GetList(Data.BALL).Count > 0)
         {
             fl_ball = false;
         }
-
         Register(Data.CATCHER);
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
-    public static Fraise Attach(GameMode g, float x, float y)
-    {
-        string linkage = Data.LINKAGES[Data.BAD_FRAISE];
-        Fraise mc = new Fraise(g.depthMan.Attach(linkage, Data.DP_BADS));
-        mc.InitBad(g, x, y);
-        return mc;
-    }
-
-
-    /*------------------------------------------------------------------------
-	R�CEPTION D'UNE BALLE
-	------------------------------------------------------------------------*/
+    /// <summary>Destroys the ball and resumes walking.</summary>
     public void CatchBall(Ball b)
     {
         if (!IsHealthy())
@@ -80,20 +64,14 @@ public class Fraise : Shooter
         ballTarget = null;
     }
 
-
-    /*------------------------------------------------------------------------
-	ASSIGNE LA BALLE � CE BAD
-	------------------------------------------------------------------------*/
+    /// <summary>This bad is holding a ball.</summary>
     public void AssignBall()
     {
         fl_ball = true;
         catchCD = Data.SECOND * 1.5f;
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: TIR
-	------------------------------------------------------------------------*/
+    /// <summary>Shoots and sets the animation of the receiver. This bad no longer holds a ball.</summary>
     protected override void OnShoot()
     {
         base.OnShoot();
@@ -114,23 +92,16 @@ public class Fraise : Shooter
         Ball s = Ball.Attach(game, x, y);
         s.MoveToTarget(ballTarget, s.shootSpeed);
         s.targetCatcher = ballTarget;
-
     }
 
-
-    /*------------------------------------------------------------------------
-	EVENT: FIN D'ANIM
-	------------------------------------------------------------------------*/
+    /// <summary>End of animation. Used to removed the target.</summary>
     protected override void OnEndAnim(string id)
     {
         base.OnEndAnim(id);
         ballTarget = null;
     }
 
-
-    /*------------------------------------------------------------------------
-	PR�PARATION DU TIR (skipp�)
-	------------------------------------------------------------------------*/
+    /// <summary>Looking for a target before sending the ball. No animation for that phase.</summary>
     protected override void StartShoot()
     {
         if (!fl_ball | catchCD > 0)
@@ -173,9 +144,7 @@ public class Fraise : Shooter
         base.StartShoot();
     }
 
-    /*------------------------------------------------------------------------
-	DESTRUCTION
-	------------------------------------------------------------------------*/
+    /// <summary>If this bad dies with the ball, another ball is assigned.</summary>
     public override void DestroyThis()
     {
         if (fl_ball)
@@ -190,23 +159,10 @@ public class Fraise : Shooter
         base.DestroyThis();
     }
 
-
-    /*------------------------------------------------------------------------
-	MAIN
-	------------------------------------------------------------------------*/
+    /// <summary>Graphic update.</summary>
     public override void EndUpdate()
     {
         base.EndUpdate();
-
-        // Balle en main
-/*         if (fl_ball)
-        {
-            FindSub("balle").SetActive(true);
-        }
-        else
-        {
-            FindSub("balle").SetActive(false);
-        } */
 
         // Se tourne dans la direction du tir
         if (ballTarget!=null)
@@ -223,12 +179,20 @@ public class Fraise : Shooter
                 }
             }
         }
+
+        // Balle en main
+        if (fl_ball)
+        {
+            FindSub("fraise_ball")._visible = true;
+            UpdateNestedClips();
+        }
+        else
+        {
+            FindSub("fraise_ball")._visible = false;
+        }
     }
 
-
-    /*------------------------------------------------------------------------
-	MAIN
-	------------------------------------------------------------------------*/
+    /// <summary>Ball management.</summary>
     public override void HammerUpdate()
     {
         base.HammerUpdate();
@@ -249,8 +213,6 @@ public class Fraise : Shooter
             List<IEntity> bl = game.GetList(Data.BAD_CLEAR);
             for (int i = 0; i < bl.Count; i++)
             {
-                Debug.Log(this.GetType());
-
                 if (bl[i].GetType()==this.GetType() && (bl[i] as Fraise).fl_ball)
                 {
                     fl_lost = false;

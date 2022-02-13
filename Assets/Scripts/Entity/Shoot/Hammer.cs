@@ -8,7 +8,7 @@ public class Hammer : Shoot
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Hammer(MovieClip mc) : base(mc)
+    Hammer(string reference) : base(reference)
     {
         shootSpeed = 0;
     }
@@ -30,7 +30,8 @@ public class Hammer : Shoot
     public static Hammer Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_shoot_hammer";
-        Hammer s = new Hammer(g.depthMan.Attach(linkage, Data.DP_SPEAR));
+        Hammer s = new Hammer(linkage);
+        g.depthMan.Attach(s, Data.DP_SPEAR);
         s.InitShoot(g, x, y + 10);
         return s;
     }

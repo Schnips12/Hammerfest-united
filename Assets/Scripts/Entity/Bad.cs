@@ -39,7 +39,7 @@ public abstract class Bad : Mover
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Bad(MovieClip mc) : base(mc)
+    protected Bad(string reference) : base(reference)
     {
         comboId = null;
 
@@ -150,7 +150,7 @@ public abstract class Bad : Mover
         // Joueur
         if ((e.types & Data.PLAYER) > 0)
         {
-            Player et = (Player)e;
+            Player et = e as Player;
 
             // additionnal (optionnal) check with distance
             bool fl_hit = true;
@@ -406,7 +406,8 @@ public abstract class Bad : Mover
         PlayAnim(Data.ANIM_BAD_FREEZE);
         if (iceMc == null)
         {
-            iceMc = game.depthMan.Attach("hammer_bad_ice", Data.DP_BADS);
+            iceMc = new MovieClip("hammer_bad_ice");
+            game.depthMan.Attach(iceMc, Data.DP_BADS);
         }
     }
 
@@ -612,7 +613,8 @@ public abstract class Bad : Mover
         {
             if (IsHealthy() & sticker._name == null)
             {
-                MovieClip mc = game.depthMan.Attach("hammer_interf_ninjaIcon", Data.DP_BADS);
+                MovieClip mc = new MovieClip("hammer_interf_ninjaIcon");
+                game.depthMan.Attach(mc, Data.DP_BADS);
                 mc.SetAnim("Frame", 1);
                 if (fl_ninFoe)
                 {
@@ -688,7 +690,8 @@ public abstract class Bad : Mover
             {
                 if (!fl_stick)
                 {
-                    MovieClip mc = game.depthMan.Attach("curse", Data.DP_FX);
+                    MovieClip mc = new MovieClip("curse");
+                    game.depthMan.Attach(mc, Data.DP_FX);
                     mc.SetAnim("Frame", 1);
                     mc.GotoAndStop(Data.CURSE_TAUNT);
                     Stick(mc, 0, Data.CASE_HEIGHT * 2.5f);

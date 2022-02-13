@@ -6,7 +6,7 @@ public class Blue : PlayerBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public Blue(MovieClip mc) : base(mc)
+    public Blue(string reference) : base(reference)
     {
         duration = 45;
         power = 20;
@@ -20,7 +20,8 @@ public class Blue : PlayerBomb
     public static Blue Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_blue";
-        Blue mc = new Blue(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        Blue mc = new Blue(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

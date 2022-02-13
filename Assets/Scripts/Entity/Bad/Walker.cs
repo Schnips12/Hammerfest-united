@@ -18,7 +18,7 @@ public abstract class Walker : Bad
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Walker(MovieClip mc) : base(mc)
+    protected Walker(string reference) : base(reference)
     {
         SetFall(null);
         speed = 2;
@@ -228,18 +228,18 @@ public abstract class Walker : Bad
 	------------------------------------------------------------------------*/
     protected override void OnNext()
     {
-        if (next.action == Data.ACTION_WALK)
+        if (next!=null && next.action == Data.ACTION_WALK)
         {
             next = null;
             Walk();
         }
-        if (next.action == Data.ACTION_FALLBACK)
+        if (next!=null && next.action == Data.ACTION_FALLBACK)
         {
             next = null;
             Walk();
             next.dx = -next.dx;
         }
-        if (next.action == Data.ACTION_MOVE && next.dy == 0)
+        if (next!=null && next.action == Data.ACTION_MOVE && next.dy == 0)
         {
             PlayAnim(Data.ANIM_BAD_WALK);
         }

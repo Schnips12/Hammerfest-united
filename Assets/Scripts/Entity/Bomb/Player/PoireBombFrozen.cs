@@ -6,7 +6,7 @@ public class PoireBombFrozen : PlayerBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public PoireBombFrozen(MovieClip mc) : base(mc)
+    public PoireBombFrozen(string reference) : base(reference)
     {
         duration = Random.Range(0, 20) + 15;
         power = 30;
@@ -19,7 +19,8 @@ public class PoireBombFrozen : PlayerBomb
     static PoireBombFrozen Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_poire_frozen";
-        PoireBombFrozen mc = new PoireBombFrozen(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        PoireBombFrozen mc = new PoireBombFrozen(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

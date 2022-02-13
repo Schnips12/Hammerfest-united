@@ -26,8 +26,8 @@ public class Extendbox
 	AJOUTE UNE LETTRE
 	------------------------------------------------------------------------*/
 	void Collect(int id) {
-		MovieClip mc;
-		mc = new MovieClip(game.depthMan.Attach("hammer_interf_extend", Data.DP_INTERF));
+		MovieClip mc = new MovieClip("hammer_interf_extend");
+		game.depthMan.Attach(mc, Data.DP_INTERF);
 		mc._name = "letter"+id.ToString();
 		mc.GotoAndStop(id+1);
 		mc._x = x;

@@ -1,9 +1,7 @@
 public class LitchiWeak : Jumper
 {
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    LitchiWeak(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    LitchiWeak(string reference) : base(reference)
     {
         SetJumpH(100);
         SetJumpUp(10);
@@ -12,10 +10,17 @@ public class LitchiWeak : Jumper
         SetFall(25);
     }
 
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
+    public static LitchiWeak Attach(GameMode g, float x, float y)
+    {
+        string linkage = Data.LINKAGES[Data.BAD_LITCHI_WEAK];
+        LitchiWeak mc = new LitchiWeak(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
+        mc.InitBad(g, x, y);
+        return mc;
+    }
 
-    /*------------------------------------------------------------------------
-	EVENT: FIN D'ANIM
-	------------------------------------------------------------------------*/
+    /// <summary>Walkd after birth.</summary>
     protected override void OnEndAnim(string id)
     {
         base.OnEndAnim(id);
@@ -26,26 +31,12 @@ public class LitchiWeak : Jumper
         }
     }
 
-    /*------------------------------------------------------------------------
-	MARCHER
-	------------------------------------------------------------------------*/
+    /// <summary>Walk disabled during the birth animation.</summary>
     protected override void Walk()
     {
         if (animId != Data.ANIM_BAD_SHOOT_START.id)
         {
             base.Walk();
         }
-    }
-
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
-    public static LitchiWeak Attach(GameMode g, float x, float y)
-    {
-        string linkage = Data.LINKAGES[Data.BAD_LITCHI_WEAK];
-        LitchiWeak mc = new LitchiWeak(g.depthMan.Attach(linkage, Data.DP_BADS));
-        mc.InitBad(g, x, y);
-        return mc;
     }
 }

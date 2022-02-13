@@ -7,7 +7,7 @@ public class Item : Physics
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Item(MovieClip mc) : base(mc)
+    protected Item(string reference) : base(reference)
     {
         Stop();
         fl_alphaBlink = true;

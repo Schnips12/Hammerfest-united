@@ -6,7 +6,7 @@ public class Bubble : Supa
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    Bubble(MovieClip mc) : base(mc)
+    Bubble(string reference) : base(reference)
     {
         fl_alphaBlink = true;
         blinkAlpha = 25;
@@ -19,7 +19,8 @@ public class Bubble : Supa
     public static Bubble Attach(GameMode g)
     {
         string linkage = "hammer_supa_bubble";
-        Bubble mc = new Bubble(g.depthMan.Attach(linkage, Data.DP_SUPA));
+        Bubble mc = new Bubble(linkage);
+        g.depthMan.Attach(mc, Data.DP_SUPA);
         mc.InitSupa(g, Data.GAME_WIDTH, 0);
         return mc;
     }

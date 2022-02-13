@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
@@ -28,10 +27,12 @@ public class GameParameters
     {
         return root.ReadVar(n);
     }
+
     int GetInt(string n)
     {
         return Int32.Parse(root.ReadVar(n));
     }
+
     bool GetBool(string n)
     {
         return root.ReadVar(n) != "0" & root.ReadVar(n) != "";
@@ -41,30 +42,27 @@ public class GameParameters
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR (default values)
 	------------------------------------------------------------------------*/
-    public GameParameters(Cookie mc, GameManager man, List<string> f, List<string> opt)
+    public GameParameters(Cookie c, GameManager man, List<string> f, List<string> opt)
     {
-        root = mc;
+        root = c;
         manager = man;
 
         // Options de jeu (mirror, nightmare...)
         options = new Dictionary<string, bool>();
         optionList = new List<string>();
-        if (opt.Count > 0)
+        foreach (string s in opt)
         {
-            foreach (string s in opt)
-            {
-                optionList.Add(s);
-                options.Add(s, true);
-            }
+            optionList.Add(s);
+            options.Add(s, true);
         }
 
         // Families
         families = f;
         scoreItemFamilies = new List<int>();
         specialItemFamilies = new List<int>();
-        for (int i = 0; i < families.Count; i++)
+        foreach (string family in families)
         {
-            int id = Int32.Parse(families[i]);
+            int id = Int32.Parse(family);
             if (id >= 1000)
             {
                 scoreItemFamilies.Add(id);
@@ -86,9 +84,7 @@ public class GameParameters
         {
             SetLowDetails();
         }
-
     }
-
 
     /*------------------------------------------------------------------------
 	MODE BASSE QUALITé
@@ -100,31 +96,27 @@ public class GameParameters
         Data.MAX_FX = Mathf.CeilToInt(Data.MAX_FX * 0.5f);
     }
 
-
-
     /*------------------------------------------------------------------------
 	RENVOIE TRUE SI LA FAMILLE ID EST DéBLOQUéE
 	------------------------------------------------------------------------*/
     public bool HasFamily(int id)
     {
-        bool fl_found = false;
         foreach (int item in specialItemFamilies)
         {
             if (item == id)
             {
-                fl_found = true;
+                return true;
             }
         }
         foreach (int item in scoreItemFamilies)
         {
             if (item == id)
             {
-                fl_found = true;
+                return true;
             }
         }
-        return fl_found;
+        return false;
     }
-
 
     /*------------------------------------------------------------------------
 	RENVOIE TRUE SI L'OPTION DEMANDéE EST ACTIVéE
@@ -133,18 +125,17 @@ public class GameParameters
     {
         if (options.ContainsKey(oid))
         {
-            return options[oid] == true;
+            return options[oid];
         }
         return false;
     }
-
 
     /*------------------------------------------------------------------------
 	RENVOIE UN RéSUMé DE LA CONFIG
 	------------------------------------------------------------------------*/
     public override string ToString()
     {
-        var str = "";
+        string str = "";
         str += "fam=" + String.Join(", ", families.ToArray()) + "\n";
         str += "opt=" + String.Join("\n  ", optionList.ToArray()) + "\n";
         str += "mus=" + musicVolume + "\n";

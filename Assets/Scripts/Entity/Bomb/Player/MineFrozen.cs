@@ -7,7 +7,7 @@ public class MineFrozen : PlayerBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public MineFrozen(MovieClip mc) : base(mc)
+    public MineFrozen(string reference) : base(reference)
     {
         duration = Random.Range(0, 20) + 15;
         power = 30;
@@ -20,7 +20,8 @@ public class MineFrozen : PlayerBomb
     static MineFrozen Attach(GameMode g, float x, float y)
     {
         string linkage = "hammer_bomb_mine_frozen";
-        MineFrozen mc = new MineFrozen(g.depthMan.Attach(linkage, Data.DP_BOMBS));
+        MineFrozen mc = new MineFrozen(linkage);
+        g.depthMan.Attach(mc, Data.DP_BOMBS);
         mc.InitBomb(g, x, y);
         return mc;
     }

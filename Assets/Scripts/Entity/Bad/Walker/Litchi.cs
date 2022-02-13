@@ -4,10 +4,8 @@ public class Litchi : Jumper
 {
     LitchiWeak child;
 
-    /*------------------------------------------------------------------------
-	CONSTRUCTEUR
-	------------------------------------------------------------------------*/
-    Litchi(MovieClip mc) : base(mc)
+    /// <summary>Constructor chained to the MovieClip constructor.</summary>
+    Litchi(string reference) : base(reference)
     {
         speed *= 0.8f;
         SetJumpH(100);
@@ -17,26 +15,23 @@ public class Litchi : Jumper
         SetFall(25);
     }
 
-
-    /*------------------------------------------------------------------------
-	ATTACHEMENT
-	------------------------------------------------------------------------*/
+    /// <summary>Calls the class constructor and perform extra initialization steps.</summary>
     public static Litchi Attach(GameMode g, float x, float y)
     {
         string linkage = Data.LINKAGES[Data.BAD_LITCHI];
-        Litchi mc = new Litchi(g.depthMan.Attach(linkage, Data.DP_BADS));
+        Litchi mc = new Litchi(linkage);
+        g.depthMan.Attach(mc, Data.DP_BADS);
         mc.InitBad(g, x, y);
         return mc;
     }
 
-
-    /*------------------------------------------------------------------------
-	OVERRIDE DES CONDITIONS DE MORT
-	------------------------------------------------------------------------*/
+    /// <summary>Freeze disabled.</summary>
     public override void Freeze(float d)
     {
         Weaken();
     }
+
+    /// <summary>Death disabled.</summary>
     public override void KillHit(float? dx)
     {
         if (!fl_knock)
@@ -45,19 +40,13 @@ public class Litchi : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	HACK: PERMET UNE MORT INSTANTAN�E
-	------------------------------------------------------------------------*/
+    /// <summary>Providing a way to kill this ennemy despite KillHit being disabled.</summary>
     void ForceKill(float dx)
     {
         base.KillHit(dx);
     }
 
-
-    /*------------------------------------------------------------------------
-	PERTE D'ARMURE
-	------------------------------------------------------------------------*/
+    /// <summary>Spawns a weakened litchi and references it as the child of this armored litchi.</summary>
     void Weaken()
     {
         if (child != null)
@@ -80,10 +69,7 @@ public class Litchi : Jumper
         child.PlayAnim(Data.ANIM_BAD_SHOOT_START);
     }
 
-
-    /*------------------------------------------------------------------------
-	MAIN
-	------------------------------------------------------------------------*/
+    /// <summary>Capping the vertical speed of this immortal fruit (multiple knocks/bumps).</summary>
     public override void HammerUpdate()
     {
         base.HammerUpdate();
@@ -93,10 +79,7 @@ public class Litchi : Jumper
         }
     }
 
-
-    /*------------------------------------------------------------------------
-	HACK POUR UTILISER LE DX/DY APRES SHOCKWAVE DU LITCHI GEL�
-	------------------------------------------------------------------------*/
+    /// <summary>Removing the parent litchi and bumping the child up. This has to be done in the EndUpdate to avoid interferences with the Shockwave.</summary>
     public override void EndUpdate()
     {
         if (child != null)

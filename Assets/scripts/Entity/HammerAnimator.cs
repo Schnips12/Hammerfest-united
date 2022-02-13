@@ -27,7 +27,7 @@ public class HammerAnimator : Trigger
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    public HammerAnimator(MovieClip mc) : base(mc)
+    public HammerAnimator(string reference) : base(reference)
     {
         resetPosition = 1;
         frame = 0;

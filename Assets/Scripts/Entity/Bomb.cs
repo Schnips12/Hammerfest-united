@@ -34,7 +34,7 @@ public class Bomb : Mover, IBomb
     /*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
-    protected Bomb(MovieClip mc) : base(mc)
+    protected Bomb(string reference) : base(reference)
     {
         explodeSound = "sound_bomb";
 
