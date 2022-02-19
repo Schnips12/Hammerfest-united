@@ -144,7 +144,7 @@ public class Entity : MovieClip, IEntity
 	DéFINI L'ENTITé PARENTE
 	------------------------------------------------------------------------*/
 	public void SetParent(IEntity e) {
-		parent = e;
+		parent = e; // TODO SetParent in unity hierarchy
 	}
 
 
@@ -401,7 +401,7 @@ public class Entity : MovieClip, IEntity
 		cx = Entity.x_rtc(x);
 		cy = Entity.y_rtc(y);
 		fcx = Entity.x_rtc(x);
-		fcy = Entity.y_rtc(y-Data.CASE_HEIGHT/2-1);
+		fcy = Entity.y_rtc(y-Data.CASE_HEIGHT/2);
 	}
 
 
@@ -415,7 +415,7 @@ public class Entity : MovieClip, IEntity
 		return Mathf.FloorToInt(n/Data.CASE_WIDTH) ;
 	}
 	public static int y_rtc(float n) {
-		return Mathf.FloorToInt(n/Data.CASE_HEIGHT + 0.5f) ;
+		return Mathf.FloorToInt(n/Data.CASE_HEIGHT+0.49f) ;
 	}
 
 
@@ -429,7 +429,7 @@ public class Entity : MovieClip, IEntity
 		return Data.CASE_WIDTH *(n+0.5f);
 	}
 	public static float y_ctr(int n) {
-		return Data.CASE_HEIGHT*(n);
+		return Data.CASE_HEIGHT*n;
 	}
 
 

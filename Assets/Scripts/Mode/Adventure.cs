@@ -209,7 +209,10 @@ public class Adventure : GameMode
 	ENVOI DU R�SULTAT DE LA PARTIE
 	------------------------------------------------------------------------*/
 	void SaveScore() {
-		Loader.Instance.root.SetVar("reachedLevel", dimensions[0].currentId.ToString());
+		int previousReachedLevel = Int32.Parse(Loader.Instance.root.ReadVar("reachedLevel"));
+		int reachedLevel = Mathf.Max(previousReachedLevel, dimensions[0].currentId);
+		Loader.Instance.root.SetVar("reachedLevel", reachedLevel.ToString());
+
 		Loader.Instance.root.SetVar("score0", GetScore(0).ToString());
 		Loader.Instance.root.SetVar("score1", GetScore(1).ToString());
 		Loader.Instance.root.SetVar("history", string.Join<string>(";", manager.history));

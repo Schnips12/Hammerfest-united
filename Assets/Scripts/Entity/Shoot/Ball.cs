@@ -48,7 +48,10 @@ public class Ball : Shoot
         game.fxMan.AttachFx(x, y + Data.CASE_HEIGHT / 2, "hammer_fx_pop");
 
         Fraise bad = game.GetOne(Data.CATCHER) as Fraise;
-        bad.AssignBall();
+        if (bad!=null)
+        {
+            bad.AssignBall();
+        }        
 
         base.OnLifeTimer();
     }

@@ -1607,8 +1607,8 @@ public class Player : Physics, IEntity
         // Gestion de verrou de contr�les
         if (fl_lockControls)
         {
-            if (fl_stable & true)
-            { // animId==baseStopAnim.id
+            if (fl_stable & animId==baseStopAnim.id)
+            {
                 fl_lockControls = false;
             }
         }

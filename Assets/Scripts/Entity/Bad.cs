@@ -638,25 +638,23 @@ public abstract class Bad : Mover
         base.EndUpdate();
 
         var minSpeed = 2;
-        if (GameManager.CONFIG.fl_detail)
+        if (fl_freeze & fl_stable & Mathf.Abs(dx ?? 0) > minSpeed)
         {
-            if (fl_freeze & fl_stable & Mathf.Abs(dx ?? 0) > minSpeed)
+            int nb = Random.Range(0, 5) + 2;
+            for (int i = 0; i < nb; i++)
             {
-                int nb = Random.Range(0, 5) + 2;
-                for (int i = 0; i < nb; i++)
-                {
-                    HammerAnimation part = game.fxMan.AttachFx(
-                        oldX + Random.Range(0, 12) * (Random.Range(0, 2) * 2 - 1),
-                        oldY + Random.Range(0, 5) + 2,
-                        "hammer_fx_partIce"
-                    );
-                    part.mc._rotation = Random.Range(0, 360);
-                    part.mc._xscale = (Random.Range(0, 80) + 20)/100.0f;
-                    part.mc._yscale = part.mc._xscale;
-                    part.mc._alpha = Mathf.Min(100, (Mathf.Abs(dx ?? 0) - minSpeed) / 5 * 100);
-                }
+                HammerAnimation part = game.fxMan.AttachFx(
+                    oldX + Random.Range(0, 12) * (Random.Range(0, 2) * 2 - 1),
+                    oldY + Random.Range(0, 5) + 2,
+                    "hammer_fx_partIce"
+                );
+                part.mc._rotation = Random.Range(0, 360);
+                part.mc._xscale = (Random.Range(0, 80) + 20)/100.0f;
+                part.mc._yscale = part.mc._xscale;
+                part.mc._alpha = Mathf.Min(100, (Mathf.Abs(dx ?? 0) - minSpeed) / 5 * 100);
             }
         }
+
 
         if (iceMc != null)
         {

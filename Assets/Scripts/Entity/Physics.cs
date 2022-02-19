@@ -102,18 +102,26 @@ public class Physics : HammerAnimator
         {
             return;
         }
-        power /= e.shockResistance; // le poids r�duit la puissance
+        float p = power / e.shockResistance; // le poids r�duit la puissance
         float dist = e.Distance(x, y); // Math.sqrt( Math.pow(e.x-x,2) + Math.pow(e.y-y,2) );
         float ratio = 1 - (dist / radius);
         float ang = Mathf.Atan2(e.y - y, e.x - x);
-        e.dx = Mathf.Cos(ang) * ratio * power;
+        e.dx = Mathf.Cos(ang) * ratio * p;
         if (e.fl_stable)
         {
             e.dy = 5;
         }
         else
         {
-            e.dy += Mathf.Sin(ang) * ratio * power;
+            if (typeof(Flyer).IsAssignableFrom(e.GetType()) && (e as Flyer).fl_intercept)
+            {
+                e.dy = 0;
+                e.dx *= 2;
+            }
+            else
+            {
+                e.dy += Mathf.Sin(ang) * ratio * p;
+            }
             e.dy = Mathf.Max(e.dy ?? 0, 10);
         }
         e.fl_stable = false;
@@ -596,7 +604,7 @@ public class Physics : HammerAnimator
                     patchFactor = 1.1f;
                 }
 
-                if (dy < 0)
+                if (dy > 0)
                 {
                     dy -= gravityFactor * Data.GRAVITY * Loader.Instance.tmod * patchFactor;
                 }
@@ -643,11 +651,11 @@ public class Physics : HammerAnimator
                 if (fl_hitWall)
                 {
                     var fl_hasHitWall = false;
-                    if (dx > 0 & world.GetCase(Entity.x_rtc(ox + Data.CASE_WIDTH / 2), Entity.y_rtc(oy)) > 0)
+                    if (dx > 0 & world.GetCase(Entity.x_rtc(ox + Data.CASE_WIDTH*0.5f), Entity.y_rtc(oy)) > 0)
                     {
                         fl_hasHitWall = true;
                     }
-                    if (dx < 0 & world.GetCase(Entity.x_rtc(ox - Data.CASE_WIDTH / 2), Entity.y_rtc(oy)) > 0)
+                    if (dx < 0 & world.GetCase(Entity.x_rtc(ox - Data.CASE_WIDTH*0.5f), Entity.y_rtc(oy)) > 0)
                     {
                         fl_hasHitWall = true;
                     }
@@ -672,9 +680,9 @@ public class Physics : HammerAnimator
 
 
                 // Patch traversée de murs par le haut
-                if (fl_hitWall & stepInfos.dy < 0)
+                if (fl_hitWall & stepInfos.dy < 0  & !fl_kill)
                 {
-                    if (world.GetCase(Entity.rtc(ofcx, ofcy)) != Data.WALL & world.GetCase(fcx, fcy) == Data.WALL)
+                    if (world.GetCase(Entity.rtc(ox, oy-Data.CASE_HEIGHT*0.5f)) != Data.WALL & world.GetCase(fcx, fcy) == Data.WALL)
                     {
                         x = ox;
                         stepInfos.dx = 0;
@@ -686,7 +694,7 @@ public class Physics : HammerAnimator
                 // Atterrissage
                 if (fl_hitGround & stepInfos.dy < 0)
                 {
-                    if (world.GetCase(ofcx, ofcy) != Data.GROUND & world.GetCase(fcx, fcy) == Data.GROUND)
+                    if (world.GetCase(Entity.rtc(ox, oy-Data.CASE_HEIGHT*0.5f)) != Data.GROUND & world.GetCase(fcx, fcy) == Data.GROUND)
                     {
                         if (world.CheckFlag(new Vector2Int(fcx, fcy), Data.IA_TILE))
                         {
@@ -709,7 +717,7 @@ public class Physics : HammerAnimator
                 // Plafond
                 if (fl_hitCeil & stepInfos.dy > 0)
                 {
-                    if (world.GetCase(Entity.rtc(ox, oy + Data.CASE_HEIGHT / 2)) <= 0 & world.GetCase(Entity.rtc(x, y + Data.CASE_HEIGHT / 2)) > 0)
+                    if (world.GetCase(Entity.rtc(ox, oy + Data.CASE_HEIGHT*0.5f)) <= 0 & world.GetCase(Entity.rtc(x, y + Data.CASE_HEIGHT*0.5f)) > 0)
                     {
                         stepInfos.dy = 0;
                         OnHitCeil();
@@ -740,7 +748,7 @@ public class Physics : HammerAnimator
                         }
                     }
 
-                    // Patch d'entr�e dans un sol avec air jump
+                    // Patch d'entr�e dans un sol (coins en diagonal)
                     if (fl_hitGround & dy <= 0 & ocx != cx & ocy != cy)
                     {
                         if (world.GetCase(ocx, ocy) <= 0 & world.GetCase(cx, cy) == Data.GROUND)

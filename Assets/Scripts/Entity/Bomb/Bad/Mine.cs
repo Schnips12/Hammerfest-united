@@ -176,7 +176,7 @@ public class Mine : BadBomb
         if (fl_plant & !fl_trigger & _alpha > 0)
         {
             _alpha -= Loader.Instance.tmod * HIDE_SPEED;
-            if (_alpha <= 0)
+            if (_alpha <= minAlpha)
             {
                 Hide();
             }

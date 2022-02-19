@@ -4,21 +4,16 @@ using System;
 
 public class GameParameters
 {
+    Cookie root;
     GameManager manager;
 
-    public List<int> specialItemFamilies;
-    public List<int> scoreItemFamilies;
+    public Dictionary<int, bool> specialItemFamilies;
+    public Dictionary<int, bool> scoreItemFamilies;
+    public Dictionary<string, bool> options;
     public float soundVolume;
     public float musicVolume;
     public float generalVolume;
-    public bool fl_detail;
     public bool fl_shaky;
-
-    Cookie root;
-    List<string> families;
-    Dictionary<string, bool> options;
-    List<string> optionList; // for toString() output only
-
 
     /*------------------------------------------------------------------------
 	GETTERS
@@ -30,12 +25,35 @@ public class GameParameters
 
     int GetInt(string n)
     {
-        return Int32.Parse(root.ReadVar(n));
+        return Int32.Parse(GetStr(n));
     }
 
     bool GetBool(string n)
     {
         return root.ReadVar(n) != "0" & root.ReadVar(n) != "";
+    }
+
+    private List<int> GetFamilies(Dictionary<int, bool> familieDict)
+    {
+        List<int> f = new List<int>();
+        foreach (KeyValuePair<int, bool> kp in familieDict)
+        {
+            if(kp.Value)
+            {
+               f.Add(kp.Key); 
+            }
+        }
+        return f;
+    }
+
+    public List<int> GetScoreItemFamilies()
+    {
+        return GetFamilies(scoreItemFamilies);
+    }
+
+    public List<int> GetSpecialItemFamilies()
+    {
+        return GetFamilies(specialItemFamilies);
     }
 
 
@@ -49,27 +67,24 @@ public class GameParameters
 
         // Options de jeu (mirror, nightmare...)
         options = new Dictionary<string, bool>();
-        optionList = new List<string>();
         foreach (string s in opt)
         {
-            optionList.Add(s);
             options.Add(s, true);
         }
 
         // Families
-        families = f;
-        scoreItemFamilies = new List<int>();
-        specialItemFamilies = new List<int>();
-        foreach (string family in families)
+        scoreItemFamilies = new Dictionary<int, bool>();
+        specialItemFamilies = new Dictionary<int, bool>();
+        foreach (string family in f)
         {
             int id = Int32.Parse(family);
             if (id >= 1000)
             {
-                scoreItemFamilies.Add(id);
+                scoreItemFamilies.Add(id, true);
             }
             else
             {
-                specialItemFamilies.Add(id);
+                specialItemFamilies.Add(id, true);
             }
         }
 
@@ -77,23 +92,7 @@ public class GameParameters
         generalVolume = GetInt("volume") * 0.5f / 100;
         soundVolume = GetInt("sound") * generalVolume;
         musicVolume = GetInt("music") * generalVolume * 0.65f;
-        fl_detail = GetBool("detail");
         fl_shaky = GetBool("shake");
-
-        if (!fl_detail)
-        {
-            SetLowDetails();
-        }
-    }
-
-    /*------------------------------------------------------------------------
-	MODE BASSE QUALITé
-	------------------------------------------------------------------------*/
-    public void SetLowDetails()
-    {
-        fl_detail = false;
-        root.SetVar("_quality", "medium");
-        Data.MAX_FX = Mathf.CeilToInt(Data.MAX_FX * 0.5f);
     }
 
     /*------------------------------------------------------------------------
@@ -101,50 +100,31 @@ public class GameParameters
 	------------------------------------------------------------------------*/
     public bool HasFamily(int id)
     {
-        foreach (int item in specialItemFamilies)
+        if (specialItemFamilies.ContainsKey(id))
         {
-            if (item == id)
-            {
-                return true;
-            }
+            return specialItemFamilies[id];
         }
-        foreach (int item in scoreItemFamilies)
+        else if (scoreItemFamilies.ContainsKey(id))
         {
-            if (item == id)
-            {
-                return true;
-            }
+            return scoreItemFamilies[id];
         }
-        return false;
+        else
+        {
+            return false;
+        }        
     }
 
-    /*------------------------------------------------------------------------
-	RENVOIE TRUE SI L'OPTION DEMANDéE EST ACTIVéE
-	------------------------------------------------------------------------*/
     public bool HasOption(string oid)
     {
         if (options.ContainsKey(oid))
         {
             return options[oid];
         }
-        return false;
+        else
+        {
+            return false;
+        }        
     }
-
-    /*------------------------------------------------------------------------
-	RENVOIE UN RéSUMé DE LA CONFIG
-	------------------------------------------------------------------------*/
-    public override string ToString()
-    {
-        string str = "";
-        str += "fam=" + String.Join(", ", families.ToArray()) + "\n";
-        str += "opt=" + String.Join("\n  ", optionList.ToArray()) + "\n";
-        str += "mus=" + musicVolume + "\n";
-        str += "snd=" + soundVolume + "\n";
-        str += "detail=" + fl_detail + "\n";
-        str += "shaky =" + fl_shaky + "\n";
-        return str;
-    }
-
 
     public bool HasMusic()
     {

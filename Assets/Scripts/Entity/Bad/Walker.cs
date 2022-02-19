@@ -262,7 +262,7 @@ public abstract class Walker : Bad
                 }
             }
         }
-        if (GameManager.CONFIG.fl_detail & fl_freeze & Mathf.Abs(dx ?? 0) >= 4)
+        if (fl_freeze & Mathf.Abs(dx ?? 0) >= 4)
         {
             if (recentParticles <= 0)
             {

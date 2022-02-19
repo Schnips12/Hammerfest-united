@@ -138,12 +138,12 @@ public class MovieClip : IMovieClip
 
     public float _alpha
     {
-        get => Mathf.RoundToInt(united.GetComponent<SpriteRenderer>().material.color.a * 100);
+        get => united.GetComponent<SpriteRenderer>().material.color.a * 100;
         set
         {
             Color c = united.GetComponent<SpriteRenderer>().material.color;
-            c.a = value / 100;
-            united.GetComponent<SpriteRenderer>().material.SetColor("scripted alpha", c);
+            c.a = value/100;
+            united.GetComponent<SpriteRenderer>().material.color = c;
         }
     }
 
@@ -297,7 +297,7 @@ public class MovieClip : IMovieClip
     {
         if (!IsAnimated())
         {
-            Debug.Log("Tried to animate an object whithout sprite resolver: " + _name);
+            /* Debug.Log("Tried to animate an object whithout sprite resolver: " + _name); */
             return;
         }
         if (frameCount == 0 | currentAnim != movement)

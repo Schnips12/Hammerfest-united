@@ -222,11 +222,11 @@ public class GameMode : Mode, IGameMode
         randMan.Register(Data.RAND_EXTENDS_ID, Data.RAND_EXTENDS);
         randMan.Register(
             Data.RAND_ITEMS_ID,
-            Data.GetRandFromFamilies(Data.Instance.SPECIAL_ITEM_FAMILIES, GameManager.CONFIG.specialItemFamilies)
+            Data.GetRandFromFamilies(Data.Instance.SPECIAL_ITEM_FAMILIES, GameManager.CONFIG.GetSpecialItemFamilies())
         );
         randMan.Register(
             Data.RAND_SCORES_ID,
-            Data.GetRandFromFamilies(Data.Instance.SCORE_ITEM_FAMILIES, GameManager.CONFIG.scoreItemFamilies)
+            Data.GetRandFromFamilies(Data.Instance.SCORE_ITEM_FAMILIES, GameManager.CONFIG.GetScoreItemFamilies())
         );
 
         lists = new List<List<IEntity>>(); // TODO Use a hastable
@@ -2544,24 +2544,6 @@ public class GameMode : Mode, IGameMode
     ------------------------------------------------------------------------*/
     public override void Main()
     {
-        // FPS
-        if (GameManager.CONFIG.fl_detail)
-        {
-/*             if (1 / Loader.Instance.tmod <= 16)
-            { // lag manager
-                lagCpt += Loader.Instance.tmod;
-                if (lagCpt >= Data.SECOND * 30)
-                {
-                    GameManager.CONFIG.SetLowDetails();
-                    GameManager.CONFIG.fl_shaky = false;
-                }
-            }
-            else
-            {
-                lagCpt = 0;
-            } */
-        }
-
         if (fl_gameOver)
         {
             Loader.Instance.GameOver();

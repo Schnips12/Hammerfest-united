@@ -989,8 +989,8 @@ public class SpecialManager
                     /* MovieClip.Filter f = new MovieClip.Filter(); // TODO Filters
                     f.blurX = 4;
                     f.blurY = f.blurX;
-                    c.filter = f;
-                    clouds.Add(c); */
+                    c.filter = f; */
+                    clouds.Add(c);
                     
                     c = new MovieClip("hammer_fx_clouds");
                     game.depthMan.Attach(c, Data.DP_SPRITE_TOP_LAYER);

@@ -5,7 +5,7 @@ public class Flyer : Bad
     float xSpeed;
     float ySpeed;
     bool fl_fly;
-    bool fl_intercept; // true si gel� en plein vol
+    public bool fl_intercept; // true si gel� en plein vol
     float speed;
     float dir;
 

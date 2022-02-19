@@ -144,6 +144,7 @@ public class FxManager
         mc.SetAnim("Frame", 1);
         mc.Play();
         mc_exitArrow = mc;
+        mcList.Add(mc);
     }
 
     /// <summary>Removes the exit pointer.</summary>
@@ -167,27 +168,21 @@ public class FxManager
     /// <summary>Displays the enter pointer (falling player).</summary>
     public void AttachEnter(float x, int pid)
     {
-        MovieClip mc = new MovieClip("hammer_fx_enter");
-        game.depthMan.Attach(mc, Data.DP_INTERF);
-        mc._x = x;
-        mc._y = Data.GAME_HEIGHT;
+        HammerAnimation anim = new HammerAnimation(game);
+        anim.Attach(x, Data.GAME_HEIGHT, "hammer_fx_enter", Data.DP_INTERF);
         if (pid == 0)
         {
-            mc.FindTextfield("field").text = "";
+            anim.mc.FindTextfield("field").text = "";
         }
         else
         {
-            mc.FindTextfield("field").text = "Player " + pid;
-            mc.FindTextfield("field").color = Data.ToColor(Data.BASE_COLORS[pid - 1]);
+            anim.mc.FindTextfield("field").text = "Player " + pid;
+            anim.mc.FindTextfield("field").color = Data.ToColor(Data.BASE_COLORS[pid - 1]);
         }
-        mc.SetAnim("Frame", 1);
-        mc.Play();
-        mcList.Add(mc);
+        anim.mc.SetAnim("Frame", 1);
+        anim.mc.Play();
+        animList.Add(anim);
     }
-
-    
-    
-
 
     /*------------------------------------------------------------------------
 	ATTACH: EXPLOSION
@@ -323,10 +318,6 @@ public class FxManager
     /// <summary>Randomized dust particles falling from the floor.</summary>
     public void Dust(int cx, int cy)
     {
-        if (!GameManager.CONFIG.fl_detail)
-        {
-            return;
-        }
         var x = Entity.x_ctr(cx);
         var y = Entity.y_ctr(cy);
         var n = 7;
@@ -376,10 +367,6 @@ public class FxManager
         {
             return;
         }
-        if (!GameManager.CONFIG.fl_detail)
-        {
-            return;
-        }        
 
         // Epuration des fx
         List<IEntity> l = game.GetList(Data.FX);
