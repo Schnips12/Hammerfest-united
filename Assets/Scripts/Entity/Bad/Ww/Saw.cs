@@ -122,13 +122,12 @@ public class Saw : WallWalker
 
         if (IsHealthy())
         {
-
             if (e.IsType(Data.BOMB) & !e.IsType(Data.BAD_BOMB))
             {
                 Bomb b = e as Bomb;
                 b.SetLifeTimer(Data.SECOND * 0.6f);
                 b.dx = (dx!=0 )		? -dx		: -cp.x*4;
-				b.dy = (cp.y!=0)	? -cp.y*13	: -8;
+				b.dy = (cp.y!=0)	? -cp.y*13	: 8;
                 game.fxMan.InGameParticlesDir(Data.PARTICLE_SPARK, b.x, b.y, 2, b.dx);
             }
         }

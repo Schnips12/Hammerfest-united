@@ -861,6 +861,23 @@ public class Data
         return s;
     }
 
+    /*------------------------------------------------------------------------
+	NETTOYAGE CHARACTERE ANTI PARSING D'INT
+	------------------------------------------------------------------------*/
+    public static string CleanInt(string s)
+    {
+        string clean = s;
+        if (s.Contains('.'))
+        {
+            clean = s.Substring(0, s.Length-s.IndexOf('.'));
+        }
+        else
+        {
+            clean = s;
+        }
+        return new string(clean.Where(c => char.IsDigit(c)).ToArray());
+    }
+
 
     /*------------------------------------------------------------------------
 	AJOUT DE LEADING ZEROS

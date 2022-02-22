@@ -74,6 +74,20 @@ public class LevelData
 	public int mapHeight() {
 		return map[0].column.Length;
 	}
+
+	public void PrintMap()
+	{
+		string s = "";
+		for (int i=mapHeight()-1; i>=0 ; i--)
+		{
+			for (int j=0; j<mapWidth(); j++)
+			{
+				s += GetCase(j, i)+"\t";
+			}
+			s +="\n";
+		}
+		Debug.Log(s);
+	}
 }
 
 

@@ -596,6 +596,7 @@ public class View : MonoBehaviour
         }
 
         fl_attach = true;
+        data.PrintMap();
 
     }
 

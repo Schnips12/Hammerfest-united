@@ -386,9 +386,9 @@ public class SetManager
     {
         if (InBound(cx, cy))
         {
-            if (t <= 0 & GetCase(cx, cy) > 0 & GetCase(cx, cy + 1) == Data.WALL)
+            if (t <= 0 & GetCase(cx, cy) > 0 & GetCase(cx, cy - 1) == Data.WALL)
             {
-                ForceCase(cx, cy + 1, Data.GROUND);
+                ForceCase(cx, cy - 1, Data.GROUND);
             }
             current.SetCase(cx, cy, t);
         }

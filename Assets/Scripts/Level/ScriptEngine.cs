@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Xml.Linq;
 using System;
+using System.Globalization;
 using UnityEngine.U2D.Animation;
 
 public class ScriptEngine
@@ -245,7 +246,15 @@ public class ScriptEngine
             }
             else
             {
-                return Int32.Parse(number);
+                try
+                {
+                    return Int32.Parse(Data.CleanInt(number));
+                }
+                catch
+                {
+                    Debug.Log(number);
+                    return null;
+                }
             }
         }
     }
@@ -265,7 +274,15 @@ public class ScriptEngine
             }
             else
             {
-                return float.Parse(node.Attribute(name).Value);
+                try
+                {
+                    return float.Parse(node.Attribute(name).Value);
+                }
+                catch
+                {
+                    Debug.Log(node.ToString());
+                    return 0;
+                }
             }
         }
     }

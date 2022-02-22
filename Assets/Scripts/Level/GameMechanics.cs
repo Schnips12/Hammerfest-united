@@ -6,29 +6,28 @@ using UnityEngine;
 public class GameMechanics : ViewManager
 {
     protected GameMode game;
-
-	bool fl_parsing;
+	public ScriptEngine scriptEngine;
+	
 	bool fl_currentIA;
 	public bool fl_lock;
-	List<bool> fl_visited;
 	public bool fl_mainWorld;
+	Dictionary<int, bool> fl_visited;
 
 	public List<List<int>> flagMap; // flags IA
 	public List<List<int>> fallMap; // hauteur de chute par case
 	public List<List<List<Entity>>> triggers;
 
+	bool fl_parsing;
 	Vector2Int _iteration;
-
-	public ScriptEngine scriptEngine;
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
 	------------------------------------------------------------------------*/
 	public GameMechanics(GameManager m, string s) : base (m, s) {
-		fl_parsing		= false;
 		fl_lock			= true;
-		fl_visited		= new List<bool>();
 		fl_mainWorld	= true;
+		fl_visited		= new Dictionary<int, bool>();
+		fl_parsing		= false;
 
 		ResetIA();
 
@@ -120,10 +119,14 @@ public class GameMechanics : ViewManager
 	FLAG LE LEVEL COURANT COMME DéJà PARCOURU
 	------------------------------------------------------------------------*/
 	void SetVisited() {
-		while(fl_visited.Count <= currentId) {
-			fl_visited.Add(false);
+		if (!fl_visited.ContainsKey(currentId))
+		{
+			fl_visited.Add(currentId, true);
 		}
-		fl_visited[currentId]=true;
+		else
+		{
+			fl_visited[currentId] = true;
+		}
 	}
 
 
@@ -131,8 +134,9 @@ public class GameMechanics : ViewManager
 	RENVOIE TRUE SI LE NIVEAU A DéJà éTé PARCOURU
 	------------------------------------------------------------------------*/
 	public bool IsVisited() {
-		while(fl_visited.Count <= currentId) {
-			fl_visited.Add(false);
+		if (!fl_visited.ContainsKey(currentId))
+		{
+			fl_visited.Add(currentId, false);
 		}
 		return fl_visited[currentId];
 	}
@@ -367,16 +371,17 @@ public class GameMechanics : ViewManager
 		int i, h;
 
 		// Optimisations
+		if (cx < 0 | cx >= Data.LEVEL_WIDTH)				return -1 ;
 		if (current.GetCase(cx, cy)==Data.GROUND)			return -1 ;
 		if (current.GetCase(cx, cy)==Data.WALL)				return -1 ;
 		if (cy<Data.LEVEL_HEIGHT-1) {
-			if ((flagMap[cx][cy+1] & Data.IA_ALLOW_FALL)>0)		return fallMap[cx][cy+1]-1;
+			if ((flagMap[cx][cy+1] & Data.IA_ALLOW_FALL)>0)	return fallMap[cx][cy+1]-1;
 		}	
 
 		secure = false;
 		i = cy-1;
 		h = 0;
-		while (!secure & i>=0 & cx >= 0 & cx<Data.LEVEL_WIDTH) {
+		while (!secure & i>=0) {
 			if (current.GetCase(cx, i) == Data.GROUND) {
 				secure = true;
 			}
