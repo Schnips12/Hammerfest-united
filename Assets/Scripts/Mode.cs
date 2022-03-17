@@ -96,10 +96,12 @@ public abstract class Mode : IMode
 	------------------------------------------------------------------------*/
     public virtual void Lock()
     {
+        Debug.Log("lock");
         fl_lock = true;
     }
     public virtual void Unlock()
     {
+        Debug.Log("unlock");
         fl_lock = false;
     }
 

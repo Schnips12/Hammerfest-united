@@ -212,10 +212,12 @@ public class GameMode : Mode, IGameMode
         mapMC = new MovieClip(manager.map);
         mapMC._visible = false;
 
-        popMC = new MovieClip(manager.popup);
+        popMC = new MovieClip("Popup");
+        popMC._x = Data.GAME_WIDTH/2;
+        popMC._y = Data.GAME_HEIGHT - 70;
         popMC._visible = false;
 
-        pointerMC = new MovieClip(manager.pointer);
+        pointerMC = new MovieClip("Pointer");
         pointerMC.SetAnim("Frame", 1);
         pointerMC._visible = false;
 
@@ -645,12 +647,13 @@ public class GameMode : Mode, IGameMode
     // TODO Déplacer les effets visuels supplémentaires vers la classe Adventure ou les scripts de niveaux.
     protected virtual void StartLevel()
     {
+        Debug.Log("START LEVEL");
         var n = 0;
         n = world.scriptEngine.InsertBads();
         if (n == 0)
         {
+            Debug.Log("CLEARED ON START");
             fxMan.AttachExit();
-            Debug.Log("CLEARED");
             fl_clear = true;
         }
 
@@ -691,6 +694,7 @@ public class GameMode : Mode, IGameMode
     ///<summary>Goes to a specified level and resets the players positions.</summary>
     public void ForcedGoto(int id)
     {
+        Debug.Log("FORCED WARP");
         fakeLevelId += id - world.currentId;
         world.fl_hideBorders = false;
         world.fl_hideTiles = false;
@@ -703,6 +707,7 @@ public class GameMode : Mode, IGameMode
                 Entity.x_ctr(world.current.playerX),
                 Entity.y_ctr(Data.LEVEL_HEIGHT-1-world.current.playerY)
             );
+            Debug.Log("SHIELD");
             p.Shield(Data.SHIELD_DURATION * 1.3f);
             p.Hide();
         }
@@ -1217,8 +1222,8 @@ public class GameMode : Mode, IGameMode
         KillPortals();
         fxMan.Clear();
         CleanKills();
-        currentDim = id;
         world.Suspend();
+        currentDim = id;        
         View v = world.previousView;
         world = dimensions[currentDim];
         world.darknessFactor = dfactor;
@@ -1883,7 +1888,7 @@ public class GameMode : Mode, IGameMode
                 icon.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scoreItems.Find(x => x.name.Substring(18)==(id-1000+1).ToString());
                 icon.SetAnim("Frame", 1);
             }
-            icon._x = itemNameMC._x - s.Length * 2.5f - 20; // FIXME
+            icon._x = itemNameMC._x - s.Length * 3.0f - 20; // FIXME
             icon._y = 20;
             icon._xscale = 0.75f;
             icon._yscale = 0.75f;
@@ -2173,7 +2178,7 @@ public class GameMode : Mode, IGameMode
         }
 
         // Annonce
-        mc = fxMan.AttachHurryUp();
+        MovieClip mc = fxMan.AttachHurryUp();
 
         if (huState == 1)
         {
@@ -2558,15 +2563,23 @@ public class GameMode : Mode, IGameMode
                 Loader.Instance.tmod = 0.3f;
             }
         }
+        else
+        {
+            Loader.Instance.tmod = 1.0f;
+        }
+
 
         // Item name
-        if (itemNameMC != null)
+        if (itemNameMC != null && icon != null)
         {
-            itemNameMC._alpha -= (105 - itemNameMC._alpha) * 0.01f;
-            if (itemNameMC._alpha <= 5)
+            icon._alpha -= (105 - icon._alpha) * 0.01f;
+            itemNameMC.FindTextfield("field").color = icon.united.GetComponent<SpriteRenderer>().material.color;
+            if (icon._alpha <= 5)
             {
                 itemNameMC.RemoveMovieClip();
-                itemNameMC = null;
+                itemNameMC=null;
+                icon.RemoveMovieClip();
+                icon = null;
             }
         }
 
@@ -2718,11 +2731,11 @@ public class GameMode : Mode, IGameMode
         }
 
         if (fl_aqua)
-        { // TODO Find what the aqua effect is because it's fucking up the whole scene.
+        {
             aquaTimer += 0.03f * Loader.Instance.tmod;
             if (!fl_flipY)
             {
-                mc._y = -7 + 7 * Mathf.Cos(aquaTimer);
+                mc._y = 7 + 7 * Mathf.Cos(aquaTimer);
                 mc._yscale = (102 - 2 * Mathf.Cos(aquaTimer)) / 100.0f;
             }
         }

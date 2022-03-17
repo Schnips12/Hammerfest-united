@@ -55,8 +55,8 @@ public class ScriptEngine
     };
 
     public XDocument script;
-    string extraScript;
-    string baseScript;
+    public string extraScript;
+   public string baseScript;
 
     GameMode game;
     LevelData data;
@@ -88,7 +88,6 @@ public class ScriptEngine
             this.mc = mc;
         }
     }
-
 
     /*------------------------------------------------------------------------
 	CONSTRUCTOR
@@ -248,12 +247,19 @@ public class ScriptEngine
             {
                 try
                 {
-                    return Int32.Parse(Data.CleanInt(number));
+                    return Int32.Parse(number);
                 }
                 catch
                 {
-                    Debug.Log(number);
-                    return null;
+                    try
+                    {
+                        return Int32.Parse(Data.CleanInt(number));
+                    }
+                    catch
+                    {
+                        Debug.Log(number);
+                        return null;
+                    }                    
                 }
             }
         }
@@ -551,8 +557,18 @@ public class ScriptEngine
                         x *= -1;
                         x += Data.CASE_WIDTH;
                     }
-                    MovieClip mc = game.world.view.AttachSprite("extra_mc", x, y, (back == 1) ? true : false);
-                    mc.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scriptedMovieclip.Find(x => x.name == name);
+
+                    MovieClip mc;
+                    if(name=="prison_loop")
+                    {
+                        mc = game.world.view.AttachSprite("prison_loop", x, y, (back == 1) ? true : false);
+                        mc.SetLayer(Data.DP_SPRITE_BACK_LAYER);
+                    }
+                    else
+                    {
+                        mc = game.world.view.AttachSprite("extra_mc", x, y, (back == 1) ? true : false);
+                        mc.united.GetComponent<SpriteLibrary>().spriteLibraryAsset = Loader.Instance.scriptedMovieclip.Find(x => x.name == name);
+                    }
                     mc.SetAnim("Frame", 1);
 
                     if (p > 0)
@@ -1165,6 +1181,7 @@ public class ScriptEngine
         NormalMode();
         fl_compile = true;
         TraceHistory("first=" + cycle);
+        RunScript();
     }
 
 
@@ -1395,8 +1412,10 @@ public class ScriptEngine
                     List<Bad> l = game.GetBadList();
                     for (var i = 0; i < l.Count; i++)
                     {
+                        Debug.Log("bad checked for jumper: "+i);
                         if (l[i].GetType().IsAssignableFrom(typeof(Jumper)))
                         {
+                            Debug.Log("Jump disabled");
                             (l[i] as Jumper).SetJumpDown(null);
                         }
                     }
@@ -1460,6 +1479,48 @@ public class ScriptEngine
         }
     }
 
+    private void PrisonLoopControl(MovieClip mc)
+    {
+        switch(mc.CurrentFrame())
+        {
+            case 1: // stop the fake Igor, play the fruits
+                mc.FindSub("Banging").Play();
+                mc.FindSub("Scared").Play();
+                mc.FindSub("Bored").Play();
+                mc.FindSub("Crying").Play();
+                break;
+            case 2: // remove the banged door
+                mc.FindSub("Banging")._visible = false;
+                break;
+            case 15: // remove the scared abricot
+                mc.FindSub("Scared")._visible = false;
+                break;
+            case 28: // remove the bored lemon
+                mc.FindSub("Bored")._visible = false;
+                break;
+            case 47: // remove the crying apple
+                mc.FindSub("Crying")._visible = false;
+                break;
+            case 395: // pause the clip
+                mc.Stop();
+                break;
+            case 396: // add the elevator Igor
+                mc.SetDepth(10);
+                MovieClip s = mc.FindSub("Waiting");
+                s.GotoAndPlay(1);
+                s._visible = true;
+                s.SetLayer(Data.DP_SPRITE_BACK_LAYER);
+                s.SetDepth(6);
+                s = mc.FindSub("Backend");
+                s._visible = true;
+                s.SetLayer(Data.DP_SPRITE_BACK_LAYER);
+                s.SetDepth(5);
+                break;
+            default: // do nothing
+                break;
+        }
+    }
+
 
     /*------------------------------------------------------------------------
 	BOUCLE PRINCIPALE
@@ -1486,6 +1547,24 @@ public class ScriptEngine
             if (clip.mc.fl_playing)
             {
                 clip.mc.NextFrame();
+            }
+            if (clip.sid == 101)
+            {
+                PrisonLoopControl(clip.mc);
+            }
+            foreach(MovieClip s in clip.mc.subs)
+            {
+                if (s.fl_playing)
+                {
+                    if(s.CurrentFrame()==s.TotalFrames() & s._name!="Waiting")
+                    {
+                        s.GotoAndPlay(1);
+                    }
+                    else
+                    {
+                        s.NextFrame();
+                    }
+                }
             }
         }
     }

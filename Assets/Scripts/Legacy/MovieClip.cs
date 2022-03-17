@@ -239,8 +239,9 @@ public class MovieClip : IMovieClip
         {
             if (child.GetComponent<SpriteResolver>() != null)
             {
-                subs.Add(new MovieClip(child.gameObject));
-                child.GetComponent<SpriteResolver>().SetCategoryAndLabel("Frame", "1");
+                MovieClip s = new MovieClip(child.gameObject);
+                subs.Add(s);
+                s.SetAnim("Frame", 1);
             }
         }
     }
@@ -345,7 +346,8 @@ public class MovieClip : IMovieClip
     /// <summary>Changes the coloring and transparency of the sprite renderer. Alpha value must be chosen between 0 and 100.</summary>
     public void SetColor(Color baseColor, float alpha)
     {
-        Color toSet = new Color(baseColor.r, baseColor.g, baseColor.b, alpha / 100);
+        float ratio = (1-alpha/100);
+        Color toSet = new Color(baseColor.r*ratio, baseColor.g*ratio, baseColor.b*ratio, 1);
         united.GetComponent<SpriteRenderer>().color = toSet;
     }
 

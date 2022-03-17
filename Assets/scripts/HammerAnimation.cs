@@ -6,6 +6,7 @@ public class HammerAnimation
     public bool fl_kill;
     public bool fl_loop;
     public bool fl_loopDone;
+    public int resetPosition;
     public bool fl_stay;
     bool fl_blink;
 
@@ -26,6 +27,7 @@ public class HammerAnimation
         fl_loop = false;
         fl_loopDone = false;
         fl_blink = false;
+        resetPosition = 1;
     }
 
     /*------------------------------------------------------------------------
@@ -121,7 +123,7 @@ public class HammerAnimation
             {
                 if (fl_loop)
                 {
-                    mc.GotoAndPlay(1);
+                    mc.GotoAndPlay(resetPosition);
                 }
                 fl_loopDone = true;
             }

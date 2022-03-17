@@ -307,7 +307,7 @@ public class Adventure : GameMode
 		}
 
 		// Perfect order
-		if (badCount>1 & b.uniqId==perfectOrder[0]) {
+		if (perfectOrder.Count>0 && badCount>1 && b.uniqId==perfectOrder[0]) {
 			perfectOrder.RemoveAt(0);
 		}
 	}

@@ -119,6 +119,7 @@ public class GameMechanics : ViewManager
 	FLAG LE LEVEL COURANT COMME DéJà PARCOURU
 	------------------------------------------------------------------------*/
 	void SetVisited() {
+		Debug.Log("SET VISITED");
 		if (!fl_visited.ContainsKey(currentId))
 		{
 			fl_visited.Add(currentId, true);
@@ -442,8 +443,6 @@ public class GameMechanics : ViewManager
 	protected override void OnDataReady() {
 		base.OnDataReady();
 		scriptEngine.Compile();
-		scriptEngine.RunScript();
-		Debug.Log(scriptEngine.script.ToString());
 	}
 
 	/*------------------------------------------------------------------------

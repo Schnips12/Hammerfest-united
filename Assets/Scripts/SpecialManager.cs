@@ -1420,7 +1420,7 @@ public class SpecialManager
                 {
                     if (player.currentWeapon == Data.WEAPON_S_FIRE)
                     {
-                        player.ChangeWeapon(-1);
+                        player.ChangeWeapon(null);
                     }
                 }
                 break;
@@ -1444,7 +1444,7 @@ public class SpecialManager
                 {
                     if (player.currentWeapon == Data.WEAPON_S_ICE)
                     {
-                        player.ChangeWeapon(-1);
+                        player.ChangeWeapon(null);
                     }
                 }
                 break;
@@ -1460,7 +1460,7 @@ public class SpecialManager
                 {
                     if (player.currentWeapon == Data.WEAPON_S_ARROW)
                     {
-                        player.ChangeWeapon(-1);
+                        player.ChangeWeapon(null);
                     }
                 }
                 break;

@@ -866,16 +866,15 @@ public class Data
 	------------------------------------------------------------------------*/
     public static string CleanInt(string s)
     {
-        string clean = s;
-        if (s.Contains('.'))
+        foreach(char c in s)
         {
-            clean = s.Substring(0, s.Length-s.IndexOf('.'));
+            if (!char.IsDigit(c))
+            {
+                s = s.Substring(0, s.IndexOf(c));
+                break;
+            }
         }
-        else
-        {
-            clean = s;
-        }
-        return new string(clean.Where(c => char.IsDigit(c)).ToArray());
+        return s;
     }
 
 

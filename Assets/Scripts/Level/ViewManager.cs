@@ -115,7 +115,7 @@ public class ViewManager : SetManager
             view = CreateView(currentId);
             if (fl_restoring)
             {
-                view.MoveTo(Data.GAME_WIDTH, 0);
+                view.MoveTo(Data.GAME_WIDTH+10, 0);
                 OnRestoreReady();
             }
             else
@@ -134,7 +134,7 @@ public class ViewManager : SetManager
             teleporterList = new List<TeleporterData>();
 
             view = CreateView(currentId);
-            view.MoveTo(0, -Data.GAME_HEIGHT);
+            view.MoveTo(0, -Data.GAME_HEIGHT-10);
             scrollCpt = 0;
 
             fl_scrolling = true;
@@ -213,7 +213,7 @@ public class ViewManager : SetManager
     public void RestoreFrom(View v, int lid)
     {
         previousView = v;
-        previousView.MoveTo(Data.GAME_WIDTH, 0);
+        previousView.MoveTo(Data.GAME_WIDTH+10, 0);
         Restore(lid);
     }
 
@@ -243,13 +243,13 @@ public class ViewManager : SetManager
             scrollCpt += scrollDir * Data.SCROLL_SPEED * Loader.Instance.tmod;
             if (scrollDir > 0)
             {
-                view.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 20) * (1 - Mathf.Sin(scrollCpt))), 0);
-                previousView.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 20) * (- Mathf.Sin(scrollCpt))), 0);
+                view.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 10) * (1 - Mathf.Sin(scrollCpt))), 0);
+                previousView.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 10) * (- Mathf.Sin(scrollCpt))), 0);
             }
             else
             {
-                view.MoveTo(Mathf.FloorToInt(-(Data.GAME_WIDTH + 20) * (1 - Mathf.Sin(scrollCpt))), 0);
-                previousView.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 20) * (Mathf.Sin(scrollCpt))), 0);
+                view.MoveTo(Mathf.FloorToInt(-(Data.GAME_WIDTH + 10) * (1 - Mathf.Sin(scrollCpt))), 0);
+                previousView.MoveTo(Mathf.FloorToInt((Data.GAME_WIDTH + 10) * (Mathf.Sin(scrollCpt))), 0);
             }
 
             if (scrollCpt >= Mathf.PI / 2 || scrollCpt <= -Mathf.PI / 2)

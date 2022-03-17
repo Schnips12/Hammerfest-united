@@ -194,8 +194,8 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        a.mc._xscale = radius / 20;
-        a.mc._yscale = radius / 20;
+        a.mc._xscale = radius / 50;
+        a.mc._yscale = radius / 50;
         return a;
     }
 
@@ -207,8 +207,8 @@ public class FxManager
             return null;
         }
         HammerAnimation a = AttachFx(x, y, "explodeZone");
-        a.mc._xscale = radius / 20;
-        a.mc._yscale = radius / 20;
+        a.mc._xscale = radius / 50;
+        a.mc._yscale = radius / 50;
         /* a.mc.blendMode	= BlendMode.OVERLAY; */
         return a;
     }
@@ -222,6 +222,7 @@ public class FxManager
     {
         KillMsg();
         igMsg = new MovieClip("hammer_interf_ingamemsg");
+        igMsg._y = 40;
         game.depthMan.Attach(igMsg, Data.DP_INTERF);
         igMsg.extraValues.Add("timer", 0.0f);
         igMsg.Play();
@@ -264,6 +265,7 @@ public class FxManager
     {
         if (game.fl_lock)
         {
+            Debug.Log("Can't add animation in a locked state");
             return null;
         }
         HammerAnimation a = new HammerAnimation(game);
@@ -539,6 +541,9 @@ public class FxManager
                 Color color = igMsg.FindTextfield("label").color;
                 color.a -= (Loader.Instance.tmod * 2)/100;
                 igMsg.FindTextfield("label").color = color;
+                color = igMsg.FindTextfield("field").color;
+                color.a -= (Loader.Instance.tmod * 2)/100;
+                igMsg.FindTextfield("field").color = color;
             }
             if (igMsg.FindTextfield("label").color.a <= 0)
             {

@@ -218,6 +218,7 @@ public class Framboise : Shooter
             s = FramBall.Attach(game, AroundX(x), AroundY(y));
             s.SetOwner(this);
             s.SetAnim("Frame", i+1);
+            s.Stop();
         }
     }
 
@@ -252,11 +253,9 @@ public class Framboise : Shooter
     {
         if (!_visible)
         {
-            Debug.Log("not visible");
             MoveTo(100, Data.GAME_HEIGHT+200);
             if (!IsHealthy())
             {
-                Debug.Log("not healthy");
                 Show();
                 MoveTo(tx, ty);
                 PhaseIn();

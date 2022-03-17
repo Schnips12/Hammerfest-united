@@ -35,9 +35,7 @@ public class Bat : Mover
 
 	List<BossFireBall> fbList;
 
-	MovieClip.Filter glow;
 	float glowCpt;
-
 
 	/*------------------------------------------------------------------------
 	CONSTRUCTEUR
@@ -67,8 +65,6 @@ public class Bat : Mover
 		dir			= 1;
 		lives		= LIVES;
 		fbList		= new List<BossFireBall>();
-
-		glow		= new MovieClip.Filter();
 	}
 
 
@@ -84,7 +80,6 @@ public class Bat : Mover
 	}
 
 
-
 	/*------------------------------------------------------------------------
 	INITIALISATION G�N�RIQUE
 	------------------------------------------------------------------------*/
@@ -92,6 +87,7 @@ public class Bat : Mover
 		base.Init(g);
 		Register(Data.BAD);
 		Register(Data.BOSS);
+		Play();
 	}
 
 
@@ -100,16 +96,15 @@ public class Bat : Mover
 	------------------------------------------------------------------------*/
 	protected void InitBoss(GameMode g) {
 		Init(g);
-		MoveTo(Data.GAME_WIDTH*0.5f,30) ;
+		MoveTo(Data.GAME_WIDTH*0.5f,Data.GAME_HEIGHT-30) ;
 
 		PlayAnim(Data.ANIM_BAT_INTRO);
-		_xscale = -scaleFactor;
+		_xscale = scaleFactor;
 		EndUpdate();
 	}
 
 
 	public override void DestroyThis() {
-//		shieldMC.removeMovieClip();
 		base.DestroyThis();
 		game.fl_clear = true;
 		game.fxMan.AttachExit();
@@ -147,7 +142,7 @@ public class Bat : Mover
 		Halt();
 		PlayAnim(Data.ANIM_BAT_SWITCH);
 		dir = -dir;
-		_xscale = dir*scaleFactor;
+		_xscale = -dir*scaleFactor;
 	}
 
 
@@ -195,33 +190,19 @@ public class Bat : Mover
 		if ( fl_shield | fl_death ) {
 			return;
 		}
-//		shieldMC = game.depthMan.attach("hammer_player_shield", Data.DP_BADS) ;
-//		shieldMC._xscale *= 1.5;
-//		shieldMC._yscale = shieldMC._xscale;
 		fl_shield	= true;
-		filter		= null;
-
 		glowCpt			= 0;
 	}
 
 	void RemoveShield() {
-//		shieldMC.removeMovieClip();
 		fl_shield	= false;
-
-		glow.quality	= 1;
-		glow.color		= Data.ToColor(0xffd78c);
-		glow.strength	= 180;
-		glow.blurX		= GLOW_BASE;
-		glow.blurY		= GLOW_BASE;
-		glow.alpha		= 1.0f;
-		filter			= glow;
 	}
 
 
 	/*------------------------------------------------------------------------
 	TOUCH� PAR UNE BOMBE
 	------------------------------------------------------------------------*/
-	void Freeze(float d) {
+	public void Freeze(float d) {
 		if ( fl_immune | fl_death ) {
 			return;
 		}
@@ -354,9 +335,9 @@ public class Bat : Mover
 		fl_wait		= false;
 		fl_death 	= true;
 		fl_deathUp	= true;
-		rotation	= -30*dir;
-		dy			= -1.5f;
-		if ( y>=Data.GAME_HEIGHT*0.5f ) {
+		rotation	= 30*dir;
+		dy			= 1.5f;
+		if ( y<=Data.GAME_HEIGHT*0.5f ) {
 			dy*=2;
 		}
 		floatOffset	= 0;
@@ -370,7 +351,7 @@ public class Bat : Mover
 	------------------------------------------------------------------------*/
 	BossFireBall AttachFireBall(float ang, float distFactor) {
 		var s = BossFireBall.Attach(game,x,y);
-		s.InitBossShoot( this, ang);
+		s.InitBossShoot(this, ang);
 		fbList.Add(s);
 		s.maxDist	*= distFactor;
 		s.distSpeed	*= distFactor;
@@ -397,11 +378,6 @@ public class Bat : Mover
 		AttachFireBall(270,	1.0f);
 
 		SetNext(null,null, Data.SECOND*15, Data.ACTION_MOVE);
-
-//		fl_alphaBlink	= false;
-//		blinkColor		= 0xff6e2e;
-//		blinkColorAlpha	= 65;
-//		blink(Data.BLINK_DURATION);
 	}
 
 
@@ -447,13 +423,6 @@ public class Bat : Mover
 				_x = x+Mathf.Sin(floatOffset)*FLOAT_X*3;
 			}
 		}
-
-		// Bouclier
-//		if ( shieldMC._name != null ) {
-//			shieldMC._x = _x;//-dir*20;
-//			shieldMC._y = _y-5;
-//		}
-
 	}
 
 
@@ -486,9 +455,8 @@ public class Bat : Mover
 		// D�placement
 		if ( fl_move ) {
 			MoveToPoint(tx, ty, SPEED);
-			glow.alpha	= 0.5f;
+			
 			if ( Distance(tx,ty) <=10 ) {
-				glow.alpha = 1.0f;
 				Halt();
 				Wait();
 				floatOffset	= 0;
@@ -500,20 +468,20 @@ public class Bat : Mover
 
 		if ( !fl_shield & !fl_death ) {
 			glowCpt += 0.3f*Loader.Instance.tmod;
-			glow.blurX	= GLOW_BASE + GLOW_RANGE*Mathf.Sin(glowCpt);
+			/* glow.blurX	= GLOW_BASE + GLOW_RANGE*Mathf.Sin(glowCpt);
 			glow.blurY	= glow.blurX;
-			filter		= glow;
+			filter		= glow; */ // TODO glowing effect grows from the inside (custom shader)
 		}
 
 		// Mort
 		if ( fl_death ) {
 			// Ascension
 			if ( fl_deathUp & Random.Range(0, 6)==0 ) {
-				game.fxMan.InGameParticles( Data.PARTICLE_STONE, Random.Range(0, Data.GAME_WIDTH),0, Random.Range(0, 3)+1 );
+				game.fxMan.InGameParticles( Data.PARTICLE_STONE, Random.Range(0, Data.GAME_WIDTH),Data.GAME_HEIGHT, Random.Range(0, 3)+1 );
 				game.Shake(Data.SECOND,1);
 				game.fxMan.AttachExplodeZone(
 					x+Random.Range(0, 20)*(Random.Range(0, 2)*2-1),
-					y+Random.Range(0, 20)*(Random.Range(0, 2)*2-1),
+					y-Random.Range(0, 20)*(Random.Range(0, 2)*2-1),
 					Random.Range(0, 40)+10
 				);
 			}
@@ -522,37 +490,29 @@ public class Bat : Mover
 			if ( !fl_deathUp & Random.Range(0, 2)==0 ) {
 				var fx = game.fxMan.AttachFx(
 					x+Random.Range(0, 20)*(Random.Range(0, 2)*2-1),
-					y-Random.Range(0, 40),
+					y+Random.Range(0, 40),
 					"hammer_fx_pop"
 				);
 				fx.mc._rotation = Random.Range(0, 360);
 				fx.mc._xscale = (Random.Range(0, 50)+50) / 100.0f;
 				fx.mc._yscale = fx.mc._xscale;
-//				game.fxMan.attachExplodeZone(
-//					x+Std.random(20)*(Std.random(2)*2-1),
-//					y+Std.random(20)*(Std.random(2)*2-1),
-//					Std.random(20)+5
-//				);
 			}
 
 
-			if ( y<=-50 & fl_deathUp ) {
+			if ( y>=Data.GAME_HEIGHT+50 & fl_deathUp ) {
 				_xscale = scaleFactor;
 				PlayAnim(Data.ANIM_BAT_FINAL_DIVE);
-				dy = 5;
+				dy = -5;
 				fl_deathUp = false;
 			}
 
 			if ( !fl_deathUp ) {
 				rotation = Mathf.Min(MAX_FALL_ROTATION, rotation+2.5f*Loader.Instance.tmod);
-				dy += 0.1f*Loader.Instance.tmod;
+				dy -= 0.1f*Loader.Instance.tmod;
 				if ( Random.Range(0, 2)==0 ) {
 					game.fxMan.InGameParticles( Data.PARTICLE_SPARK, x,y, Random.Range(0, 2)+1 );
 				}
-				if ( y>=Data.DEATH_LINE+Data.GAME_HEIGHT*1.5 ) {
-//					game.fxMan.inGameParticles( Data.PARTICLE_SPARK, x,Data.GAME_HEIGHT, Data.MAX_FX);
-//					game.fxMan.attachFx(x,Data.GAME_HEIGHT*0.5, "hammer_fx_death");
-//					game.fxMan.attachExplodeZone(x,y,100);
+				if ( y<=Data.DEATH_LINE-Data.GAME_HEIGHT*0.5f ) {
 					game.Shake(Data.SECOND*1.5f, 5);
 					this.DestroyThis();
 				}

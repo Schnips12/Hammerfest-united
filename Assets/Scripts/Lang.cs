@@ -234,7 +234,7 @@ public class Lang
 
     public static string GetKeyName(int kid)
     {
-        if (kid < questDesc.Count)
+        if (kid < keyNames.Count)
         {
             return keyNames[kid];
         }

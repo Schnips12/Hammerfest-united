@@ -16,6 +16,7 @@ public class BossFireBall : Shoot
 	------------------------------------------------------------------------*/
     BossFireBall(string reference) : base(reference)
     {
+        Debug.Log("bossfireball");
         fl_checkBounds = false;
         fl_largeTrigger = true;
         turnSpeed = 0.025f;

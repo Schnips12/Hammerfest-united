@@ -51,10 +51,19 @@ public class Classic : PlayerBomb
 
         for (int i = 0; i < l.Count; i++)
         {
-            Bad e = l[i] as Bad;
-            e.SetCombo(uniqId);
-            e.Freeze(Data.FREEZE_DURATION);
-            ShockWave(e, radius, power);
+            if(typeof(Bad).IsAssignableFrom(l[i].GetType()))
+            {
+                Bad e = l[i] as Bad;
+                e.SetCombo(uniqId);
+                e.Freeze(Data.FREEZE_DURATION);
+                ShockWave(e, radius, power);
+            }
+            else if(typeof(Bat).IsAssignableFrom(l[i].GetType()))
+            {
+                Bat e = l[i] as Bat;
+                e.Freeze(Data.FREEZE_DURATION);
+                ShockWave(e, radius, power);
+            }
         }
         game.fxMan.InGameParticles(Data.PARTICLE_ICE, x, y, Random.Range(0, 2) + 2);
 

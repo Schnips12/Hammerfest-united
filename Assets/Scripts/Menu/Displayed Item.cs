@@ -44,8 +44,6 @@ public class DisplayedItem : MonoBehaviour
         return unlocked;
     }
 
-
-
     private void UpdateColors()
     {
         if(IsUnlocked())

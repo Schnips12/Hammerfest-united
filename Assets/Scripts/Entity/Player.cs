@@ -526,6 +526,7 @@ public class Player : Physics, IEntity
                 fx.mc._yscale = fx.mc._xscale;
                 game.soundMan.PlaySound("sound_field", Data.CHAN_FIELD);
             }
+            Debug.Log("PEACE!");
             ChangeWeapon(Data.WEAPON_NONE);
         }
 
@@ -602,7 +603,7 @@ public class Player : Physics, IEntity
         base.Resurrect();
         game.manager.LogAction("R" + lives);
         // Joueur
-        MoveTo(Entity.x_ctr(world.current.playerX), Entity.y_ctr(Data.LEVEL_HEIGHT-1-world.current.playerY));
+        MoveTo(Entity.x_ctr(world.current.playerX), Entity.y_ctr(Data.LEVEL_HEIGHT - 1 - world.current.playerY));
         dx = 0;
         dy = 0;
         Shield(null);
@@ -645,14 +646,21 @@ public class Player : Physics, IEntity
             shieldMC.DestroyThis();
             shieldMC = null;
         }
-        shieldMC = game.fxMan.AttachFx(x, y, "hammer_player_shield");
-        shieldMC.fl_loop = true;
-        shieldMC.StopBlink();
 
+        shieldMC = game.fxMan.AttachFx(x, y, "hammer_player_shield");
         shieldTimer = duration == null ? Data.SHIELD_DURATION : duration.Value;
-        shieldMC.lifeTimer = shieldTimer;
+        if (shieldMC != null)
+        {
+            shieldMC.fl_loop = true;
+            shieldMC.resetPosition = 19;
+            shieldMC.StopBlink();
+            shieldMC.lifeTimer = shieldTimer;
+        }
+
         fl_shield = true;
     }
+
+
 
 
     /*------------------------------------------------------------------------
@@ -1022,32 +1030,32 @@ public class Player : Physics, IEntity
     /*------------------------------------------------------------------------
 	D�FINI L'ARME DU JOUEUR
 	------------------------------------------------------------------------*/
-    public void ChangeWeapon(int id)
+    public void ChangeWeapon(int? id)
     {
-        if (id == -1)
+        if (id == null)
         {
             id = lastBomb;
         }
 
         // Pas une arme
-        if (id > 0 & !IsBombWeapon(id) & !IsShootWeapon(id))
+        if (id > 0 & !IsBombWeapon(id.Value) & !IsShootWeapon(id.Value))
         {
             return;
         }
 
         // bombe -> tir
-        if (IsBombWeapon(currentWeapon) & !IsBombWeapon(id))
+        if (IsBombWeapon(currentWeapon) & !IsBombWeapon(id.Value))
         {
             lastBomb = currentWeapon;
         }
 
         // ? -> bombe
-        if (IsBombWeapon(id))
+        if (IsBombWeapon(id.Value))
         {
-            lastBomb = id;
+            lastBomb = id.Value;
         }
 
-        currentWeapon = id;
+        currentWeapon = id.Value;
         ReplayAnim();
     }
 
@@ -1493,7 +1501,7 @@ public class Player : Physics, IEntity
     {
         base.EndUpdate();
 
-        if (shieldMC != null && shieldMC.mc!=null)
+        if (shieldMC != null && shieldMC.mc != null)
         {
             if (shieldTimer <= Data.SECOND * 3)
             {
@@ -1607,7 +1615,7 @@ public class Player : Physics, IEntity
         // Gestion de verrou de contr�les
         if (fl_lockControls)
         {
-            if (fl_stable & animId==baseStopAnim.id)
+            if (fl_stable & animId == baseStopAnim.id)
             {
                 fl_lockControls = false;
             }

@@ -36,8 +36,8 @@ public class LevelData
 	public int playerX;
 	public int playerY;
 
-	public int skinTiles;
-	public int skinBg;
+	public int skinTiles = 1;
+	public int skinBg = 1;
 
 	public _slot[] specialSlots;
 	public _slot[] scoreSlots;

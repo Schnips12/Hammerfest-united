@@ -121,7 +121,7 @@ public class Menu : MonoBehaviour
         objects = new List<GameObject>();
         chosenLevel.ClearOptions();
 		List<string> options = new List<string>();
-		for (int i = 0; i < 100; i++)
+		for (int i = 0; i < 102; i++)
 		{
 			options.Add(i.ToString());
 		}

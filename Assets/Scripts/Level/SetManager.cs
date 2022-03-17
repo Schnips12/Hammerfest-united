@@ -55,6 +55,8 @@ public class SetManager
             worldmap.Add(new LevelData());
             fl_read.Add(false);
         }
+
+        currentId = -1;
     }
 
 
